@@ -1,6 +1,6 @@
 {
     "name": "mobservable-react",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "React bindings for mobservable. Create fully reactive view components.",
     "main": "index.js",
     "repository": {
