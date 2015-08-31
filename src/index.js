@@ -40,7 +40,7 @@
                             return baseRender.call(_self);
                         },
                         function() {
-                            _self.forceUpdate();
+                            React.Component.prototype.forceUpdate.call(_self);
                         },
                         {
                             object: this,
