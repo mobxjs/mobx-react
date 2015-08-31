@@ -4,7 +4,7 @@ module.exports = {
     entry: './src/index.js',
     output: {
         libraryTarget: 'umd',
-        library: 'mobservable-react',
+        library: 'mobservableReact',
         path: __dirname,
         filename: 'index.js'
     },
