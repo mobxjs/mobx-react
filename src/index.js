@@ -10,7 +10,9 @@
 
         function reportRendering(component) {
             var node = React.findDOMNode(component);
-            componentByNodeRegistery.set(node, component);
+            if (node)
+                componentByNodeRegistery.set(node, component);
+
             renderReporter.emit({
                 event: 'render',
                 renderTime: component.__renderEnd - component.__renderStart,
