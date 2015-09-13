@@ -9,6 +9,7 @@
         var renderReporter = new mobservable._.SimpleEventEmitter();
 
         function reportRendering(component) {
+            // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.
             var node = React.findDOMNode(component);
             if (node)
                 componentByNodeRegistery.set(node, component);
@@ -61,6 +62,7 @@
                     this.__watchDisposer();
                 delete this.$mobservable;
                 if (isTracking) {
+                    // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.
                     var node = React.findDOMNode(this);
                     if (node) {
                         componentByNodeRegistery.delete(node);
