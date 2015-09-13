@@ -64,11 +64,12 @@ exports.testNestedRendering = function(test) {
     var listResult = list$.getRenderOutput();
     
     test.equal(todoListRenderings, 1, "should have rendered list once");
+    console.log(JSON.stringify(listResult, null, 2));
     test.equal(listResult.props.children.length, 2, "list should have two children");
-    test.equal(listResult.props.children[0]._store.props.children, "1", "should have correct title");
+    test.equal(listResult.props.children[0].props.children, "1", "should have correct title");
     test.equal(listResult.props.children[1].length, 1, "list should on item in the list");
     
-    var item1$ = shallow(todoItem, listResult.props.children[1][0]._store.props);
+    var item1$ = shallow(todoItem, listResult.props.children[1][0].props);
     item1$.getRenderOutput();
     test.equal(todoItemRenderings, 1, "item1 should render once");
     test.equal(mobservable._.getDNode(store, "todos").observers.length, 1, "observer count on store is not increased");
@@ -88,7 +89,7 @@ exports.testNestedRendering = function(test) {
     listResult = list$.getRenderOutput();
     test.equal(listResult.props.children[1].length, 2, "list should two items in in the list");
     
-    var item2$ = shallow(todoItem, listResult.props.children[1][1]._store.props);
+    var item2$ = shallow(todoItem, listResult.props.children[1][1].props);
     item2$.getRenderOutput();
     
     test.equal(todoListRenderings, 2, "should have rendered list twice");
