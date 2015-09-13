@@ -90,9 +90,21 @@
                 var key;
                 if (keys.length !== Object.keys(nextProps).length)
                     return true;
-                for(var i = keys.length -1; i >= 0, key = keys[i]; i--)
-                    if (nextProps[key] !== this.props[key])
+                for(var i = keys.length -1; i >= 0, key = keys[i]; i--) {
+                    var newValue = nextProps[key];
+                    if (newValue !== this.props[key]) {
                         return true;
+                    } else if (newValue && typeof newValue === "object" && !mobservable.isReactive(newValue)) {
+                        /**
+                         * If the newValue is still the same object, but that object is not reactive,
+                         * fallback to the default React behavior: update, because the object *might* have changed.
+                         * If you need the non default behavior, just use the React pure render mixin, as that one 
+                         * will work fine with mobservable as well, instead of the default implementation of 
+                         * reactiveComponent.
+                         */
+                        return true;
+                    }
+                }
                 return false;
             }
         }
