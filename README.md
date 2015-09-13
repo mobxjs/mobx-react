@@ -48,3 +48,7 @@ Data will have one of the following formats:
 
 WeakMap. It's `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
 This map is only available after invoking `trackComponents`.
+
+# Changelog
+
+0.1.4: Added support for React 0.14(RC) by dropping peer dependency
