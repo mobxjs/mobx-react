@@ -29,31 +29,27 @@
                 var baseRender = this.render;
 
                 this.render = function() {
-                    var _self = this;
                     if (isTracking)
                         this.__renderStart = Date.now();
 
                     if (this.__watchDisposer)
                         this.__watchDisposer();
-                    // [rendering, disposer, dnode]
-                    var observeOutput = observeUntilInvalid(
-                        function() {
-                            return baseRender.call(_self);
-                        },
-                        function() {
-                            React.Component.prototype.forceUpdate.call(_self);
-                        },
-                        {
-                            object: this,
-                            name: name
-                        }
-                    );
 
-                    this.__watchDisposer = observeOutput[1];
-                    this.$mobservable = observeOutput[2];
+                    var hasRendered = false;
+                    var rendering;
+                    this.__watchDisposer = mobservable.sideEffect(function reactiveRender() {
+                        if (!hasRendered) {
+                            hasRendered = true;
+                            rendering = baseRender.call(this);
+                        } else {
+                            React.Component.prototype.forceUpdate.call(this);
+                        }
+                    }, this);
+
+                    this.$mobservable = this.__watchDisposer.$mobservable;
                     if (isTracking)
                         this.__renderEnd = Date.now();
-                    return observeOutput[0];
+                    return rendering;
                 }
             },
 

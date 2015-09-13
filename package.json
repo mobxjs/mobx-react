@@ -10,7 +10,7 @@
     "scripts": {
         "build": "./node_modules/webpack/bin/webpack.js",
         "prepublish": "npm run build",
-        "test": "cd test/ && npm install && npm test"
+        "test": "npm run build && cd test/ && npm install && npm test"
     },
     "author": "Michel Weststrate",
     "license": "MIT",

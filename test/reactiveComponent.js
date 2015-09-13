@@ -64,7 +64,6 @@ exports.testNestedRendering = function(test) {
     var listResult = list$.getRenderOutput();
     
     test.equal(todoListRenderings, 1, "should have rendered list once");
-    console.log(JSON.stringify(listResult, null, 2));
     test.equal(listResult.props.children.length, 2, "list should have two children");
     test.equal(listResult.props.children[0].props.children, "1", "should have correct title");
     test.equal(listResult.props.children[1].length, 1, "list should on item in the list");
