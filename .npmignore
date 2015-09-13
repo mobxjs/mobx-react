@@ -1,3 +1,5 @@
 /src
 /node_modules/
 webpack.config.js
+test/
+publish.js
