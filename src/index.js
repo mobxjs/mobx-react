@@ -2,7 +2,6 @@
     function mrFactory(mobservable, React) {
         var reactComponentId = 1;
         var isTracking = false;
-        var observeUntilInvalid = mobservable.observeUntilInvalid;
 
         // WeakMap<Node, Object>;
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
