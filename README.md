@@ -12,8 +12,10 @@ For documentation, see the [mobservable](https://mweststrate.github.io/mobservab
 
 ### reactiveComponent(componentClass)
 
-Function (and decorator) that converts a React component definition (or TypeScript / ES6 class) into a reactive component.
+Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
 See the [mobservable](https://github.com/mweststrate/mobservable/blob/master/docs/api.md#reactivecomponentcomponent) documentation for more details.
+
+![reactive function](reactive-function.png)
 
 ### trackComponents()
 
