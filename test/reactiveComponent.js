@@ -106,3 +106,24 @@ exports.testNestedRendering = function(test) {
     
     test.done();
 }
+
+exports.testIsComponentReactive = function(test) {
+    var component = reactiveComponent({ render: function() {}});
+    test.equal(mobservable.isReactive(component), false); // dependencies not known yet
+    component.componentWillMount();
+    component.render();
+    test.ok(mobservable.isReactive(component), true);
+
+    test.done();
+}
+
+exports.testGetDNode = function(test) {
+    var getD = mobservable._.getDNode;
+
+    var c = reactiveComponent({ render: function() {}});
+    c.componentWillMount();
+    c.render();
+    test.ok(getD(c));
+
+    test.done();
+}
