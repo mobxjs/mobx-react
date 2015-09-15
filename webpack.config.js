@@ -10,7 +10,12 @@ module.exports = {
     },
     externals: {
         "mobservable": "mobservable",
-        "react": "react"
+        "react": {
+            root: 'React',
+            commonjs2: 'react',
+            commonjs: 'react',
+            amd: 'react'
+        }
     },
     plugins: [
         new webpack.optimize.UglifyJsPlugin({
