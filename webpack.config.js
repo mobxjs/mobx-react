@@ -1,12 +1,12 @@
 var webpack = require('webpack');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: './index.js',
     output: {
         libraryTarget: 'umd',
         library: 'mobservableReact',
         path: __dirname,
-        filename: 'index.js'
+        filename: 'dist/index.js'
     },
     externals: {
         "mobservable": "mobservable",

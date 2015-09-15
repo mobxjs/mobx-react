@@ -2,7 +2,7 @@
     "name": "mobservable-react",
     "version": "0.1.5",
     "description": "React bindings for mobservable. Create fully reactive view components.",
-    "main": "index.js",
+    "main": "dist/index.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/mweststrate/mobservable-react.git"
