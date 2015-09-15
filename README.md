@@ -51,4 +51,21 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
-0.1.4: Added support for React 0.14(RC) by dropping peer dependency
+# 0.1.6
+
+`reactiveComponent` now accepts a pure render function as argument, besides constructor function. For example:
+
+```javascript
+var TodoItem = reactiveComponent(function TodoItem(props) {
+    var todo = props.todo;
+    return <li>{todo.task}</li>;
+});
+```
+
+# 0.1.5
+
+reactiveComponent is now defined in terms of side effects.
+
+# 0.1.4
+
+Added support for React 0.14(RC) by dropping peer dependency

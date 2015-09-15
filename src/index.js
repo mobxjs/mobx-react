@@ -118,6 +118,17 @@
         }
 
         function reactiveComponent(componentClass) {
+            // If it is function but doesn't seem to be a react class constructor,
+            // wrap it to a react class automatically
+            if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass) {
+                return reactiveComponent(React.createClass({
+                    displayName: componentClass.name,
+                    render: function() {
+                        return componentClass.call(this, this.props);
+                    }
+                }));
+            }
+            
             if (!componentClass)
                 throw new Error("Please pass a valid component to 'reactiveComponent'");
             var target = componentClass.prototype || componentClass;

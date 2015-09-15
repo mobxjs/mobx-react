@@ -22,12 +22,10 @@ var store = mobservable.makeReactive({
 });
 
 var todoItemRenderings = 0;
-var todoItem = reactiveComponent(React.createClass({
-    render: function() {
-        todoItemRenderings++;
-        return e("li", {}, this.props.todo.title);
-    }
-}));
+var todoItem = reactiveComponent(function TodoItem(props) {
+    todoItemRenderings++;
+    return e("li", {}, props.todo.title);
+});
 
 var todoListRenderings = 0;
 var todoList = reactiveComponent(React.createClass({
