@@ -1,6 +1,5 @@
 (function() {
     function mrFactory(mobservable, React) {
-        var reactComponentId = 1;
         var isTracking = false;
 
         // WeakMap<Node, Object>;
@@ -24,7 +23,6 @@
 
         var reactiveMixin = {
             componentWillMount: function() {
-                var name = (this.displayName || this.constructor.name || "ReactiveComponent") + reactComponentId++;
                 var baseRender = this.render;
 
                 this.render = function() {
