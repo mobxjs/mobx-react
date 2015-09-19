@@ -36,7 +36,7 @@
 
                     var hasRendered = false;
                     var rendering;
-                    this.__watchDisposer = mobservable.sideEffect(function reactiveRender() {
+                    this.__watchDisposer = mobservable.observe(function reactiveRender() {
                         if (!hasRendered) {
                             hasRendered = true;
                             rendering = baseRender.call(this);
@@ -120,7 +120,7 @@
         function reactiveComponent(componentClass) {
             // If it is function but doesn't seem to be a react class constructor,
             // wrap it to a react class automatically
-            if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass) {
+            if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)) {
                 return reactiveComponent(React.createClass({
                     displayName: componentClass.name,
                     render: function() {

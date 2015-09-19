@@ -53,6 +53,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 0.1.7
+
+Fixed issue where Babel generated component classes where not properly picked up.
+
 # 0.1.6
 
 `reactiveComponent` now accepts a pure render function as argument, besides constructor function. For example:
