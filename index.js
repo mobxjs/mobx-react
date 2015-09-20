@@ -24,6 +24,7 @@
         var reactiveMixin = {
             componentWillMount: function() {
                 var baseRender = this.render;
+                this.__dependencies = [];
 
                 this.render = function() {
                     if (isTracking)
@@ -44,6 +45,16 @@
                     }, this);
 
                     this.$mobservable = this.__watchDisposer.$mobservable;
+                    
+                    var newDependencies = this.$mobservable.observing.map(function(dep) {
+                        dep.setRefCount(+1);
+                        return dep;
+                    });
+                    this.__dependencies.forEach(function(dep) {
+                        dep.setRefCount(-1);
+                    });
+                    this.__dependencies = newDependencies;
+                    
                     if (isTracking)
                         this.__renderEnd = Date.now();
                     return rendering;
@@ -53,6 +64,9 @@
             componentWillUnmount: function() {
                 if (this.__watchDisposer)
                     this.__watchDisposer();
+                this.__dependencies.forEach(function(dep) {
+                    dep.setRefCount(-1);
+                });
                 delete this.$mobservable;
                 if (isTracking) {
                     // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.

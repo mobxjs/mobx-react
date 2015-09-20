@@ -127,3 +127,40 @@ exports.testGetDNode = function(test) {
 
     test.done();
 }
+
+exports.testKeepViewsAlive = function(test) {
+    var yCalcCount = 0;
+    var data = mobservable.makeReactive({
+        x: 3,
+        y: function() {
+            yCalcCount++;
+            return this.x * 2;
+        },
+        z: "hi"
+    });
+    
+    var component = reactiveComponent(function testComponent() {
+        return React.createElement("div", {}, data.z + data.y);
+    });
+    
+    var c$ = shallow(component, { });
+
+    var cResult = c$.getRenderOutput();
+    test.equal(yCalcCount, 1);
+    test.equal(cResult.props.children, "hi6");
+    
+    data.z = "hello";
+    // test: rerender should not need a recomputation of data.y because the subscription is kept alive
+    
+    test.equal(yCalcCount, 1);
+
+    cResult = c$.getRenderOutput();
+    test.equal(cResult.props.children, "hello6");
+    test.equal(yCalcCount, 1);
+    
+    test.equal(mobservable._.getDNode(data, "y").observers.length, 1);
+    c$.unmount();
+    test.equal(mobservable._.getDNode(data, "y").observers.length, 0);
+
+    test.done();
+}
