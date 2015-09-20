@@ -14,8 +14,8 @@
 
             renderReporter.emit({
                 event: 'render',
-                renderTime: component.__renderEnd - component.__renderStart,
-                totalTime: Date.now() - component.__renderStart,
+                renderTime: component.__$mobRenderEnd - component.__$mobRenderStart,
+                totalTime: Date.now() - component.__$mobRenderStart,
                 component: component,
                 node: node
             });
@@ -24,47 +24,50 @@
         var reactiveMixin = {
             componentWillMount: function() {
                 var baseRender = this.render;
-                this.__dependencies = [];
+                this.__$mobDependencies = [];
 
                 this.render = function() {
                     if (isTracking)
-                        this.__renderStart = Date.now();
+                        this.__$mobRenderStart = Date.now();
 
-                    if (this.__watchDisposer)
-                        this.__watchDisposer();
-
+                    // invoke the old render function and in the mean time track all dependencies using
+                    // 'observe'.
+                    // when the dependencies change, the function is triggered, but we don't want to 
+                    // rerender because that would ignore the normal React lifecycle, 
+                    // so instead we dispose the current observer and trigger a force update.
                     var hasRendered = false;
                     var rendering;
-                    this.__watchDisposer = mobservable.observe(function reactiveRender() {
+                    this.__$mobDisposer = mobservable.observe(function reactiveRender() {
                         if (!hasRendered) {
                             hasRendered = true;
                             rendering = baseRender.call(this);
                         } else {
+                            this.__$mobDisposer();
                             React.Component.prototype.forceUpdate.call(this);
                         }
                     }, this);
 
-                    this.$mobservable = this.__watchDisposer.$mobservable;
-                    
+                    // make sure views are not disposed between the clean-up of the observer and the next render
+                    // (invoked through force update)
+                    this.$mobservable = this.__$mobDisposer.$mobservable;
                     var newDependencies = this.$mobservable.observing.map(function(dep) {
                         dep.setRefCount(+1);
                         return dep;
                     });
-                    this.__dependencies.forEach(function(dep) {
+                    this.__$mobDependencies.forEach(function(dep) {
                         dep.setRefCount(-1);
                     });
-                    this.__dependencies = newDependencies;
+                    this.__$mobDependencies = newDependencies;
                     
                     if (isTracking)
-                        this.__renderEnd = Date.now();
+                        this.__$mobRenderEnd = Date.now();
                     return rendering;
                 }
             },
 
             componentWillUnmount: function() {
-                if (this.__watchDisposer)
-                    this.__watchDisposer();
-                this.__dependencies.forEach(function(dep) {
+                this.__$mobDisposer && this.__$mobDisposer();
+                this.__$mobDependencies.forEach(function(dep) {
                     dep.setRefCount(-1);
                 });
                 delete this.$mobservable;
