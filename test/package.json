@@ -11,7 +11,7 @@
   "devDependencies": {},
   "dependencies": {
     "jsdom": "^3.1.2",
-    "mobservable": "^0.6.9",
+    "mobservable": "^0.7.0",
     "nodeunit": "^0.9.1",
     "react": "^0.14.0-rc1",
     "react-dom": "^0.14.0-rc1"
