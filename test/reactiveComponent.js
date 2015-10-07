@@ -10,11 +10,11 @@ global.navigator = window.navigator;
 var mobservable = require('mobservable');
 var React = require('react/addons');
 var TestUtils = React.addons.TestUtils;
-var reactiveComponent = require('mobservable-react').reactiveComponent;
+var observer = require('mobservable-react').observer;
 
 var e = React.createElement;
 
-var store = mobservable.makeReactive({
+var store = mobservable.observable({
     todos: [{
         title: "a",
         completed: false
@@ -22,13 +22,13 @@ var store = mobservable.makeReactive({
 });
 
 var todoItemRenderings = 0;
-var todoItem = reactiveComponent(function TodoItem(props) {
+var todoItem = observer(function TodoItem(props) {
     todoItemRenderings++;
     return e("li", {}, props.todo.title);
 });
 
 var todoListRenderings = 0;
-var todoList = reactiveComponent(React.createClass({
+var todoList = observer(React.createClass({
     renderings: 0,
     render: function() {
         todoListRenderings++;
@@ -69,14 +69,14 @@ exports.testNestedRendering = function(test) {
     var item1$ = shallow(todoItem, listResult.props.children[1][0].props);
     item1$.getRenderOutput();
     test.equal(todoItemRenderings, 1, "item1 should render once");
-    test.equal(mobservable._.getDNode(store, "todos").observers.length, 1, "observer count on store is not increased");
-    test.equal(mobservable._.getDNode(store.todos[0], "title").observers.length, 1, "title observers should have increased");
+    test.equal(mobservable.extras.getDNode(store, "todos").observers.length, 1, "observer count on store is not increased");
+    test.equal(mobservable.extras.getDNode(store.todos[0], "title").observers.length, 1, "title observers should have increased");
 
     store.todos[0].title += "a";
     test.equal(todoListRenderings, 1, "should have rendered list once");
     test.equal(todoItemRenderings, 2, "item1 should have rendered twice");
-    test.equal(mobservable._.getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
-    test.equal(mobservable._.getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
+    test.equal(mobservable.extras.getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
+    test.equal(mobservable.extras.getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
     
     store.todos.push({
         title: "b",
@@ -91,8 +91,8 @@ exports.testNestedRendering = function(test) {
     
     test.equal(todoListRenderings, 2, "should have rendered list twice");
     test.equal(todoItemRenderings, 3, "item2 should have rendered as well"); 
-    test.equal(mobservable._.getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
-    test.equal(mobservable._.getDNode(store.todos[1], "completed").observers.length, 0, "completed observers should not have increased");
+    test.equal(mobservable.extras.getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
+    test.equal(mobservable.extras.getDNode(store.todos[1], "completed").observers.length, 0, "completed observers should not have increased");
     
     var oldTodo = store.todos.pop();
     listResult = list$.getRenderOutput();
@@ -101,26 +101,26 @@ exports.testNestedRendering = function(test) {
     test.equal(listResult.props.children[1].length, 1, "list should have only on item in list now");
     
     item2$.unmount(); // that's what react does normally for us..
-    test.equal(mobservable._.getDNode(oldTodo, "title").observers.length, 0, "title observers should have decreased");
-    test.equal(mobservable._.getDNode(oldTodo, "completed").observers.length, 0, "completed observers should not have decreased");
+    test.equal(mobservable.extras.getDNode(oldTodo, "title").observers.length, 0, "title observers should have decreased");
+    test.equal(mobservable.extras.getDNode(oldTodo, "completed").observers.length, 0, "completed observers should not have decreased");
     
     test.done();
 }
 
 exports.testIsComponentReactive = function(test) {
-    var component = reactiveComponent({ render: function() {}});
-    test.equal(mobservable.isReactive(component), false); // dependencies not known yet
+    var component = observer({ render: function() {}});
+    test.equal(mobservable.isObservable(component), false); // dependencies not known yet
     component.componentWillMount();
     component.render();
-    test.ok(mobservable.isReactive(component), true);
+    test.ok(mobservable.isObservable(component), true);
 
     test.done();
 }
 
 exports.testGetDNode = function(test) {
-    var getD = mobservable._.getDNode;
+    var getD = mobservable.extras.getDNode;
 
-    var c = reactiveComponent({ render: function() {}});
+    var c = observer({ render: function() {}});
     c.componentWillMount();
     c.render();
     test.ok(getD(c));
@@ -130,7 +130,7 @@ exports.testGetDNode = function(test) {
 
 exports.testKeepViewsAlive = function(test) {
     var yCalcCount = 0;
-    var data = mobservable.makeReactive({
+    var data = mobservable.observable({
         x: 3,
         y: function() {
             yCalcCount++;
@@ -139,7 +139,7 @@ exports.testKeepViewsAlive = function(test) {
         z: "hi"
     });
     
-    var component = reactiveComponent(function testComponent() {
+    var component = observer(function testComponent() {
         return React.createElement("div", {}, data.z + data.y);
     });
     
@@ -158,9 +158,9 @@ exports.testKeepViewsAlive = function(test) {
     test.equal(cResult.props.children, "hello6");
     test.equal(yCalcCount, 1);
     
-    test.equal(mobservable._.getDNode(data, "y").observers.length, 1);
+    test.equal(mobservable.extras.getDNode(data, "y").observers.length, 1);
     c$.unmount();
-    test.equal(mobservable._.getDNode(data, "y").observers.length, 0);
+    test.equal(mobservable.extras.getDNode(data, "y").observers.length, 0);
 
     test.done();
 }

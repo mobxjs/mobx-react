@@ -114,7 +114,7 @@
                          * fallback to the default React behavior: update, because the object *might* have changed.
                          * If you need the non default behavior, just use the React pure render mixin, as that one 
                          * will work fine with mobservable as well, instead of the default implementation of 
-                         * reactiveComponent.
+                         * observer.
                          */
                         return true;
                     }
@@ -132,11 +132,11 @@
             }
         }
 
-        function reactiveComponent(componentClass) {
+        function observer(componentClass) {
             // If it is function but doesn't seem to be a react class constructor,
             // wrap it to a react class automatically
             if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)) {
-                return reactiveComponent(React.createClass({
+                return observer(React.createClass({
                     displayName: componentClass.name,
                     render: function() {
                         return componentClass.call(this, this.props);
@@ -145,7 +145,7 @@
             }
             
             if (!componentClass)
-                throw new Error("Please pass a valid component to 'reactiveComponent'");
+                throw new Error("Please pass a valid component to 'observer'");
             var target = componentClass.prototype || componentClass;
 
             [
@@ -170,7 +170,7 @@
         }
 
         return ({
-            reactiveComponent: reactiveComponent,
+            observer: observer,
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,
             trackComponents: trackComponents
