@@ -1,6 +1,6 @@
 {
     "name": "mobservable-react",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "description": "React bindings for mobservable. Create fully reactive view components.",
     "main": "dist/index.js",
     "typings": "dist/index",
@@ -20,7 +20,7 @@
     },
     "homepage": "https://mweststrate.github.io/mobservable",
     "peerDependencies": {
-        "mobservable": "1.0.0-alpha.3"
+        "mobservable": "1.0.0-alpha.4"
     },
     "devDependencies": {
         "webpack": "^1.12.0"

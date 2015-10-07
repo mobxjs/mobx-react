@@ -4,7 +4,7 @@
 
         // WeakMap<Node, Object>;
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
-        var renderReporter = new mobservable._.SimpleEventEmitter();
+        var renderReporter = new mobservable.extras.SimpleEventEmitter();
 
         function reportRendering(component) {
             // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.
