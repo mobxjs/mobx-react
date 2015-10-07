@@ -1,7 +1,7 @@
 # mobservable-react
 
 Package with react component wrapper for combining React with mobservable.
-Exports the `reactiveComponent` decorator and some development utilities.
+Exports the `observer` decorator and some development utilities.
 For documentation, see the [mobservable](https://mweststrate.github.io/mobservable) project.
 
 ## Installation
@@ -10,10 +10,10 @@ For documentation, see the [mobservable](https://mweststrate.github.io/mobservab
 
 ## API documentation
 
-### reactiveComponent(componentClass)
+### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
-See the [mobservable](https://github.com/mweststrate/mobservable/blob/master/docs/api.md#reactivecomponentcomponent) documentation for more details.
+See the [mobservable](https://github.com/mweststrate/mobservable/blob/master/docs/api.md#observercomponent) documentation for more details.
 
 ![reactive function](reactive-function.png)
 
@@ -53,16 +53,20 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 1.0.0
+
+`reactiveComponent` has been renamed to `observer`
+
 # 0.1.7
 
 Fixed issue where Babel generated component classes where not properly picked up.
 
 # 0.1.6
 
-`reactiveComponent` now accepts a pure render function as argument, besides constructor function. For example:
+`observer` now accepts a pure render function as argument, besides constructor function. For example:
 
 ```javascript
-var TodoItem = reactiveComponent(function TodoItem(props) {
+var TodoItem = observer(function TodoItem(props) {
     var todo = props.todo;
     return <li>{todo.task}</li>;
 });
@@ -70,7 +74,7 @@ var TodoItem = reactiveComponent(function TodoItem(props) {
 
 # 0.1.5
 
-reactiveComponent is now defined in terms of side effects.
+observer is now defined in terms of side effects.
 
 # 0.1.4
 
