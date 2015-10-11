@@ -177,6 +177,10 @@
 
         return ({
             observer: observer,
+            reactiveComponent: function() {
+                console.warn("[mobservable-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
+                return observer.apply(null, arguments);                
+            },
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,
             trackComponents: trackComponents
