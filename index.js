@@ -1,5 +1,11 @@
 (function() {
-    function mrFactory(mobservable, React) {
+    function mrFactory(mobservable, ReactDep, ReactNativeDep) {
+        if (!mobservable)
+            throw new Error("mobservable-react requires the Mobservable package.")
+        var React = ReactNativeDep || ReactDep;
+        if (!React)
+            throw new Error("mobservable-react requires either React or ReactNative to be available");
+
         var isTracking = false;
 
         // WeakMap<Node, Object>;
@@ -179,10 +185,29 @@
 
     // UMD
     if (typeof define === 'function' && define.amd) {
-        define('mobservable-react', ['mobservable', 'react'], mrFactory);
+        define('mobservable-react', ['mobservable', 'react', 'react-native'], mrFactory);
+    } else if (typeof exports === 'object') {
+        module.exports = mrFactory(
+            require('mobservable'),
+            require('react'), 
+            function () {
+                try { 
+                    return require('react');
+                }
+                catch (e) { 
+                    return null; 
+                } 
+            }(),
+            function() {
+                try { 
+                    return require('react-native'); 
+                }
+                catch (e) { 
+                    return null; 
+                } 
+            }()
+        );
+    } else {
+        this.mobservableReact = mrFactory(this['mobservable'], this['React'], this['ReactNative']);
     }
-    else if (typeof exports === 'object')
-        module.exports = mrFactory(require('mobservable'), require('react'));
-    else
-        this.mobservableReact = mrFactory(this['mobservable'], this['React']);
 })();

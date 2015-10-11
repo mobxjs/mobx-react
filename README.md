@@ -3,6 +3,7 @@
 Package with react component wrapper for combining React with mobservable.
 Exports the `reactiveComponent` decorator and some development utilities.
 For documentation, see the [mobservable](https://mweststrate.github.io/mobservable) project.
+This package supports both React and React-Native.
 
 ## Installation
 
@@ -52,6 +53,14 @@ WeakMap. It's `get` function returns the associated reactive component of the gi
 This map is only available after invoking `trackComponents`.
 
 # Changelog
+
+# 0.2.1
+
+Added react-native as dependency, so that the package works with either `react` or `react-native`.
+
+# 0.2.0
+
+Upgraded to Mobservable 0.7.0
 
 # 0.1.7
 
