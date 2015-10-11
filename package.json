@@ -2,16 +2,14 @@
     "name": "mobservable-react",
     "version": "1.0.0-alpha.3",
     "description": "React bindings for mobservable. Create fully reactive view components.",
-    "main": "dist/index.js",
-    "typings": "dist/index",
+    "main": "index.js",
+    "typings": "index",
     "repository": {
         "type": "git",
         "url": "https://github.com/mweststrate/mobservable-react.git"
     },
     "scripts": {
-        "build": "./node_modules/webpack/bin/webpack.js",
-        "prepublish": "npm run build",
-        "test": "npm run build && cd test/ && npm install && npm test"
+        "test": "cd test/ && npm install && npm test"
     },
     "author": "Michel Weststrate",
     "license": "MIT",
@@ -21,9 +19,6 @@
     "homepage": "https://mweststrate.github.io/mobservable",
     "peerDependencies": {
         "mobservable": "1.0.0-alpha.4"
-    },
-    "devDependencies": {
-        "webpack": "^1.12.0"
     },
     "keywords": [
         "mobservable",
