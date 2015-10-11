@@ -189,7 +189,6 @@
     } else if (typeof exports === 'object') {
         module.exports = mrFactory(
             require('mobservable'),
-            require('react'), 
             function () {
                 try { 
                     return require('react');
