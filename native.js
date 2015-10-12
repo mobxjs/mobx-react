@@ -184,9 +184,9 @@
 
     // UMD
     if (typeof define === 'function' && define.amd) {
-        define('mobservable-react', ['mobservable', 'react'/* or native */], mrFactory);
+        define('mobservable-react', ['mobservable', 'react-native'], mrFactory);
     } else if (typeof exports === 'object') {
-        module.exports = mrFactory(require('mobservable'), require('react'/* or native */));
+        module.exports = mrFactory(require('mobservable'), require('react-native'));
     } else {
         this.mobservableReact = mrFactory(this['mobservable'], this['ReactNative'] || this['React']);
     }

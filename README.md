@@ -9,6 +9,12 @@ This package supports both React and React-Native.
 
 `npm install mobservable-react --save`
 
+```javascript
+import reactiveComponent from 'mobservable-react';
+// - or -
+import reactiveComponent from 'mobservable-react/native';
+```
+
 ## API documentation
 
 ### reactiveComponent(componentClass)
@@ -54,7 +60,11 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
-# 0.2.1
+# 0.2.3
+
+Added separte import for react-native: use `var reactiveComponent = require('mobservable-react/native').reactiveComponent` for native support; webpack clients will refuse to build otherwise.
+
+# 0.2.2
 
 Added react-native as dependency, so that the package works with either `react` or `react-native`.
 
