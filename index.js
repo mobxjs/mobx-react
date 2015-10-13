@@ -36,21 +36,24 @@
                         this.__$mobRenderStart = Date.now();
 
                     // invoke the old render function and in the mean time track all dependencies using
-                    // 'observe'.
+                    // 'autorun'.
                     // when the dependencies change, the function is triggered, but we don't want to 
                     // rerender because that would ignore the normal React lifecycle, 
                     // so instead we dispose the current observer and trigger a force update.
                     var hasRendered = false;
+                    var self = this;
                     var rendering;
-                    this.__$mobDisposer = mobservable.observe(function reactiveRender() {
+                    this.__$mobDisposer = mobservable.autorun(function reactiveRender() {
                         if (!hasRendered) {
                             hasRendered = true;
-                            rendering = baseRender.call(this);
+                            mobservable.extras.withStrict(true, function() {
+                                rendering = baseRender.call(self);
+                            });
                         } else {
-                            this.__$mobDisposer();
-                            React.Component.prototype.forceUpdate.call(this);
+                            self.__$mobDisposer();
+                            React.Component.prototype.forceUpdate.call(self);
                         }
-                    }, this);
+                    });
 
                     // make sure views are not disposed between the clean-up of the observer and the next render
                     // (invoked through force update)
