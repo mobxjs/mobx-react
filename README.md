@@ -15,6 +15,15 @@ import observer from 'mobservable-react';
 import observer from 'mobservable-react/native';
 ```
 
+This package provides the bindings for Mobservable and React.
+See the [official documentation](mweststrate.github.io/mobservable/) for how to get started.
+
+## Boilerplate projects that use mobservable-react
+
+* Minimal Mobservable, React, ES6, JSX, Hot reloading: [Mobservable-React-Boilerplate](https://github.com/mweststrate/mobservable-react-boilerplate)
+* TodoMVC Mobservable, React, ES6, JSX, Hot reloading: [Mobservable-React-TodoMVC](https://github.com/mweststrate/mobservable-react-todomvc)
+* Minimal Mobservable, React, Typescript, TSX: [Mobservable-React-Typescript](https://github.com/mweststrate/mobservable-react-typescript)
+
 ## API documentation
 
 ### observer(componentClass)
@@ -59,6 +68,10 @@ WeakMap. It's `get` function returns the associated reactive component of the gi
 This map is only available after invoking `trackComponents`.
 
 # Changelog
+
+# 1.0.1
+
+Fixed issue with typescript typings. An example project with Mobservable, React, Typescript, TSX can be found here: https://github.com/mweststrate/mobservable-react-typescript
 
 # 1.0.0
 
