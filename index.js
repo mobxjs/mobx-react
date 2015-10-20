@@ -43,22 +43,22 @@
                     var hasRendered = false;
                     var self = this;
                     var rendering;
-                    this.__$mobDisposer = mobservable.autorun(function reactiveRender() {
+                    this.__$mobRenderAutorunner = mobservable.autorun(function reactiveRender() {
                         if (!hasRendered) {
                             hasRendered = true;
                             mobservable.extras.withStrict(true, function() {
                                 rendering = baseRender.call(self);
                             });
                         } else {
-                            self.__$mobDisposer();
+                            self.__$mobRenderAutorunner();
                             React.Component.prototype.forceUpdate.call(self);
                         }
                     });
 
+                    this.render.$mobservable = this.__$mobRenderAutorunner.$mobservable;
                     // make sure views are not disposed between the clean-up of the observer and the next render
                     // (invoked through force update)
-                    this.$mobservable = this.__$mobDisposer.$mobservable;
-                    var newDependencies = this.$mobservable.observing.map(function(dep) {
+                    var newDependencies = this.__$mobRenderAutorunner.$mobservable.observing.map(function(dep) {
                         dep.setRefCount(+1);
                         return dep;
                     });
@@ -74,11 +74,11 @@
             },
 
             componentWillUnmount: function() {
-                this.__$mobDisposer && this.__$mobDisposer();
+                this.__$mobRenderAutorunner && this.__$mobRenderAutorunner();
                 this.__$mobDependencies.forEach(function(dep) {
                     dep.setRefCount(-1);
                 });
-                delete this.$mobservable;
+                delete this.render.$mobservable;
                 if (isTracking) {
                     // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.
                     var node = React.findDOMNode(this);
@@ -167,6 +167,7 @@
 
             if (!target.shouldComponentUpdate)
                 target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
+            componentClass.isMobservableReactObserver = true;
             return componentClass;
         }
 
