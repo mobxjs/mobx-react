@@ -1,9 +1,9 @@
 (function() {
-    function mrFactory(mobservable, React) {
+    function mrFactory(mobservable, React, ReactDOM) {
         if (!mobservable)
-            throw new Error("mobservable-react requires the Mobservable package.")
+            throw new Error("mobservable-react requires the Mobservable package")
         if (!React)
-            throw new Error("mobservable-react requires React to be available, or mobservable-react/native requires ReactNative to be available");
+            throw new Error("mobservable-react requires React to be available");
 
         var isTracking = false;
 
@@ -11,9 +11,14 @@
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
         var renderReporter = new mobservable.extras.SimpleEventEmitter();
 
+        function findDOMNode(component) {
+            if (ReactDOM)
+                return ReactDOM.findDOMNode(component);
+            return null;
+        }
+
         function reportRendering(component) {
-            // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.
-            var node = React.findDOMNode(component);
+            var node = findDOMNode(component);
             if (node)
                 componentByNodeRegistery.set(node, component);
 
@@ -81,16 +86,15 @@
                 });
                 delete this.render.$mobservable;
                 if (isTracking) {
-                    // TODO: Fix in 0.14: React.findDOMNode is deprecated. Please use ReactDOM.findDOMNode from require('react-dom') instead.
-                    var node = React.findDOMNode(this);
+                    var node = findDOMNode(this);
                     if (node) {
                         componentByNodeRegistery.delete(node);
-                        renderReporter.emit({
-                            event: 'destroy',
-                            component: this,
-                            node: node
-                        });
                     }
+                    renderReporter.emit({
+                        event: 'destroy',
+                        component: this,
+                        node: node
+                    });
                 }
             },
 
@@ -174,7 +178,7 @@
 
         function trackComponents() {
             if (typeof WeakMap === "undefined")
-                throw new Error("tracking components is not supported in this browser");
+                throw new Error("[mobservable-react] tracking components is not supported in this browser.");
             if (!isTracking)
                 isTracking = true;
         }
@@ -193,10 +197,10 @@
 
     // UMD
     if (typeof define === 'function' && define.amd) {
-        define('mobservable-react', ['mobservable', 'react'/* or native */], mrFactory);
+        define('mobservable-react', ['mobservable', 'react', 'react-dom'], mrFactory);
     } else if (typeof exports === 'object') {
-        module.exports = mrFactory(require('mobservable'), require('react'/* or native */));
+        module.exports = mrFactory(require('mobservable'), require('react'), require('react-dom'));
     } else {
-        this.mobservableReact = mrFactory(this['mobservable'], this['ReactNative'] || this['React']);
+        this.mobservableReact = mrFactory(this['mobservable'], this['React'], this['ReactDOM']);
     }
 })();

@@ -20,7 +20,9 @@
     },
     "homepage": "https://mweststrate.github.io/mobservable",
     "peerDependencies": {
-        "mobservable": "^1.0.0"
+        "mobservable": "^1.0.0",
+        "react": "^0.14.0",
+        "react-dom": "^0.14.0"
     },
     "keywords": [
         "mobservable",
