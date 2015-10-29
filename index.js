@@ -62,6 +62,10 @@
                     });
 
                     this.render.$mobservable = this.__$mobRenderDisposer.$mobservable;
+
+                    // Generate friendly name for debugging
+                    this.render.$mobservable.context.name = (this.displayName || this.name || (this.constructor && this.constructor.name)) + "#" + this._reactInternalInstance._rootNodeID +  ".render()"
+
                     // make sure views are not disposed between the clean-up of the observer and the next render
                     // (invoked through force update)
                     var newDependencies = this.__$mobRenderDisposer.$mobservable.observing.map(function(dep) {
