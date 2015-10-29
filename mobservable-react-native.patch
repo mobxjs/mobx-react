@@ -1,0 +1,25 @@
+--- a/native.js
++++ b/native.js
+@@ -3,7 +3,7 @@
+         if (!mobservable)
+             throw new Error("mobservable-react requires the Mobservable package")
+         if (!React)
+-            throw new Error("mobservable-react requires React to be available");
++            throw new Error("mobservable-react/native requires React Native to be available");
+ 
+         var isTracking = false;
+ 
+@@ -197,10 +197,10 @@
+ 
+     // UMD
+     if (typeof define === 'function' && define.amd) {
+-        define('mobservable-react', ['mobservable', 'react', 'react-dom'], mrFactory);
++        define('mobservable-react', ['mobservable', 'react-native'], mrFactory);
+     } else if (typeof exports === 'object') {
+-        module.exports = mrFactory(require('mobservable'), require('react'), require('react-dom'));
++        module.exports = mrFactory(require('mobservable'), require('react-native'));
+     } else {
+-        this.mobservableReact = mrFactory(this['mobservable'], this['React'], this['ReactDOM']);
++        this.mobservableReact = mrFactory(this['mobservable'], this['ReactNative']);
+     }
+ })();

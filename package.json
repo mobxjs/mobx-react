@@ -9,7 +9,7 @@
         "url": "https://github.com/mweststrate/mobservable-react.git"
     },
     "scripts": {
-        "build": "sed -e 's/'\\''react'\\''\\/\\* or native \\*\\//'\\''react-native'\\''/g' index.js > native.js",
+        "build": "cp index.js native.js && git apply mobservable-react-native.patch",
         "test": "cd test/ && npm install && npm test",
         "prepublish": "npm run build"
     },
