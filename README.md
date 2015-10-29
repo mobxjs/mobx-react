@@ -69,6 +69,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 1.0.2 / 1.03
+
+Minor fixes and improvements
+
 # 1.0.1
 
 Fixed issue with typescript typings. An example project with Mobservable, React, Typescript, TSX can be found here: https://github.com/mweststrate/mobservable-react-typescript
