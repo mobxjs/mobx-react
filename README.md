@@ -71,9 +71,9 @@ This map is only available after invoking `trackComponents`.
 
 # 2.0.0
 
-Use React 0.14 instead of React 0.13. For React 0.13, use version `mobservable-react@1.0.3` or higher. 
+Use React 0.14 instead of React 0.13. For React 0.13, use version `mobservable-react@1.0.2` or higher. 
 
-# 1.0.2 / 1.0.3
+# 1.0.2
 
 Minor fixes and improvements
 
