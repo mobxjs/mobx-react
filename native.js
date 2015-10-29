@@ -43,22 +43,23 @@
                     var hasRendered = false;
                     var self = this;
                     var rendering;
-                    this.__$mobRenderAutorunner = mobservable.autorun(function reactiveRender() {
+                    this.__$mobRenderDisposer = mobservable.autorun(function reactiveRender() {
                         if (!hasRendered) {
                             hasRendered = true;
+                            // withStrict: throw errors if the render function tries to alter state.
                             mobservable.extras.withStrict(true, function() {
                                 rendering = baseRender.call(self);
                             });
                         } else {
-                            self.__$mobRenderAutorunner();
+                            self.__$mobRenderDisposer(); // dispose
                             React.Component.prototype.forceUpdate.call(self);
                         }
                     });
 
-                    this.render.$mobservable = this.__$mobRenderAutorunner.$mobservable;
+                    this.render.$mobservable = this.__$mobRenderDisposer.$mobservable;
                     // make sure views are not disposed between the clean-up of the observer and the next render
                     // (invoked through force update)
-                    var newDependencies = this.__$mobRenderAutorunner.$mobservable.observing.map(function(dep) {
+                    var newDependencies = this.__$mobRenderDisposer.$mobservable.observing.map(function(dep) {
                         dep.setRefCount(+1);
                         return dep;
                     });
@@ -74,7 +75,7 @@
             },
 
             componentWillUnmount: function() {
-                this.__$mobRenderAutorunner && this.__$mobRenderAutorunner();
+                this.__$mobRenderDisposer && this.__$mobRenderDisposer();
                 this.__$mobDependencies.forEach(function(dep) {
                     dep.setRefCount(-1);
                 });
