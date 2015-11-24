@@ -186,10 +186,10 @@ var stateLessComp = function() {
     );
 }
 stateLessComp.propTypes = {
-  testProp: React.PropTypes.string
+    testProp: React.PropTypes.string
 }
 stateLessComp.defaultProps = {
-  testProp: 'default value for prop testProp'
+    testProp: 'default value for prop testProp'
 }
 
 exports.testStatelessComponentProps = function(test) {
