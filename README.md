@@ -69,6 +69,28 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 2.0.1
+
+It is now possible to define `propTypes` and `getDefaultProps` on a stateless component:
+
+```javascript
+const myComponent = (props) => {
+    // render
+};
+
+myComponent.propTypes = {
+    name: React.PropTypes.string
+};
+
+myComponent.defaultProps = {
+    name: "World"
+};
+
+export default observer(myComponent);
+```
+
+All credits to Jiri Spac for this contribution!
+
 # 2.0.0
 
 Use React 0.14 instead of React 0.13. For React 0.13, use version `mobservable-react@1.0.2` or higher. 
