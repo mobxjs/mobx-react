@@ -69,6 +69,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 2.1.0
+
+Upped dependency of mobservable to 1.1.1.
+
 # 2.0.1
 
 It is now possible to define `propTypes` and `getDefaultProps` on a stateless component:
