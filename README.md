@@ -28,6 +28,8 @@ See the [official documentation](mweststrate.github.io/mobservable/) for how to 
 * Minimal Mobservable, React, ES6, JSX, Hot reloading: [Mobservable-React-Boilerplate](https://github.com/mweststrate/mobservable-react-boilerplate)
 * TodoMVC Mobservable, React, ES6, JSX, Hot reloading: [Mobservable-React-TodoMVC](https://github.com/mweststrate/mobservable-react-todomvc)
 * Minimal Mobservable, React, Typescript, TSX: [Mobservable-React-Typescript](https://github.com/mweststrate/mobservable-react-typescript)
+* Minimal Mobservable, React, ES6(babel), JSPM with hot reloading moduleas:
+[jspm-react](https://github.com/capaj/jspm-react)
 
 ## API documentation
 
