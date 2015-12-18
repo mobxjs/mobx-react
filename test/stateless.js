@@ -1,6 +1,7 @@
 var test = require('tape');
 var mobservable = require('mobservable');
 var React = require('react/addons');
+var ReactDOM = require('react-dom');
 var TestUtils = React.addons.TestUtils;
 var observer = require('../').observer;
 var $ = require('jquery');
@@ -30,8 +31,8 @@ test('stateless component with proptypes', function (test) {
 	console.error = originalConsoleError;
 	test.equal(beenWarned, true, "an error should be logged with a property type warning")
 
-	React.render(e(statelessCompObserver, { testProp: "hello world" }), document.body, function () {
-		test.equal($("div").text(), "result: hello world");
+	ReactDOM.render(e(statelessCompObserver, { testProp: "hello world" }), document.getElementById('testroot'), function () {
+		test.equal($("#testroot").text(), "result: hello world");
 		test.end();
 	});
 });
