@@ -57,7 +57,8 @@
                             });
                         } else {
                             self.__$mobRenderDisposer(); // dispose
-                            React.Component.prototype.forceUpdate.call(self);
+                            if (self.__$mobHasUnmounted !== true) // Fixes #12, should not be needed after fixing mobservable #71
+                                React.Component.prototype.forceUpdate.call(self);
                         }
                     });
 
@@ -92,6 +93,7 @@
                 this.__$mobDependencies.forEach(function(dep) {
                     dep.setRefCount(-1);
                 });
+                this.__$mobHasUnmounted = true;
                 delete this.render.$mobservable;
                 if (isTracking) {
                     var node = findDOMNode(this);
