@@ -1,9 +1,13 @@
 var test = require('tape');
 var mobservable = require('mobservable');
 var React = require('react/addons');
+var ReactDOM = require('react-dom');
 var TestUtils = React.addons.TestUtils;
 var observer = require('../').observer;
 var $ = require('jquery');
+
+$("<div></div>").attr("id","testroot").appendTo($(window.document.body));
+var testRoot = document.getElementById("testroot");
 
 var e = React.createElement;
 
@@ -45,7 +49,7 @@ var app = React.createClass({
 });
 
 test('nestedRendering', function(test) {
-	React.render(e(app), window.document.body, function() {
+	ReactDOM.render(e(app), testRoot, function() {
     	test.equal(todoListRenderings, 1, "should have rendered list once");
 		test.equal($("li").length, 1);
         test.equal($("li").text(), "|a");
@@ -111,10 +115,10 @@ test('keep views alive', function(test) {
         return React.createElement("div", {}, data.z + data.y);
     });
 
-    React.render(e(component), document.body, function() {
+    ReactDOM.render(e(component), testRoot, function() {
     
         test.equal(yCalcCount, 1);
-        test.equal($("div").text(), "hi6");
+        test.equal($(testRoot).text(), "hi6");
     
         data.z = "hello";
         // test: rerender should not need a recomputation of data.y because the subscription is kept alive
@@ -122,15 +126,65 @@ test('keep views alive', function(test) {
         setTimeout(function() {
             test.equal(yCalcCount, 1);
         
-            test.equal($("div").text(), "hello6");
+            test.equal($(testRoot).text(), "hello6");
             test.equal(yCalcCount, 1);
         
             test.equal(mobservable.extras.getDNode(data, "y").observers.length, 1);
             
-            React.render(e("div"), document.body, function() {
+            ReactDOM.render(e("div"), testRoot, function() {
                 test.equal(mobservable.extras.getDNode(data, "y").observers.length, 0);
                 test.end();
             });
         }, 100);
+    });
+});
+
+// From typescript compiler:
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+
+test('issue 12', function(t) {
+    var data = mobservable.observable({
+        selected: "coffee",
+        items: [{
+            name: "coffee"
+        }, {
+            name: "tea"
+        }]
+    });
+    
+    /** Row Class */
+    var _super = React.Component;
+    var Row  = function() {
+        _super.apply(this, arguments);
+    }
+    __extends(Row, _super);
+    Row.prototype.render = function() {
+        return e("div", {}, this.props.item.name + (data.selected === this.props.item.name ? "!" : ""));
+    }; 
+    
+    /** table stateles component */
+    var table = observer(function table() {
+        return e("div", {}, data.items.map(function(item) {
+            return e(Row, { key: item.name, item: item})
+        }));
+    })
+    
+    ReactDOM.render(e(table), testRoot, function() {
+        t.equal($(testRoot).text(), "coffee!tea");
+        
+        mobservable.transaction(function() {
+            data.items[1].name = "boe";
+            data.items.splice(0, 2, { name : "soup" });
+            data.selected = "tea";
+        });
+        
+        setTimeout(function() {
+            t.equal($(testRoot).text(), "soup");
+            t.end();
+        }, 50);
     });
 });

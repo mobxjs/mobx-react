@@ -52,5 +52,5 @@ tape.test("issue 50", function(test) {
 		test.end();
 	}, 400);
 	
-	ReactDOM.render(React.createElement(Test), document.body);
+	ReactDOM.render(React.createElement(Test), document.getElementById('testroot'));
 });
