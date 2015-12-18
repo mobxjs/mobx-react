@@ -76,6 +76,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 2.1.1
+
+Fixed #12: fixed React warning when a component was unmounted after scheduling a re-render but before executing it.
+
 # 2.1.0
 
 Upped dependency of mobservable to 1.1.1.
