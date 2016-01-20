@@ -15,13 +15,13 @@ This package supports both React and React-Native.
 `npm install mobservable-react --save`
 
 ```javascript
-import observer from 'mobservable-react';
+import {observer} from 'mobservable-react';
 // - or -
-import observer from 'mobservable-react/native';
+import {observer} from 'mobservable-react/native';
 ```
 
 This package provides the bindings for Mobservable and React.
-See the [official documentation](mweststrate.github.io/mobservable/) for how to get started.
+See the [official documentation](http://mweststrate.github.io/mobservable/intro/overview.html) for how to get started.
 
 ## Boilerplate projects that use mobservable-react
 
