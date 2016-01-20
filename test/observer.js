@@ -188,3 +188,17 @@ test('issue 12', function(t) {
         }, 50);
     });
 });
+
+test("changing state in render should fail", function(t) {
+    var data = mobservable.observable(2);
+    var comp = observer(function() {
+        data(3);
+        return e("div", {}, data());
+    });
+    
+
+    t.throws(function() {    
+        ReactDOM.render(e(comp), testRoot);
+    }, "It is not allowed to change the state during a view");
+    t.end();
+});

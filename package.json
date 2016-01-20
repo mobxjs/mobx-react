@@ -1,44 +1,44 @@
 {
-    "name": "mobservable-react",
-    "version": "2.1.1",
-    "description": "React bindings for mobservable. Create fully reactive components.",
-    "main": "index.js",
-    "typings": "index",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/mweststrate/mobservable-react.git"
-    },
-    "scripts": {
-        "build": "cp index.js native.js && git apply mobservable-react-native.patch",
-        "prepublish": "npm run build",
-        "test": "browserify test/*.js | tape-run",
-        "debug": "browserify test/*.js | tape-run --browser chrome"
-    },
-    "author": "Michel Weststrate",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/mweststrate/mobservable/issues"
-    },
-    "homepage": "https://mweststrate.github.io/mobservable",
-    "peerDependencies": {
-        "mobservable": "^1.1.1",
-        "react": "^0.14.0",
-        "react-dom": "^0.14.0"
-    },
-    "devDependencies": {
-        "browserify": "^12.0.1",
-        "jquery": "^2.1.4",
-        "mobservable": "^1.1.1",
-        "react": "^0.14.0",
-        "react-dom": "^0.14.0",
-        "tape": "^4.2.2",
-        "tape-run": "2.1.0"
-    },
-    "keywords": [
-        "mobservable",
-        "react-component",
-        "react",
-        "reactjs",
-        "reactive"
-    ]
+  "name": "mobservable-react",
+  "version": "2.1.1",
+  "description": "React bindings for mobservable. Create fully reactive components.",
+  "main": "index.js",
+  "typings": "index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mweststrate/mobservable-react.git"
+  },
+  "scripts": {
+    "build": "cp index.js native.js && git apply mobservable-react-native.patch",
+    "prepublish": "npm run build",
+    "test": "browserify test/*.js | tape-run",
+    "debug": "browserify test/*.js | tape-run --browser chrome"
+  },
+  "author": "Michel Weststrate",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mweststrate/mobservable/issues"
+  },
+  "homepage": "https://mweststrate.github.io/mobservable",
+  "peerDependencies": {
+    "mobservable": "^1.1.1",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0"
+  },
+  "devDependencies": {
+    "browserify": "^12.0.1",
+    "jquery": "^2.1.4",
+    "mobservable": "^1.2.2",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0",
+    "tape": "^4.2.2",
+    "tape-run": "2.1.0"
+  },
+  "keywords": [
+    "mobservable",
+    "react-component",
+    "react",
+    "reactjs",
+    "reactive"
+  ]
 }
