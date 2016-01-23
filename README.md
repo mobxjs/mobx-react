@@ -36,7 +36,7 @@ See the [official documentation](http://mweststrate.github.io/mobservable/intro/
 ### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
-See the [mobservable](https://github.com/mweststrate/mobservable/blob/master/docs/api.md#observercomponent) documentation for more details.
+See the [mobservable](https://mweststrate.github.io/mobservable/refguide/observer-component.html) documentation for more details.
 
 ![reactive function](reactive-function.png)
 
