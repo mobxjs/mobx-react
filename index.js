@@ -33,68 +33,48 @@
 
         var reactiveMixin = {
             componentWillMount: function() {
-                var baseRender = this.render;
-                this.__$mobDependencies = [];
+                // Generate friendly name for debugging
+                var name = [
+                    this.displayName || this.name || (this.constructor && this.constructor.name) || "<component>",
+                    "#", this._reactInternalInstance && this._reactInternalInstance._rootNodeID,
+                    ".render()"
+                ].join("");
 
-                this.render = function() {
-                    if (isTracking)
-                        this.__$mobRenderStart = Date.now();
-
-                    // invoke the old render function and in the mean time track all dependencies using
-                    // 'autorun'.
-                    // when the dependencies change, the function is triggered, but we don't want to 
-                    // rerender because that would ignore the normal React lifecycle, 
-                    // so instead we dispose the current observer and trigger a force update.
-                    var hasRendered = false;
-                    var self = this;
-                    var rendering;
-                    this.__$mobRenderDisposer = mobservable.autorun(function reactiveRender() {
-                        if (!hasRendered) {
-                            hasRendered = true;
-                            // withStrict: throw errors if the render function tries to alter state.
-                            mobservable.extras.withStrict(true, function() {
-                                rendering = baseRender.call(self);
-                            });
-                        } else {
-                            self.__$mobRenderDisposer(); // dispose
-                            if (self.__$mobHasUnmounted !== true) // Fixes #12, should not be needed after fixing mobservable #71
-                                React.Component.prototype.forceUpdate.call(self);
+                var baseRender = this.render.bind(this);
+                var self = this;
+                var tracker = null;
+                var renderingPending = false;
+                
+                function initialRender() {
+                    tracker = new mobservable.Reaction(name, function() {
+                        if (!renderingPending) {
+                            renderingPending = true;
+                            React.Component.prototype.forceUpdate.call(self)
                         }
                     });
+                    reactiveRender.$mobservable = tracker;
+                    self.render = reactiveRender;
+                    return reactiveRender();
+                }
 
-                    this.render.$mobservable = this.__$mobRenderDisposer.$mobservable;
-
-                    // Generate friendly name for debugging
-                    this.render.$mobservable.context.name = [
-                        this.displayName || this.name || (this.constructor && this.constructor.name) || "<component>",
-                        "#", this._reactInternalInstance && this._reactInternalInstance._rootNodeID,
-                        ".render()"
-                    ].join("");
-
-                    // make sure views are not disposed between the clean-up of the observer and the next render
-                    // (invoked through force update)
-                    var newDependencies = this.__$mobRenderDisposer.$mobservable.observing.map(function(dep) {
-                        dep.setRefCount(+1);
-                        return dep;
+                function reactiveRender() {
+                    renderingPending = false;
+                    var rendering;
+                    tracker.track(function() {
+                        if (isTracking)
+                            self.__$mobRenderStart = Date.now();
+                        rendering = mobservable.extras.allowStateChanges(false, baseRender);
+                        if (isTracking)
+                            self.__$mobRenderEnd = Date.now();
                     });
-                    this.__$mobDependencies.forEach(function(dep) {
-                        dep.setRefCount(-1);
-                    });
-                    this.__$mobDependencies = newDependencies;
-                    
-                    if (isTracking)
-                        this.__$mobRenderEnd = Date.now();
                     return rendering;
                 }
+
+                this.render = initialRender;
             },
 
             componentWillUnmount: function() {
-                this.__$mobRenderDisposer && this.__$mobRenderDisposer();
-                this.__$mobDependencies.forEach(function(dep) {
-                    dep.setRefCount(-1);
-                });
-                this.__$mobHasUnmounted = true;
-                delete this.render.$mobservable;
+                this.render.$mobservable && this.render.$mobservable.dispose();
                 if (isTracking) {
                     var node = findDOMNode(this);
                     if (node) {
@@ -135,8 +115,8 @@
                         /**
                          * If the newValue is still the same object, but that object is not observable,
                          * fallback to the default React behavior: update, because the object *might* have changed.
-                         * If you need the non default behavior, just use the React pure render mixin, as that one 
-                         * will work fine with mobservable as well, instead of the default implementation of 
+                         * If you need the non default behavior, just use the React pure render mixin, as that one
+                         * will work fine with mobservable as well, instead of the default implementation of
                          * observer.
                          */
                         return true;
@@ -170,7 +150,7 @@
                     }
                 }));
             }
-            
+
             if (!componentClass)
                 throw new Error("Please pass a valid component to 'observer'");
             var target = componentClass.prototype || componentClass;
@@ -201,7 +181,7 @@
             observer: observer,
             reactiveComponent: function() {
                 console.warn("[mobservable-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
-                return observer.apply(null, arguments);                
+                return observer.apply(null, arguments);
             },
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,

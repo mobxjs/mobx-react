@@ -200,5 +200,7 @@ test("changing state in render should fail", function(t) {
     t.throws(function() {    
         ReactDOM.render(e(comp), testRoot);
     }, "It is not allowed to change the state during a view");
+    
+    mobservable._.resetGlobalState();
     t.end();
 });

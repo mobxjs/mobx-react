@@ -1,6 +1,6 @@
 {
   "name": "mobservable-react",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "React bindings for mobservable. Create fully reactive components.",
   "main": "index.js",
   "typings": "index",
@@ -21,7 +21,7 @@
   },
   "homepage": "https://mweststrate.github.io/mobservable",
   "peerDependencies": {
-    "mobservable": "^1.1.1",
+    "mobservable": "^2.0.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0"
   },
