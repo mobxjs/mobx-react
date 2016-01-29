@@ -42,8 +42,8 @@
 
                     // invoke the old render function and in the mean time track all dependencies using
                     // 'autorun'.
-                    // when the dependencies change, the function is triggered, but we don't want to 
-                    // rerender because that would ignore the normal React lifecycle, 
+                    // when the dependencies change, the function is triggered, but we don't want to
+                    // rerender because that would ignore the normal React lifecycle,
                     // so instead we dispose the current observer and trigger a force update.
                     var hasRendered = false;
                     var self = this;
@@ -81,7 +81,7 @@
                         dep.setRefCount(-1);
                     });
                     this.__$mobDependencies = newDependencies;
-                    
+
                     if (isTracking)
                         this.__$mobRenderEnd = Date.now();
                     return rendering;
@@ -135,8 +135,8 @@
                         /**
                          * If the newValue is still the same object, but that object is not observable,
                          * fallback to the default React behavior: update, because the object *might* have changed.
-                         * If you need the non default behavior, just use the React pure render mixin, as that one 
-                         * will work fine with mobservable as well, instead of the default implementation of 
+                         * If you need the non default behavior, just use the React pure render mixin, as that one
+                         * will work fine with mobservable as well, instead of the default implementation of
                          * observer.
                          */
                         return true;
@@ -160,17 +160,14 @@
             // wrap it to a react class automatically
             if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)) {
                 return observer(React.createClass({
-                    displayName: componentClass.name,
-                    propTypes: componentClass.propTypes,
-                    getDefaultProps: function() {
-                      return componentClass.defaultProps;
-                    },
-                    render: function() {
-                        return componentClass.call(this, this.props);
-                    }
+                    displayName:     componentClass.displayName || componentClass.name,
+                    propTypes:       componentClass.propTypes,
+                    contextTypes:    componentClass.contextTypes,
+                    getDefaultProps: function() { return componentClass.defaultProps; },
+                    render:          function() { return componentClass.call(this, this.props, this.context); }
                 }));
             }
-            
+
             if (!componentClass)
                 throw new Error("Please pass a valid component to 'observer'");
             var target = componentClass.prototype || componentClass;
@@ -201,7 +198,7 @@
             observer: observer,
             reactiveComponent: function() {
                 console.warn("[mobservable-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
-                return observer.apply(null, arguments);                
+                return observer.apply(null, arguments);
             },
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,
