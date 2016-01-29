@@ -99,6 +99,12 @@
             },
 
             shouldComponentUpdate: function(nextProps, nextState) {
+                // TODO: if context changed, return true.., see #18
+                
+                // if props or state did change, but a render was scheduled already, no additional render needs to be scheduled
+                if (this.render.$mobservable && this.render.$mobservable.isScheduled() === true)
+                    return false;
+                
                 // update on any state changes (as is the default)
                 if (this.state !== nextState)
                     return true;
