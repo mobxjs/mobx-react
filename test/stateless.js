@@ -19,7 +19,7 @@ stateLessComp.defaultProps = {
 	testProp: 'default value for prop testProp'
 }
 
-test('stateless component with proptypes', function (test) {
+test('stateless component with propTypes', function (test) {
 	var statelessCompObserver = observer(stateLessComp);
 	test.equal(statelessCompObserver.getDefaultProps().testProp, 'default value for prop testProp', "default property value should be propagated");
 	var originalConsoleError = console.error
@@ -33,6 +33,23 @@ test('stateless component with proptypes', function (test) {
 
 	ReactDOM.render(e(statelessCompObserver, { testProp: "hello world" }), document.getElementById('testroot'), function () {
 		test.equal($("#testroot").text(), "result: hello world");
+		test.end();
+	});
+});
+
+test('stateless component with context support', function (test) {
+	var stateLessCompWithContext = function (props, context) { return e("div", {}, "context: " + context.testContext); }
+	stateLessCompWithContext.contextTypes = { testContext: React.PropTypes.string }
+	var stateLessCompWithContextObserver = observer(stateLessCompWithContext);
+
+	var ContextProvider =  React.createClass({
+		childContextTypes: stateLessCompWithContext.contextTypes,
+		getChildContext:   function() { return { testContext: 'hello world' }; },
+		render:            function() { return e(stateLessCompWithContextObserver); }
+	});
+
+	ReactDOM.render(e(ContextProvider), document.getElementById('testroot'), function () {
+		test.equal($("#testroot").text(), "context: hello world");
 		test.end();
 	});
 });

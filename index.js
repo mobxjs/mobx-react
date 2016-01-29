@@ -146,14 +146,11 @@
             // wrap it to a react class automatically
             if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)) {
                 return observer(React.createClass({
-                    displayName: componentClass.name,
-                    propTypes: componentClass.propTypes,
-                    getDefaultProps: function() {
-                      return componentClass.defaultProps;
-                    },
-                    render: function() {
-                        return componentClass.call(this, this.props);
-                    }
+                    displayName:     componentClass.displayName || componentClass.name,
+                    propTypes:       componentClass.propTypes,
+                    contextTypes:    componentClass.contextTypes,
+                    getDefaultProps: function() { return componentClass.defaultProps; },
+                    render:          function() { return componentClass.call(this, this.props, this.context); }
                 }));
             }
 

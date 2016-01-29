@@ -36,7 +36,7 @@ See the [official documentation](http://mweststrate.github.io/mobservable/intro/
 ### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
-See the [mobservable](https://github.com/mweststrate/mobservable/blob/master/docs/api.md#observercomponent) documentation for more details.
+See the [mobservable](https://mweststrate.github.io/mobservable/refguide/observer-component.html) documentation for more details.
 
 ![reactive function](reactive-function.png)
 
@@ -75,6 +75,10 @@ WeakMap. It's `get` function returns the associated reactive component of the gi
 This map is only available after invoking `trackComponents`.
 
 # Changelog
+
+# 2.1.3
+
+Added support for context to stateless components. (by Kosta-Github).
 
 # 2.1.1
 
