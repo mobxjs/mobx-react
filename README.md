@@ -76,7 +76,7 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
-# 2.1.2
+# 2.1.3
 
 Added support for context to stateless components. (by Kosta-Github).
 
