@@ -76,6 +76,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 2.1.2
+
+Added support for context to stateless components. (by Kosta-Github).
+
 # 2.1.1
 
 Fixed #12: fixed React warning when a component was unmounted after scheduling a re-render but before executing it.
