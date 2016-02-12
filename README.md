@@ -76,6 +76,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 2.1.4
+
+Added empty 'dependencies' section to package.json, fixes #26
+
 # 2.1.3
 
 Added support for context to stateless components. (by Kosta-Github).
