@@ -30,6 +30,8 @@ See the [official documentation](http://mweststrate.github.io/mobservable/intro/
 * Minimal Mobservable, React, Typescript, TSX: [Mobservable-React-Typescript](https://github.com/mweststrate/mobservable-react-typescript)
 * Minimal Mobservable, React, ES6(babel), JSPM with hot reloading modules:
 [jspm-react](https://github.com/capaj/jspm-react)
+* React-Native Counter:[Mobservable-React-Native-Counter](https://github.com/bartonhammond/mobservable-react-native-counter)
+
 
 ## API documentation
 
