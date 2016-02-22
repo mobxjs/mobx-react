@@ -11,7 +11,7 @@
   "scripts": {
     "build": "cp index.js native.js && git apply mobservable-react-native.patch",
     "prepublish": "npm run build",
-    "test": "browserify test/*.js | tape-run",
+    "test": "browserify test/*.js | tape-run && tsc -p test/ts",
     "debug": "browserify test/*.js | tape-run --browser chrome"
   },
   "author": "Michel Weststrate",
@@ -32,7 +32,8 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "tape": "^4.2.2",
-    "tape-run": "2.1.0"
+    "tape-run": "2.1.0",
+    "typescript": "^1.7.5"
   },
   "keywords": [
     "mobservable",
