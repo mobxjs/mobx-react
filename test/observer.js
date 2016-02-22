@@ -48,6 +48,10 @@ var app = React.createClass({
     }
 });
 
+function getDNode(obj, prop) {
+    return obj.$mobservable.values[prop];
+}
+
 test('nestedRendering', function(test) {
 	ReactDOM.render(e(app), testRoot, function() {
     	test.equal(todoListRenderings, 1, "should have rendered list once");
@@ -56,16 +60,16 @@ test('nestedRendering', function(test) {
 
         test.equal(todoItemRenderings, 1, "item1 should render once");
         
-        test.equal(mobservable.extras.getDNode(store, "todos").observers.length, 1);
-        test.equal(mobservable.extras.getDNode(store.todos[0], "title").observers.length, 1);
+        test.equal(getDNode(store, "todos").observers.length, 1);
+        test.equal(getDNode(store.todos[0], "title").observers.length, 1);
         
         store.todos[0].title += "a";
         setTimeout(function() {
         
             test.equal(todoListRenderings, 1, "should have rendered list once");
             test.equal(todoItemRenderings, 2, "item1 should have rendered twice");
-            test.equal(mobservable.extras.getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
-            test.equal(mobservable.extras.getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
+            test.equal(getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
+            test.equal(getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
         
             store.todos.push({
                 title: "b",
@@ -80,8 +84,8 @@ test('nestedRendering', function(test) {
             
                 test.equal(todoListRenderings, 2, "should have rendered list twice");
                 test.equal(todoItemRenderings, 3, "item2 should have rendered as well");
-                test.equal(mobservable.extras.getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
-                test.equal(mobservable.extras.getDNode(store.todos[1], "completed").observers.length, 0, "completed observers should not have increased");
+                test.equal(getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
+                test.equal(getDNode(store.todos[1], "completed").observers.length, 0, "completed observers should not have increased");
 
                 var oldTodo = store.todos.pop();
 
@@ -90,8 +94,8 @@ test('nestedRendering', function(test) {
                     test.equal(todoItemRenderings, 3, "item1 should not have rerendered");
                     test.equal($("li").length, 1, "list should have only on item in list now");
                 
-                    test.equal(mobservable.extras.getDNode(oldTodo, "title").observers.length, 0, "title observers should have decreased");
-                    test.equal(mobservable.extras.getDNode(oldTodo, "completed").observers.length, 0, "completed observers should not have decreased");
+                    test.equal(getDNode(oldTodo, "title").observers.length, 0, "title observers should have decreased");
+                    test.equal(getDNode(oldTodo, "completed").observers.length, 0, "completed observers should not have decreased");
                 
                     test.end();
                 });
@@ -129,10 +133,10 @@ test('keep views alive', function(test) {
             test.equal($(testRoot).text(), "hello6");
             test.equal(yCalcCount, 1);
         
-            test.equal(mobservable.extras.getDNode(data, "y").observers.length, 1);
+            test.equal(getDNode(data, "y").observers.length, 1);
             
             ReactDOM.render(e("div"), testRoot, function() {
-                test.equal(mobservable.extras.getDNode(data, "y").observers.length, 0);
+                test.equal(getDNode(data, "y").observers.length, 0);
                 test.end();
             });
         }, 100);

@@ -11,25 +11,25 @@ tape.test("mobservable issue 50", function(test) {
 		b: mobservable.observable(false),
 		c: mobservable.observable(function() { 
 			console.log("evaluate c");
-			return foo.b(); 
+			return foo.b.get(); 
 		})
 	};
 	
 	function flipStuff() {
 		mobservable.transaction(function() {
-			foo.a(!foo.a());
-			foo.b(!foo.b());
+			foo.a.set(!foo.a.get());
+			foo.b.set(!foo.b.get());
 		});
 	}
 	
 	var asText = "";
 	mobservable.autorun(function() {
-		asText = [foo.a(), foo.b(), foo.c()].join(":");
+		asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(":");
 	});
 		
 	var Test = mobservableReact.observer(React.createClass({
 		render: function() {
-			return (React.createElement("div", { id: 'x' }, [foo.a(), foo.b(), foo.c()].join(",")));
+			return (React.createElement("div", { id: 'x' }, [foo.a.get(), foo.b.get(), foo.c.get()].join(",")));
 		}
 	}));
 	
@@ -51,18 +51,18 @@ tape.test("React.render should respect transaction", function(t) {
 	var valuesSeen = [];
 
 	var component = mobservableReact.observer(function() {
-		valuesSeen.push(a());
-		if (loaded())
-			return React.createElement("div", {}, a());
+		valuesSeen.push(a.get());
+		if (loaded.get())
+			return React.createElement("div", {}, a.get());
 		else
 			return React.createElement("div", {}, "loading");
 	});
 	
 	React.render(React.createElement(component, {}), document.getElementById('testroot'));
 	mobservable.transaction(function() {
-		a(3);
-		a(4);
-		loaded(true);
+		a.set(3);
+		a.set(4);
+		loaded.set(true);
 	});
 
 	setTimeout(function() {
@@ -77,18 +77,18 @@ tape.test("React.render in transaction should succeed", function(t) {
 	var loaded = mobservable.observable(false);
 	var valuesSeen = [];
 	var component = mobservableReact.observer(function() {
-		valuesSeen.push(a());
-		if (loaded())
-			return React.createElement("div", {}, a());
+		valuesSeen.push(a.get());
+		if (loaded.get())
+			return React.createElement("div", {}, a.get());
 		else
 			return React.createElement("div", {}, "loading");
 	});
 	
 	mobservable.transaction(function() {
-		a(3);
+		a.set(3);
 		React.render(React.createElement(component, {}), document.getElementById('testroot'));
-		a(4);
-		loaded(true);
+		a.set(4);
+		loaded.set(true);
 	});
 
 	setTimeout(function() {

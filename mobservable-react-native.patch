@@ -7,9 +7,9 @@
 -            throw new Error("mobservable-react requires React to be available");
 +            throw new Error("mobservable-react/native requires React Native to be available");
  
-         var isTracking = false;
+         var isDevtoolsEnabled = false;
  
-@@ -197,10 +197,10 @@
+@@ -194,10 +194,10 @@
  
      // UMD
      if (typeof define === 'function' && define.amd) {

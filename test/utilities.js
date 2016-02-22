@@ -2,6 +2,7 @@ var test = require('tape');
 var mobservable = require('mobservable');
 var observer = require('../').observer;
 
+// TODO:
 test.skip('testIsComponentReactive', function(test) {
     var component = observer({ render: function() {}});
     test.equal(component.isMobservableReactObserver, true);
@@ -13,19 +14,20 @@ test.skip('testIsComponentReactive', function(test) {
     test.equal(mobservable.isObservable(component.render), true); // dependencies not known yet
     test.equal(mobservable.isObservable(component), false);
 
-    mobservable.extendReactive(component, {});
+    mobservable.extendObservable(component, {});
     test.equal(mobservable.isObservable(component), true);
 
     test.end();
 });
 
+// TODO:
 test.skip('testGetDNode', function(test) {
     var getD = mobservable.extras.getDNode;
 
     var c = observer({ render: function() {}});
     c.componentWillMount();
     c.render();
-    test.ok(getD(c.render));
+    test.ok(c.$mobservable);
 
     test.end();
 });

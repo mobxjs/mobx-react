@@ -5,11 +5,11 @@
         if (!React)
             throw new Error("mobservable-react requires React to be available");
 
-        var isTracking = false;
+        var isDevtoolsEnabled = false;
 
         // WeakMap<Node, Object>;
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
-        var renderReporter = new mobservable.extras.SimpleEventEmitter();
+        var renderReporter = new mobservable.SimpleEventEmitter();
 
         function findDOMNode(component) {
             if (ReactDOM)
@@ -42,29 +42,29 @@
 
                 var baseRender = this.render.bind(this);
                 var self = this;
-                var tracker = null;
-                var renderingPending = false;
+                var reaction = null;
+                var isRenderingPending = false;
                 
                 function initialRender() {
-                    tracker = new mobservable.Reaction(name, function() {
-                        if (!renderingPending) {
-                            renderingPending = true;
+                    reaction = new mobservable.Reaction(name, function() {
+                        if (!isRenderingPending) {
+                            isRenderingPending = true;
                             React.Component.prototype.forceUpdate.call(self)
                         }
                     });
-                    reactiveRender.$mobservable = tracker;
+                    reactiveRender.$mobservable = reaction;
                     self.render = reactiveRender;
                     return reactiveRender();
                 }
 
                 function reactiveRender() {
-                    renderingPending = false;
+                    isRenderingPending = false;
                     var rendering;
-                    tracker.track(function() {
-                        if (isTracking)
+                    reaction.track(function() {
+                        if (isDevtoolsEnabled)
                             self.__$mobRenderStart = Date.now();
                         rendering = mobservable.extras.allowStateChanges(false, baseRender);
-                        if (isTracking)
+                        if (isDevtoolsEnabled)
                             self.__$mobRenderEnd = Date.now();
                     });
                     return rendering;
@@ -75,7 +75,7 @@
 
             componentWillUnmount: function() {
                 this.render.$mobservable && this.render.$mobservable.dispose();
-                if (isTracking) {
+                if (isDevtoolsEnabled) {
                     var node = findDOMNode(this);
                     if (node) {
                         componentByNodeRegistery.delete(node);
@@ -89,12 +89,12 @@
             },
 
             componentDidMount: function() {
-                if (isTracking)
+                if (isDevtoolsEnabled)
                     reportRendering(this);
             },
 
             componentDidUpdate: function() {
-                if (isTracking)
+                if (isDevtoolsEnabled)
                     reportRendering(this);
             },
 
@@ -176,8 +176,8 @@
         function trackComponents() {
             if (typeof WeakMap === "undefined")
                 throw new Error("[mobservable-react] tracking components is not supported in this browser.");
-            if (!isTracking)
-                isTracking = true;
+            if (!isDevtoolsEnabled)
+                isDevtoolsEnabled = true;
         }
 
         return ({

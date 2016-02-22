@@ -29,7 +29,7 @@
     "browserify": "^12.0.1",
     "jquery": "^2.1.4",
     "lodash": "^4.0.1",
-    "mobservable": "^1.2.2",
+    "mobservable": "^2.0.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "tape": "^4.2.2",
