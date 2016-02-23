@@ -45,4 +45,12 @@ class T6 extends Component<{}, {}> {
 
 const x = React.createElement(T3, { hamburger: 4 });
 
+class T7 extends Component<{ pizza: number}, {}> {
+    render() {
+        return <div>{this.props.pizza}</div>;
+    }
+}
+React.createElement(observer(T7), { pizza: 4 });
+
+
 ReactDOM.render(<T5 />, document.body);

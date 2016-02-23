@@ -78,6 +78,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+# 2.1.5
+
+Improved typescript typings overloads of `observer`
+
 # 2.1.4
 
 Added empty 'dependencies' section to package.json, fixes #26
