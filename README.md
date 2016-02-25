@@ -1,34 +1,34 @@
-# mobservable-react
+# mobx-react
 
-[![Build Status](https://travis-ci.org/mweststrate/mobservable-react.svg?branch=master)](https://travis-ci.org/mweststrate/mobservable-react)
-[![Join the chat at https://gitter.im/mweststrate/mobservable](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mweststrate/mobservable?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![#mobservable channel on reactiflux discord](https://img.shields.io/badge/discord-%23mobservable%20%40reactiflux-blue.svg)](https://discord.gg/0ZcbPKXt5bYAa2J1)
+[![Build Status](https://travis-ci.org/mobxjs/mobx-react.svg?branch=master)](https://travis-ci.org/mobxjs/mobx-react)
+[![Join the chat at https://gitter.im/mobxjs/mobx](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mobxjs/mobx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![#mobservable channel on reactiflux discord](https://img.shields.io/badge/discord-%23mobx%20%40reactiflux-blue.svg)](https://discord.gg/0ZcbPKXt5bYAa2J1)
 
 
-Package with react component wrapper for combining React with mobservable.
+Package with react component wrapper for combining React with mobx.
 Exports the `observer` decorator and some development utilities.
-For documentation, see the [mobservable](https://mweststrate.github.io/mobservable) project.
+For documentation, see the [mobx](https://mobxjs.github.io/mobx) project.
 This package supports both React and React-Native.
 
 ## Installation
 
-`npm install mobservable-react --save`
+`npm install mobx-react --save`
 
 ```javascript
-import {observer} from 'mobservable-react';
+import {observer} from 'mobx-react';
 // - or -
-import {observer} from 'mobservable-react/native';
+import {observer} from 'mobx-react/native';
 ```
 
-This package provides the bindings for Mobservable and React.
-See the [official documentation](http://mweststrate.github.io/mobservable/intro/overview.html) for how to get started.
+This package provides the bindings for MobX and React.
+See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.html) for how to get started.
 
-## Boilerplate projects that use mobservable-react
+## Boilerplate projects that use mobx-react
 
-* Minimal Mobservable, React, ES6, JSX, Hot reloading: [Mobservable-React-Boilerplate](https://github.com/mweststrate/mobservable-react-boilerplate)
-* TodoMVC Mobservable, React, ES6, JSX, Hot reloading: [Mobservable-React-TodoMVC](https://github.com/mweststrate/mobservable-react-todomvc)
-* Minimal Mobservable, React, Typescript, TSX: [Mobservable-React-Typescript](https://github.com/mweststrate/mobservable-react-typescript)
-* Minimal Mobservable, React, ES6(babel), JSPM with hot reloading modules:
+* Minimal MobX, React, ES6, JSX, Hot reloading: [MobX-React-Boilerplate](https://github.com/mobxjs/mobx-react-boilerplate)
+* TodoMVC MobX, React, ES6, JSX, Hot reloading: [MobX-React-TodoMVC](https://github.com/mobxjs/mobx-react-todomvc)
+* Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript](https://github.com/mobxjs/mobx-react-typescript)
+* Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
 [jspm-react](https://github.com/capaj/jspm-react)
 * React-Native Counter: [Mobservable-React-Native-Counter](https://github.com/bartonhammond/mobservable-react-native-counter)
 
@@ -38,7 +38,7 @@ See the [official documentation](http://mweststrate.github.io/mobservable/intro/
 ### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
-See the [mobservable](https://mweststrate.github.io/mobservable/refguide/observer-component.html) documentation for more details.
+See the [mobx](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
 ![reactive function](reactive-function.png)
 
@@ -96,7 +96,7 @@ Fixed #12: fixed React warning when a component was unmounted after scheduling a
 
 # 2.1.0
 
-Upped dependency of mobservable to 1.1.1.
+Upped dependency of mobx to 1.1.1.
 
 # 2.0.1
 
@@ -122,7 +122,7 @@ All credits to Jiri Spac for this contribution!
 
 # 2.0.0
 
-Use React 0.14 instead of React 0.13. For React 0.13, use version `mobservable-react@1.0.2` or higher. 
+Use React 0.14 instead of React 0.13. For React 0.13, use version `mobx-react@1.0.2` or higher. 
 
 # 1.0.2
 
@@ -130,7 +130,7 @@ Minor fixes and improvements
 
 # 1.0.1
 
-Fixed issue with typescript typings. An example project with Mobservable, React, Typescript, TSX can be found here: https://github.com/mweststrate/mobservable-react-typescript
+Fixed issue with typescript typings. An example project with MobX, React, Typescript, TSX can be found here: https://github.com/mobxjs/mobx-react-typescript
 
 # 1.0.0
 
@@ -138,7 +138,7 @@ Fixed issue with typescript typings. An example project with Mobservable, React,
 
 # 0.2.3
 
-Added separte import for react-native: use `var reactiveComponent = require('mobservable-react/native').reactiveComponent` for native support; webpack clients will refuse to build otherwise.
+Added separte import for react-native: use `var reactiveComponent = require('mobx-react/native').reactiveComponent` for native support; webpack clients will refuse to build otherwise.
 
 # 0.2.2
 
@@ -146,7 +146,7 @@ Added react-native as dependency, so that the package works with either `react` 
 
 # 0.2.0
 
-Upgraded to Mobservable 0.7.0
+Upgraded to MobX 0.7.0
 
 # 0.1.7
 

@@ -1,15 +1,15 @@
 (function() {
-    function mrFactory(mobservable, React, ReactDOM) {
-        if (!mobservable)
-            throw new Error("mobservable-react requires the Mobservable package")
+    function mrFactory(mobx, React, ReactDOM) {
+        if (!mobx)
+            throw new Error("mobx-react requires the MobX package")
         if (!React)
-            throw new Error("mobservable-react requires React to be available");
+            throw new Error("mobx-react requires React to be available");
 
-        var isTracking = false;
+        var isDevtoolsEnabled = false;
 
         // WeakMap<Node, Object>;
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
-        var renderReporter = new mobservable.extras.SimpleEventEmitter();
+        var renderReporter = new mobx.SimpleEventEmitter();
 
         function findDOMNode(component) {
             if (ReactDOM)
@@ -33,69 +33,49 @@
 
         var reactiveMixin = {
             componentWillMount: function() {
-                var baseRender = this.render;
-                this.__$mobDependencies = [];
+                // Generate friendly name for debugging
+                var name = [
+                    this.displayName || this.name || (this.constructor && this.constructor.name) || "<component>",
+                    "#", this._reactInternalInstance && this._reactInternalInstance._rootNodeID,
+                    ".render()"
+                ].join("");
 
-                this.render = function() {
-                    if (isTracking)
-                        this.__$mobRenderStart = Date.now();
-
-                    // invoke the old render function and in the mean time track all dependencies using
-                    // 'autorun'.
-                    // when the dependencies change, the function is triggered, but we don't want to
-                    // rerender because that would ignore the normal React lifecycle,
-                    // so instead we dispose the current observer and trigger a force update.
-                    var hasRendered = false;
-                    var self = this;
-                    var rendering;
-                    this.__$mobRenderDisposer = mobservable.autorun(function reactiveRender() {
-                        if (!hasRendered) {
-                            hasRendered = true;
-                            // withStrict: throw errors if the render function tries to alter state.
-                            mobservable.extras.withStrict(true, function() {
-                                rendering = baseRender.call(self);
-                            });
-                        } else {
-                            self.__$mobRenderDisposer(); // dispose
-                            if (self.__$mobHasUnmounted !== true) // Fixes #12, should not be needed after fixing mobservable #71
-                                React.Component.prototype.forceUpdate.call(self);
+                var baseRender = this.render.bind(this);
+                var self = this;
+                var reaction = null;
+                var isRenderingPending = false;
+                
+                function initialRender() {
+                    reaction = new mobx.Reaction(name, function() {
+                        if (!isRenderingPending) {
+                            isRenderingPending = true;
+                            React.Component.prototype.forceUpdate.call(self)
                         }
                     });
+                    reactiveRender.$mobx = reaction;
+                    self.render = reactiveRender;
+                    return reactiveRender();
+                }
 
-                    this.render.$mobservable = this.__$mobRenderDisposer.$mobservable;
-
-                    // Generate friendly name for debugging
-                    this.render.$mobservable.context.name = [
-                        this.displayName || this.name || (this.constructor && this.constructor.name) || "<component>",
-                        "#", this._reactInternalInstance && this._reactInternalInstance._rootNodeID,
-                        ".render()"
-                    ].join("");
-
-                    // make sure views are not disposed between the clean-up of the observer and the next render
-                    // (invoked through force update)
-                    var newDependencies = this.__$mobRenderDisposer.$mobservable.observing.map(function(dep) {
-                        dep.setRefCount(+1);
-                        return dep;
+                function reactiveRender() {
+                    isRenderingPending = false;
+                    var rendering;
+                    reaction.track(function() {
+                        if (isDevtoolsEnabled)
+                            self.__$mobRenderStart = Date.now();
+                        rendering = mobx.extras.allowStateChanges(false, baseRender);
+                        if (isDevtoolsEnabled)
+                            self.__$mobRenderEnd = Date.now();
                     });
-                    this.__$mobDependencies.forEach(function(dep) {
-                        dep.setRefCount(-1);
-                    });
-                    this.__$mobDependencies = newDependencies;
-
-                    if (isTracking)
-                        this.__$mobRenderEnd = Date.now();
                     return rendering;
                 }
+
+                this.render = initialRender;
             },
 
             componentWillUnmount: function() {
-                this.__$mobRenderDisposer && this.__$mobRenderDisposer();
-                this.__$mobDependencies.forEach(function(dep) {
-                    dep.setRefCount(-1);
-                });
-                this.__$mobHasUnmounted = true;
-                delete this.render.$mobservable;
-                if (isTracking) {
+                this.render.$mobx && this.render.$mobx.dispose();
+                if (isDevtoolsEnabled) {
                     var node = findDOMNode(this);
                     if (node) {
                         componentByNodeRegistery.delete(node);
@@ -109,16 +89,22 @@
             },
 
             componentDidMount: function() {
-                if (isTracking)
+                if (isDevtoolsEnabled)
                     reportRendering(this);
             },
 
             componentDidUpdate: function() {
-                if (isTracking)
+                if (isDevtoolsEnabled)
                     reportRendering(this);
             },
 
             shouldComponentUpdate: function(nextProps, nextState) {
+                // TODO: if context changed, return true.., see #18
+                
+                // if props or state did change, but a render was scheduled already, no additional render needs to be scheduled
+                if (this.render.$mobx && this.render.$mobx.isScheduled() === true)
+                    return false;
+                
                 // update on any state changes (as is the default)
                 if (this.state !== nextState)
                     return true;
@@ -131,12 +117,12 @@
                     var newValue = nextProps[key];
                     if (newValue !== this.props[key]) {
                         return true;
-                    } else if (newValue && typeof newValue === "object" && !mobservable.isObservable(newValue)) {
+                    } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
                         /**
                          * If the newValue is still the same object, but that object is not observable,
                          * fallback to the default React behavior: update, because the object *might* have changed.
                          * If you need the non default behavior, just use the React pure render mixin, as that one
-                         * will work fine with mobservable as well, instead of the default implementation of
+                         * will work fine with mobx as well, instead of the default implementation of
                          * observer.
                          */
                         return true;
@@ -183,21 +169,21 @@
 
             if (!target.shouldComponentUpdate)
                 target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
-            componentClass.isMobservableReactObserver = true;
+            componentClass.isMobXReactObserver = true;
             return componentClass;
         }
 
         function trackComponents() {
             if (typeof WeakMap === "undefined")
-                throw new Error("[mobservable-react] tracking components is not supported in this browser.");
-            if (!isTracking)
-                isTracking = true;
+                throw new Error("[mobx-react] tracking components is not supported in this browser.");
+            if (!isDevtoolsEnabled)
+                isDevtoolsEnabled = true;
         }
 
         return ({
             observer: observer,
             reactiveComponent: function() {
-                console.warn("[mobservable-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
+                console.warn("[mobx-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
                 return observer.apply(null, arguments);
             },
             renderReporter: renderReporter,
@@ -208,10 +194,10 @@
 
     // UMD
     if (typeof define === 'function' && define.amd) {
-        define('mobservable-react', ['mobservable', 'react', 'react-dom'], mrFactory);
+        define('mobx-react', ['mobx', 'react', 'react-dom'], mrFactory);
     } else if (typeof exports === 'object') {
-        module.exports = mrFactory(require('mobservable'), require('react'), require('react-dom'));
+        module.exports = mrFactory(require('mobx'), require('react'), require('react-dom'));
     } else {
-        this.mobservableReact = mrFactory(this['mobservable'], this['React'], this['ReactDOM']);
+        this.mobxReact = mrFactory(this['mobx'], this['React'], this['ReactDOM']);
     }
 })();

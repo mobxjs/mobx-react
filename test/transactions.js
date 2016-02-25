@@ -1,45 +1,35 @@
-var mobservable = require("mobservable");
+var mobx = require("mobx");
 var tape = require("tape");
-var mobservableReact = require("../");
+var mobxReact = require("../");
 var ReactDOM = require("react-dom");
 var React = require("react");
 
-tape.test("issue 50", function(test) {
+tape.test("mobx issue 50", function(test) {
 	
 	var foo = {
-		a: mobservable.observable(true),
-		b: mobservable.observable(false),
-		c: mobservable.observable(function() { 
+		a: mobx.observable(true),
+		b: mobx.observable(false),
+		c: mobx.observable(function() { 
 			console.log("evaluate c");
-			return foo.b(); 
+			return foo.b.get(); 
 		})
 	};
 	
 	function flipStuff() {
-		console.log("flipping");
-		mobservable.extras.trackTransitions(true, function(line) {
-			//lines.forEach(function(line) {
-				console.log(line.state, line.name);
-			//});
+		mobx.transaction(function() {
+			foo.a.set(!foo.a.get());
+			foo.b.set(!foo.b.get());
 		});
-
-		mobservable.transaction(function() {
-			foo.a(!foo.a());
-			foo.b(!foo.b());
-			console.log("transaction pre-end");
-		});
-		console.log("transaction post-end");
 	}
 	
 	var asText = "";
-	mobservable.autorun(function() {
-		asText = [foo.a(), foo.b(), foo.c()].join(":");
+	mobx.autorun(function() {
+		asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(":");
 	});
 		
-	var Test = mobservableReact.observer(React.createClass({
+	var Test = mobxReact.observer(React.createClass({
 		render: function() {
-			console.log("rendering");
-			return (React.createElement("div", { id: 'x' }, [foo.a(), foo.b(), foo.c()].join(",")));
+			return (React.createElement("div", { id: 'x' }, [foo.a.get(), foo.b.get(), foo.c.get()].join(",")));
 		}
 	}));
 	
@@ -53,4 +43,57 @@ tape.test("issue 50", function(test) {
 	}, 400);
 	
 	ReactDOM.render(React.createElement(Test), document.getElementById('testroot'));
+});
+
+tape.test("React.render should respect transaction", function(t) {
+	var a = mobx.observable(2);
+	var loaded = mobx.observable(false);
+	var valuesSeen = [];
+
+	var component = mobxReact.observer(function() {
+		valuesSeen.push(a.get());
+		if (loaded.get())
+			return React.createElement("div", {}, a.get());
+		else
+			return React.createElement("div", {}, "loading");
+	});
+	
+	React.render(React.createElement(component, {}), document.getElementById('testroot'));
+	mobx.transaction(function() {
+		a.set(3);
+		a.set(4);
+		loaded.set(true);
+	});
+
+	setTimeout(function() {
+		t.equal(document.body.textContent.replace(/\s+/g,""), "4");
+		t.deepEqual(valuesSeen, [2, 4]);
+		t.end();
+	}, 400);	
+});
+
+tape.test("React.render in transaction should succeed", function(t) {
+	var a = mobx.observable(2);
+	var loaded = mobx.observable(false);
+	var valuesSeen = [];
+	var component = mobxReact.observer(function() {
+		valuesSeen.push(a.get());
+		if (loaded.get())
+			return React.createElement("div", {}, a.get());
+		else
+			return React.createElement("div", {}, "loading");
+	});
+	
+	mobx.transaction(function() {
+		a.set(3);
+		React.render(React.createElement(component, {}), document.getElementById('testroot'));
+		a.set(4);
+		loaded.set(true);
+	});
+
+	setTimeout(function() {
+		t.equal(document.body.textContent.replace(/\s+/g,""), "4");
+		t.deepEqual(valuesSeen, [3, 4]);
+		t.end();
+	}, 400);	
 });
