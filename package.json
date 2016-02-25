@@ -1,15 +1,15 @@
 {
-  "name": "mobservable-react",
-  "version": "2.1.5",
-  "description": "React bindings for mobservable. Create fully reactive components.",
+  "name": "mobx-react",
+  "version": "3.0.0",
+  "description": "React bindings for mobx. Create fully reactive components.",
   "main": "index.js",
   "typings": "index",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mweststrate/mobservable-react.git"
+    "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
-    "build": "cp index.js native.js && git apply mobservable-react-native.patch",
+    "build": "cp index.js native.js && git apply mobx-react-native.patch",
     "prepublish": "npm run build",
     "test": "browserify test/*.js | tape-run && tsc -p test/ts",
     "debug": "browserify test/*.js | tape-run --browser chrome"
@@ -17,30 +17,32 @@
   "author": "Michel Weststrate",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mweststrate/mobservable/issues"
+    "url": "https://github.com/mobxjs/mobx/issues"
   },
-  "homepage": "https://mweststrate.github.io/mobservable",
+  "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobservable": "^1.1.1",
+    "mobx": "^2.0.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0"
   },
   "devDependencies": {
     "browserify": "^12.0.1",
     "jquery": "^2.1.4",
-    "mobservable": "^1.1.1",
+    "lodash": "^4.0.1",
+    "mobx": "^2.0.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
     "typescript": "^1.7.5"
   },
+  "dependencies": {},
   "keywords": [
+    "mobx",
     "mobservable",
     "react-component",
     "react",
     "reactjs",
     "reactive"
-  ],
-  "dependencies": {}
+  ]
 }

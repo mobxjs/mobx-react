@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Component} from 'react'; 
-import {} from 'mobservable';
 import {observer} from '../../';
 
 @observer
