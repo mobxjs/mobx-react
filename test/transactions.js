@@ -1,33 +1,33 @@
-var mobservable = require("mobservable");
+var mobx = require("mobx");
 var tape = require("tape");
-var mobservableReact = require("../");
+var mobxReact = require("../");
 var ReactDOM = require("react-dom");
 var React = require("react");
 
-tape.test("mobservable issue 50", function(test) {
+tape.test("mobx issue 50", function(test) {
 	
 	var foo = {
-		a: mobservable.observable(true),
-		b: mobservable.observable(false),
-		c: mobservable.observable(function() { 
+		a: mobx.observable(true),
+		b: mobx.observable(false),
+		c: mobx.observable(function() { 
 			console.log("evaluate c");
 			return foo.b.get(); 
 		})
 	};
 	
 	function flipStuff() {
-		mobservable.transaction(function() {
+		mobx.transaction(function() {
 			foo.a.set(!foo.a.get());
 			foo.b.set(!foo.b.get());
 		});
 	}
 	
 	var asText = "";
-	mobservable.autorun(function() {
+	mobx.autorun(function() {
 		asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(":");
 	});
 		
-	var Test = mobservableReact.observer(React.createClass({
+	var Test = mobxReact.observer(React.createClass({
 		render: function() {
 			return (React.createElement("div", { id: 'x' }, [foo.a.get(), foo.b.get(), foo.c.get()].join(",")));
 		}
@@ -46,11 +46,11 @@ tape.test("mobservable issue 50", function(test) {
 });
 
 tape.test("React.render should respect transaction", function(t) {
-	var a = mobservable.observable(2);
-	var loaded = mobservable.observable(false);
+	var a = mobx.observable(2);
+	var loaded = mobx.observable(false);
 	var valuesSeen = [];
 
-	var component = mobservableReact.observer(function() {
+	var component = mobxReact.observer(function() {
 		valuesSeen.push(a.get());
 		if (loaded.get())
 			return React.createElement("div", {}, a.get());
@@ -59,7 +59,7 @@ tape.test("React.render should respect transaction", function(t) {
 	});
 	
 	React.render(React.createElement(component, {}), document.getElementById('testroot'));
-	mobservable.transaction(function() {
+	mobx.transaction(function() {
 		a.set(3);
 		a.set(4);
 		loaded.set(true);
@@ -73,10 +73,10 @@ tape.test("React.render should respect transaction", function(t) {
 });
 
 tape.test("React.render in transaction should succeed", function(t) {
-	var a = mobservable.observable(2);
-	var loaded = mobservable.observable(false);
+	var a = mobx.observable(2);
+	var loaded = mobx.observable(false);
 	var valuesSeen = [];
-	var component = mobservableReact.observer(function() {
+	var component = mobxReact.observer(function() {
 		valuesSeen.push(a.get());
 		if (loaded.get())
 			return React.createElement("div", {}, a.get());
@@ -84,7 +84,7 @@ tape.test("React.render in transaction should succeed", function(t) {
 			return React.createElement("div", {}, "loading");
 	});
 	
-	mobservable.transaction(function() {
+	mobx.transaction(function() {
 		a.set(3);
 		React.render(React.createElement(component, {}), document.getElementById('testroot'));
 		a.set(4);

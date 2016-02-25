@@ -1,5 +1,5 @@
 var test = require('tape');
-var mobservable = require('mobservable');
+var mobx = require('mobx');
 var React = require('react/addons');
 var ReactDOM = require('react-dom');
 var TestUtils = React.addons.TestUtils;
@@ -12,7 +12,7 @@ var testRoot = document.getElementById("testroot");
 
 var e = React.createElement;
 
-var wizardModel = mobservable.observable({
+var wizardModel = mobx.observable({
 	steps: [
 		{
 			title: 'Size',
@@ -30,7 +30,7 @@ var wizardModel = mobservable.observable({
 	activeStep: function () {
 		return _.find(this.steps, 'active');
 	},
-	activateNextStep: mobservable.asReference(function () {
+	activateNextStep: mobx.asReference(function () {
 		var nextStep = this.steps[_.findIndex(this.steps, 'active') + 1];
 		if(!nextStep) {
 			return false;
@@ -39,7 +39,7 @@ var wizardModel = mobservable.observable({
 	}),
 	setActiveStep: function (modeToActivate) {
 		var self = this;
-		mobservable.transaction(function () {
+		mobx.transaction(function () {
 			_.find(self.steps, 'active').active = false;
 			modeToActivate.active = true;
 		});

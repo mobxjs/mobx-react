@@ -1,5 +1,5 @@
 var test = require('tape');
-var mobservable = require('mobservable');
+var mobx = require('mobx');
 var React = require('react/addons');
 var ReactDOM = require('react-dom');
 var TestUtils = React.addons.TestUtils;

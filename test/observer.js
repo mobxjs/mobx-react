@@ -1,5 +1,5 @@
 var test = require('tape');
-var mobservable = require('mobservable');
+var mobx = require('mobx');
 var React = require('react/addons');
 var ReactDOM = require('react-dom');
 var TestUtils = React.addons.TestUtils;
@@ -11,7 +11,7 @@ var testRoot = document.getElementById("testroot");
 
 var e = React.createElement;
 
-var store = mobservable.observable({
+var store = mobx.observable({
     todos: [{
         title: "a",
         completed: false
@@ -49,7 +49,7 @@ var app = React.createClass({
 });
 
 function getDNode(obj, prop) {
-    return obj.$mobservable.values[prop];
+    return obj.$mobx.values[prop];
 }
 
 test('nestedRendering', function(test) {
@@ -106,7 +106,7 @@ test('nestedRendering', function(test) {
 
 test('keep views alive', function(test) {
     var yCalcCount = 0;
-    var data = mobservable.observable({
+    var data = mobx.observable({
         x: 3,
         y: function() {
             yCalcCount++;
@@ -151,7 +151,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 
 test('issue 12', function(t) {
-    var data = mobservable.observable({
+    var data = mobx.observable({
         selected: "coffee",
         items: [{
             name: "coffee"
@@ -180,7 +180,7 @@ test('issue 12', function(t) {
     ReactDOM.render(e(table), testRoot, function() {
         t.equal($(testRoot).text(), "coffee!tea");
         
-        mobservable.transaction(function() {
+        mobx.transaction(function() {
             data.items[1].name = "boe";
             data.items.splice(0, 2, { name : "soup" });
             data.selected = "tea";
@@ -194,7 +194,7 @@ test('issue 12', function(t) {
 });
 
 test("changing state in render should fail", function(t) {
-    var data = mobservable.observable(2);
+    var data = mobx.observable(2);
     var comp = observer(function() {
         data(3);
         return e("div", {}, data());
@@ -205,6 +205,6 @@ test("changing state in render should fail", function(t) {
         ReactDOM.render(e(comp), testRoot);
     }, "It is not allowed to change the state during a view");
     
-    mobservable._.resetGlobalState();
+    mobx._.resetGlobalState();
     t.end();
 });
