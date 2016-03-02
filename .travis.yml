@@ -3,5 +3,4 @@ script: npm test
 after_success:
   - cat ./coverage/lcov.info|./node_modules/coveralls/bin/coveralls.js
 node_js:
-  - "0.12"
   - "4.0.0"
