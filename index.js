@@ -48,6 +48,8 @@
                 function initialRender() {
                     reaction = new mobx.Reaction(name, function() {
                         if (!isRenderingPending) {
+                            if (self.__$mobDidMount !== true)
+                                console.error("[mobx-react] Warning: A re-render was triggered before the component '" + name + "', was mounted. Is (another) component trying to modify state in it's constructor / getInitialState? Use componentWillMount instead.");
                             isRenderingPending = true;
                             React.Component.prototype.forceUpdate.call(self)
                         }
@@ -89,6 +91,7 @@
             },
 
             componentDidMount: function() {
+                this.__$mobDidMount = true;
                 if (isDevtoolsEnabled)
                     reportRendering(this);
             },

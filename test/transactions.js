@@ -97,3 +97,41 @@ tape.test("React.render in transaction should succeed", function(t) {
 		t.end();
 	}, 400);	
 });
+
+tape.test("Should warn about changing state in getInitialState", function(t) {
+	var a = mobx.observable(2);
+	
+	var child = mobxReact.observer(React.createClass({
+		displayName: "Child",
+		getInitialState: function() {
+			a.set(3); // one shouldn't do this!
+			return {};
+		},
+		render: function() {
+			return React.createElement("div", {}, a.get());
+		}
+	}));
+	
+	var parent = mobxReact.observer(function Parent() {
+		return React.createElement("div", {}, 
+			React.createElement(child, {}),
+			a.get()
+		);
+	});
+	
+	var baseError = console.error;
+	var msg = [];
+	console.error = function(x) {
+		msg.push(x);
+		baseError.apply(console, arguments);
+	};
+	
+	React.render(React.createElement(parent, {}), document.getElementById('testroot'), function() {
+		console.error = baseError;
+		t.deepEqual(msg, [
+			"[mobx-react] Warning: A re-render was triggered before the component '<component>#.b.render()', was mounted. Is (another) component trying to modify state in it's constructor / getInitialState? Use componentWillMount instead.",
+			"Warning: forceUpdate(...): Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state."			
+		]);
+		t.end();
+	});
+});
