@@ -12,8 +12,10 @@
         var renderReporter = new mobx.SimpleEventEmitter();
 
         function findDOMNode(component) {
-            if (ReactDOM)
+            if (ReactDOM && ReactDOM.findDOMNode)
                 return ReactDOM.findDOMNode(component);
+            else if (React && React.findDOMNode)
+                return React.findDOMNode(component);
             return null;
         }
 
