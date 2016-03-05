@@ -40,7 +40,30 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
 See the [mobx](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
-![reactive function](reactive-function.png)
+```javascript
+import {observer} from "mobx-react";
+
+// ---- ES5 syntax ----
+
+const TodoView = observer(React.createClass({
+    displayName: "TodoView",
+    render() {
+        return <div>this.props.todo.title</div>   
+    }
+}));
+
+// ---- ES6 syntax ----
+
+@observer class TodoView extends React.Component {
+    render() {
+        return <div>this.props.todo.title</div>   
+    }   
+}
+
+// ---- or just use a stateless component function: ----
+
+const TodoView = observer(({todo}) => <div>{todo.title}</div>)
+```
 
 ### trackComponents()
 
@@ -78,27 +101,35 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
-# 2.1.5
+### 3.0.1
+
+Added warning when changing state in `getInitialState` / `constructor`. 
+
+### 3.0.0
+
+Upgraded to MobX 2.0.0
+
+### 2.1.5
 
 Improved typescript typings overloads of `observer`
 
-# 2.1.4
+### 2.1.4
 
 Added empty 'dependencies' section to package.json, fixes #26
 
-# 2.1.3
+### 2.1.3
 
 Added support for context to stateless components. (by Kosta-Github).
 
-# 2.1.1
+### 2.1.1
 
 Fixed #12: fixed React warning when a component was unmounted after scheduling a re-render but before executing it.
 
-# 2.1.0
+### 2.1.0
 
 Upped dependency of mobx to 1.1.1.
 
-# 2.0.1
+### 2.0.1
 
 It is now possible to define `propTypes` and `getDefaultProps` on a stateless component:
 
@@ -120,39 +151,39 @@ export default observer(myComponent);
 
 All credits to Jiri Spac for this contribution!
 
-# 2.0.0
+### 2.0.0
 
 Use React 0.14 instead of React 0.13. For React 0.13, use version `mobx-react@1.0.2` or higher. 
 
-# 1.0.2
+### 1.0.2
 
 Minor fixes and improvements
 
-# 1.0.1
+### 1.0.1
 
 Fixed issue with typescript typings. An example project with MobX, React, Typescript, TSX can be found here: https://github.com/mobxjs/mobx-react-typescript
 
-# 1.0.0
+### 1.0.0
 
 `reactiveComponent` has been renamed to `observer`
 
-# 0.2.3
+### 0.2.3
 
 Added separte import for react-native: use `var reactiveComponent = require('mobx-react/native').reactiveComponent` for native support; webpack clients will refuse to build otherwise.
 
-# 0.2.2
+### 0.2.2
 
 Added react-native as dependency, so that the package works with either `react` or `react-native`.
 
-# 0.2.0
+### 0.2.0
 
 Upgraded to MobX 0.7.0
 
-# 0.1.7
+### 0.1.7
 
 Fixed issue where Babel generated component classes where not properly picked up.
 
-# 0.1.6
+### 0.1.6
 
 `observer` now accepts a pure render function as argument, besides constructor function. For example:
 
@@ -163,10 +194,10 @@ var TodoItem = observer(function TodoItem(props) {
 });
 ```
 
-# 0.1.5
+### 0.1.5
 
 observer is now defined in terms of side effects.
 
-# 0.1.4
+### 0.1.4
 
 Added support for React 0.14(RC) by dropping peer dependency
