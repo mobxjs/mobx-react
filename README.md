@@ -30,7 +30,7 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 * Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript](https://github.com/mobxjs/mobx-react-typescript)
 * Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
 [jspm-react](https://github.com/capaj/jspm-react)
-* React-Native Counter: [Mobservable-React-Native-Counter](https://github.com/bartonhammond/mobservable-react-native-counter)
+* React-Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
 
 
 ## API documentation
