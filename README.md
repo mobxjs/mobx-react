@@ -65,6 +65,28 @@ const TodoView = observer(React.createClass({
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+## FAQ
+
+**Should I use `observer` for each component?**
+
+You should use `observer` on every component that displays observable data. 
+Even the small ones. `observer` allows components to render independently from their parent and in general this means that
+the more you use `observer`, the better the performance become.
+The overhead of `observer` itself is neglectable.
+See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/issues/101)
+
+
+**I see React warnings about `forceUpdate` / `setState` from React**
+
+The following warning will appear if you trigger a re-rendering between instantiating and rendering a component: 
+
+`Warning: forceUpdate(...): Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state.`
+
+Usually this means that (another) component is trying to modify observables used by this components in their `constructor` or `getInitialState` methods.
+This violates the React Lifecycle, `componentWillMount` should be used instead if state needs to be modified before mounting.
+
+## Internal DevTools Api
+
 ### trackComponents()
 
 Enables the tracking from components. Each rendered reactive component will be added to the `componentByNodeRegistery` and its renderings will be reported through the `renderReporter` event emitter.
@@ -100,6 +122,10 @@ WeakMap. It's `get` function returns the associated reactive component of the gi
 This map is only available after invoking `trackComponents`.
 
 # Changelog
+
+### 3.0.2
+
+Removed the warning introduced in 3.0.1. It triggered always when using shallow rendering (when using shallow rendering `componentDidMount` won't fire. See https://github.com/facebook/react/issues/4919).
 
 ### 3.0.1
 
