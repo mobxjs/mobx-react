@@ -58,7 +58,7 @@ tape.test("React.render should respect transaction", function(t) {
 			return React.createElement("div", {}, "loading");
 	});
 	
-	React.render(React.createElement(component, {}), document.getElementById('testroot'));
+	ReactDOM.render(React.createElement(component, {}), document.getElementById('testroot'));
 	mobx.transaction(function() {
 		a.set(3);
 		a.set(4);
@@ -86,7 +86,7 @@ tape.test("React.render in transaction should succeed", function(t) {
 	
 	mobx.transaction(function() {
 		a.set(3);
-		React.render(React.createElement(component, {}), document.getElementById('testroot'));
+		ReactDOM.render(React.createElement(component, {}), document.getElementById('testroot'));
 		a.set(4);
 		loaded.set(true);
 	});
