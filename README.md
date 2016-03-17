@@ -123,6 +123,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+### 3.0.3
+
+Removed peer dependencies, React 15 (and 0.13) are supported as well. By @bkniffler
+
 ### 3.0.2
 
 Removed the warning introduced in 3.0.1. It triggered always when using shallow rendering (when using shallow rendering `componentDidMount` won't fire. See https://github.com/facebook/react/issues/4919).
