@@ -1,8 +1,8 @@
 var test = require('tape');
 var mobx = require('mobx');
-var React = require('react/addons');
+var React = require('react');
 var ReactDOM = require('react-dom');
-var TestUtils = React.addons.TestUtils;
+var TestUtils = require('react-addons-test-utils');
 var observer = require('../').observer;
 var $ = require('jquery');
 

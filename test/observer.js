@@ -1,8 +1,8 @@
 var test = require('tape');
 var mobx = require('mobx');
-var React = require('react/addons');
+var React = require('react');
 var ReactDOM = require('react-dom');
-var TestUtils = React.addons.TestUtils;
+var TestUtils = require('react-addons-test-utils');
 var observer = require('../').observer;
 var $ = require('jquery');
 
@@ -59,29 +59,29 @@ test('nestedRendering', function(test) {
         test.equal($("li").text(), "|a");
 
         test.equal(todoItemRenderings, 1, "item1 should render once");
-        
+
         test.equal(getDNode(store, "todos").observers.length, 1);
         test.equal(getDNode(store.todos[0], "title").observers.length, 1);
-        
+
         store.todos[0].title += "a";
         setTimeout(function() {
-        
+
             test.equal(todoListRenderings, 1, "should have rendered list once");
             test.equal(todoItemRenderings, 2, "item1 should have rendered twice");
             test.equal(getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
             test.equal(getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
-        
+
             store.todos.push({
                 title: "b",
                 completed: true
             });
-        
+
             setTimeout(function() {
-                
-                
+
+
                 test.equal($("li").length, 2, "list should two items in in the list");
                 test.equal($("li").text(), "|aa|b");
-            
+
                 test.equal(todoListRenderings, 2, "should have rendered list twice");
                 test.equal(todoItemRenderings, 3, "item2 should have rendered as well");
                 test.equal(getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
@@ -93,10 +93,10 @@ test('nestedRendering', function(test) {
                     test.equal(todoListRenderings, 3, "should have rendered list another time");
                     test.equal(todoItemRenderings, 3, "item1 should not have rerendered");
                     test.equal($("li").length, 1, "list should have only on item in list now");
-                
+
                     test.equal(getDNode(oldTodo, "title").observers.length, 0, "title observers should have decreased");
                     test.equal(getDNode(oldTodo, "completed").observers.length, 0, "completed observers should not have decreased");
-                
+
                     test.end();
                 });
             }, 100);
@@ -120,21 +120,21 @@ test('keep views alive', function(test) {
     });
 
     ReactDOM.render(e(component), testRoot, function() {
-    
+
         test.equal(yCalcCount, 1);
         test.equal($(testRoot).text(), "hi6");
-    
+
         data.z = "hello";
         // test: rerender should not need a recomputation of data.y because the subscription is kept alive
-        
+
         setTimeout(function() {
             test.equal(yCalcCount, 1);
-        
+
             test.equal($(testRoot).text(), "hello6");
             test.equal(yCalcCount, 1);
-        
+
             test.equal(getDNode(data, "y").observers.length, 1);
-            
+
             ReactDOM.render(e("div"), testRoot, function() {
                 test.equal(getDNode(data, "y").observers.length, 0);
                 test.end();
@@ -159,7 +159,7 @@ test('issue 12', function(t) {
             name: "tea"
         }]
     });
-    
+
     /** Row Class */
     var _super = React.Component;
     var Row  = function() {
@@ -168,24 +168,24 @@ test('issue 12', function(t) {
     __extends(Row, _super);
     Row.prototype.render = function() {
         return e("div", {}, this.props.item.name + (data.selected === this.props.item.name ? "!" : ""));
-    }; 
-    
+    };
+
     /** table stateles component */
     var table = observer(function table() {
         return e("div", {}, data.items.map(function(item) {
             return e(Row, { key: item.name, item: item})
         }));
     })
-    
+
     ReactDOM.render(e(table), testRoot, function() {
         t.equal($(testRoot).text(), "coffee!tea");
-        
+
         mobx.transaction(function() {
             data.items[1].name = "boe";
             data.items.splice(0, 2, { name : "soup" });
             data.selected = "tea";
         });
-        
+
         setTimeout(function() {
             t.equal($(testRoot).text(), "soup");
             t.end();
@@ -199,12 +199,12 @@ test("changing state in render should fail", function(t) {
         data(3);
         return e("div", {}, data());
     });
-    
 
-    t.throws(function() {    
+
+    t.throws(function() {
         ReactDOM.render(e(comp), testRoot);
     }, "It is not allowed to change the state during a view");
-    
+
     mobx._.resetGlobalState();
     t.end();
 });

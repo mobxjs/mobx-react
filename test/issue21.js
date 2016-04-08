@@ -1,8 +1,8 @@
 var test = require('tape');
 var mobx = require('mobx');
-var React = require('react/addons');
+var React = require('react');
 var ReactDOM = require('react-dom');
-var TestUtils = React.addons.TestUtils;
+var TestUtils = require('react-addons-test-utils');
 var observer = require('../').observer;
 var $ = require('jquery');
 var _ = require('lodash');
@@ -114,7 +114,7 @@ test('verify issue 21', function(t) {
 	ReactDOM.render(React.createElement(Wizard, {model: wizardModel}),testRoot, function() {
 		t.equal(topRenderCount, 1);
 		changeStep(0);
-		
+
 		setTimeout(function() {
 			t.equal(topRenderCount, 2);
 			changeStep(2);
@@ -122,6 +122,6 @@ test('verify issue 21', function(t) {
 				t.equal(topRenderCount, 3);
 				t.end();
 			}, 100);
-		}, 100);		
+		}, 100);
 	});
 });
