@@ -35,7 +35,7 @@
             componentWillMount: function() {
                 // Generate friendly name for debugging
                 var name = [
-                    this.displayName || this.name || (this.constructor && this.constructor.name) || "<component>",
+                    this.displayName || this.name || (this.constructor && (this.constructor.displayName || this.constructor.name)) || "<component>",
                     "#", this._reactInternalInstance && this._reactInternalInstance._rootNodeID,
                     ".render()"
                 ].join("");

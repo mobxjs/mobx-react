@@ -123,6 +123,16 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+### 3.0.4
+
+The debug name stateless function components of babel transpiled jsx are now properly picked up if the wrapper is applied after defining the component:
+
+```javascript
+const MyComponent = () => <span>hi</span>
+
+export default observer(MyComponent);
+```
+
 ### 3.0.3
 
 Removed peer dependencies, React 15 (and 0.13) are supported as well. By @bkniffler
