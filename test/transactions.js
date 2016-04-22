@@ -23,11 +23,15 @@ tape.test("mobx issue 50", function(test) {
 	}
 	
 	var asText = "";
+    var willReactCount = 0;
 	mobx.autorun(function() {
 		asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(":");
 	});
 		
 	var Test = mobxReact.observer(React.createClass({
+        componentWillReact: function() {
+            willReactCount++;
+        },
 		render: function() {
 			return (React.createElement("div", { id: 'x' }, [foo.a.get(), foo.b.get(), foo.c.get()].join(",")));
 		}
@@ -39,6 +43,7 @@ tape.test("mobx issue 50", function(test) {
 	setTimeout(function() {
 		test.equal(asText, "false:true:true");
 		test.equal(document.getElementById('x').innerHTML, "false,true,true");
+        test.equal(willReactCount, 1);
 		test.end();
 	}, 400);
 	

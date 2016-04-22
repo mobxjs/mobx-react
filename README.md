@@ -65,6 +65,30 @@ const TodoView = observer(React.createClass({
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+### `componentWillReact` (lifecycle hook)
+
+React components usually render on a fresh stack, so that makes it often hard to figure out what _caused_ a component to re-render.
+When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component will be scheduled to re-render because
+data it observes has changed. This makes it easy to trace renders back to the action that caused the rendering.
+
+```javascript
+import {observer} from "mobx-react";
+
+@observer class TodoView extends React.Component {
+    componentWillReact() {
+        console.log("I will re-render, since the todo has changed!");    
+    }
+
+    render() {
+        return <div>this.props.todo.title</div>   
+    }   
+}
+```
+
+* `componentWillReact` doesn't take arguments
+* `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
+* `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
+
 ## FAQ
 
 **Should I use `observer` for each component?**
@@ -122,6 +146,10 @@ WeakMap. It's `get` function returns the associated reactive component of the gi
 This map is only available after invoking `trackComponents`.
 
 # Changelog
+
+### 3.0.5
+
+Introduced `componentWillReact`
 
 ### 3.0.4
 

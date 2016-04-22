@@ -25,8 +25,12 @@ var todoItem = observer(function TodoItem(props) {
 });
 
 var todoListRenderings = 0;
+var todoListWillReactCount = 0;
 var todoList = observer(React.createClass({
     renderings: 0,
+    componentWillReact : function() {
+        todoListWillReactCount++;  
+    },
     render: function() {
         todoListRenderings++;
         var todos = store.todos;
@@ -55,6 +59,7 @@ function getDNode(obj, prop) {
 test('nestedRendering', function(test) {
 	ReactDOM.render(e(app), testRoot, function() {
     	test.equal(todoListRenderings, 1, "should have rendered list once");
+        test.equal(todoListWillReactCount, 0, "should not have reacted yet")
 		test.equal($("li").length, 1);
         test.equal($("li").text(), "|a");
 
@@ -67,6 +72,7 @@ test('nestedRendering', function(test) {
         setTimeout(function() {
 
             test.equal(todoListRenderings, 1, "should have rendered list once");
+            test.equal(todoListWillReactCount, 0, "should not have reacted")
             test.equal(todoItemRenderings, 2, "item1 should have rendered twice");
             test.equal(getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
             test.equal(getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
@@ -83,6 +89,7 @@ test('nestedRendering', function(test) {
                 test.equal($("li").text(), "|aa|b");
 
                 test.equal(todoListRenderings, 2, "should have rendered list twice");
+                test.equal(todoListWillReactCount, 1, "should have reacted")
                 test.equal(todoItemRenderings, 3, "item2 should have rendered as well");
                 test.equal(getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
                 test.equal(getDNode(store.todos[1], "completed").observers.length, 0, "completed observers should not have increased");
@@ -91,6 +98,8 @@ test('nestedRendering', function(test) {
 
                 setTimeout(function() {
                     test.equal(todoListRenderings, 3, "should have rendered list another time");
+                    test.equal(todoListWillReactCount, 2, "should have reacted")
+
                     test.equal(todoItemRenderings, 3, "item1 should not have rerendered");
                     test.equal($("li").length, 1, "list should have only on item in list now");
 

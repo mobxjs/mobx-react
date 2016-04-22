@@ -48,6 +48,8 @@
                     reaction = new mobx.Reaction(name, function() {
                         if (!isRenderingPending) {
                             isRenderingPending = true;
+                            if (typeof self.componentWillReact === "function")
+                                self.componentWillReact();
                             React.Component.prototype.forceUpdate.call(self)
                         }
                     });
