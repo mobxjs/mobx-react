@@ -46,7 +46,7 @@
                 var isRenderingPending = false;
                 function initialRender() {
                     reaction = new mobx.Reaction(name, function() {
-                        if (!isRenderingPending) {
+                        if (!isRenderingPending && self._isMounted) {
                             isRenderingPending = true;
                             if (typeof self.componentWillReact === "function")
                                 self.componentWillReact();
@@ -76,6 +76,7 @@
 
             componentWillUnmount: function() {
                 this.render.$mobx && this.render.$mobx.dispose();
+                this._isMounted = false;
                 if (isDevtoolsEnabled) {
                     var node = findDOMNode(this);
                     if (node) {
@@ -90,6 +91,7 @@
             },
 
             componentDidMount: function() {
+                this._isMounted = true;
                 if (isDevtoolsEnabled)
                     reportRendering(this);
             },
@@ -101,11 +103,11 @@
 
             shouldComponentUpdate: function(nextProps, nextState) {
                 // TODO: if context changed, return true.., see #18
-                
+
                 // if props or state did change, but a render was scheduled already, no additional render needs to be scheduled
                 if (this.render.$mobx && this.render.$mobx.isScheduled() === true)
                     return false;
-                
+
                 // update on any state changes (as is the default)
                 if (this.state !== nextState)
                     return true;
