@@ -2,3 +2,4 @@
 /test/node_modules
 npm-debug.log
 native.js
+custom.js

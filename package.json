@@ -9,7 +9,7 @@
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
-    "build": "cp index.js native.js && git apply mobx-react-native.patch",
+    "build": "cp index.js native.js && git apply mobx-react-native.patch && cp index.js custom.js && git apply mobx-react-custom.patch",
     "prepublish": "npm run build",
     "test": "browserify test/*.js | tape-run && tsc -p test/ts",
     "debug": "browserify test/*.js | tape-run --browser chrome"
