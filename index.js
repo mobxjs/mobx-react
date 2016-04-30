@@ -194,10 +194,10 @@
     }
 
     // UMD
-    if (typeof define === 'function' && define.amd) {
-        define('mobx-react', ['mobx', 'react', 'react-dom'], mrFactory);
-    } else if (typeof exports === 'object') {
+    if (typeof exports === 'object') {
         module.exports = mrFactory(require('mobx'), require('react'), require('react-dom'));
+    } else if (typeof define === 'function' && define.amd) {
+        define('mobx-react', ['mobx', 'react', 'react-dom'], mrFactory);
     } else {
         this.mobxReact = mrFactory(this['mobx'], this['React'], this['ReactDOM']);
     }

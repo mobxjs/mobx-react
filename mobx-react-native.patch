@@ -12,12 +12,12 @@
 @@ -194,10 +194,10 @@
  
      // UMD
-     if (typeof define === 'function' && define.amd) {
--        define('mobx-react', ['mobx', 'react', 'react-dom'], mrFactory);
-+        define('mobx-react', ['mobx', 'react-native'], mrFactory);
-     } else if (typeof exports === 'object') {
+     if (typeof exports === 'object') {
 -        module.exports = mrFactory(require('mobx'), require('react'), require('react-dom'));
 +        module.exports = mrFactory(require('mobx'), require('react-native'));
+     } else if (typeof define === 'function' && define.amd) {
+-        define('mobx-react', ['mobx', 'react', 'react-dom'], mrFactory);
++        define('mobx-react', ['mobx', 'react-native'], mrFactory);
      } else {
 -        this.mobxReact = mrFactory(this['mobx'], this['React'], this['ReactDOM']);
 +        this.mobxReact = mrFactory(this['mobx'], this['ReactNative']);
