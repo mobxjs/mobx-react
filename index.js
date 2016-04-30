@@ -136,9 +136,13 @@
         function patch(target, funcName) {
             var base = target[funcName];
             var mixinFunc = reactiveMixin[funcName];
-            target[funcName] = function() {
-                base && base.apply(this, arguments);
-                mixinFunc.apply(this, arguments);
+            if (!base) {
+                target[funcName] = mixinFunc;
+            } else {
+                target[funcName] = function() {
+                    base.apply(this, arguments);
+                    mixinFunc.apply(this, arguments);
+                }
             }
         }
 
