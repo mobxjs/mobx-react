@@ -1,15 +1,16 @@
 {
   "name": "mobx-react",
-  "version": "3.0.5",
+  "version": "4.0.0",
   "description": "React bindings for mobx. Create fully reactive components.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "jsnext:main": "index.js",
   "typings": "index",
   "repository": {
     "type": "git",
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
-    "build": "cp index.js native.js && git apply mobx-react-native.patch && cp index.js custom.js && git apply mobx-react-custom.patch",
+    "build": "babel index.js --out-file dist/index.js",
     "prepublish": "npm run build",
     "test": "browserify test/*.js | tape-run && tsc -p test/ts",
     "debug": "browserify test/*.js | tape-run --browser chrome"
@@ -24,6 +25,8 @@
     "mobx": "^2.0.0"
   },
   "devDependencies": {
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
+    "babel-preset-es2015": "^6.6.0",
     "browserify": "^12.0.1",
     "jquery": "^2.1.4",
     "lodash": "^4.0.1",
