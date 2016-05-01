@@ -50,7 +50,7 @@ import {observer} from "mobx-react";
 const TodoView = observer(React.createClass({
     displayName: "TodoView",
     render() {
-        return <div>this.props.todo.title</div>   
+        return <div>{this.props.todo.title}</div>   
     }
 }));
 
@@ -58,7 +58,7 @@ const TodoView = observer(React.createClass({
 
 @observer class TodoView extends React.Component {
     render() {
-        return <div>this.props.todo.title</div>   
+        return <div>{this.props.todo.title}</div>   
     }   
 }
 
@@ -82,7 +82,7 @@ import {observer} from "mobx-react";
     }
 
     render() {
-        return <div>this.props.todo.title</div>   
+        return <div>{this.props.todo.title}</div>   
     }   
 }
 ```
