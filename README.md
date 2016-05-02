@@ -149,6 +149,12 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+### 3.1.0
+
+* Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
+* Fixed some issues with rollup #43
+* Minor optimization
+
 ### 3.0.5
 
 Introduced `componentWillReact`
@@ -162,12 +168,6 @@ const MyComponent = () => <span>hi</span>
 
 export default observer(MyComponent);
 ```
-
-### 3.1.0
-
-* Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
-* Fixed some issues with rollup #43
-* Minor optimization
 
 ### 3.0.3
 

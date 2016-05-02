@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "3.0.5",
+  "version": "3.1.0",
   "description": "React bindings for mobx. Create fully reactive components.",
   "main": "index.js",
   "typings": "index",
