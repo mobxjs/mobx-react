@@ -149,6 +149,18 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+### 4.0
+
+* Code is now based on ES2015 modules rather than manually keeping up with a UMD codeset.
+* Converted to using Babel for internal build.
+* No longer export a UMD module.  Instead, we follow MobX and export only a CommonJS build.
+
+### 3.1.0
+
+* Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
+* Fixed some issues with rollup #43
+* Minor optimization
+
 ### 3.0.5
 
 Introduced `componentWillReact`
@@ -162,12 +174,6 @@ const MyComponent = () => <span>hi</span>
 
 export default observer(MyComponent);
 ```
-
-### 3.1.0
-
-* Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
-* Fixed some issues with rollup #43
-* Minor optimization
 
 ### 3.0.3
 
