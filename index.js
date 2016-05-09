@@ -9,8 +9,7 @@
 
         // WeakMap<Node, Object>;
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
-        var renderReporter = new mobx.SimpleEventEmitter();
-
+        var renderReporter = new EventEmitter();
         function findDOMNode(component) {
             if (ReactDOM)
                 return ReactDOM.findDOMNode(component);
@@ -184,6 +183,24 @@
             if (!isDevtoolsEnabled)
                 isDevtoolsEnabled = true;
         }
+
+        function EventEmitter() {
+            this.listeners = [];
+        };
+        EventEmitter.prototype.on = function (cb) {
+            this.listeners.push(cb);
+            var self = this;
+            return function() {
+                var idx = self.listeners.indexOf(cb);
+                if (idx !== -1)
+                    self.listeners.splice(idx, 1);
+            };
+        };
+        EventEmitter.prototype.emit = function(data) {
+            this.listeners.forEach(function (fn) {
+                fn(data);
+            });
+        };
 
         return ({
             observer: observer,
