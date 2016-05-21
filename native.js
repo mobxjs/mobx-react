@@ -3,7 +3,7 @@
         if (!mobx)
             throw new Error("mobx-react requires the MobX package")
         if (!React)
-            throw new Error("mobx-react requires React to be available");
+            throw new Error("mobx-react/native requires React Native to be available");
 
         var isDevtoolsEnabled = false;
 
@@ -199,10 +199,10 @@
 
     // UMD
     if (typeof exports === 'object') {
-        module.exports = mrFactory(require('mobx'), require('react'), require('react-dom'));
+        module.exports = mrFactory(require('mobx'), require('react'));
     } else if (typeof define === 'function' && define.amd) {
-        define('mobx-react', ['mobx', 'react', 'react-dom'], mrFactory);
+        define('mobx-react', ['mobx', 'react'], mrFactory);
     } else {
-        this.mobxReact = mrFactory(this['mobx'], this['React'], this['ReactDOM']);
+        this.mobxReact = mrFactory(this['mobx'], this['React']);
     }
 })();
