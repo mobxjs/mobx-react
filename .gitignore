@@ -1,5 +1,5 @@
 /node_modules
 /test/node_modules
 npm-debug.log
-native.js
+//native.js
 custom.js
