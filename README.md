@@ -149,6 +149,10 @@ This map is only available after invoking `trackComponents`.
 
 # Changelog
 
+### 3.2.0
+
+* Added support for react-native 0.25 and higher. By @danieldunderfelt.
+
 ### 3.1.0
 
 * Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
