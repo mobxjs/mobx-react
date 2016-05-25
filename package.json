@@ -1,7 +1,7 @@
 {
   "name": "mobx-react",
-  "version": "3.2.0",
-  "description": "React bindings for mobx. Create fully reactive components.",
+  "version": "3.3.0",
+  "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "typings": "index",
   "repository": {
@@ -21,13 +21,13 @@
   },
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobx": "^2.0.0"
+    "mobx": "^2.2.0"
   },
   "devDependencies": {
     "browserify": "^12.0.1",
     "jquery": "^2.1.4",
     "lodash": "^4.0.1",
-    "mobx": "^2.0.0",
+    "mobx": "^2.2.0",
     "react": "^15.0.0",
     "react-addons-test-utils": "^15.0.0",
     "react-dom": "^15.0.0",
