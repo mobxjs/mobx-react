@@ -91,9 +91,97 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
-### context(propType: React.Validator<any>, defaultValue?: any, nameInContext?: string)
+### Member decorators used to simplify declaring and using observable React properties, state, and context. 
 
-A property decorator that simplifies using observable context. 
+>For clarity, the term 'member' means a javascript property, to distinguish from the term 'property' which means a React Property
+
+These decorators enable accessing React properties, state, and context directly from the component instance (i.e. use `this.myMember` as opposed to `this.props.myMember` or `this.state.myMember` or `this.context.myMember`). Further, the `state` and `context` decorators make their decorated members observable.
+
+* `property` This merely makes a React property accessible directly from the component instance, and throws an exception if an attempt is made to assign.
+* `state` Creates a React property that can be used to easily initialize the state member, and makes the state member observable. After initialization, the state member can be changed, and mobx will kick in.
+* `context` Like the `state` decorator, except uses React's context scoping rules. This same decorator is used by both context providers and consumers, as will be explained below.
+
+>`componentWillReceiveProps` is intercepted to update `state` or `context` members when their related property is set. This should handle most uses cases. However, if more complex logic is required to set state or context based on properties, `componentWillReceiveProps` may still be overridden.
+
+### property(propType: React.Validator<any>, defaultValue?: any)
+
+```javascript
+import {property} from 'mobx-react'
+
+// ---- ES6 syntax
+
+class App extends React.Component {
+    render() {
+        return <MyComponent someProperty="prop init"/>
+    }
+}
+
+@observer 
+class MyComponent extends React.Component {
+    @property(React.PropTypes.string, 'default if not inited')
+    someProperty
+    
+    onClick = () => {
+        // this will throw an exception
+        this.someProperty += ' clicked'
+    }
+    
+    render() {
+        return <div>
+            <div>someProperty = {this.someProperty}</div>
+            <button onClick={this.onClick}>Change</button>
+        </div>
+    }
+}
+
+// ---- ES5 syntax 
+var MyComponent = React.createClass({
+    ...
+})
+// TODO: veryify this works in ES5
+property(React.PropTypes.string, 'default if not inited')(MyComponent.prototype, 'someProperty')
+```
+
+### state(propType: React.Validator<any>, defaultValue?: any)
+
+```javascript
+import {state} from 'mobx-react'
+
+// ---- ES6 syntax
+
+class App extends React.Component {
+    render() {
+        return <MyComponent someState="state init"/>
+    }
+}
+
+@observer 
+class MyComponent extends React.Component {
+    @state(React.PropTypes.string, 'default if not inited')
+    someState
+    
+    onClick = () => {
+        // this will cause mobx to kick in 
+        this.someState += ' clicked'
+    }
+    
+    render() {
+        return <div>
+            <div>someState = {this.someState}</div>
+            <button onClick={this.onClick}>Change</button>
+        </div>
+    }
+}
+
+// ---- ES5 syntax 
+var MyComponent = React.createClass({
+    ...
+})
+// TODO: veryify this works in ES5
+state(React.PropTypes.string, 'default if not inited')(MyComponent.prototype, 'someState')
+```
+
+### context(propType: React.Validator<any>, defaultValue?: any, nameInContext?: string)
 
 ```javascript
 import {context} from 'mobx-react'
@@ -102,29 +190,67 @@ import {context} from 'mobx-react'
 
 class App extends React.Component {
     render() {
-        return <Context someContext="prop init"/>
+        return <Context someContext="context init"/>
     }
 }
 
-@observer class Context extends React.Component {
+@observer
+class Context extends React.Component {
     @context(React.PropTypes.string)
-    someContext: string
+    someContext
     
     onClick = () => {
+        // this will cause mobx to kick in
         this.someContext += ' clicked'
     }
     
     render() {
         return <div>
             <button onClick={this.onClick}>Change</button>
+            <UseAndChangeContext/>
+        </div>
+    }
+}
+
+@observer
+class UseAndChangeContext extends React.Component {
+    @context(React.PropTypes.string, 'default if not inited')
+    someContext
+    
+    onClick = () => {
+        this.someContext = 'descendants see this'
+        
+        // At this point, this.someContext !== this.someContext !!!!
+        // this means that a component consuming a context will always
+        // get the value assigned by an ancestor, even after they set
+        // the context to some other value that only its descendant
+        // component instances will see. However, if ancestor did not
+        // set the context, or the context was not initialized by its 
+        // property, then this.someContext === this.someContext
+        
+        // NOTE: the above behavior allows for a component to 'override',
+        // or more precisely take ownership of some context, but only
+        // for the component instance's descendants. Further, once 
+        // overridden, changes by ancestor will no longer propagate to
+        // descendants of overridding instance (but overridding instance
+        // will still rerender if changed by ancestor). A future enhancement
+        // may enable using a mobx 'computed' to override, so that
+        // an overridden context can by a function of it's ancestor
+    }
+    
+    render() {
+        return <div>{
+            <div>{this.someContext}</div>
+            <button onClick={this.onClick}>Change</button>
             <UseContext/>
         </div>
     }
 }
 
-@observer class UseContext extends React.Component {
-    @context(React.PropTypes.string, 'default')
-    someContext: string
+@observer
+class UseContext extends React.Component {
+    @context(React.PropTypes.string, 'descendant default if not init')
+    someContext
     
     render() {
         return <div>{this.someContext}</div>

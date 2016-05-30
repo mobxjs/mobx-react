@@ -201,6 +201,30 @@
                 fn(data);
             });
         };
+        
+        var undef = {}['undef'];
+        function ensureUpdateFromProps(proto, name) {
+            var compProto = proto;
+            var clazz = proto.constructor;
+            if (!compProto._updateFromProps) {
+                compProto._updateFromProps = [];
+                compProto._componentWillReceiveProps = compProto.componentWillReceiveProps;
+                compProto.componentWillReceiveProps = function (nextProps) {
+                    var names = compProto._updateFromProps;
+                    var idx = names.length;
+                    while (idx--) {
+                        var name_1 = names[idx];
+                        if (nextProps[name_1] !== undef)
+                            this[name_1] = nextProps[name_1];
+                        else
+                            this[name_1] = clazz.defaultProps && clazz.defaultProps[name_1];
+                    }
+                    if (compProto._componentWillReceiveProps)
+                        compProto._componentWillReceiveProps.call(this, arguments[0], arguments[1]);
+                };
+            }
+            compProto._updateFromProps.push(name);
+        }
 
         function makeContextObservable(instance, name, nameInContext, value) {
             var obsCtx = instance._observableContext;
@@ -221,20 +245,30 @@
         function context(propType, defaultValue, nameInContext) {
             return function (proto, name) {
                 var clazz = proto.constructor;
-                if (!clazz.childContextTypes) clazz.childContextTypes = {};
-                if (!clazz.contextTypes) clazz.contextTypes = {};
-                if (!clazz.propTypes) clazz.propTypes = {};
+                if (!clazz.childContextTypes)
+                    clazz.childContextTypes = {};
+                if (!clazz.contextTypes)
+                    clazz.contextTypes = {};
+                if (!clazz.propTypes)
+                    clazz.propTypes = {};
                 nameInContext = nameInContext || name;
                 clazz.childContextTypes[nameInContext] = propType;
                 clazz.contextTypes[nameInContext] = propType;
                 clazz.propTypes[name] = propType;
+                if (defaultValue) {
+                    if (!clazz.defaultProps)
+                        clazz.defaultProps = {};
+                    clazz.defaultProps[name] = defaultValue;
+                }
+                ensureUpdateFromProps(proto, name);
                 Object.defineProperty(proto, name, {
                     enumerable: true,
                     configurable: true,
                     get: function () {
                         var obs = this.context[nameInContext];
-                        if (obs) return obs.get ? obs.get() : obs;
-                        makeContextObservable(this, name, nameInContext, this.props[name] || defaultValue);
+                        if (obs)
+                            return obs.get ? obs.get() : obs;
+                        makeContextObservable(this, name, nameInContext, this.props[name]);
                         return this[name];
                     },
                     set: function (value) {
@@ -242,10 +276,16 @@
                     }
                 });
                 var provider = proto;
-                if (provider.getChildContext) return;
+                if (provider.getChildContext)
+                    return;
                 provider.getChildContext = function () {
-                    for (var key in clazz.childContextTypes) var ign = this[key];
-                    return (provider.getChildContext = function () {return this._observableContext}).call(this);
+                    if (!this._observableContext) {
+                        for (var key in clazz.childContextTypes)
+                            var ign = this[key];
+                        if (!this._observableContext)
+                            this._observableContext = {};
+                    }
+                    return this._observableContext;
                 };
             };
         }
@@ -253,12 +293,35 @@
         function property(propType, defaultValue) {
             return function (proto, name) {
                 var clazz = proto.constructor;
-                if (!clazz.propTypes) clazz.propTypes = {};
+                if (!clazz.propTypes)
+                    clazz.propTypes = {};
                 clazz.propTypes[name] = propType;
                 if (defaultValue) {
-                    if (!clazz.defaultProps) clazz.defaultProps = {};
+                    if (!clazz.defaultProps)
+                        clazz.defaultProps = {};
                     clazz.defaultProps[name] = defaultValue;
                 }
+                Object.defineProperty(proto, name, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () { return this.props[name]; },
+                    set: function (value) { throw new Error('\'' + name + '\' is a property and cannot be set'); }
+                });
+            };
+        }
+
+        function state(propType, defaultValue) {
+            return function (proto, name) {
+                var clazz = proto.constructor;
+                if (!clazz.propTypes)
+                    clazz.propTypes = {};
+                clazz.propTypes[name] = propType;
+                if (defaultValue) {
+                    if (!clazz.defaultProps)
+                        clazz.defaultProps = {};
+                    clazz.defaultProps[name] = defaultValue;
+                }
+                ensureUpdateFromProps(proto, name);
                 Object.defineProperty(proto, name, {
                     enumerable: true,
                     configurable: true,
@@ -275,7 +338,6 @@
             };
         }
 
-
         return ({
             observer: observer,
             reactiveComponent: function() {
@@ -285,8 +347,9 @@
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,
             trackComponents: trackComponents,
-            context: context,
-            property: property
+            property: property,
+            state: state,
+            context: context
         });
     }
 
