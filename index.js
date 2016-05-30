@@ -203,27 +203,34 @@
         };
         
         var undef = {}['undef'];
-        function ensureUpdateFromProps(proto, name) {
+        function ensureUpdateFromProps(proto, name, nameInContext) {
+            if (nameInContext === void 0) { nameInContext = null; }
             var compProto = proto;
             var clazz = proto.constructor;
             if (!compProto._updateFromProps) {
                 compProto._updateFromProps = [];
+                compProto._contextProps = {};
                 compProto._componentWillReceiveProps = compProto.componentWillReceiveProps;
                 compProto.componentWillReceiveProps = function (nextProps) {
                     var names = compProto._updateFromProps;
                     var idx = names.length;
                     while (idx--) {
                         var name_1 = names[idx];
-                        if (nextProps[name_1] !== undef)
-                            this[name_1] = nextProps[name_1];
-                        else
-                            this[name_1] = clazz.defaultProps && clazz.defaultProps[name_1];
+                        var nameInContext_1 = compProto._contextProps[name_1];
+                        var obsCtx = this._observableContext;
+                        if (!nameInContext_1 || obsCtx && !obsCtx[nameInContext_1])
+                            if (nextProps[name_1] !== undef)
+                                this[name_1] = nextProps[name_1];
+                            else
+                                this[name_1] = clazz.defaultProps && clazz.defaultProps[name_1];
                     }
                     if (compProto._componentWillReceiveProps)
                         compProto._componentWillReceiveProps.call(this, arguments[0], arguments[1]);
                 };
             }
             compProto._updateFromProps.push(name);
+            if (nameInContext)
+                compProto._contextProps[name] = nameInContext;
         }
 
         function makeContextObservable(instance, name, nameInContext, value) {
@@ -260,7 +267,7 @@
                         clazz.defaultProps = {};
                     clazz.defaultProps[name] = defaultValue;
                 }
-                ensureUpdateFromProps(proto, name);
+                ensureUpdateFromProps(proto, name, nameInContext);
                 Object.defineProperty(proto, name, {
                     enumerable: true,
                     configurable: true,
