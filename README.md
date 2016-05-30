@@ -91,6 +91,47 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
+### context(propType: React.Validator<any>, defaultValue?: any, nameInContext?: string)
+
+A property decorator that simplifies using observable context. 
+
+```javascript
+import {context} from 'mobx-react'
+
+// ---- ES6 syntax
+
+class App extends React.Component {
+    render() {
+        return <Context someContext="prop init"/>
+    }
+}
+
+@observer class Context extends React.Component {
+    @context(React.PropTypes.string)
+    someContext: string
+    
+    onClick = () => {
+        this.someContext += ' clicked'
+    }
+    
+    render() {
+        return <div>
+            <button onClick={this.onClick}>Change</button>
+            <UseContext/>
+        </div>
+    }
+}
+
+@observer class UseContext extends React.Component {
+    @context(React.PropTypes.string, 'default')
+    someContext: string
+    
+    render() {
+        return <div>{this.someContext}</div>
+    }
+}
+```
+
 ## FAQ
 
 **Should I use `observer` for each component?**

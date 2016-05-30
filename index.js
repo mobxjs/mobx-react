@@ -202,6 +202,80 @@
             });
         };
 
+        function makeContextObservable(instance, name, nameInContext, value) {
+            var obsCtx = instance._observableContext;
+            if (!obsCtx) obsCtx = instance._observableContext = {};
+            var obs = obsCtx[nameInContext] = mobx.observable(value);
+            var ctxVal = instance.context && instance.context[nameInContext];
+            var getObs = ctxVal || obs;
+            Object.defineProperty(instance, name, {
+                enumerable: true,
+                configurable: true,
+                get: ctxVal && !ctxVal.get
+                    ? function () { return ctxVal; }
+                    : function () { return getObs.get(); },
+                set: function (value) { return obs.set(value); }
+            });
+        }
+
+        function context(propType, defaultValue, nameInContext) {
+            return function (proto, name) {
+                var clazz = proto.constructor;
+                if (!clazz.childContextTypes) clazz.childContextTypes = {};
+                if (!clazz.contextTypes) clazz.contextTypes = {};
+                if (!clazz.propTypes) clazz.propTypes = {};
+                nameInContext = nameInContext || name;
+                clazz.childContextTypes[nameInContext] = propType;
+                clazz.contextTypes[nameInContext] = propType;
+                clazz.propTypes[name] = propType;
+                Object.defineProperty(proto, name, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () {
+                        var obs = this.context[nameInContext];
+                        if (obs) return obs.get ? obs.get() : obs;
+                        makeContextObservable(this, name, nameInContext, this.props[name] || defaultValue);
+                        return this[name];
+                    },
+                    set: function (value) {
+                        makeContextObservable(this, name, nameInContext, this.props[name] || value);
+                    }
+                });
+                var provider = proto;
+                if (provider.getChildContext) return;
+                provider.getChildContext = function () {
+                    for (var key in clazz.childContextTypes) var ign = this[key];
+                    return (provider.getChildContext = function () {return this._observableContext}).call(this);
+                };
+            };
+        }
+
+        function property(propType, defaultValue) {
+            return function (proto, name) {
+                var clazz = proto.constructor;
+                if (!clazz.propTypes) clazz.propTypes = {};
+                clazz.propTypes[name] = propType;
+                if (defaultValue) {
+                    if (!clazz.defaultProps) clazz.defaultProps = {};
+                    clazz.defaultProps[name] = defaultValue;
+                }
+                Object.defineProperty(proto, name, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () {
+                        mobx.extendObservable(this, (_a = {}, _a[name] = this.props[name], _a));
+                        return this[name];
+                        var _a;
+                    },
+                    set: function (value) {
+                        mobx.extendObservable(this, (_a = {}, _a[name] = value, _a));
+                        var _a;
+                    }
+                });
+            };
+        }
+
+
         return ({
             observer: observer,
             reactiveComponent: function() {
@@ -210,7 +284,9 @@
             },
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,
-            trackComponents: trackComponents
+            trackComponents: trackComponents,
+            context: context,
+            property: property
         });
     }
 
