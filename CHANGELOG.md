@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.2.1
+
+* Added typescript typings form `mobx-react/native` and `mobx-react/custom`
+
 ### 3.2.0
 
 * Added support for react-native 0.25 and higher. By @danieldunderfelt.
