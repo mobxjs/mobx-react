@@ -148,7 +148,12 @@
         function observer(componentClass) {
             // If it is function but doesn't seem to be a react class constructor,
             // wrap it to a react class automatically
-            if (typeof componentClass === "function" && !componentClass.prototype.render && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)) {
+            if (
+                typeof componentClass === "function" &&
+                (!componentClass.prototype || !componentClass.prototype.render) &&
+                !componentClass.isReactClass && 
+                !React.Component.isPrototypeOf(componentClass)
+            ) {
                 return observer(React.createClass({
                     displayName:     componentClass.displayName || componentClass.name,
                     propTypes:       componentClass.propTypes,
