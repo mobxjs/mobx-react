@@ -1,9 +1,13 @@
 # MobX-React Changelog
 
-### 3.2.1
+### 3.3.1
 
 * Added typescript typings form `mobx-react/native` and `mobx-react/custom`
 * Fixed #63: error when using stateless function components when using babel and typescript
+
+### 3.3.0 
+
+* Upgraded to MobX 2.2.0
 
 ### 3.2.0
 
