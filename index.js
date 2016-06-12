@@ -206,6 +206,149 @@
                 fn(data);
             });
         };
+        
+        var undef = {}['undef'];
+        function ensureUpdateFromProps(proto, name, nameInContext) {
+            if (nameInContext === void 0) { nameInContext = null; }
+            var compProto = proto;
+            var clazz = proto.constructor;
+            if (!compProto._updateFromProps) {
+                compProto._updateFromProps = [];
+                compProto._contextProps = {};
+                compProto._componentWillReceiveProps = compProto.componentWillReceiveProps;
+                compProto.componentWillReceiveProps = function (nextProps) {
+                    var names = compProto._updateFromProps;
+                    var idx = names.length;
+                    while (idx--) {
+                        var name_1 = names[idx];
+                        var nameInContext_1 = compProto._contextProps[name_1];
+                        var obsCtx = this._observableContext;
+                        if (!nameInContext_1 || obsCtx && !obsCtx[nameInContext_1])
+                            if (nextProps[name_1] !== undef)
+                                this[name_1] = nextProps[name_1];
+                            else
+                                this[name_1] = clazz.defaultProps && clazz.defaultProps[name_1];
+                    }
+                    if (compProto._componentWillReceiveProps)
+                        compProto._componentWillReceiveProps.call(this, arguments[0], arguments[1]);
+                };
+            }
+            compProto._updateFromProps.push(name);
+            if (nameInContext)
+                compProto._contextProps[name] = nameInContext;
+        }
+
+        function makeContextObservable(instance, name, nameInContext, value) {
+            var obsCtx = instance._observableContext;
+            if (!obsCtx) obsCtx = instance._observableContext = {};
+            var obs = obsCtx[nameInContext] = mobx.observable(value);
+            var ctxVal = instance.context && instance.context[nameInContext];
+            var getObs = ctxVal || obs;
+            Object.defineProperty(instance, name, {
+                enumerable: true,
+                configurable: true,
+                get: ctxVal && !ctxVal.get
+                    ? function () { return ctxVal; }
+                    : function () { return getObs.get(); },
+                set: function (value) { return obs.set(value); }
+            });
+        }
+
+        function context(propType, defaultValue, nameInContext) {
+            return function (proto, name) {
+                var clazz = proto.constructor;
+                if (!clazz.childContextTypes)
+                    clazz.childContextTypes = {};
+                if (!clazz.contextTypes)
+                    clazz.contextTypes = {};
+                if (!clazz.propTypes)
+                    clazz.propTypes = {};
+                nameInContext = nameInContext || name;
+                clazz.childContextTypes[nameInContext] = propType;
+                clazz.contextTypes[nameInContext] = propType;
+                clazz.propTypes[name] = propType;
+                if (defaultValue) {
+                    if (!clazz.defaultProps)
+                        clazz.defaultProps = {};
+                    clazz.defaultProps[name] = defaultValue;
+                }
+                ensureUpdateFromProps(proto, name, nameInContext);
+                Object.defineProperty(proto, name, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () {
+                        var obs = this.context[nameInContext];
+                        if (obs)
+                            return obs.get ? obs.get() : obs;
+                        makeContextObservable(this, name, nameInContext, this.props[name]);
+                        return this[name];
+                    },
+                    set: function (value) {
+                        makeContextObservable(this, name, nameInContext, this.props[name] || value);
+                    }
+                });
+                var provider = proto;
+                if (provider.getChildContext)
+                    return;
+                provider.getChildContext = function () {
+                    if (!this._observableContext) {
+                        for (var key in clazz.childContextTypes)
+                            var ign = this[key];
+                        if (!this._observableContext)
+                            this._observableContext = {};
+                    }
+                    return this._observableContext;
+                };
+            };
+        }
+
+        function property(propType, defaultValue) {
+            return function (proto, name) {
+                var clazz = proto.constructor;
+                if (!clazz.propTypes)
+                    clazz.propTypes = {};
+                clazz.propTypes[name] = propType;
+                if (defaultValue) {
+                    if (!clazz.defaultProps)
+                        clazz.defaultProps = {};
+                    clazz.defaultProps[name] = defaultValue;
+                }
+                Object.defineProperty(proto, name, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () { return this.props[name]; },
+                    set: function (value) { throw new Error('\'' + name + '\' is a property and cannot be set'); }
+                });
+            };
+        }
+
+        function state(propType, defaultValue) {
+            return function (proto, name) {
+                var clazz = proto.constructor;
+                if (!clazz.propTypes)
+                    clazz.propTypes = {};
+                clazz.propTypes[name] = propType;
+                if (defaultValue) {
+                    if (!clazz.defaultProps)
+                        clazz.defaultProps = {};
+                    clazz.defaultProps[name] = defaultValue;
+                }
+                ensureUpdateFromProps(proto, name);
+                Object.defineProperty(proto, name, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () {
+                        mobx.extendObservable(this, (_a = {}, _a[name] = this.props[name], _a));
+                        return this[name];
+                        var _a;
+                    },
+                    set: function (value) {
+                        mobx.extendObservable(this, (_a = {}, _a[name] = value, _a));
+                        var _a;
+                    }
+                });
+            };
+        }
 
         return ({
             observer: observer,
@@ -215,7 +358,10 @@
             },
             renderReporter: renderReporter,
             componentByNodeRegistery: componentByNodeRegistery,
-            trackComponents: trackComponents
+            trackComponents: trackComponents,
+            property: property,
+            state: state,
+            context: context
         });
     }
 
