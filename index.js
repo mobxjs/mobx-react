@@ -132,9 +132,9 @@
             }
         }
 
-        function patch(target, funcName) {
+        function patch(target, funcName, func) {
             var base = target[funcName];
-            var mixinFunc = reactiveMixin[funcName];
+            var mixinFunc = func || reactiveMixin[funcName];
             if (!base) {
                 target[funcName] = mixinFunc;
             } else {
@@ -145,7 +145,22 @@
             }
         }
 
-        function observer(componentClass) {
+        function observer(arg1, arg2) {
+            var componentClass, stores;
+            if (Array.isArray(arg1)) {
+                stores = arg1;
+                if (!arg2) {
+                    // invoked as decorator
+                    return function(componentClass) {
+                        return observer(stores, componentClass);
+                    }
+                } else {
+                    componentClass = arg2;
+                }   
+            } else {
+                componentClass = arg1;
+                stores = [];
+            }
             // If it is function but doesn't seem to be a react class constructor,
             // wrap it to a react class automatically
             if (
@@ -165,6 +180,7 @@
 
             if (!componentClass)
                 throw new Error("Please pass a valid component to 'observer'");
+
             var target = componentClass.prototype || componentClass;
 
             [
@@ -176,11 +192,62 @@
                 patch(target, funcName)
             });
 
+            // mix in stores
+            if (stores.length) {
+                if (!componentClass.contextTypes)
+                    componentClass.contextTypes = {};
+                componentClass.contextTypes.mobxStores = PropTypes.object.isRequired;
+                patch(target, "componentWillMount", function() {
+                    // Throw if no baSeStores!
+                    this.stores = this.context.mobxStores;
+
+                    // var baseStores = this.context.mobxStores;
+                    // // Throw if no baseStores!
+                    // console.dir(stores);
+                    // console.dir(baseStores);
+                    // stores.forEach(function(storeName) {
+                    //     if (!baseStores && !(storeName in baseStores))
+                    //         console.error("@observer: store '" + storeName + " is not available!");
+                    //     if (!this.stores)
+                    //         this.stores = {};
+                    //     this.stores[storeName] = baseStores[storeName];
+                    // }, this);
+                });
+            }
+
             if (!target.shouldComponentUpdate)
                 target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
             componentClass.isMobXReactObserver = true;
             return componentClass;
         }
+
+        var Provider = React.createClass({
+            displayName: "Provider",
+
+            render: function() {
+                return React.Children.only(this.props.children);
+            },
+
+            getChildContext: function () {
+                var stores = {};
+                // inherit stores
+                var baseStores = this.context.mobxStores;
+                if (baseStores) for (var key in baseStores) {
+                    stores[key] = baseStores[key];
+                }
+                // add own stores
+                for (var key in this.props)
+                    if (key !== "children" && key !== "key")
+                        stores[key] = this.props[key];
+                return {
+                    mobxStores: stores
+                };
+            }
+        });
+
+        var PropTypes = React.PropTypes;
+        Provider.contextTypes = { mobxStores: PropTypes.object };
+        Provider.childContextTypes = { mobxStores: PropTypes.object.isRequired };
 
         function trackComponents() {
             if (typeof WeakMap === "undefined")
@@ -209,6 +276,7 @@
 
         return ({
             observer: observer,
+            Provider: Provider,
             reactiveComponent: function() {
                 console.warn("[mobx-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
                 return observer.apply(null, arguments);

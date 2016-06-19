@@ -3,6 +3,7 @@
  */
 import React = require('react');
 
+// TODO: add stores / Provider
 export function observer<P>(clazz: React.StatelessComponent<P>): React.ClassicComponentClass<P>;
 export function observer<P>(renderFunction: (props: P) => React.ReactElement<any>): React.ClassicComponentClass<P>;
 export function observer<P>(clazz: React.ClassicComponentClass<P>): React.ClassicComponentClass<P>;
