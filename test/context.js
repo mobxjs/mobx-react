@@ -8,11 +8,9 @@ var test = require('tape');
 var e = React.createElement;
 
 test('basic context', t => {
-    debugger;
-
     var C = observer(["foo"], React.createClass({
         render: function() {
-            return e("div", {}, "context:" + this.stores.foo);
+            return e("div", {}, "context:" + this.props.foo);
         }
     }));
 

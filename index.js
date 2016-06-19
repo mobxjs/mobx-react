@@ -132,9 +132,9 @@
             }
         }
 
-        function patch(target, funcName, func) {
+        function patch(target, funcName) {
             var base = target[funcName];
-            var mixinFunc = func || reactiveMixin[funcName];
+            var mixinFunc = reactiveMixin[funcName];
             if (!base) {
                 target[funcName] = mixinFunc;
             } else {
@@ -146,21 +146,18 @@
         }
 
         function observer(arg1, arg2) {
-            var componentClass, stores;
             if (Array.isArray(arg1)) {
-                stores = arg1;
+                // component needs stores
                 if (!arg2) {
                     // invoked as decorator
                     return function(componentClass) {
                         return observer(stores, componentClass);
                     }
                 } else {
-                    componentClass = arg2;
+                    return createStoreInjector(arg1, observer(arg2));
                 }   
-            } else {
-                componentClass = arg1;
-                stores = [];
             }
+            var componentClass = arg1;
             // If it is function but doesn't seem to be a react class constructor,
             // wrap it to a react class automatically
             if (
@@ -191,29 +188,6 @@
             ].forEach(function(funcName) {
                 patch(target, funcName)
             });
-
-            // mix in stores
-            if (stores.length) {
-                if (!componentClass.contextTypes)
-                    componentClass.contextTypes = {};
-                componentClass.contextTypes.mobxStores = PropTypes.object.isRequired;
-                patch(target, "componentWillMount", function() {
-                    // Throw if no baSeStores!
-                    this.stores = this.context.mobxStores;
-
-                    // var baseStores = this.context.mobxStores;
-                    // // Throw if no baseStores!
-                    // console.dir(stores);
-                    // console.dir(baseStores);
-                    // stores.forEach(function(storeName) {
-                    //     if (!baseStores && !(storeName in baseStores))
-                    //         console.error("@observer: store '" + storeName + " is not available!");
-                    //     if (!this.stores)
-                    //         this.stores = {};
-                    //     this.stores[storeName] = baseStores[storeName];
-                    // }, this);
-                });
-            }
 
             if (!target.shouldComponentUpdate)
                 target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
@@ -248,6 +222,29 @@
         var PropTypes = React.PropTypes;
         Provider.contextTypes = { mobxStores: PropTypes.object };
         Provider.childContextTypes = { mobxStores: PropTypes.object.isRequired };
+
+        function createStoreInjector(stores, component) {
+            var Injector = React.createClass({
+                displayName: "MobXStoreInjector",
+                render: function() {
+                    var newProps = {};
+                    for (var key in this.props)
+                        newProps = this.props[key];
+                    var baseStores = this.context.mobxStores;
+                    if (!baseStores)
+                        throw new Error("Could not find any provided stores. Make sure the component is wrapped by a Provider component");
+                    stores.forEach(function(storeName) {
+                        if (!(storeName in baseStores))
+                            throw new Error("@observer: store '" + storeName + " is not available! Make sure it is provided by some Provider");
+                        if (!(storeName in newProps)) // prefer explicit props
+                            newProps[storeName] = baseStores[storeName];
+                    }, this);
+                    return React.createElement(component, newProps);
+                }
+            });
+            Injector.contextTypes = { mobxStores: PropTypes.object.isRequired };
+            return Injector;
+        }
 
         function trackComponents() {
             if (typeof WeakMap === "undefined")
