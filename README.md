@@ -91,6 +91,56 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
+### `Provider`
+
+`Provider` is a component that can stores (or other stuff) on React's context.
+This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
+By passing a string array as first argument to `observer`, observer will pick up the named stores from the context and make them available as props of de decorated component:
+
+```javascript
+@observer(["color"])
+class Button extends React.Component {
+  render() {
+    return (
+      <button style={{background: this.props.color}}>
+        {this.props.children}
+      </button>
+    );
+  }
+}
+
+class Message extends React.Component {
+  render() {
+    return (
+      <div>
+        {this.props.text} <Button>Delete</Button>
+      </div>
+    );
+  }
+}
+
+class MessageList extends React.Component {
+  getChildContext() {
+    return {color: "purple"};
+  }
+
+  render() {
+    const children = this.props.messages.map((message) =>
+      <Message text={message.text} />
+    );
+    return <Provider color="red">
+        <div>
+            {children}
+        </div>
+    </Provider>;
+  }
+}
+```
+
+Some note about passing stores around:
+* If a component ask a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
+* Values provided through `Provider` should be final, to avoid issues like 
+
 ## FAQ
 
 **Should I use `observer` for each component?**

@@ -53,3 +53,29 @@ React.createElement(observer(T7), { pizza: 4 });
 
 
 ReactDOM.render(<T5 />, document.body);
+
+/// with stores
+@observer(["store1", "store2"])
+class T8 extends Component<{ pizza: number}, {}> {
+	render() {
+		return <div>{this.props.pizza}</div>;
+	}
+}
+
+const T9 = observer(["stores"], React.createClass({
+	getDefaultProps() {
+		return { cake: 7 };
+	},
+	render() {
+		return <div><T1 pizza = {this.props.cake} /></div>;
+	}
+}));
+
+const T10 = observer(["stores"], (props: { hamburger: number }) => {
+	return <T2 cake={this.props.hamburger} />;
+});
+
+React.createElement(observer(T8), { pizza: 4 });
+
+
+ReactDOM.render(<T10 hamburger={3} />, document.body);
