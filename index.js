@@ -263,7 +263,7 @@
                 if (Object.keys(nextProps).length !== Object.keys(this.props).length)
                     console.warn("MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children");
                 for (var key in nextProps)
-                    if (this.props[key] !== nextProps(key))
+                    if (this.props[key] !== nextProps[key])
                         console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
             }
         });
