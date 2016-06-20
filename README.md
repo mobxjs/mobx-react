@@ -91,7 +91,9 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
-### `Provider`
+### `Provider` (Experimental)
+
+_This feature is marked as experimental as the exact api might change in a next minor, pending any community feedback_.
 
 `Provider` is a component that can stores (or other stuff) on React's context.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
@@ -139,7 +141,7 @@ class MessageList extends React.Component {
 
 Some note about passing stores around:
 * If a component ask a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
-* Values provided through `Provider` should be final, to avoid issues like 
+* Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks.
 
 ## FAQ
 
