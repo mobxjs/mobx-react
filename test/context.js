@@ -57,9 +57,9 @@ test('props override context', t => {
 
 
 test('overriding stores is supported', t => {
-    var C = observer(["foo"], React.createClass({
+    var C = observer(["foo", "bar"], React.createClass({
         render: function() {
-            return e("div", {}, "context:" + this.props.foo);
+            return e("div", {}, "context:" + this.props.foo + this.props.bar);
         }
     }));
 
@@ -71,7 +71,7 @@ test('overriding stores is supported', t => {
 
     var A = React.createClass({
         render: function() {
-            return e(Provider, { foo: "bar" },
+            return e(Provider, { foo: "bar", bar: 1337 },
                 e("div", {},
                     e("span", {},
                         e(B, {})
@@ -85,8 +85,8 @@ test('overriding stores is supported', t => {
     })
 
     const wrapper = mount(e(A));
-    t.equal(wrapper.find("span").text(), "context:bar");
-    t.equal(wrapper.find("section").text(), "context:42");
+    t.equal(wrapper.find("span").text(), "context:bar1337");
+    t.equal(wrapper.find("section").text(), "context:421337");
     t.end();
 })
 
@@ -168,7 +168,7 @@ test('warning is printed when changing stores', t => {
     t.equal(wrapper.find("span").text(), "42");
     t.equal(wrapper.find("div").text(), "context:3");
 
-    t.equal(msg, "MobX Provider: Provided store \'children\' has changed. Please avoid replacing stores as the change might not propagate to all children");
+    t.equal(msg, "MobX Provider: Provided store \'foo\' has changed. Please avoid replacing stores as the change might not propagate to all children");
 
     console.warn = baseWarn;
     t.end();

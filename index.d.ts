@@ -15,3 +15,7 @@ export function observer<P>(stores: string[], renderFunction: (props: P) => Reac
 export function observer<P>(stores: string[], clazz: React.ClassicComponentClass<P>): React.ClassicComponentClass<P>;
 export function observer<P>(stores: string[], clazz: React.ComponentClass<P>): React.ComponentClass<P>;
 export function observer(stores: string[]): <TFunction extends React.ComponentClass<any>>(target: TFunction) => TFunction; // decorator signature
+
+export class Provider extends React.Component<any, {}> {
+
+}

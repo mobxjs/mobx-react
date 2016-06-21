@@ -62,6 +62,8 @@
         /**
          * Utilities
          */
+        var specialReactKeys = { children: true, key: true, ref: true };
+
         function patch(target, funcName) {
             var base = target[funcName];
             var mixinFunc = reactiveMixin[funcName];
@@ -189,7 +191,7 @@
                 if (!arg2) {
                     // invoked as decorator
                     return function(componentClass) {
-                        return observer(stores, componentClass);
+                        return observer(arg1, componentClass);
                     }
                 } else {
                     return createStoreInjector(arg1, observer(arg2));
@@ -251,7 +253,7 @@
                 }
                 // add own stores
                 for (var key in this.props)
-                    if (key !== "children" && key !== "key" && key != "ref")
+                    if (!specialReactKeys[key])
                         stores[key] = this.props[key];
                 return {
                     mobxStores: stores
@@ -263,7 +265,7 @@
                 if (Object.keys(nextProps).length !== Object.keys(this.props).length)
                     console.warn("MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children");
                 for (var key in nextProps)
-                    if (this.props[key] !== nextProps[key])
+                    if (!specialReactKeys[key] && this.props[key] !== nextProps[key])
                         console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
             }
         });
@@ -284,7 +286,7 @@
                         newProps[key] = this.props[key];
                     var baseStores = this.context.mobxStores;
                     stores.forEach(function(storeName) {
-                        if (storeName in newProps) // prefer explicit props
+                        if (storeName in newProps) // prefer props over stores
                             return;
                         if (!(storeName in baseStores))
                             throw new Error("MobX observer: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");

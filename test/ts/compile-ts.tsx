@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Component} from 'react'; 
-import {observer} from '../../';
+import {observer, Provider} from '../../';
 
 @observer
 class T1 extends Component<{ pizza: number}, {}> {
@@ -76,6 +76,14 @@ const T10 = observer(["stores"], (props: { hamburger: number }) => {
 });
 
 React.createElement(observer(T8), { pizza: 4 });
+
+class ProviderTest extends Component<any, any> {
+    render() {
+        return <Provider foo={32}>
+            <div>hi</div>
+        </Provider>;
+    }
+}
 
 
 ReactDOM.render(<T10 hamburger={3} />, document.body);
