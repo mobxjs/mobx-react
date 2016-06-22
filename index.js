@@ -5,11 +5,15 @@
         if (!React)
             throw new Error("mobx-react requires React to be available");
 
+        /**
+         * dev tool support
+         */
         var isDevtoolsEnabled = false;
 
         // WeakMap<Node, Object>;
         var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
         var renderReporter = new EventEmitter();
+
         function findDOMNode(component) {
             if (ReactDOM)
                 return ReactDOM.findDOMNode(component);
@@ -30,6 +34,52 @@
             });
         }
 
+        function trackComponents() {
+            if (typeof WeakMap === "undefined")
+                throw new Error("[mobx-react] tracking components is not supported in this browser.");
+            if (!isDevtoolsEnabled)
+                isDevtoolsEnabled = true;
+        }
+
+        function EventEmitter() {
+            this.listeners = [];
+        };
+        EventEmitter.prototype.on = function (cb) {
+            this.listeners.push(cb);
+            var self = this;
+            return function() {
+                var idx = self.listeners.indexOf(cb);
+                if (idx !== -1)
+                    self.listeners.splice(idx, 1);
+            };
+        };
+        EventEmitter.prototype.emit = function(data) {
+            this.listeners.forEach(function (fn) {
+                fn(data);
+            });
+        };
+
+        /**
+         * Utilities
+         */
+        var specialReactKeys = { children: true, key: true, ref: true };
+
+        function patch(target, funcName) {
+            var base = target[funcName];
+            var mixinFunc = reactiveMixin[funcName];
+            if (!base) {
+                target[funcName] = mixinFunc;
+            } else {
+                target[funcName] = function() {
+                    base.apply(this, arguments);
+                    mixinFunc.apply(this, arguments);
+                }
+            }
+        }
+
+        /**
+         * ReactiveMixin
+         */
         var reactiveMixin = {
             componentWillMount: function() {
                 // Generate friendly name for debugging
@@ -99,8 +149,6 @@
             },
 
             shouldComponentUpdate: function(nextProps, nextState) {
-                // TODO: if context changed, return true.., see #18
-                
                 // if props or state did change, but a render was scheduled already, no additional render needs to be scheduled
                 if (this.render.$mobx && this.render.$mobx.isScheduled() === true)
                     return false;
@@ -132,20 +180,26 @@
             }
         }
 
-        function patch(target, funcName) {
-            var base = target[funcName];
-            var mixinFunc = reactiveMixin[funcName];
-            if (!base) {
-                target[funcName] = mixinFunc;
-            } else {
-                target[funcName] = function() {
-                    base.apply(this, arguments);
-                    mixinFunc.apply(this, arguments);
-                }
+        /**
+         * Observer function / decorator
+         */
+        function observer(arg1, arg2) {
+            if (typeof arg1 === "string")
+                throw new Error("Store names should be provided as array");
+            if (Array.isArray(arg1)) {
+                // component needs stores
+                if (!arg2) {
+                    // invoked as decorator
+                    return function(componentClass) {
+                        return observer(arg1, componentClass);
+                    }
+                } else {
+                    return createStoreInjector(arg1, observer(arg2));
+                }   
             }
-        }
+            var componentClass = arg1;
 
-        function observer(componentClass) {
+            // Stateless function component:
             // If it is function but doesn't seem to be a react class constructor,
             // wrap it to a react class automatically
             if (
@@ -166,7 +220,6 @@
             if (!componentClass)
                 throw new Error("Please pass a valid component to 'observer'");
             var target = componentClass.prototype || componentClass;
-
             [
                 "componentWillMount",
                 "componentWillUnmount",
@@ -175,40 +228,83 @@
             ].forEach(function(funcName) {
                 patch(target, funcName)
             });
-
             if (!target.shouldComponentUpdate)
                 target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
             componentClass.isMobXReactObserver = true;
             return componentClass;
         }
 
-        function trackComponents() {
-            if (typeof WeakMap === "undefined")
-                throw new Error("[mobx-react] tracking components is not supported in this browser.");
-            if (!isDevtoolsEnabled)
-                isDevtoolsEnabled = true;
+        /**
+         * Store provider
+         */
+        var Provider = React.createClass({
+            displayName: "Provider",
+
+            render: function() {
+                return React.Children.only(this.props.children);
+            },
+
+            getChildContext: function () {
+                var stores = {};
+                // inherit stores
+                var baseStores = this.context.mobxStores;
+                if (baseStores) for (var key in baseStores) {
+                    stores[key] = baseStores[key];
+                }
+                // add own stores
+                for (var key in this.props)
+                    if (!specialReactKeys[key])
+                        stores[key] = this.props[key];
+                return {
+                    mobxStores: stores
+                };
+            },
+
+            componentWillReceiveProps: function(nextProps) {
+                // Maybe this warning is to aggressive?
+                if (Object.keys(nextProps).length !== Object.keys(this.props).length)
+                    console.warn("MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children");
+                for (var key in nextProps)
+                    if (!specialReactKeys[key] && this.props[key] !== nextProps[key])
+                        console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
+            }
+        });
+
+        var PropTypes = React.PropTypes;
+        Provider.contextTypes = { mobxStores: PropTypes.object };
+        Provider.childContextTypes = { mobxStores: PropTypes.object.isRequired };
+
+        /**
+         * Store Injection
+         */
+        function createStoreInjector(stores, component) {
+            var Injector = React.createClass({
+                displayName: "MobXStoreInjector",
+                render: function() {
+                    var newProps = {};
+                    for (var key in this.props)
+                        newProps[key] = this.props[key];
+                    var baseStores = this.context.mobxStores;
+                    stores.forEach(function(storeName) {
+                        if (storeName in newProps) // prefer props over stores
+                            return;
+                        if (!(storeName in baseStores))
+                            throw new Error("MobX observer: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
+                        newProps[storeName] = baseStores[storeName];
+                    }, this);
+                    return React.createElement(component, newProps);
+                }
+            });
+            Injector.contextTypes = { mobxStores: PropTypes.object };
+            return Injector;
         }
 
-        function EventEmitter() {
-            this.listeners = [];
-        };
-        EventEmitter.prototype.on = function (cb) {
-            this.listeners.push(cb);
-            var self = this;
-            return function() {
-                var idx = self.listeners.indexOf(cb);
-                if (idx !== -1)
-                    self.listeners.splice(idx, 1);
-            };
-        };
-        EventEmitter.prototype.emit = function(data) {
-            this.listeners.forEach(function (fn) {
-                fn(data);
-            });
-        };
-
+        /**
+         * Export
+         */
         return ({
             observer: observer,
+            Provider: Provider,
             reactiveComponent: function() {
                 console.warn("[mobx-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
                 return observer.apply(null, arguments);
@@ -219,7 +315,9 @@
         });
     }
 
-    // UMD
+    /**
+     * UMD
+     */
     if (typeof exports === 'object') {
         module.exports = mrFactory(require('mobx'), require('react'), require('react-dom'));
     } else if (typeof define === 'function' && define.amd) {

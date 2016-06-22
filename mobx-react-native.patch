@@ -7,11 +7,11 @@
 -            throw new Error("mobx-react requires React to be available");
 +            throw new Error("mobx-react/native requires React Native to be available");
 
-         var isDevtoolsEnabled = false;
-
-@@ -194,10 +194,10 @@
-
-     // UMD
+         /**
+          * dev tool support
+@@ -320,10 +320,10 @@
+      * UMD
+      */
      if (typeof exports === 'object') {
 -        module.exports = mrFactory(require('mobx'), require('react'), require('react-dom'));
 +        module.exports = mrFactory(require('mobx'), require('react'));

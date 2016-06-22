@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.4.0
+
+* Introduced context
+
 ### 3.3.1
 
 * Added typescript typings form `mobx-react/native` and `mobx-react/custom`
