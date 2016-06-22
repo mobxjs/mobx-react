@@ -18,7 +18,7 @@
 
         function reportRendering(component) {
             var node = findDOMNode(component);
-            if (node)
+            if (node && componentByNodeRegistery)
                 componentByNodeRegistery.set(node, component);
 
             renderReporter.emit({
@@ -77,7 +77,7 @@
                 this.render.$mobx && this.render.$mobx.dispose();
                 if (isDevtoolsEnabled) {
                     var node = findDOMNode(this);
-                    if (node) {
+                    if (node && componentByNodeRegistery) {
                         componentByNodeRegistery.delete(node);
                     }
                     renderReporter.emit({
