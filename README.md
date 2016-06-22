@@ -99,6 +99,8 @@ _This feature is marked as experimental as the exact api might change in a next 
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
 By passing a string array as first argument to `observer`, observer will pick up the named stores from the context and make them available as props of the decorated component:
 
+Example (based on the official [context docs](https://facebook.github.io/react/docs/context.html#passing-info-automatically-through-a-tree)):
+
 ```javascript
 @observer(["color"])
 class Button extends React.Component {
@@ -122,10 +124,6 @@ class Message extends React.Component {
 }
 
 class MessageList extends React.Component {
-  getChildContext() {
-    return {color: "purple"};
-  }
-
   render() {
     const children = this.props.messages.map((message) =>
       <Message text={message.text} />
