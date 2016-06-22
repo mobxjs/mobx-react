@@ -295,7 +295,7 @@
                     return React.createElement(component, newProps);
                 }
             });
-            Injector.contextTypes = { mobxStores: PropTypes.object.isRequired };
+            Injector.contextTypes = { mobxStores: PropTypes.object };
             return Injector;
         }
 

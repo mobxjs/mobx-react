@@ -95,9 +95,9 @@ import {observer} from "mobx-react";
 
 _This feature is marked as experimental as the exact api might change in a next minor, pending any community feedback_.
 
-`Provider` is a component that can stores (or other stuff) on React's context.
+`Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
-By passing a string array as first argument to `observer`, observer will pick up the named stores from the context and make them available as props of de decorated component:
+By passing a string array as first argument to `observer`, observer will pick up the named stores from the context and make them available as props of the decorated component:
 
 ```javascript
 @observer(["color"])
