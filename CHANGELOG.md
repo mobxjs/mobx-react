@@ -2,7 +2,8 @@
 
 ### 3.4.0
 
-* Introduced context
+* Introduced `Provider` / context support (#53 / MobX #300)
+* Fixed issues when using devtools with IE. #66 (By @pvasek)
 
 ### 3.3.1
 
