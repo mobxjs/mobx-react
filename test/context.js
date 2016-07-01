@@ -174,7 +174,7 @@ test('warning is printed when changing stores', t => {
     t.end();
 })
 
-test('statics are copied over to the Injector wrapped component', t = > {
+test('statics are copied over to the Injector wrapped component', t => {
 
 	var C = observer(["foo"], React.createClass({
 		statics: {
