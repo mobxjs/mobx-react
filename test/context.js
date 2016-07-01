@@ -173,3 +173,33 @@ test('warning is printed when changing stores', t => {
     console.warn = baseWarn;
     t.end();
 })
+
+test('statics are copied over to the Injector wrapped component', t = > {
+
+	var C = observer(["foo"], React.createClass({
+		statics: {
+			testStaticFunc: function (param) {
+				return param + 1;
+			}
+		},
+		render: function () {
+			return e("div", {}, "context:" + this.props.foo);
+		}
+	}));
+
+	var B = React.createClass({
+		render: function () {
+			return e(C, {});
+		}
+	});
+
+	var A = React.createClass({
+		render: function () {
+			return e(Provider, {foo: "bar"}, e(B, {}))
+		}
+	})
+
+	const wrapper = mount(e(A));
+	t.equal(C.testStaticFunc(1), 2, 'Run a simple static function on an Injector wrapped component.');
+	t.end();
+})
