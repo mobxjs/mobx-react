@@ -19,3 +19,12 @@ export function observer(stores: string[]): <TFunction extends React.ComponentCl
 export class Provider extends React.Component<any, {}> {
 
 }
+
+// renderReporter for tracking renders
+export var renderReporter: RenderReporter;
+
+export interface RenderReporter {
+  on(eventName: string, handler: (data: any) => void)
+  emit(eventName: string, data: any)
+}
+
