@@ -24,7 +24,7 @@ export class Provider extends React.Component<any, {}> {
 export var renderReporter: RenderReporter;
 
 export interface RenderReporter {
-  on(eventName: string, handler: (data: any) => void) => void
-  emit(eventName: string, data: any) => void
+  on(eventName: string, handler: (data: any) => void) => void;
+  emit(eventName: string, data: any) => void;
 }
 
