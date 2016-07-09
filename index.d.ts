@@ -23,7 +23,7 @@ export class Provider extends React.Component<any, {}> {
 /**
  * Enable dev tool support, makes sure that renderReport emits events.
  */
-export function trackComponents();
+export function trackComponents():void;
 
 export const renderReporter: RenderReporter;
 
