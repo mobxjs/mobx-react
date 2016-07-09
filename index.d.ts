@@ -1,7 +1,7 @@
 /**
  * Turns a React component or stateless render function into a reactive component.
  */
-import React = require('react');
+import React = require("react");
 
 export function observer<P>(clazz: React.StatelessComponent<P>): React.ClassicComponentClass<P>;
 export function observer<P>(renderFunction: (props: P) => React.ReactElement<any>): React.ClassicComponentClass<P>;
@@ -20,11 +20,26 @@ export class Provider extends React.Component<any, {}> {
 
 }
 
-// renderReporter for tracking renders
-export var renderReporter: RenderReporter;
+/**
+ * Enable dev tool support, makes sure that renderReport emits events.
+ */
+export function trackComponents();
+
+export const renderReporter: RenderReporter;
 
 export interface RenderReporter {
-  on(eventName: string, handler: (data: any) => void): void;
-  emit(eventName: string, data: any): void;
+  on(handler: (data: IRenderEvent) => void): void;
 }
 
+export interface IRenderEvent {
+    event: "render" | "destroy";
+    renderTime?: number;
+    totalTime?: number;
+    component: any; // Component instance
+    node: any; // DOMNode
+}
+
+/**
+ * WeakMap DOMNode -> Component instance
+ */
+export const componentByNodeRegistery: any;
