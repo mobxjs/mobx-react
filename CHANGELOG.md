@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+### 3.4.1
+
+* Fixed #76: error when no stores are provided through context
+* Added typings for devTools related features (@benjamingr).
+* Added MobX specific propTypes (@mattruby)
+
 ### 3.4.0
 
 * Introduced `Provider` / context support (#53 / MobX #300)

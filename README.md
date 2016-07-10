@@ -91,6 +91,17 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
+### `propTypes`
+
+MobX-react provides the following additional `propTypes` which can be used to validate against MobX structures:
+
+* `observableArray`
+* `observableMap`
+* `observableObject`
+* `arrayOrObservableArray`
+* `objectOrObservableObject`
+
+
 ### `Provider` (Experimental)
 
 _This feature is marked as experimental as the exact api might change in a next minor, pending any community feedback_.
