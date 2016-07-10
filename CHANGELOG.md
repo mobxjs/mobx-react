@@ -1,5 +1,19 @@
 # MobX-React Changelog
 
+### 3.4.0
+
+* Introduced `Provider` / context support (#53 / MobX #300)
+* Fixed issues when using devtools with IE. #66 (By @pvasek)
+
+### 3.3.1
+
+* Added typescript typings form `mobx-react/native` and `mobx-react/custom`
+* Fixed #63: error when using stateless function components when using babel and typescript
+
+### 3.3.0 
+
+* Upgraded to MobX 2.2.0
+
 ### 3.2.0
 
 * Added support for react-native 0.25 and higher. By @danieldunderfelt.

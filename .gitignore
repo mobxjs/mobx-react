@@ -2,4 +2,6 @@
 /test/node_modules
 npm-debug.log
 native.js
+native.d.ts
 custom.js
+custom.d.ts

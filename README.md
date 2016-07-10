@@ -91,6 +91,56 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
+### `Provider` (Experimental)
+
+_This feature is marked as experimental as the exact api might change in a next minor, pending any community feedback_.
+
+`Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
+This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
+By passing a string array as first argument to `observer`, observer will pick up the named stores from the context and make them available as props of the decorated component:
+
+Example (based on the official [context docs](https://facebook.github.io/react/docs/context.html#passing-info-automatically-through-a-tree)):
+
+```javascript
+@observer(["color"])
+class Button extends React.Component {
+  render() {
+    return (
+      <button style={{background: this.props.color}}>
+        {this.props.children}
+      </button>
+    );
+  }
+}
+
+class Message extends React.Component {
+  render() {
+    return (
+      <div>
+        {this.props.text} <Button>Delete</Button>
+      </div>
+    );
+  }
+}
+
+class MessageList extends React.Component {
+  render() {
+    const children = this.props.messages.map((message) =>
+      <Message text={message.text} />
+    );
+    return <Provider color="red">
+        <div>
+            {children}
+        </div>
+    </Provider>;
+  }
+}
+```
+
+Some note about passing stores around:
+* If a component ask a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
+* Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks.
+
 ## FAQ
 
 **Should I use `observer` for each component?**
