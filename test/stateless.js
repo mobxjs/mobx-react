@@ -4,6 +4,8 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var TestUtils = require('react-addons-test-utils');
 var observer = require('../').observer;
+var propTypes = require('../').propTypes;
+
 var $ = require('jquery');
 
 var e = React.createElement;
@@ -52,4 +54,37 @@ test('stateless component with context support', function (test) {
 		test.equal($("#testroot").text(), "context: hello world");
 		test.end();
 	});
+});
+
+test('component with observable propTypes', function (t) {
+    var component = React.createClass({
+        render: function() {
+            return null;
+        },
+        propTypes: {
+            a1: propTypes.observableArray,
+            a2: propTypes.arrayOrObservableArray
+        }
+    })
+	var originalConsoleError = console.error
+	var warnings = [];
+	console.error = function (msg) {
+		warnings.push(msg);
+	};
+	React.createElement(component, {
+        a1: [],
+        a2: []
+    })
+	t.equal(warnings.length, 1)
+    t.equal(/Failed propType: Invalid prop `a1`/.test(warnings[0]), true)
+
+	React.createElement(component, {
+        a1: mobx.observable([]),
+        a2: mobx.observable([])
+    })
+	t.equal(warnings.length, 1)
+
+	console.error = originalConsoleError;
+
+    t.end();
 });

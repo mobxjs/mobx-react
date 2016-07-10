@@ -300,11 +300,42 @@
         }
 
         /**
+         * PropTypes
+         */
+
+        
+        function observableTypeChecker (type) {
+            return function(props, propName, componentName) {
+                if (!mobx['isObservable' + type](props[propName])) {
+                    return new Error(
+                        'Invalid prop `' + propName + '` supplied to' +
+                        ' `' + componentName + '`. Expected a mobx observable ' + type + '. Validation failed.'
+                    );
+                }
+            };
+        }
+        // oneOfType is used for simple isRequired chaining
+        var propTypes = {
+            observableArray: React.PropTypes.oneOfType([observableTypeChecker('Array')]),
+            observableMap: React.PropTypes.oneOfType([observableTypeChecker('Map')]),
+            observableObject: React.PropTypes.oneOfType([observableTypeChecker('Object')]),
+            arrayOrObservableArray: React.PropTypes.oneOfType([
+                React.PropTypes.array,
+                observableTypeChecker('Array')
+            ]),
+            objectOrObservableObject: React.PropTypes.oneOfType([
+                React.PropTypes.object,
+                observableTypeChecker('Object')
+            ])
+        };
+
+        /**
          * Export
          */
         return ({
             observer: observer,
             Provider: Provider,
+            propTypes: propTypes,
             reactiveComponent: function() {
                 console.warn("[mobx-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");
                 return observer.apply(null, arguments);
