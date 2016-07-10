@@ -284,7 +284,7 @@
                     var newProps = {};
                     for (var key in this.props)
                         newProps[key] = this.props[key];
-                    var baseStores = this.context.mobxStores;
+                    var baseStores = this.context.mobxStores || {};
                     stores.forEach(function(storeName) {
                         if (storeName in newProps) // prefer props over stores
                             return;
