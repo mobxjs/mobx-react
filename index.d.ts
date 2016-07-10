@@ -35,7 +35,7 @@ export interface IRenderEvent {
     event: "render" | "destroy";
     renderTime?: number;
     totalTime?: number;
-    component: any; // Component instance
+    component: React.ReactElement<any>; // Component instance
     node: any; // DOMNode
 }
 
@@ -43,3 +43,11 @@ export interface IRenderEvent {
  * WeakMap DOMNode -> Component instance
  */
 export const componentByNodeRegistery: any;
+
+export const propTypes: {
+    observableArray: React.Requireable<any>;
+    observableMap: React.Requireable<any>;
+    observableObject: React.Requireable<any>;
+    arrayOrObservableArray: React.Requireable<any>;
+    objectOrObservableObject: React.Requireable<any>;
+}

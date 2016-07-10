@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Component} from 'react'; 
-import {observer, Provider} from '../../';
+import {observer, Provider, propTypes} from '../../';
 
 @observer
 class T1 extends Component<{ pizza: number}, {}> {
@@ -16,7 +16,10 @@ const T2 = observer(React.createClass({
 	},
 	render() {
 		return <div><T1 pizza = {this.props.cake} /></div>;
-	}
+	},
+    propTypes: {
+        zoem: propTypes.arrayOrObservableArray
+    }
 }));
 
 const T3 = observer((props: { hamburger: number }) => {
