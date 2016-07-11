@@ -153,6 +153,7 @@ Notes:
 * If a component ask a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
 * Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks.
 * When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outher. There might be additional decorators in between.
+* The original component wrapped by `inject` is available as the `wrappedComponent` property of created the higher order component.
 
 #### Inject as function
 

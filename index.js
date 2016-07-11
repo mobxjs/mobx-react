@@ -291,6 +291,7 @@
                 // TODO: should have shouldComponentUpdate?
             });
             Injector.contextTypes = { mobxStores: PropTypes.object };
+            Injector.wrappedComponent = component;
             return Injector;
         }
 

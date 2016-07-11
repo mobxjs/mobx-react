@@ -210,5 +210,18 @@ test('inject based context', t => {
         t.end();
     })
 
+    test('support wrappedComponent', t=> {
+        var B = React.createClass({
+            render() {},
+            propTypes: {
+                "x": React.PropTypes.object
+            }
+        })
+        var C = inject("booh")(B);
+        t.equal(C.wrappedComponent, B);
+        t.deepEqual(Object.keys(C.wrappedComponent.propTypes), ["x"]);
+        t.end();
+    })
+
     t.end()
 })
