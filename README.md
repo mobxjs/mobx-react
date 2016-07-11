@@ -152,6 +152,11 @@ Some note about passing stores around:
 * If a component ask a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
 * Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks.
 
+### `inject`
+
+`@observer(["store1", "store2"])` is actually a shorthand for `@inject("store1", "store2") @observer class ...` or `inject("store1", "store2")(observer(React.createClass({ .. })))`
+
+
 ## FAQ
 
 **Should I use `observer` for each component?**

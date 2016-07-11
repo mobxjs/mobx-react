@@ -194,7 +194,8 @@
                         return observer(arg1, componentClass);
                     }
                 } else {
-                    return createStoreInjector(arg1, observer(arg2));
+                    // TODO: deprecate this invocation style
+                    return inject.apply(null, arg1)(observer(arg2));
                 }   
             }
             var componentClass = arg1;
@@ -277,32 +278,59 @@
         /**
          * Store Injection
          */
-        function createStoreInjector(stores, component) {
+        function createStoreInjector(grabStoresFn, component) {
             var Injector = React.createClass({
                 displayName: "MobXStoreInjector",
                 render: function() {
                     var newProps = {};
                     for (var key in this.props)
                         newProps[key] = this.props[key];
-                    var baseStores = this.context.mobxStores || {};
-                    stores.forEach(function(storeName) {
-                        if (storeName in newProps) // prefer props over stores
-                            return;
-                        if (!(storeName in baseStores))
-                            throw new Error("MobX observer: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
-                        newProps[storeName] = baseStores[storeName];
-                    }, this);
+                    newProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context);
                     return React.createElement(component, newProps);
                 }
+                // TODO: should have shouldComponentUpdate?
             });
             Injector.contextTypes = { mobxStores: PropTypes.object };
             return Injector;
         }
 
         /**
+         * higher order component that injects stores to a child. 
+         * takes either a varargs list of strings, which are stores read from the context,
+         * or a function that manually maps the available stores from the context to props:
+         * storesToProps(mobxStores, props, context) => newProps
+         */  
+        function inject(/* fn(stores, nextProps) or ...storeNames */) {
+            var grabStoresFn;
+            if (typeof arguments[0] === "function") {
+                grabStoresFn = arguments[0];
+            } else {
+                var storesNames = [];
+                for (var i = 0; i < arguments.length; i++)
+                    storesNames[i] = arguments[i];
+                grabStoresFn = grabStoresByName(storesNames);
+            }
+            return function(componentClass) {
+                return createStoreInjector(grabStoresFn, componentClass);
+            };
+        }
+
+        function grabStoresByName(storeNames) {
+            return function(baseStores, nextProps) {
+                storeNames.forEach(function(storeName) {
+                    if (storeName in nextProps) // prefer props over stores
+                        return;
+                    if (!(storeName in baseStores))
+                        throw new Error("MobX observer: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
+                    nextProps[storeName] = baseStores[storeName];
+                });
+                return nextProps;
+            }
+        }
+
+        /**
          * PropTypes
          */
-
         
         function observableTypeChecker (type) {
             return function(props, propName, componentName) {
@@ -314,6 +342,7 @@
                 }
             };
         }
+
         // oneOfType is used for simple isRequired chaining
         var propTypes = {
             observableArray: React.PropTypes.oneOfType([observableTypeChecker('Array')]),
@@ -335,6 +364,7 @@
         return ({
             observer: observer,
             Provider: Provider,
+            inject: inject,
             propTypes: propTypes,
             reactiveComponent: function() {
                 console.warn("[mobx-react] `reactiveComponent` has been renamed to `observer` and will be removed in 1.1.");

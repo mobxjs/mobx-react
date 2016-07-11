@@ -2,6 +2,7 @@
 
 ### 3.4.1
 
+* Introduced `inject("store1", "store2")(component)` as alternative syntax to inject stores. Should address #77, #70
 * Fixed #76: error when no stores are provided through context
 * Added typings for devTools related features (@benjamingr).
 * Added MobX specific propTypes (@mattruby)
