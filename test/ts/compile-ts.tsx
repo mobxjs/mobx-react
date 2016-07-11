@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Component} from 'react'; 
-import {observer, Provider, propTypes} from '../../';
+import {observer, Provider, propTypes, inject} from '../../';
 
 @observer
 class T1 extends Component<{ pizza: number}, {}> {
@@ -86,6 +86,48 @@ class ProviderTest extends Component<any, any> {
             <div>hi</div>
         </Provider>;
     }
+}
+
+@inject(() => ({ x: 3 }))
+class T11 extends Component<{ pizza: number, x?: number}, {}> {
+	render() {
+		return <div>{this.props.pizza}{this.props.x}</div>;
+	}
+}
+
+class T15 extends Component<{ pizza: number, x?: number}, {}> {
+	render() {
+		return <div>{this.props.pizza}{this.props.x}</div>;
+	}
+}
+const T16 = inject(() => ({ x: 3 }))(T15);
+
+class T17 extends React.Component<{}, {}> {
+    render() {
+        return <div>
+            <T11 pizza={3} x={1} />
+            <T15 pizza={3} x={1} />
+            <T16 pizza={4} x={2} />
+            <T11 pizza={3} />
+            <T15 pizza={3} />
+            <T16 pizza={4} />
+        </div>
+    }
+}
+
+
+@inject("a", "b")
+class T12 extends Component<{ pizza: number}, {}> {
+	render() {
+		return <div>{this.props.pizza}</div>;
+	}
+}
+
+@inject("a", "b") @observer
+class T13 extends Component<{ pizza: number}, {}> {
+	render() {
+		return <div>{this.props.pizza}</div>;
+	}
 }
 
 

@@ -34,7 +34,7 @@
     "react-dom": "^15.1.0",
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
-    "typescript": "^1.7.5"
+    "typescript": "^1.8.10"
   },
   "dependencies": {},
   "keywords": [
