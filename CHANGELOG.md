@@ -1,11 +1,13 @@
 # MobX-React Changelog
 
-### 3.4.1
+### 3.5.0
 
 * Introduced `inject("store1", "store2")(component)` as alternative syntax to inject stores. Should address #77, #70
+* Introduced the `wrappedComponent` property on injected higher order components, addresses #70, #72
 * Fixed #76: error when no stores are provided through context
 * Added typings for devTools related features (@benjamingr).
 * Added MobX specific propTypes (@mattruby)
+* Merged #44, fixes #73: don't re-render if component was somehow unmounted
 
 ### 3.4.0
 
