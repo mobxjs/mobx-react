@@ -67,6 +67,9 @@ const TodoView = observer(React.createClass({
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoid as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
+If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`), but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted. 
+
 ### `componentWillReact` (lifecycle hook)
 
 React components usually render on a fresh stack, so that makes it often hard to figure out what _caused_ a component to re-render.
