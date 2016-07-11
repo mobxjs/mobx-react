@@ -278,8 +278,17 @@
          * Store Injection
          */
         function createStoreInjector(stores, component) {
+            
+            var statics = Object.getOwnPropertyNames(component).filter(function (propName) {
+				return typeof component[propName] === 'function';
+			}).reduce(function (staticMethods, staticName) {
+				staticMethods[staticName] = component[staticName];
+				return staticMethods;
+			}, {});
+			
             var Injector = React.createClass({
                 displayName: "MobXStoreInjector",
+                statics: statics,
                 render: function() {
                     var newProps = {};
                     for (var key in this.props)
