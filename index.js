@@ -99,7 +99,8 @@
                             isRenderingPending = true;
                             if (typeof self.componentWillReact === "function")
                                 self.componentWillReact();
-                            React.Component.prototype.forceUpdate.call(self)
+                            if (self.__$mobxMounted)
+                                React.Component.prototype.forceUpdate.call(self)
                         }
                     });
                     reactiveRender.$mobx = reaction;
@@ -125,6 +126,7 @@
 
             componentWillUnmount: function() {
                 this.render.$mobx && this.render.$mobx.dispose();
+                this.__$mobxMounted = false;
                 if (isDevtoolsEnabled) {
                     var node = findDOMNode(this);
                     if (node && componentByNodeRegistery) {
@@ -139,6 +141,7 @@
             },
 
             componentDidMount: function() {
+                this.__$mobxMounted = true;
                 if (isDevtoolsEnabled)
                     reportRendering(this);
             },
@@ -149,10 +152,11 @@
             },
 
             shouldComponentUpdate: function(nextProps, nextState) {
+                // TODO: if context changed, return true.., see #18
                 // if props or state did change, but a render was scheduled already, no additional render needs to be scheduled
                 if (this.render.$mobx && this.render.$mobx.isScheduled() === true)
                     return false;
-                
+
                 // update on any state changes (as is the default)
                 if (this.state !== nextState)
                     return true;
