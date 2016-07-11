@@ -3,17 +3,18 @@ var enzyme = require('enzyme');
 var mount = enzyme.mount;
 var mobx = require('mobx');
 var observer = require('../').observer;
+var inject = require('../').inject;
 var Provider = require('../').Provider;
 var test = require('tape');
 var e = React.createElement;
 
-test('observer based context', t => {
+test('inject based context', t => {
     test('basic context', t => {
-        var C = observer(["foo"], React.createClass({
+        var C = inject("foo")(observer(React.createClass({
             render: function() {
                 return e("div", {}, "context:" + this.props.foo);
             }
-        }));
+        })));
 
         var B = React.createClass({
             render: function() {
@@ -33,7 +34,7 @@ test('observer based context', t => {
     })
 
     test('props override context', t => {
-        var C = observer(["foo"], React.createClass({
+        var C = inject("foo")(React.createClass({
             render: function() {
                 return e("div", {}, "context:" + this.props.foo);
             }
@@ -58,11 +59,11 @@ test('observer based context', t => {
 
 
     test('overriding stores is supported', t => {
-        var C = observer(["foo", "bar"], React.createClass({
+        var C = inject("foo", "bar")(observer(React.createClass({
             render: function() {
                 return e("div", {}, "context:" + this.props.foo + this.props.bar);
             }
-        }));
+        })));
 
         var B = React.createClass({
             render: function() {
@@ -92,11 +93,11 @@ test('observer based context', t => {
     })
 
     test('store should be available', t => {
-        var C = observer(["foo"], React.createClass({
+        var C = inject("foo")(observer(React.createClass({
             render: function() {
                 return e("div", {}, "context:" + this.props.foo);
             }
-        }));
+        })));
 
         var B = React.createClass({
             render: function() {
@@ -115,11 +116,11 @@ test('observer based context', t => {
     })
 
     test('store is not required if prop is available', t => {
-        var C = observer(["foo"], React.createClass({
+        var C = inject("foo")(observer(React.createClass({
             render: function() {
                 return e("div", {}, "context:" + this.props.foo);
             }
-        }));
+        })));
 
         var B = React.createClass({
             render: function() {
@@ -172,6 +173,40 @@ test('observer based context', t => {
         t.equal(msg, "MobX Provider: Provided store \'foo\' has changed. Please avoid replacing stores as the change might not propagate to all children");
 
         console.warn = baseWarn;
+        t.end();
+    })
+
+    test('custom storesToProps', t => {
+        var C = inject(
+            function(stores, props, context) {
+                t.deepEqual(context, { mobxStores: { foo: "bar" }});
+                t.deepEqual(stores, { foo: "bar" });
+                t.deepEqual(props, { baz: 42 });
+                return {
+                    zoom: stores.foo,
+                    baz: props.baz * 2
+                }
+            }
+        )(observer(React.createClass({
+            render: function() {
+                return e("div", {}, "context:" + this.props.zoom + this.props.baz);
+            }
+        })));
+
+        var B = React.createClass({
+            render: function() {
+                return e(C, { baz: 42 });
+            }
+        });
+
+        var A = React.createClass({
+            render: function() {
+                return e(Provider, { foo: "bar" }, e(B, {}))
+            }
+        })
+
+        const wrapper = mount(e(A));
+        t.equal(wrapper.find("div").text(), "context:bar84");
         t.end();
     })
 

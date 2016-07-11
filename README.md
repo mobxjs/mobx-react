@@ -102,18 +102,19 @@ MobX-react provides the following additional `propTypes` which can be used to va
 * `objectOrObservableObject`
 
 
-### `Provider` (Experimental)
+### `Provider` and `inject` (Experimental)
 
 _This feature is marked as experimental as the exact api might change in a next minor, pending any community feedback_.
 
 `Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
-By passing a string array as first argument to `observer`, observer will pick up the named stores from the context and make them available as props of the decorated component:
+
+`inject` can be used to pick up those stores. It is a higher order component that takes a list of strings and makes those stores available to the wrapped component. 
 
 Example (based on the official [context docs](https://facebook.github.io/react/docs/context.html#passing-info-automatically-through-a-tree)):
 
 ```javascript
-@observer(["color"])
+@inject("color") @observer
 class Button extends React.Component {
   render() {
     return (
@@ -148,14 +149,37 @@ class MessageList extends React.Component {
 }
 ```
 
-Some note about passing stores around:
+Notes:
 * If a component ask a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
 * Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks.
+* When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outher. There might be additional decorators in between.
 
-### `inject`
+#### Inject as function
 
-`@observer(["store1", "store2"])` is actually a shorthand for `@inject("store1", "store2") @observer class ...` or `inject("store1", "store2")(observer(React.createClass({ .. })))`
+The above example in ES5 would start like:
 
+```javascript
+var Button = inject("color")(observer(React.createClass({
+    /* ... etc ... */ 
+})))
+```
+
+#### Strongly typing inject
+
+`inject` also accepts a function (`(allStores, nextProps, nextContext) => nextProps`) that can be used to pick all the desired stores from the available stores like this:
+
+```typescript
+import {IUserStore} from "myStore"
+
+@inject((allStores) => ({
+    userStore: allStores.userStore as IUserStore
+}))
+class MyComponent extends React.Component<{ userStore?: IUserStore; otherProp: number }, {}> {
+    /* etc */
+}
+```
+
+Make sure to mark `userStore` as optional property. It should not (necessarily) be passed in by parent components after all!
 
 ## FAQ
 
