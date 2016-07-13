@@ -1,6 +1,7 @@
 "use strict"
 
 var React = require('react');
+var ReactDOM = require('react-dom')
 var enzyme = require('enzyme');
 var mount = enzyme.mount;
 var mobx = require('mobx');
@@ -103,3 +104,36 @@ test("issue mobx 405", t => {
 
     t.end()
 })
+
+test("#85 Should handle state changing in constructors", function(t) {
+	var a = mobx.observable(2);
+	
+	var child = observer(React.createClass({
+		displayName: "Child",
+		getInitialState: function() {
+			a.set(3); // one shouldn't do this!
+			return {};
+		},
+		render: function() {
+			return React.createElement("div", {}, "child:", a.get(), " - ");
+		}
+	}));
+	
+	var parent = observer(function Parent() {
+		return React.createElement("span", {}, 
+			React.createElement(child, {}),
+            "parent:",
+			a.get()
+		);
+	});
+	
+	ReactDOM.render(React.createElement(parent, {}), document.getElementById('testroot'), function() {
+		t.equal(document.getElementsByTagName("span")[0].textContent, "child:3 - parent:3")
+        a.set(5)
+		t.equal(document.getElementsByTagName("span")[0].textContent, "child:5 - parent:5")
+        a.set(7)
+		t.equal(document.getElementsByTagName("span")[0].textContent, "child:7 - parent:7")
+
+		t.end();
+	});
+  });

@@ -96,11 +96,23 @@
                 function initialRender() {
                     reaction = new mobx.Reaction(name, function() {
                         if (!isRenderingPending) {
-                            isRenderingPending = true;
                             if (typeof self.componentWillReact === "function")
                                 self.componentWillReact();
-                            if (self.__$mobxMounted)
+                            isRenderingPending = true;
+                            if (self.__$mobxMounted) { // componentWillReact *could* cause component to be unmounted..
                                 React.Component.prototype.forceUpdate.call(self)
+                            } else {
+                                // long story, see:
+                                // https://github.com/mobxjs/mobx-react/issues/85
+                                // https://github.com/mobxjs/mobx-react/pull/44
+                                // https://github.com/mobxjs/mobx-react/commit/7ac924c880747920feaa016a3b4c9c3850449e1a
+                                // https://github.com/mobxjs/mobx-react/commit/cc2e14e2706e93de2de6da1253a3b20692396d7b
+                                // in short: if a rerendering is triggered before the component is mounted, 
+                                // forceUpdate is not allowed (which we normally used because if observables change we MUST update)
+                                // but setStates are correctly queued
+                                // this will trigger a warning, but yield the correct rendering, see misc.js: 133 
+                                React.Component.prototype.setState.call(self, {}) // fixes 85
+                            }
                         }
                     });
                     reactiveRender.$mobx = reaction;

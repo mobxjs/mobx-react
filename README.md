@@ -200,7 +200,13 @@ See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/
 
 The following warning will appear if you trigger a re-rendering between instantiating and rendering a component: 
 
-`Warning: forceUpdate(...): Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state.`
+```
+Warning: forceUpdate(...): Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state.`
+```
+-- or --
+```
+Warning: setState(...): Cannot update during an existing state transition (such as within `render` or another component's constructor). Render methods should be a pure function of props and state; constructor side-effects are an anti-pattern, but can be moved to `componentWillMount`.
+```
 
 Usually this means that (another) component is trying to modify observables used by this components in their `constructor` or `getInitialState` methods.
 This violates the React Lifecycle, `componentWillMount` should be used instead if state needs to be modified before mounting.
