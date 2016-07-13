@@ -29,9 +29,9 @@
     "jquery": "^2.1.4",
     "lodash": "^4.0.1",
     "mobx": "^2.2.0",
-    "react": "^15.1.0",
-    "react-addons-test-utils": "^15.1.0",
-    "react-dom": "^15.1.0",
+    "react": "^15.2.0",
+    "react-addons-test-utils": "^15.2.0",
+    "react-dom": "^15.2.0",
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
     "typescript": "^1.8.10"
