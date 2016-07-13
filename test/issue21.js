@@ -90,7 +90,6 @@ var WizardStep = observer(React.createClass({
 	render: function () {
 		// weird test hack:
 		if (this.props.tester === true) {
-			debugger;
 			topRenderCount++;
 		}
 		return React.DOM.div({onClick: this.modeClickHandler},

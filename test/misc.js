@@ -1,3 +1,5 @@
+"use strict"
+
 var React = require('react');
 var enzyme = require('enzyme');
 var mount = enzyme.mount;
@@ -70,4 +72,34 @@ test('custom shouldComponentUpdate is not respected for observable changes (#50)
     t.equal(called, 3)
 
     t.end();
+})
+
+test("issue mobx 405", t => {
+    function ExampleState() {
+        mobx.extendObservable(this, {
+            name: "test",
+            greetings: function() {
+                return 'Hello my name is ' + this.name;
+            }
+        })
+    }
+
+    const ExampleView = observer(React.createClass({
+        render: function() {
+            return e("div", {}, 
+                e("input", { 
+                    type: "text",
+                    value: this.props.exampleState.name,
+                    onChange: e => this.props.exampleState.name = e.target.value
+                }),
+                e("span", {}, this.props.exampleState.greetings)
+            );
+        }
+    }))
+
+    let exampleState = new ExampleState();
+    const wrapper = enzyme.shallow(e(ExampleView, { exampleState: exampleState}));
+    t.equal(wrapper.find('span').text(), "Hello my name is test")
+
+    t.end()
 })
