@@ -49,9 +49,6 @@ test('custom shouldComponentUpdate is not respected for observable changes (#50)
     var B = observer(React.createClass({
         render: function() {
             return e("span", {}, e(C, {y: y.get()}));
-        },
-        shouldComponentUpdate() {
-            called++;
         }
     }));
 

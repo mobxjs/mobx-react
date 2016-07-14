@@ -96,22 +96,17 @@
                 function initialRender() {
                     reaction = new mobx.Reaction(name, function() {
                         if (!isRenderingPending) {
-                            if (typeof self.componentWillReact === "function")
-                                self.componentWillReact();
+                            // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
+                            // This unidiomatic React usage but React will correctly warn about this so we continue as usual
+                            // See #85 / Pull #44
                             isRenderingPending = true;
-                            if (self.__$mobxMounted) { // componentWillReact *could* cause component to be unmounted..
-                                React.Component.prototype.forceUpdate.call(self)
-                            } else {
-                                // long story, see:
-                                // https://github.com/mobxjs/mobx-react/issues/85
-                                // https://github.com/mobxjs/mobx-react/pull/44
-                                // https://github.com/mobxjs/mobx-react/commit/7ac924c880747920feaa016a3b4c9c3850449e1a
-                                // https://github.com/mobxjs/mobx-react/commit/cc2e14e2706e93de2de6da1253a3b20692396d7b
-                                // in short: if a rerendering is triggered before the component is mounted, 
-                                // forceUpdate is not allowed (which we normally used because if observables change we MUST update)
-                                // but setStates are correctly queued
-                                // this will trigger a warning, but yield the correct rendering, see misc.js: 133 
-                                React.Component.prototype.setState.call(self, {}) // fixes 85
+                            if (typeof self.componentWillReact === "function")
+                                self.componentWillReact(); // TODO: wrap in action?
+                            if (self.__$mobxIsUnmounted !== true) {
+                                 // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
+                                 // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
+                                 // However, people also claim this migth happen during unit tests..
+                                 React.Component.prototype.forceUpdate.call(self)
                             }
                         }
                     });
@@ -138,7 +133,7 @@
 
             componentWillUnmount: function() {
                 this.render.$mobx && this.render.$mobx.dispose();
-                this.__$mobxMounted = false;
+                this.__$mobxIsUnmounted = true;
                 if (isDevtoolsEnabled) {
                     var node = findDOMNode(this);
                     if (node && componentByNodeRegistery) {
@@ -153,7 +148,6 @@
             },
 
             componentDidMount: function() {
-                this.__$mobxMounted = true;
                 if (isDevtoolsEnabled)
                     reportRendering(this);
             },

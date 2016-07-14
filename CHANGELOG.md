@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.5.1
+
+* Fixed regression #85, changes caused by the constructor results in inconsistent rendering (N.B.: that is un-idiomatic React usage and React will warn about this!)
+
 ### 3.5.0
 
 * Introduced `inject("store1", "store2")(component)` as alternative syntax to inject stores. Should address #77, #70
