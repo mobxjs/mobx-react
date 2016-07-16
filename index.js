@@ -302,6 +302,25 @@
             });
             Injector.contextTypes = { mobxStores: PropTypes.object };
             Injector.wrappedComponent = component;
+
+            if (process.env.NODE_ENV !== 'production') {
+                var warningOnProperties = ['propTypes', 'defaultProps', 'contextTypes'];
+
+                warningOnProperties.forEach(function(prop) {
+                    var propValue = Injector[prop];                
+                    Object.defineProperty(Injector, prop, {
+                        set: function (_) {
+                            var name = component.displayName || component.name;
+                            console.warn('Mobx Injector: you are trying to attach ' + prop +
+                                         ' to HOC instead of '+ name +'. Use `wrappedComponent` property.');
+                        },
+                        get: function() {
+                            return propValue;
+                        }
+                    });
+                });
+            }
+
             return Injector;
         }
 
