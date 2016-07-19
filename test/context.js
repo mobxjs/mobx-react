@@ -77,7 +77,7 @@ test('observer based context', t => {
                         e("span", {},
                             e(B, {})
                         ),
-                        e("section", {}, 
+                        e("section", {},
                             e(Provider, { foo: 42}, e(B, {}))
                         )
                     )
@@ -132,6 +132,83 @@ test('observer based context', t => {
         t.end();
     })
 
+
+        test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
+        var msg = [];
+        var baseWarn = console.warn;
+        console.warn = (m) => msg.push(m);
+
+        var C = observer(["foo"], React.createClass({
+            displayName: 'C',
+            render: function() {
+                return e("div", {}, "context:" + this.props.foo);
+            }
+        }));
+
+        C.propTypes = {};
+        C.defaultProps = {};
+        C.contextTypes = {};
+
+        var B = React.createClass({
+            render: function() {
+                return e(C, {});
+            }
+        });
+
+        var A = React.createClass({
+            render: function() {
+                return e(Provider, { foo: "bar" }, e(B, {}))
+            }
+        })
+
+        const wrapper = mount(e(A));
+        t.equal(msg.length, 3);
+        t.equal(msg[0], "Mobx Injector: you are trying to attach propTypes to HOC instead of C. Use `wrappedComponent` property.");
+        t.equal(msg[1], "Mobx Injector: you are trying to attach defaultProps to HOC instead of C. Use `wrappedComponent` property.");
+        t.equal(msg[2], "Mobx Injector: you are trying to attach contextTypes to HOC instead of C. Use `wrappedComponent` property.");
+
+        console.warn = baseWarn;
+        t.end();
+    })
+
+
+   test('warning is not printed when attaching propTypes to HOC in production', t => {
+        var msg = [];
+        var baseWarn = console.warn;
+        console.warn = (m) => msg = m;
+
+        var env = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'production';
+
+
+        var C = observer(["foo"], React.createClass({
+            displayName: 'C',
+            render: function() {
+                return e("div", {}, "context:" + this.props.foo);
+            }
+        }));
+
+        C.propTypes = {};
+
+        var B = React.createClass({
+            render: function() {
+                return e(C, {});
+            }
+        });
+
+        var A = React.createClass({
+            render: function() {
+                return e(Provider, { foo: "bar" }, e(B, {}))
+            }
+        })
+
+        const wrapper = mount(e(A));
+        t.equal(msg.length, 0);
+        console.warn = baseWarn;
+        process.env.NODE_ENV = env;
+        t.end();
+    })
+
     test('warning is printed when changing stores', t => {
         var msg;
         var baseWarn = console.warn;
@@ -156,7 +233,7 @@ test('observer based context', t => {
                 return e("section", {},
                     e("span", {}, a.get()),
                     e(Provider, { foo: a.get() }, e(B, {}))
-                ); 
+                );
             }
         }))
 
