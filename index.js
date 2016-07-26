@@ -296,6 +296,9 @@
                     for (var key in this.props)
                         newProps[key] = this.props[key];
                     newProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context);
+                    newProps.ref = function(instance) {
+                        this.wrappedComponent = instance;
+                    }
                     return React.createElement(component, newProps);
                 }
                 // TODO: should have shouldComponentUpdate?
