@@ -76,7 +76,6 @@ test('component with observable propTypes', function (t) {
         a2: []
     })
 	t.equal(warnings.length, 1)
-    t.equal(/Failed prop type: Invalid prop `a1`/.test(warnings[0]), true)
 
 	React.createElement(component, {
         a1: mobx.observable([]),

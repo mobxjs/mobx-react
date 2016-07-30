@@ -206,7 +206,7 @@
                 } else {
                     // TODO: deprecate this invocation style
                     return inject.apply(null, arg1)(observer(arg2));
-                }   
+                }
             }
             var componentClass = arg1;
 
@@ -216,7 +216,7 @@
             if (
                 typeof componentClass === "function" &&
                 (!componentClass.prototype || !componentClass.prototype.render) &&
-                !componentClass.isReactClass && 
+                !componentClass.isReactClass &&
                 !React.Component.isPrototypeOf(componentClass)
             ) {
                 return observer(React.createClass({
@@ -306,11 +306,11 @@
         }
 
         /**
-         * higher order component that injects stores to a child. 
+         * higher order component that injects stores to a child.
          * takes either a varargs list of strings, which are stores read from the context,
          * or a function that manually maps the available stores from the context to props:
          * storesToProps(mobxStores, props, context) => newProps
-         */  
+         */
         function inject(/* fn(stores, nextProps) or ...storeNames */) {
             var grabStoresFn;
             if (typeof arguments[0] === "function") {
@@ -342,31 +342,133 @@
         /**
          * PropTypes
          */
-        
-        function observableTypeChecker (type) {
-            return function(props, propName, componentName) {
-                if (!mobx['isObservable' + type](props[propName])) {
-                    return new Error(
-                        'Invalid prop `' + propName + '` supplied to' +
-                        ' `' + componentName + '`. Expected a mobx observable ' + type + '. Validation failed.'
-                    );
+
+        // Copied from React.PropTypes
+        function createChainableTypeChecker(validate) {
+            function checkType(isRequired, props, propName, componentName, location, propFullName) {
+                componentName = componentName || ANONYMOUS;
+                propFullName = propFullName || propName;
+                if (props[propName] == null) {
+                    if (isRequired) {
+                        var actual = props[propName] === null ? 'null' : 'undefined';
+                        return new Error(
+                          'The ' + location + ' `' + propFullName +'` is marked as required ' +
+                          'in `' + componentName + '`, but its value is `' + actual + '`.'
+                        );
+                    }
+                    return null;
+                } else {
+                    return validate(props, propName, componentName, location, propFullName);
                 }
-            };
+            }
+            var chainedCheckType = checkType.bind(null, false);
+            chainedCheckType.isRequired = checkType.bind(null, true);
+            return chainedCheckType;
         }
 
-        // oneOfType is used for simple isRequired chaining
+        // Copied from React.PropTypes
+        function isSymbol(propType, propValue) {
+            // Native Symbol.
+            if (propType === 'symbol') {
+                return true;
+            }
+
+            // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+            if (propValue['@@toStringTag'] === 'Symbol') {
+                return true;
+            }
+
+            // Fallback for non-spec compliant Symbols which are polyfilled.
+            if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Copied from React.PropTypes
+        function getPropType(propValue) {
+            var propType = typeof propValue;
+            if (Array.isArray(propValue)) {
+                return 'array';
+            }
+            if (propValue instanceof RegExp) {
+                // Old webkits (at least until Android 4.0) return 'function' rather than
+                // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+                // passes PropTypes.object.
+                return 'object';
+            }
+            if (isSymbol(propType, propValue)) {
+                return 'symbol';
+            }
+            return propType;
+        }
+
+
+        // This handles more types than `getPropType`. Only used for error messages.
+        // Copied from React.PropTypes
+        function getPreciseType(propValue) {
+            var propType = getPropType(propValue);
+            if (propType === 'object') {
+                if (propValue instanceof Date) {
+                    return 'date';
+                } else if (propValue instanceof RegExp) {
+                    return 'regexp';
+                }
+            }
+            return propType;
+        }
+
+        function createObservableTypeCheckerCreator(allowNativeType, mobxType) {
+            return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
+                if (allowNativeType) {
+                    if (getPropType(props[propName]) === mobxType.toLowerCase()) return null;
+                }
+                if (!mobx['isObservable' + mobxType](props[propName])) {
+                    var preciseType = getPreciseType(props[propName]);
+                    var nativeTypeExpectationMessage = allowNativeType ? ' or javascript `' + mobxType.toLowerCase() + '`' : '';
+                    return new Error(
+                        'Invalid prop `' + propFullName + '` of type `' + preciseType + '` supplied to' +
+                        ' `' + componentName + '`, expected `mobx.Observable' + mobxType + '`' + nativeTypeExpectationMessage + '.'
+                    );
+                }
+                return null;
+            });
+        }
+
+        function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
+            return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
+                if (typeof typeChecker !== 'function') {
+                    return new Error(
+                      'Property `' + propFullName + '` of component `' + componentName + '` has ' +
+                      'invalid PropType notation.'
+                    );
+                }
+                var error = createObservableTypeCheckerCreator(allowNativeType, 'Array')(props, propName, componentName);
+                if (error instanceof Error) return error;
+                var propValue = props[propName];
+                for (var i = 0; i < propValue.length; i++) {
+                    error = typeChecker(
+                      propValue,
+                      i,
+                      componentName,
+                      location,
+                      propFullName + '[' + i + ']'
+                    );
+                    if (error instanceof Error) return error;
+                }
+                return null;
+            });
+        }
+
         var propTypes = {
-            observableArray: React.PropTypes.oneOfType([observableTypeChecker('Array')]),
-            observableMap: React.PropTypes.oneOfType([observableTypeChecker('Map')]),
-            observableObject: React.PropTypes.oneOfType([observableTypeChecker('Object')]),
-            arrayOrObservableArray: React.PropTypes.oneOfType([
-                React.PropTypes.array,
-                observableTypeChecker('Array')
-            ]),
-            objectOrObservableObject: React.PropTypes.oneOfType([
-                React.PropTypes.object,
-                observableTypeChecker('Object')
-            ])
+            observableArray: createObservableTypeCheckerCreator(false, 'Array'),
+            observableArrayOf: createObservableArrayOfTypeChecker.bind(null, false),
+            observableMap: createObservableTypeCheckerCreator(false, 'Map'),
+            observableObject: createObservableTypeCheckerCreator(false, 'Object'),
+            arrayOrObservableArray: createObservableTypeCheckerCreator(true, 'Array'),
+            arrayOrObservableArrayOf: createObservableArrayOfTypeChecker.bind(null, true),
+            objectOrObservableObject: createObservableTypeCheckerCreator(true, 'Object'),
         };
 
         /**
