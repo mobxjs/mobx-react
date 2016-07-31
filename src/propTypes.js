@@ -7,7 +7,7 @@ function createChainableTypeChecker(validate) {
     propFullName = propFullName || propName;
     if (props[propName] == null) {
       if (isRequired) {
-        var actual = props[propName] === null ? 'null' : 'undefined';
+        const actual = props[propName] === null ? 'null' : 'undefined';
         return new Error(
           'The ' + location + ' `' + propFullName + '` is marked as required ' +
           'in `' + componentName + '`, but its value is `' + actual + '`.'
@@ -19,7 +19,7 @@ function createChainableTypeChecker(validate) {
     }
   }
 
-  var chainedCheckType = checkType.bind(null, false);
+  const chainedCheckType = checkType.bind(null, false);
   chainedCheckType.isRequired = checkType.bind(null, true);
   return chainedCheckType;
 }
@@ -46,7 +46,7 @@ function isSymbol(propType, propValue) {
 
 // Copied from React.PropTypes
 function getPropType(propValue) {
-  var propType = typeof propValue;
+  const propType = typeof propValue;
   if (Array.isArray(propValue)) {
     return 'array';
   }
@@ -66,7 +66,7 @@ function getPropType(propValue) {
 // This handles more types than `getPropType`. Only used for error messages.
 // Copied from React.PropTypes
 function getPreciseType(propValue) {
-  var propType = getPropType(propValue);
+  const propType = getPropType(propValue);
   if (propType === 'object') {
     if (propValue instanceof Date) {
       return 'date';
@@ -89,10 +89,10 @@ function createObservableTypeCheckerCreator(allowNativeType, mobxType) {
       case 'Map': mobxChecker = isObservableMap; break;
       default: throw new Error(`Unexpected mobxType: ${mobxType}`)
     }
-    var propValue = props[propName];
+    const propValue = props[propName];
     if (!mobxChecker(propValue)) {
-      var preciseType = getPreciseType(propValue);
-      var nativeTypeExpectationMessage = allowNativeType ? ' or javascript `' + mobxType.toLowerCase() + '`' : '';
+      const preciseType = getPreciseType(propValue);
+      const nativeTypeExpectationMessage = allowNativeType ? ' or javascript `' + mobxType.toLowerCase() + '`' : '';
       return new Error(
         'Invalid prop `' + propFullName + '` of type `' + preciseType + '` supplied to' +
         ' `' + componentName + '`, expected `mobx.Observable' + mobxType + '`' + nativeTypeExpectationMessage + '.'
@@ -110,10 +110,10 @@ function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
         'invalid PropType notation.'
       );
     }
-    var error = createObservableTypeCheckerCreator(allowNativeType, 'Array')(props, propName, componentName);
+    let error = createObservableTypeCheckerCreator(allowNativeType, 'Array')(props, propName, componentName);
     if (error instanceof Error) return error;
-    var propValue = props[propName];
-    for (var i = 0; i < propValue.length; i++) {
+    const propValue = props[propName];
+    for (let i = 0; i < propValue.length; i++) {
       error = typeChecker(
         propValue,
         i,

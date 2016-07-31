@@ -1,7 +1,7 @@
 import mobx from 'mobx';
 import React from 'react';
 
-var TARGET_LIB_NAME;
+let TARGET_LIB_NAME;
 if (__TARGET__ === 'browser') TARGET_LIB_NAME = 'mobx-react';
 if (__TARGET__ === 'native') TARGET_LIB_NAME = 'mobx-react/native';
 if (__TARGET__ === 'custom') TARGET_LIB_NAME = 'mobx-react/custom';
@@ -16,7 +16,7 @@ export {
   renderReporter,
   componentByNodeRegistery,
   trackComponents
-} from './observerHOC';
+} from './observer';
 
 export { default as Provider } from './Provider';
 export { default as inject } from './inject';

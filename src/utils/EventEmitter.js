@@ -1,21 +1,18 @@
-function EventEmitter() {
-  this.listeners = [];
-}
 
-EventEmitter.prototype.on = function(cb) {
-  this.listeners.push(cb);
-  var self = this;
-  return function() {
-    var idx = self.listeners.indexOf(cb);
-    if (idx !== -1)
-      self.listeners.splice(idx, 1);
+export default class EventEmitter {
+
+  listeners = [];
+
+  on(cb) {
+    this.listeners.push(cb);
+    return () => {
+      const index = this.listeners.indexOf(cb);
+      if (index !== -1)
+        this.listeners.splice(index, 1);
+    };
+  }
+
+  emit(data) {
+    this.listeners.forEach(fn => fn(data));
   };
-};
-
-EventEmitter.prototype.emit = function(data) {
-  this.listeners.forEach(function(fn) {
-    fn(data);
-  });
-};
-
-export default EventEmitter;
+}

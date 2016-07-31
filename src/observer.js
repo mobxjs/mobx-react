@@ -10,8 +10,8 @@ import inject from './inject';
 let isDevtoolsEnabled = false;
 
 // WeakMap<Node, Object>;
-export var componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
-export var renderReporter = new EventEmitter();
+export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
+export const renderReporter = new EventEmitter();
 
 function findDOMNode(component) {
   if (ReactDOM)
@@ -20,7 +20,7 @@ function findDOMNode(component) {
 }
 
 function reportRendering(component) {
-  var node = findDOMNode(component);
+  const node = findDOMNode(component);
   if (node && componentByNodeRegistery)
     componentByNodeRegistery.set(node, component);
 
@@ -45,8 +45,8 @@ export function trackComponents() {
  */
 
 function patch(target, funcName) {
-  var base = target[funcName];
-  var mixinFunc = reactiveMixin[funcName];
+  const base = target[funcName];
+  const mixinFunc = reactiveMixin[funcName];
   if (!base) {
     target[funcName] = mixinFunc;
   } else {
@@ -60,7 +60,7 @@ function patch(target, funcName) {
 /**
  * ReactiveMixin
  */
-var reactiveMixin = {
+const reactiveMixin = {
   componentWillMount: function() {
     // Generate friendly name for debugging
     const initialName = this.displayName
@@ -68,9 +68,9 @@ var reactiveMixin = {
       || (this.constructor && (this.constructor.displayName || this.constructor.name))
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
-    var baseRender = this.render.bind(this);
-    var reaction = null;
-    var isRenderingPending = false;
+    const baseRender = this.render.bind(this);
+    let reaction = null;
+    let isRenderingPending = false;
 
     const initialRender = () => {
       reaction = new mobx.Reaction(`${initialName}#${rootNodeID}.render()`, () => {
@@ -92,11 +92,11 @@ var reactiveMixin = {
       reactiveRender.$mobx = reaction;
       this.render = reactiveRender;
       return reactiveRender();
-    }
+    };
 
     const reactiveRender = () => {
       isRenderingPending = false;
-      var rendering;
+      let rendering = undefined;
       reaction.track(() => {
         if (isDevtoolsEnabled) {
           this.__$mobRenderStart = Date.now();
@@ -116,7 +116,7 @@ var reactiveMixin = {
     this.render.$mobx && this.render.$mobx.dispose();
     this.__$mobxIsUnmounted = true;
     if (isDevtoolsEnabled) {
-      var node = findDOMNode(this);
+      const node = findDOMNode(this);
       if (node && componentByNodeRegistery) {
         componentByNodeRegistery.delete(node);
       }
@@ -152,12 +152,13 @@ var reactiveMixin = {
       return true;
     }
     // update if props are shallowly not equal, inspired by PureRenderMixin
-    var keys = Object.keys(this.props);
-    var key;
-    if (keys.length !== Object.keys(nextProps).length)
+    const keys = Object.keys(this.props);
+    if (keys.length !== Object.keys(nextProps).length) {
       return true;
-    for (var i = keys.length - 1; i >= 0, key = keys[i]; i--) {
-      var newValue = nextProps[key];
+    }
+    let key;
+    for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
+      const newValue = nextProps[key];
       if (newValue !== this.props[key]) {
         return true;
       } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
@@ -173,7 +174,7 @@ var reactiveMixin = {
     }
     return false;
   }
-}
+};
 
 /**
  * Observer function / decorator
@@ -192,7 +193,7 @@ export function observer(arg1, arg2) {
       return inject.apply(null, arg1)(observer(arg2));
     }
   }
-  var componentClass = arg1;
+  const componentClass = arg1;
 
   // Stateless function component:
   // If it is function but doesn't seem to be a react class constructor,
@@ -213,7 +214,7 @@ export function observer(arg1, arg2) {
   if (!componentClass) {
     throw new Error("Please pass a valid component to 'observer'");
   }
-  var target = componentClass.prototype || componentClass;
+  const target = componentClass.prototype || componentClass;
   [
     "componentWillMount",
     "componentWillUnmount",

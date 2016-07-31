@@ -56,8 +56,6 @@ function makeConfig(target) {
         __TARGET__: JSON.stringify(target),
       }),
       new webpack.optimize.UglifyJsPlugin({
-        mangle: false,
-        beautify: true,
         compress: {
           warnings: false
         }
