@@ -9,7 +9,7 @@
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
-    "build": "webpack && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
+    "build": "webpack && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
     "prepublish": "npm run build",
     "test": "npm run build && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run && tsc -p test/ts",
     "debug": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run --browser chrome"
