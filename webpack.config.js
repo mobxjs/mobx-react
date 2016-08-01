@@ -55,7 +55,6 @@ function makeConfig(target) {
     },
     plugins: [
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify('production'),
         __TARGET__: JSON.stringify(target),
       }),
       new webpack.optimize.UglifyJsPlugin({
