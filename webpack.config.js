@@ -19,7 +19,10 @@ function makeConfig(target) {
       }())
     },
     resolve: {
-      extensions: ['', '.js']
+      extensions: ['', '.js'],
+      alias: {
+        'react-dom': 'empty-module'
+      }
     },
     module: {
       loaders: [{
@@ -46,7 +49,7 @@ function makeConfig(target) {
           commonjs2: 'react-dom',
           amd: 'react-dom'
         };
-        return 'var undefined';
+        return false; // not external, will use empty-module  alias
       }()),
       mobx: 'mobx'
     },

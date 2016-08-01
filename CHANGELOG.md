@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.5.2
+
+* added propTypes.observableArrayOf and propTypes.arrayOrObservableArrayOf (#91)
+
 ### 3.5.1
 
 * Fixed regression #85, changes caused by the constructor results in inconsistent rendering (N.B.: that is un-idiomatic React usage and React will warn about this!)
