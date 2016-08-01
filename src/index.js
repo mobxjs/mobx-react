@@ -24,6 +24,7 @@ export { default as inject } from './inject';
 import * as propTypes from './propTypes';
 export { propTypes };
 
+export default module.exports;
 
 /* Deprecated */
 
