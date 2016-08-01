@@ -3,7 +3,7 @@ import { isObservableArray, isObservableObject, isObservableMap } from 'mobx';
 // Copied from React.PropTypes
 function createChainableTypeChecker(validate) {
   function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    componentName = componentName || ANONYMOUS;
+    componentName = componentName || '<<anonymous>>';
     propFullName = propFullName || propName;
     if (props[propName] == null) {
       if (isRequired) {
