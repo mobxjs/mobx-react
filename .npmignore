@@ -2,3 +2,5 @@
 test/
 publish.js
 *.patch
+src
+webpack.config.js

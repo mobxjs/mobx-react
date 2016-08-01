@@ -99,9 +99,11 @@ import {observer} from "mobx-react";
 MobX-react provides the following additional `propTypes` which can be used to validate against MobX structures:
 
 * `observableArray`
+* `observableArrayOf(React.PropTypes.number)`
 * `observableMap`
 * `observableObject`
 * `arrayOrObservableArray`
+* `arrayOrObservableArrayOf(React.PropTypes.number)`
 * `objectOrObservableObject`
 
 
