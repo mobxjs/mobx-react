@@ -1,6 +1,6 @@
 # MobX-React Changelog
 
-### 3.5.2
+### 3.5.3
 
 * Fixed error `Cannot read property 'renderReporter' of undefined` (#96)
 
