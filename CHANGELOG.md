@@ -2,7 +2,11 @@
 
 ### 3.5.2
 
-* added propTypes.observableArrayOf and propTypes.arrayOrObservableArrayOf (#91)
+* Fixed error `Cannot read property 'renderReporter' of undefined` (#96)
+
+### 3.5.2
+
+* Added propTypes.observableArrayOf and propTypes.arrayOrObservableArrayOf (#91)
 
 ### 3.5.1
 
