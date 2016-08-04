@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.5.4
+
+* Introduced `wrappedInstance` by @rossipedia on `inject` decorated HOC's, see https://github.com/mobxjs/mobx-react/pull/90/
+
 ### 3.5.3
 
 * Fixed error `Cannot read property 'renderReporter' of undefined` (#96)
@@ -31,7 +35,7 @@
 * Added typescript typings form `mobx-react/native` and `mobx-react/custom`
 * Fixed #63: error when using stateless function components when using babel and typescript
 
-### 3.3.0 
+### 3.3.0
 
 * Upgraded to MobX 2.2.0
 
@@ -69,7 +73,7 @@ Removed the warning introduced in 3.0.1. It triggered always when using shallow 
 
 ### 3.0.1
 
-Added warning when changing state in `getInitialState` / `constructor`. 
+Added warning when changing state in `getInitialState` / `constructor`.
 
 ### 3.0.0
 
@@ -119,7 +123,7 @@ All credits to Jiri Spac for this contribution!
 
 ### 2.0.0
 
-Use React 0.14 instead of React 0.13. For React 0.13, use version `mobx-react@1.0.2` or higher. 
+Use React 0.14 instead of React 0.13. For React 0.13, use version `mobx-react@1.0.2` or higher.
 
 ### 1.0.2
 

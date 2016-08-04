@@ -12,6 +12,10 @@ function createStoreInjector(grabStoresFn, component) {
         newProps[key] = this.props[key];
       }
       newProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context);
+      newProps.ref = instance => {
+        this.wrappedInstance = instance;
+      }
+
       return React.createElement(component, newProps);
     }
     // TODO: should have shouldComponentUpdate?

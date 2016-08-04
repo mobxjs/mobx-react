@@ -78,7 +78,7 @@ test('inject based context', t => {
                         e("span", {},
                             e(B, {})
                         ),
-                        e("section", {}, 
+                        e("section", {},
                             e(Provider, { foo: 42}, e(B, {}))
                         )
                     )
@@ -157,7 +157,7 @@ test('inject based context', t => {
                 return e("section", {},
                     e("span", {}, a.get()),
                     e(Provider, { foo: a.get() }, e(B, {}))
-                ); 
+                );
             }
         }))
 
@@ -210,9 +210,12 @@ test('inject based context', t => {
         t.end();
     })
 
-    test('support wrappedComponent', t=> {
+    test('support wrappedComponent and wrappedInstance', t=> {
         var B = React.createClass({
-            render() {},
+            render() {
+                this.testField = 1;
+                return null;
+            },
             propTypes: {
                 "x": React.PropTypes.object
             }
@@ -220,6 +223,10 @@ test('inject based context', t => {
         var C = inject("booh")(B);
         t.equal(C.wrappedComponent, B);
         t.deepEqual(Object.keys(C.wrappedComponent.propTypes), ["x"]);
+
+        const wrapper = mount(e(C, { booh: 42 }));
+        t.equal(wrapper.root.nodes[0].wrappedInstance.testField, 1);
+
         t.end();
     })
 
