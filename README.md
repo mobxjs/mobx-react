@@ -170,6 +170,14 @@ var Button = inject("color")(observer(React.createClass({
 })))
 ```
 
+A functional stateless componentn would look like:
+
+```javascript
+var Button = inject("color")(observer(({ color }) => {
+    /* ... etc ... */ 
+}))
+```
+
 #### Strongly typing inject
 
 `inject` also accepts a function (`(allStores, nextProps, nextContext) => nextProps`) that can be used to pick all the desired stores from the available stores like this:
