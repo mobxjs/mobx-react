@@ -50,16 +50,24 @@ import {observer} from "mobx-react";
 const TodoView = observer(React.createClass({
     displayName: "TodoView",
     render() {
-        return <div>{this.props.todo.title}</div>   
+        return <div>{this.props.todo.title}</div>
     }
 }));
 
 // ---- ES6 syntax ----
 
+const TodoView  = observer(class TodoView extends React.Component {
+    render() {
+        return <div>{this.props.todo.title}</div>
+    }
+})
+
+// ---- ESNext syntax with decorators ----
+
 @observer class TodoView extends React.Component {
     render() {
-        return <div>{this.props.todo.title}</div>   
-    }   
+        return <div>{this.props.todo.title}</div>
+    }
 }
 
 // ---- or just use a stateless component function: ----
@@ -67,8 +75,24 @@ const TodoView = observer(React.createClass({
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+### Which components should be marked with `observer`?
+
+The simple rule of thumb is: _all components that render observable data_.
+If you don't want to mark a component as observer, for example to reduce the dependencies of a generic component package, make sure you only pass it plain data.
+
+### Enabling decorators (optional)
+
+Decorators are currently a stage-2 ESNext feature. How to enable them is document [here](https://github.com/mobxjs/mobx#enabling-decorators-optional).
+
+### Should I still use smart and dumb components?
+
+See this [thread](https://www.reddit.com/r/reactjs/comments/4vnxg5/free_eggheadio_course_learn_mobx_react_in_30/d61oh0l).
+TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, but use `observer` on all components.
+
+### About `shouldComponentUpdate`
+
 It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoid as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
-If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`), but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted. 
+If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`), but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted.
 
 ### `componentWillReact` (lifecycle hook)
 
@@ -81,12 +105,12 @@ import {observer} from "mobx-react";
 
 @observer class TodoView extends React.Component {
     componentWillReact() {
-        console.log("I will re-render, since the todo has changed!");    
+        console.log("I will re-render, since the todo has changed!");
     }
 
     render() {
-        return <div>{this.props.todo.title}</div>   
-    }   
+        return <div>{this.props.todo.title}</div>
+    }
 }
 ```
 
@@ -114,7 +138,7 @@ _This feature is marked as experimental as the exact api might change in a next 
 `Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
 
-`inject` can be used to pick up those stores. It is a higher order component that takes a list of strings and makes those stores available to the wrapped component. 
+`inject` can be used to pick up those stores. It is a higher order component that takes a list of strings and makes those stores available to the wrapped component.
 
 Example (based on the official [context docs](https://facebook.github.io/react/docs/context.html#passing-info-automatically-through-a-tree)):
 
@@ -166,15 +190,15 @@ The above example in ES5 would start like:
 
 ```javascript
 var Button = inject("color")(observer(React.createClass({
-    /* ... etc ... */ 
+    /* ... etc ... */
 })))
 ```
 
-A functional stateless componentn would look like:
+A functional stateless component would look like:
 
 ```javascript
 var Button = inject("color")(observer(({ color }) => {
-    /* ... etc ... */ 
+    /* ... etc ... */
 }))
 ```
 
@@ -199,7 +223,7 @@ Make sure to mark `userStore` as optional property. It should not (necessarily) 
 
 **Should I use `observer` for each component?**
 
-You should use `observer` on every component that displays observable data. 
+You should use `observer` on every component that displays observable data.
 Even the small ones. `observer` allows components to render independently from their parent and in general this means that
 the more you use `observer`, the better the performance become.
 The overhead of `observer` itself is neglectable.
@@ -208,7 +232,7 @@ See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/
 
 **I see React warnings about `forceUpdate` / `setState` from React**
 
-The following warning will appear if you trigger a re-rendering between instantiating and rendering a component: 
+The following warning will appear if you trigger a re-rendering between instantiating and rendering a component:
 
 ```
 Warning: forceUpdate(...): Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state.`
