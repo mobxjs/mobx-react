@@ -133,6 +133,26 @@ test('inject based context', t => {
         t.end();
     })
 
+    test('inject merges (and overrides) props', t => {
+        t.plan(1);
+        var C = inject(function() {
+            return { a: 1 }
+        })(observer(React.createClass({
+            render: function() {
+                t.deepEqual(this.props, { a: 1, b: 2 });
+                return null;
+            }
+        })));
+
+        var B = React.createClass({
+            render: function() {
+                return e(C, { a: 2, b: 2 });
+            }
+        });
+
+        const wrapper = mount(e(B));
+    })
+
     test('warning is printed when changing stores', t => {
         var msg;
         var baseWarn = console.warn;

@@ -12,7 +12,10 @@ function createStoreInjector(grabStoresFn, component) {
       for (let key in this.props) if (this.props.hasOwnProperty(key)) {
         newProps[key] = this.props[key];
       }
-      newProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context);
+      var additionalProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context) || {};
+      for (let key in additionalProps) {
+          newProps[key] = additionalProps[key];
+      }
       newProps.ref = instance => {
         this.wrappedInstance = instance;
       }

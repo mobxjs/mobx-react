@@ -204,7 +204,8 @@ var Button = inject("color")(observer(({ color }) => {
 
 #### Strongly typing inject
 
-`inject` also accepts a function (`(allStores, nextProps, nextContext) => nextProps`) that can be used to pick all the desired stores from the available stores like this:
+`inject` also accepts a function (`(allStores, nextProps, nextContext) => additionalProps`) that can be used to pick all the desired stores from the available stores like this.
+The `additionalProps` will be merged into the original `nextProps` before being provided to the next component.
 
 ```typescript
 import {IUserStore} from "myStore"
