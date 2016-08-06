@@ -1,22 +1,24 @@
-import { isObservableArray, isObservableObject, isObservableMap } from 'mobx';
+import { isObservableArray, isObservableObject, isObservableMap, untracked } from 'mobx';
 
 // Copied from React.PropTypes
 function createChainableTypeChecker(validate) {
   function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    componentName = componentName || '<<anonymous>>';
-    propFullName = propFullName || propName;
-    if (props[propName] == null) {
-      if (isRequired) {
-        const actual = props[propName] === null ? 'null' : 'undefined';
-        return new Error(
-          'The ' + location + ' `' + propFullName + '` is marked as required ' +
-          'in `' + componentName + '`, but its value is `' + actual + '`.'
-        );
+    return untracked(() => {
+      componentName = componentName || '<<anonymous>>';
+      propFullName = propFullName || propName;
+      if (props[propName] == null) {
+        if (isRequired) {
+          const actual = props[propName] === null ? 'null' : 'undefined';
+          return new Error(
+            'The ' + location + ' `' + propFullName + '` is marked as required ' +
+            'in `' + componentName + '`, but its value is `' + actual + '`.'
+          );
+        }
+        return null;
+      } else {
+        return validate(props, propName, componentName, location, propFullName);
       }
-      return null;
-    } else {
-      return validate(props, propName, componentName, location, propFullName);
-    }
+    })
   }
 
   const chainedCheckType = checkType.bind(null, false);
@@ -79,51 +81,55 @@ function getPreciseType(propValue) {
 
 function createObservableTypeCheckerCreator(allowNativeType, mobxType) {
   return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
-    if (allowNativeType) {
-      if (getPropType(props[propName]) === mobxType.toLowerCase()) return null;
-    }
-    let mobxChecker;
-    switch (mobxType) {
-      case 'Array': mobxChecker = isObservableArray; break;
-      case 'Object': mobxChecker = isObservableObject; break;
-      case 'Map': mobxChecker = isObservableMap; break;
-      default: throw new Error(`Unexpected mobxType: ${mobxType}`)
-    }
-    const propValue = props[propName];
-    if (!mobxChecker(propValue)) {
-      const preciseType = getPreciseType(propValue);
-      const nativeTypeExpectationMessage = allowNativeType ? ' or javascript `' + mobxType.toLowerCase() + '`' : '';
-      return new Error(
-        'Invalid prop `' + propFullName + '` of type `' + preciseType + '` supplied to' +
-        ' `' + componentName + '`, expected `mobx.Observable' + mobxType + '`' + nativeTypeExpectationMessage + '.'
-      );
-    }
-    return null;
+    return untracked(() => {
+      if (allowNativeType) {
+        if (getPropType(props[propName]) === mobxType.toLowerCase()) return null;
+      }
+      let mobxChecker;
+      switch (mobxType) {
+        case 'Array': mobxChecker = isObservableArray; break;
+        case 'Object': mobxChecker = isObservableObject; break;
+        case 'Map': mobxChecker = isObservableMap; break;
+        default: throw new Error(`Unexpected mobxType: ${mobxType}`)
+      }
+      const propValue = props[propName];
+      if (!mobxChecker(propValue)) {
+        const preciseType = getPreciseType(propValue);
+        const nativeTypeExpectationMessage = allowNativeType ? ' or javascript `' + mobxType.toLowerCase() + '`' : '';
+        return new Error(
+          'Invalid prop `' + propFullName + '` of type `' + preciseType + '` supplied to' +
+          ' `' + componentName + '`, expected `mobx.Observable' + mobxType + '`' + nativeTypeExpectationMessage + '.'
+        );
+      }
+      return null;
+    })
   });
 }
 
 function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
   return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
-    if (typeof typeChecker !== 'function') {
-      return new Error(
-        'Property `' + propFullName + '` of component `' + componentName + '` has ' +
-        'invalid PropType notation.'
-      );
-    }
-    let error = createObservableTypeCheckerCreator(allowNativeType, 'Array')(props, propName, componentName);
-    if (error instanceof Error) return error;
-    const propValue = props[propName];
-    for (let i = 0; i < propValue.length; i++) {
-      error = typeChecker(
-        propValue,
-        i,
-        componentName,
-        location,
-        propFullName + '[' + i + ']'
-      );
+    return untracked(() => {
+      if (typeof typeChecker !== 'function') {
+        return new Error(
+          'Property `' + propFullName + '` of component `' + componentName + '` has ' +
+          'invalid PropType notation.'
+        );
+      }
+      let error = createObservableTypeCheckerCreator(allowNativeType, 'Array')(props, propName, componentName);
       if (error instanceof Error) return error;
-    }
-    return null;
+      const propValue = props[propName];
+      for (let i = 0; i < propValue.length; i++) {
+        error = typeChecker(
+          propValue,
+          i,
+          componentName,
+          location,
+          propFullName + '[' + i + ']'
+        );
+        if (error instanceof Error) return error;
+      }
+      return null;
+    });
   });
 }
 

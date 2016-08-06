@@ -6,6 +6,7 @@
 * print warnings when assign values to `propTypes`, `defaultProps`, or `contextTypes` of a HOC. (by @jtraub, see https://github.com/mobxjs/mobx-react/pull/88/)
 * Static properties are now hoisted to HoC components when, #92
 * If `inject` is used incombination with a function, the object return from the function will now be merged into the `nextProps` instead of replacing them, #80
+* Always do propType checking untracked, partially fixes #56, #305
 
 ### 3.5.3
 
