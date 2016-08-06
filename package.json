@@ -42,7 +42,9 @@
     "typescript": "^1.8.10",
     "webpack": "^1.13.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "hoist-non-react-statics": "^1.2.0"
+  },
   "keywords": [
     "mobx",
     "mobservable",

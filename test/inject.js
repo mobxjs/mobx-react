@@ -210,7 +210,7 @@ test('inject based context', t => {
         t.end();
     })
 
-    test('support wrappedComponent and wrappedInstance', t=> {
+    test('support static hoisting, wrappedComponent and wrappedInstance', t=> {
         var B = React.createClass({
             render() {
                 this.testField = 1;
@@ -220,8 +220,14 @@ test('inject based context', t => {
                 "x": React.PropTypes.object
             }
         })
+        B.bla = 17;
+        B.bla2 = {};
+
         var C = inject("booh")(B);
         t.equal(C.wrappedComponent, B);
+        t.equal(B.bla, 17);
+        t.equal(C.bla, 17);
+        t.ok(C.bla2 === B.bla2);
         t.deepEqual(Object.keys(C.wrappedComponent.propTypes), ["x"]);
 
         const wrapper = mount(e(C, { booh: 42 }));
@@ -230,8 +236,7 @@ test('inject based context', t => {
         t.end();
     })
 
-
-test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
+    test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
         var msg = [];
         var baseWarn = console.warn;
         console.warn = (m) => msg.push(m);

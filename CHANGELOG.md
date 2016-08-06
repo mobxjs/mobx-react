@@ -4,6 +4,7 @@
 
 * Introduced `wrappedInstance` by @rossipedia on `inject` decorated HOC's, see https://github.com/mobxjs/mobx-react/pull/90/
 * print warnings when assign values to `propTypes`, `defaultProps`, or `contextTypes` of a HOC. (by @jtraub, see https://github.com/mobxjs/mobx-react/pull/88/)
+* Static properties are now hoisted to HoC components when, #92
 
 ### 3.5.3
 

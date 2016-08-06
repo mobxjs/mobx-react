@@ -176,7 +176,7 @@ test('observer based context', t => {
         t.end();
     })
 
-test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
+    test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
         var msg = [];
         var baseWarn = console.warn;
         console.warn = (m) => msg.push(m);

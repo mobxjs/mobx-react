@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import hoistStatics from 'hoist-non-react-statics';
 
 /**
  * Store Injection
@@ -23,7 +24,7 @@ function createStoreInjector(grabStoresFn, component) {
   Injector.contextTypes = { mobxStores: PropTypes.object };
   Injector.wrappedComponent = component;
   injectStaticWarnings(Injector, component)
-
+  hoistStatics(Injector, component);
   return Injector;
 }
 
