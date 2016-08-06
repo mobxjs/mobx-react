@@ -22,7 +22,29 @@ function createStoreInjector(grabStoresFn, component) {
   });
   Injector.contextTypes = { mobxStores: PropTypes.object };
   Injector.wrappedComponent = component;
+  injectStaticWarnings(Injector, component)
+
   return Injector;
+}
+
+function injectStaticWarnings(hoc, component) {
+    if (typeof process === "undefined" || !process.env || process.env.NODE_ENV === "production")
+        return;
+
+    ['propTypes', 'defaultProps', 'contextTypes'].forEach(function (prop) {
+        const propValue = hoc[prop];
+        Object.defineProperty(hoc, prop, {
+            set: function (_) {
+                // enable for testing:
+                var name = component.displayName || component.name;
+                console.warn('Mobx Injector: you are trying to attach ' + prop +
+                    ' to HOC instead of ' + name + '. Use `wrappedComponent` property.');
+            },
+            get: function () {
+                return propValue;
+            }
+        });
+    });
 }
 
 function grabStoresByName(storeNames) {

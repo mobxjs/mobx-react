@@ -230,5 +230,77 @@ test('inject based context', t => {
         t.end();
     })
 
+
+test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
+        var msg = [];
+        var baseWarn = console.warn;
+        console.warn = (m) => msg.push(m);
+
+        var C = observer(["foo"], React.createClass({
+            displayName: 'C',
+            render: function () {
+                return e("div", {}, "context:" + this.props.foo);
+            }
+        }));
+
+        C.propTypes = {};
+        C.defaultProps = {};
+        C.contextTypes = {};
+
+        var B = React.createClass({
+            render: function () {
+                return e(C, {});
+            }
+        });
+
+        var A = React.createClass({
+            render: function () {
+                return e(Provider, { foo: "bar" }, e(B, {}))
+            }
+        })
+
+        const wrapper = mount(e(A));
+        t.equal(msg.length, 3);
+        t.equal(msg[0], "Mobx Injector: you are trying to attach propTypes to HOC instead of C. Use `wrappedComponent` property.");
+        t.equal(msg[1], "Mobx Injector: you are trying to attach defaultProps to HOC instead of C. Use `wrappedComponent` property.");
+        t.equal(msg[2], "Mobx Injector: you are trying to attach contextTypes to HOC instead of C. Use `wrappedComponent` property.");
+
+        console.warn = baseWarn;
+        t.end();
+    })
+
+
+    test('warning is not printed when attaching propTypes to wrapped component', t => {
+        var msg = [];
+        var baseWarn = console.warn;
+        console.warn = (m) => msg = m;
+
+        var C = observer(["foo"], React.createClass({
+            displayName: 'C',
+            render: function () {
+                return e("div", {}, "context:" + this.props.foo);
+            }
+        }));
+
+        C.wrappedComponent.propTypes = {};
+
+        var B = React.createClass({
+            render: function () {
+                return e(C, {});
+            }
+        });
+
+        var A = React.createClass({
+            render: function () {
+                return e(Provider, { foo: "bar" }, e(B, {}))
+            }
+        })
+
+        const wrapper = mount(e(A));
+        t.equal(msg.length, 0);
+        console.warn = baseWarn;
+        t.end();
+    })
+
     t.end()
 })
