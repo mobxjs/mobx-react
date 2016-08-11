@@ -2,7 +2,7 @@ import { isObservableArray, isObservableObject, isObservableMap, untracked } fro
 
 // Copied from React.PropTypes
 function createChainableTypeChecker(validate) {
-  function checkType(isRequired, props, propName, componentName, location, propFullName) {
+  function checkType(isRequired, props, propName, componentName, location, propFullName, ...rest) {
     return untracked(() => {
       componentName = componentName || '<<anonymous>>';
       propFullName = propFullName || propName;
@@ -16,7 +16,7 @@ function createChainableTypeChecker(validate) {
         }
         return null;
       } else {
-        return validate(props, propName, componentName, location, propFullName);
+        return validate(props, propName, componentName, location, propFullName, ...rest);
       }
     })
   }
@@ -107,7 +107,7 @@ function createObservableTypeCheckerCreator(allowNativeType, mobxType) {
 }
 
 function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
-  return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
+  return createChainableTypeChecker(function(props, propName, componentName, location, propFullName, ...rest) {
     return untracked(() => {
       if (typeof typeChecker !== 'function') {
         return new Error(
@@ -124,7 +124,8 @@ function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
           i,
           componentName,
           location,
-          propFullName + '[' + i + ']'
+          propFullName + '[' + i + ']',
+          ...rest
         );
         if (error instanceof Error) return error;
       }
