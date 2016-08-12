@@ -46,7 +46,8 @@ function injectStaticWarnings(hoc, component) {
             },
             get: function () {
                 return propValue;
-            }
+            },
+            configurable: true
         });
     });
 }
