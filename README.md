@@ -131,9 +131,7 @@ MobX-react provides the following additional `propTypes` which can be used to va
 * `objectOrObservableObject`
 
 
-### `Provider` and `inject` (Experimental)
-
-_This feature is marked as experimental as the exact api might change in a next minor, pending any community feedback_.
+### `Provider` and `inject`
 
 `Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
