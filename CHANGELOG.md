@@ -1,5 +1,10 @@
 # MobX-React Changelog
 
+### 3.5.5
+
+* Removed `experimental` status of `inject` / `Provider`. Official feature now.
+* Fixed hot-reloading issue, #101
+
 ### 3.5.4
 
 * Introduced `wrappedInstance` by @rossipedia on `inject` decorated HOC's, see https://github.com/mobxjs/mobx-react/pull/90/
