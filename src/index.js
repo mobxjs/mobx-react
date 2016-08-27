@@ -35,3 +35,9 @@ export const reactiveComponent = () => {
   );
   return observer.apply(null, arguments);
 };
+
+
+/* DevTool support */
+if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
+  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports)
+}
