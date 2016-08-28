@@ -39,5 +39,5 @@ export const reactiveComponent = () => {
 
 /* DevTool support */
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
-  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports)
+  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports, mobx)
 }
