@@ -218,6 +218,25 @@ class MyComponent extends React.Component<{ userStore?: IUserStore; otherProp: n
 
 Make sure to mark `userStore` as optional property. It should not (necessarily) be passed in by parent components after all!
 
+#### Testing store injection
+
+It is allowed to pass any declared stored in directly as property as well. This makes it easy to set up individual component tests without a provider. 
+
+So if you have in your app something like:
+```javascript
+<Provider profile ={profile}>
+    <Person age={'30'} />
+</Provider>
+```
+
+In your test you can easily test the `Person` component by passing the necessary store as prop directly:
+```
+const profile = new Profile()
+const mountedComponent = mount(
+   <Person age={'30'} profile={profile} />
+)
+```
+
 ## FAQ
 
 **Should I use `observer` for each component?**
