@@ -23,6 +23,7 @@ export { default as inject } from './inject';
 
 import * as propTypes from './propTypes';
 export { propTypes };
+export { propTypes as PropTypes };
 
 export default module.exports;
 
