@@ -118,9 +118,9 @@ import {observer} from "mobx-react";
 * `componentWillReact` won't fire before the initial render (use `componentWillMount` instead)
 * `componentWillReact` won't fire when receiving new props or after `setState` calls (use `componentWillUpdate` instead)
 
-### `propTypes`
+### `PropTypes`
 
-MobX-react provides the following additional `propTypes` which can be used to validate against MobX structures:
+MobX-react provides the following additional `PropTypes` which can be used to validate against MobX structures:
 
 * `observableArray`
 * `observableArrayOf(React.PropTypes.number)`
@@ -130,7 +130,7 @@ MobX-react provides the following additional `propTypes` which can be used to va
 * `arrayOrObservableArrayOf(React.PropTypes.number)`
 * `objectOrObservableObject`
 
-Use `import { propTypes } from "react-mobx"` to import them, then use for example `propTypes.observableArray`
+Use `import { PropTypes } from "react-mobx"` to import them, then use for example `PropTypes.observableArray`
 
 
 ### `Provider` and `inject`
@@ -239,7 +239,7 @@ Make sure to mark `userStore` as optional property. It should not (necessarily) 
 
 #### Testing store injection
 
-It is allowed to pass any declared stored in directly as property as well. This makes it easy to set up individual component tests without a provider. 
+It is allowed to pass any declared stored in directly as property as well. This makes it easy to set up individual component tests without a provider.
 
 So if you have in your app something like:
 ```javascript

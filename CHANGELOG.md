@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.5.6
+
+* Export `propTypes` as `PropTypes`, like React (@andykog, ##117)
+
 ### 3.5.5
 
 * Removed `experimental` status of `inject` / `Provider`. Official feature now.
