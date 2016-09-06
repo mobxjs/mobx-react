@@ -130,7 +130,7 @@ MobX-react provides the following additional `PropTypes` which can be used to va
 * `arrayOrObservableArrayOf(React.PropTypes.number)`
 * `objectOrObservableObject`
 
-Use `import { PropTypes } from "react-mobx"` to import them, then use for example `PropTypes.observableArray`
+Use `import { PropTypes } from "mobx-react"` to import them, then use for example `PropTypes.observableArray`
 
 
 ### `Provider` and `inject`
