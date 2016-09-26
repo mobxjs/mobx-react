@@ -14,6 +14,8 @@ This package supports both React and React-Native.
 
 `npm install mobx-react --save`
 
+Or CDN: https://unpkg.com/mobx-react
+
 ```javascript
 import {observer} from 'mobx-react';
 // - or -
