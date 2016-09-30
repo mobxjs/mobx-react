@@ -60,7 +60,10 @@ function makeConfig(target) {
       new webpack.optimize.UglifyJsPlugin({
         compress: {
           warnings: false
-        }
+        },
+        mangle: {
+          except: ['require'], // #127
+        },
       })
     ]
   };
