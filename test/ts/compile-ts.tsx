@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Component} from 'react'; 
+import {Component, PropTypes} from 'react';
 import {observer, Provider, propTypes, inject} from '../../';
 
 @observer
@@ -34,7 +34,7 @@ const T5 = observer(() => {
 
 @observer
 class T6 extends Component<{}, {}> {
-	
+
 	render() {
 		return <span>
 			<T3 hamburger={6} />
@@ -130,5 +130,18 @@ class T13 extends Component<{ pizza: number}, {}> {
 	}
 }
 
+@inject((allStores) => ({
+    store: {},
+}))
+@observer
+class LoginContainer extends Component<any, void> {
+    static contextTypes: React.ValidationMap<any> = {
+        router: PropTypes.func.isRequired,
+    }
+
+    render() {
+        return (<div>Hello!</div>)
+    }
+}
 
 ReactDOM.render(<T10 hamburger={3} />, document.body);
