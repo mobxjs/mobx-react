@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.5.7
+
+* Bundles are no longer minified, fixes #127
+
 ### 3.5.6
 
 * Export `propTypes` as `PropTypes`, like React (@andykog, ##117)
