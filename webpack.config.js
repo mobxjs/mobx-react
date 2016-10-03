@@ -56,14 +56,6 @@ function makeConfig(target) {
     plugins: [
       new webpack.DefinePlugin({
         __TARGET__: JSON.stringify(target),
-      }),
-      new webpack.optimize.UglifyJsPlugin({
-        compress: {
-          warnings: false
-        },
-        mangle: {
-          except: ['require'], // #127
-        },
       })
     ]
   };
