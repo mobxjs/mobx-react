@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.5.8
+
+* Fixed issue where `props` where not passed properly to components in very rare cases. Also fixed #115
+
 ### 3.5.7
 
 * Bundles are no longer minified, fixes #127
