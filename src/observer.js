@@ -68,6 +68,13 @@ const reactiveMixin = {
       || (this.constructor && (this.constructor.displayName || this.constructor.name))
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
+
+    // make this.props an observable reference, see #124
+    mobx.extendObservable(this, {
+        props: mobx.asReference(this.props)
+    })
+
+    // wire up reactive render
     const baseRender = this.render.bind(this);
     let reaction = null;
     let isRenderingPending = false;

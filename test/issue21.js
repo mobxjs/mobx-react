@@ -142,10 +142,7 @@ test('verify prop changes are picked up', function(t) {
     var data = mobx.observable({
         items: [createItem(1, "hi")]
     })
-
-    var setState;
     var events = []
-    window.xxx = events
 
     var Child = observer(React.createClass({
         componentWillReceiveProps: function (nextProps) {
@@ -208,6 +205,189 @@ test('verify prop changes are picked up', function(t) {
                 [ 'update', 1, 2 ],
                 [ 'compute', 2 ],
                 [ 'render', 2, '1.2.test.0' ]
+            ])
+            t.end()
+        }, 100)
+    })
+})
+
+
+test('verify props is reactive', function(t) {
+    function createItem(subid, label) {
+        const res = mobx.observable({
+            id: 1,
+            label: label,
+            get text() {
+                events.push(["compute", this.subid])
+                return this.id + "." + this.subid + "." + this.label + "." + data.items.indexOf(this)
+            }
+        })
+        res.subid = subid // non reactive
+        return res
+    }
+
+    var data = mobx.observable({
+        items: [createItem(1, "hi")]
+    })
+    var events = []
+
+    var Child = observer(React.createClass({
+        componentWillMount() {
+            events.push(["mount"])
+            mobx.extendObservable(this, {
+                computedLabel: function() {
+                    events.push(["computed label", this.props.item.subid])
+                    return this.props.item.label
+                }
+            })
+        },
+
+        componentWillReceiveProps: function (nextProps) {
+            events.push(["receive", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillUpdate: function (nextProps) {
+            events.push(["update", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillReact: function() {
+            events.push(["react", this.props.item.subid])
+        },
+
+        render: function() {
+            events.push(["render", this.props.item.subid, this.props.item.text, this.computedLabel])
+            return React.createElement("span", {}, this.props.item.text + this.computedLabel)
+        }
+    }))
+
+    var Parent = observer(React.createClass({
+        render: function() {
+            return React.createElement("div", {
+                onClick: changeStuff.bind(this), // event is needed to get batching!
+                id: "testDiv"
+            }, data.items.map(function(item) {
+                return React.createElement(Child, {
+                    key: "fixed",
+                    item: item
+                })
+            }))
+        }
+    }))
+
+    var Wrapper = React.createClass({ render: function() {
+        return React.createElement(Parent, {})
+    }})
+
+    function changeStuff() {
+        mobx.transaction(function() {
+            // components start rendeirng a new item, but computed is still based on old value
+            data.items = [createItem(2, "test")]
+        })
+    }
+
+    ReactDOM.render(React.createElement(Wrapper, {}), testRoot, function() {
+        t.deepEqual(events, [
+            ["mount"],
+            ["compute", 1],
+            ["computed label", 1],
+            ["render", 1, "1.1.hi.0", "hi"],
+        ])
+        events.splice(0)
+        $("#testDiv").click()
+
+        setTimeout(function() {
+            t.deepEqual(events, [
+                [ 'compute', 1 ],
+                [ 'react', 1 ],
+                [ 'receive', 1, 2 ],
+                [ 'update', 1, 2 ],
+                [ 'compute', 2 ],
+                [ "computed label", 2],
+                [ 'render', 2, '1.2.test.0', "test" ]
+            ])
+            t.end()
+        }, 100)
+    })
+})
+
+
+test.only('no re-render for shallow equal props', function(t) {
+    function createItem(subid, label) {
+        const res = mobx.observable({
+            id: 1,
+            label: label,
+        })
+        res.subid = subid // non reactive
+        return res
+    }
+
+    var data = mobx.observable({
+        items: [createItem(1, "hi")],
+        parentValue: 0
+    })
+    var events = []
+
+    var Child = observer(React.createClass({
+        componentWillMount() {
+            events.push(["mount"])
+        },
+
+        componentWillReceiveProps: function (nextProps) {
+            events.push(["receive", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillUpdate: function (nextProps) {
+            events.push(["update", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillReact: function() {
+            events.push(["react", this.props.item.subid])
+        },
+
+        render: function() {
+            events.push(["render", this.props.item.subid, this.props.item.label])
+            return React.createElement("span", {}, this.props.item.label)
+        }
+    }))
+
+    var Parent = observer(React.createClass({
+        render: function() {
+            events.push(["parent render", data.parentValue])
+            return React.createElement("div", {
+                onClick: changeStuff.bind(this), // event is needed to get batching!
+                id: "testDiv"
+            }, data.items.map(function(item) {
+                return React.createElement(Child, {
+                    key: "fixed",
+                    item: item,
+                    value: 5
+                })
+            }))
+        }
+    }))
+
+    var Wrapper = React.createClass({ render: function() {
+        return React.createElement(Parent, {})
+    }})
+
+    function changeStuff() {
+        data.items[0].label = "hi" // no change
+        data.parentValue = 1 // rerender parent
+    }
+
+    ReactDOM.render(React.createElement(Wrapper, {}), testRoot, function() {
+        t.deepEqual(events, [
+            ["parent render", 0],
+            ["mount"],
+            ["render", 1, "hi"],
+        ])
+        events.splice(0)
+        $("#testDiv").click()
+
+        setTimeout(function() {
+            t.deepEqual(events, [
+                ["parent render", 1],
+                [ 'receive', 1, 1 ],
             ])
             t.end()
         }, 100)
