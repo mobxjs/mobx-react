@@ -84,6 +84,9 @@ const reactiveMixin = {
         }
     })
 
+    // make state an observable reference
+    mobx.extendObservable(this, { state: mobx.asFlat(this.state) })
+
     // wire up reactive render
     const baseRender = this.render.bind(this);
     let reaction = null;
@@ -158,31 +161,6 @@ const reactiveMixin = {
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    // update on any state changes (as is the default)
-    if (this.state !== nextState) {
-      return true;
-    }
-    // update if props are shallowly not equal, inspired by PureRenderMixin
-    const keys = Object.keys(this.props);
-    if (keys.length !== Object.keys(nextProps).length) {
-      return true;
-    }
-    let key;
-    for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
-      const newValue = nextProps[key];
-      if (newValue !== this.props[key]) {
-        return true;
-      } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
-        /**
-         * If the newValue is still the same object, but that object is not observable,
-         * fallback to the default React behavior: update, because the object *might* have changed.
-         * If you need the non default behavior, just use the React pure render mixin, as that one
-         * will work fine with mobx as well, instead of the default implementation of
-         * observer.
-         */
-        return true;
-      }
-    }
     return false;
   }
 };
