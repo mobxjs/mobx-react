@@ -311,7 +311,7 @@ test('verify props is reactive', function(t) {
 })
 
 
-test.only('no re-render for shallow equal props', function(t) {
+test('no re-render for shallow equal props', function(t) {
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -352,6 +352,7 @@ test.only('no re-render for shallow equal props', function(t) {
 
     var Parent = observer(React.createClass({
         render: function() {
+            t.equal(mobx.isObservable(this.props.nonObservable), false, "object has become observable!")
             events.push(["parent render", data.parentValue])
             return React.createElement("div", {
                 onClick: changeStuff.bind(this), // event is needed to get batching!
@@ -367,7 +368,7 @@ test.only('no re-render for shallow equal props', function(t) {
     }))
 
     var Wrapper = React.createClass({ render: function() {
-        return React.createElement(Parent, {})
+        return React.createElement(Parent, { nonObservable: {} })
     }})
 
     function changeStuff() {

@@ -70,8 +70,18 @@ const reactiveMixin = {
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
 
     // make this.props an observable reference, see #124
-    mobx.extendObservable(this, {
-        props: mobx.asReference(this.props)
+    const props = {}
+    for (var key in this.props)
+        props[key] = this.props[key]
+    mobx.observable(mobx.asFlat(props))
+    Object.defineProperty(this, "props",  {
+        configurable: true, enumerable: true,
+        get: function() {
+            return props
+        },
+        set: function(v) {
+            mobx.extendObservable(props, v)
+        }
     })
 
     // wire up reactive render
