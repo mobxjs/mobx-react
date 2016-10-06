@@ -68,6 +68,26 @@ const reactiveMixin = {
       || (this.constructor && (this.constructor.displayName || this.constructor.name))
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
+
+    // make this.props an observable reference, see #124
+    const props = {}
+    for (var key in this.props)
+        props[key] = this.props[key]
+    mobx.observable(mobx.asFlat(props))
+    Object.defineProperty(this, "props",  {
+        configurable: true, enumerable: true,
+        get: function() {
+            return props
+        },
+        set: function(v) {
+            mobx.extendObservable(props, v)
+        }
+    })
+
+    // make state an observable reference
+    mobx.extendObservable(this, { state: mobx.asFlat(this.state) })
+
+    // wire up reactive render
     const baseRender = this.render.bind(this);
     let reaction = null;
     let isRenderingPending = false;
@@ -141,31 +161,6 @@ const reactiveMixin = {
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    // update on any state changes (as is the default)
-    if (this.state !== nextState) {
-      return true;
-    }
-    // update if props are shallowly not equal, inspired by PureRenderMixin
-    const keys = Object.keys(this.props);
-    if (keys.length !== Object.keys(nextProps).length) {
-      return true;
-    }
-    let key;
-    for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
-      const newValue = nextProps[key];
-      if (newValue !== this.props[key]) {
-        return true;
-      } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
-        /**
-         * If the newValue is still the same object, but that object is not observable,
-         * fallback to the default React behavior: update, because the object *might* have changed.
-         * If you need the non default behavior, just use the React pure render mixin, as that one
-         * will work fine with mobx as well, instead of the default implementation of
-         * observer.
-         */
-        return true;
-      }
-    }
     return false;
   }
 };
