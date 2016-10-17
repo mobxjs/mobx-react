@@ -69,26 +69,29 @@ const reactiveMixin = {
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
 
-    // make this.props an observable reference, see #124
-    const props = {}
-    for (var key in this.props)
-        props[key] = mobx.asReference(this.props[key]);
-    mobx.observable(mobx.asFlat(props))
-    Object.defineProperty(this, "props",  {
-        configurable: true, enumerable: true,
-        get: function() {
-            return props
-        },
-        set: mobx.action(function setProps(v) {
-            var newProps = {};
-            for (var key in v)
-                newProps[key] = (key in props) ? v[key] : mobx.asReference(v[key])
-            mobx.extendObservable(props, newProps)
-        })
-    })
+    function makePropertyObservableReference(propName) {
+      const value = {}
+      for (var key in this[propName])
+        value[key] = mobx.asReference(this[propName][key]);
+      mobx.observable(mobx.asFlat(value))
+      Object.defineProperty(this, propName, {
+          configurable: true, enumerable: true,
+          get: function() {
+              return value
+          },
+          set: mobx.action(function set(v) {
+              var newValue = {};
+              for (var key in v)
+                newValue[key] = (key in value) ? v[key] : mobx.asReference(v[key])
+              mobx.extendObservable(value, newValue)
+          })
+      })
+    }
 
+    // make this.props an observable reference, see #124
+    makePropertyObservableReference.call(this, "props")
     // make state an observable reference
-    mobx.extendObservable(this, { state: mobx.asFlat(this.state) })
+    makePropertyObservableReference.call(this, "state")
 
     // wire up reactive render
     const baseRender = this.render.bind(this);
