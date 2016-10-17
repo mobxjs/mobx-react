@@ -394,3 +394,17 @@ test('no re-render for shallow equal props', function(t) {
         }, 100)
     })
 })
+
+test('function passed in props is not invoked on property access', function(t) {
+  var Component = observer(React.createClass({
+    render: function() {
+      return React.createElement("div", {onClick: this.props.onClick})
+    }
+  }))
+  function onClick() {
+    t.fail(new Error("This function should not be called!"));
+  }
+  ReactDOM.render(React.createElement(Component, {onClick: onClick}), testRoot, function() {
+    t.end();
+  });
+})
