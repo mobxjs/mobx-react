@@ -72,7 +72,7 @@ const reactiveMixin = {
     // make this.props an observable reference, see #124
     const props = {}
     for (var key in this.props)
-        props[key] = this.props[key]
+        props[key] = mobx.asReference(this.props[key]);
     mobx.observable(mobx.asFlat(props))
     Object.defineProperty(this, "props",  {
         configurable: true, enumerable: true,
@@ -80,7 +80,10 @@ const reactiveMixin = {
             return props
         },
         set: function(v) {
-            mobx.extendObservable(props, v)
+            var newProps = {};
+            for (var key in v)
+                newProps[key] = (key in props) ? v[key] : mobx.asReference(v[key])
+            mobx.extendObservable(props, newProps)
         }
     })
 
