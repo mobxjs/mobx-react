@@ -79,12 +79,12 @@ const reactiveMixin = {
         get: function() {
             return props
         },
-        set: function(v) {
+        set: mobx.action(function setProps(v) {
             var newProps = {};
             for (var key in v)
                 newProps[key] = (key in props) ? v[key] : mobx.asReference(v[key])
             mobx.extendObservable(props, newProps)
-        }
+        })
     })
 
     // make state an observable reference
