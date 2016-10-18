@@ -97,26 +97,27 @@ const reactiveMixin = {
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
 
+    let skipRender = false;
+
     function makePropertyObservableReference(propName) {
       let valueHolder = this[propName];
       const atom = new mobx.Atom("reactive " + propName);
-      const reportChanged = debounce(function reportChanged() {
-        atom.reportChanged();
-      })
       Object.defineProperty(this, propName, {
           configurable: true, enumerable: true,
           get: function() {
             atom.reportObserved();
             return valueHolder;
           },
-          set: mobx.action(function set(v) {
+          set: function set(v) {
             if (isObjectShallowModified(valueHolder, v)) {
               valueHolder = v;
-              reportChanged();
+              skipRender = true;
+              atom.reportChanged();
+              skipRender = false;
             } else {
               valueHolder = v;
             }
-          })
+          }
       })
     }
 
@@ -143,7 +144,9 @@ const reactiveMixin = {
             // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
             // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
             // However, people also claim this migth happen during unit tests..
-            React.Component.prototype.forceUpdate.call(this)
+            if (!skipRender) {
+              React.Component.prototype.forceUpdate.call(this)
+            }
           }
         }
       });
