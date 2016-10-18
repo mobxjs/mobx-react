@@ -107,7 +107,6 @@ const reactiveMixin = {
           },
           set: mobx.action(function set(v) {
             if (isObjectShallowModified(valueHolder, v)) {
-              console.log("changed", valueHolder === v, valueHolder, v)
               valueHolder = v;
               atom.reportChanged();
             } else {
