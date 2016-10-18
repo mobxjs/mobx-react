@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import EventEmitter from './utils/EventEmitter';
 import inject from './inject';
+import debounce from "lodash.debounce";
 
 /**
  * dev tool support
@@ -99,6 +100,9 @@ const reactiveMixin = {
     function makePropertyObservableReference(propName) {
       let valueHolder = this[propName];
       const atom = new mobx.Atom("reactive " + propName);
+      const reportChanged = debounce(function reportChanged() {
+        atom.reportChanged();
+      })
       Object.defineProperty(this, propName, {
           configurable: true, enumerable: true,
           get: function() {
@@ -108,7 +112,7 @@ const reactiveMixin = {
           set: mobx.action(function set(v) {
             if (isObjectShallowModified(valueHolder, v)) {
               valueHolder = v;
-              atom.reportChanged();
+              reportChanged();
             } else {
               valueHolder = v;
             }
