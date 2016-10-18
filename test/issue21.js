@@ -408,3 +408,46 @@ test('function passed in props is not invoked on property access', function(t) {
     t.end();
   });
 })
+
+test('lifecycle callbacks called with correct arguments', function(t) {
+  t.timeoutAfter(200);
+  t.plan(6);
+  var Component = observer(React.createClass({
+    componentWillReceiveProps: function(nextProps) {
+      t.equal(nextProps.counter, 1, 'componentWillReceiveProps: nextProps.counter === 1');
+      t.equal(this.props.counter, 0, 'componentWillReceiveProps: this.props.counter === 1');
+    },
+    componentWillUpdate: function(nextProps, nextState) {
+      t.equal(nextProps.counter, 1, 'componentWillUpdate: nextProps.counter === 1');
+      t.equal(this.props.counter, 0, 'componentWillUpdate: this.props.counter === 0');
+    },
+    componentDidUpdate: function(prevProps, prevState) {
+      t.equal(prevProps.counter, 0, 'componentDidUpdate: prevProps.counter === 0');
+      t.equal(this.props.counter, 1, 'componentDidUpdate: this.props.counter === 1');
+    },
+    render: function() {
+      return React.createElement('div', {}, [
+        React.createElement('span', {}, [this.props.counter]),
+        React.createElement('button', {id: "testButton", onClick: this.props.onClick}),
+      ])
+    }
+  }))
+  var Root = React.createClass({
+    getInitialState: function() {
+      return {};
+    },
+    onButtonClick: function() {
+      console.log('on button click');
+      this.setState({counter: (this.state.counter || 0) + 1})
+    },
+    render: function() {
+      return React.createElement(Component, {
+        counter: this.state.counter || 0,
+        onClick: this.onButtonClick,
+      })
+    },
+  })
+  ReactDOM.render(React.createElement(Root), testRoot, function() {
+    $("#testButton").click();
+  })
+})
