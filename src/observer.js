@@ -57,6 +57,33 @@ function patch(target, funcName) {
   }
 }
 
+function isObjectShallowModified(prev, next) {
+  if (null == prev || null == next || typeof prev !== "object" || typeof next !== "object") {
+    return prev !== next;
+  }
+  const keys = Object.keys(prev);
+  if (keys.length !== Object.keys(next).length) {
+    return true;
+  }
+  let key;
+  for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
+    const newValue = next[key];
+    if (newValue !== prev[key]) {
+      return true;
+    } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
+      /**
+       * If the newValue is still the same object, but that object is not observable,
+       * fallback to the default React behavior: update, because the object *might* have changed.
+       * If you need the non default behavior, just use the React pure render mixin, as that one
+       * will work fine with mobx as well, instead of the default implementation of
+       * observer.
+       */
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * ReactiveMixin
  */
@@ -70,20 +97,22 @@ const reactiveMixin = {
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
 
     function makePropertyObservableReference(propName) {
-      const value = {}
-      for (var key in this[propName])
-        value[key] = mobx.asReference(this[propName][key]);
-      mobx.observable(mobx.asFlat(value))
+      let valueHolder = this[propName];
+      const atom = new mobx.Atom("reactive " + propName);
       Object.defineProperty(this, propName, {
           configurable: true, enumerable: true,
           get: function() {
-              return value
+            atom.reportObserved();
+            return valueHolder;
           },
           set: mobx.action(function set(v) {
-              var newValue = {};
-              for (var key in v)
-                newValue[key] = (key in value) ? v[key] : mobx.asReference(v[key])
-              mobx.extendObservable(value, newValue)
+            if (isObjectShallowModified(valueHolder, v)) {
+              console.log("changed", valueHolder === v, valueHolder, v)
+              valueHolder = v;
+              atom.reportChanged();
+            } else {
+              valueHolder = v;
+            }
           })
       })
     }
@@ -167,7 +196,12 @@ const reactiveMixin = {
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    return false;
+    // update on any state changes (as is the default)
+    if (this.state !== nextState) {
+      return true;
+    }
+    // update if props are shallowly not equal, inspired by PureRenderMixin
+    return isObjectShallowModified(this.props, nextProps);
   }
 };
 

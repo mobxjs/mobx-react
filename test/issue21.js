@@ -427,8 +427,8 @@ test('lifecycle callbacks called with correct arguments', function(t) {
     },
     render: function() {
       return React.createElement('div', {}, [
-        React.createElement('span', {}, [this.props.counter]),
-        React.createElement('button', {id: "testButton", onClick: this.props.onClick}),
+        React.createElement('span', {key: "1"}, [this.props.counter]),
+        React.createElement('button', {key: "2", id: "testButton", onClick: this.props.onClick}),
       ])
     }
   }))
@@ -437,7 +437,6 @@ test('lifecycle callbacks called with correct arguments', function(t) {
       return {};
     },
     onButtonClick: function() {
-      console.log('on button click');
       this.setState({counter: (this.state.counter || 0) + 1})
     },
     render: function() {
