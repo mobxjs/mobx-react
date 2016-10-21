@@ -3,7 +3,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import EventEmitter from './utils/EventEmitter';
 import inject from './inject';
-import debounce from "lodash.debounce";
 
 /**
  * dev tool support
