@@ -21,7 +21,8 @@
   },
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobx": "^2.2.0"
+    "mobx": "^2.2.0",
+    "react": "^0.13.0 || ^0.14.0 || ^15.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.11.4",
