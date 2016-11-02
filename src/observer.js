@@ -189,6 +189,10 @@ export function observer(arg1, arg2) {
   }
   const componentClass = arg1;
 
+  if (componentClass.isObervable !== undefined && !componentClass.isObervable) {
+    console.warn('Mobx Observer: you are trying to observe a non observable component, maybe component is already wrapped by inject');
+  }
+
   // Stateless function component:
   // If it is function but doesn't seem to be a react class constructor,
   // wrap it to a react class automatically
@@ -196,6 +200,7 @@ export function observer(arg1, arg2) {
     typeof componentClass === "function" &&
     (!componentClass.prototype || !componentClass.prototype.render) && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)
   ) {
+
     return observer(React.createClass({
       displayName: componentClass.displayName || componentClass.name,
       propTypes: componentClass.propTypes,
@@ -208,6 +213,7 @@ export function observer(arg1, arg2) {
   if (!componentClass) {
     throw new Error("Please pass a valid component to 'observer'");
   }
+
   const target = componentClass.prototype || componentClass;
   [
     "componentWillMount",
