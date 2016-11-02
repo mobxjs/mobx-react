@@ -25,7 +25,7 @@ function createStoreInjector(grabStoresFn, component) {
     // TODO: should have shouldComponentUpdate?
   });
 
-  Injector.isObervable = false;
+  Injector.isInjector = true;
   Injector.contextTypes = { mobxStores: PropTypes.object };
   Injector.wrappedComponent = component;
   injectStaticWarnings(Injector, component)

@@ -189,8 +189,8 @@ export function observer(arg1, arg2) {
   }
   const componentClass = arg1;
 
-  if (componentClass.isObervable !== undefined && !componentClass.isObervable) {
-    console.warn('Mobx Observer: you are trying to observe a non observable component, maybe component is already wrapped by inject');
+  if (componentClass.isInjector !== undefined && componentClass.isInjector) {
+    console.warn('Mobx Observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
   }
 
   // Stateless function component:
