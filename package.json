@@ -11,8 +11,8 @@
   "scripts": {
     "build": "webpack && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
     "prepublish": "npm run build",
-    "test": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run && tsc -p test/ts",
-    "debug": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run --browser chrome"
+    "test": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run | tap-spec && tsc -p test/ts",
+    "debug": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run --browser chrome | tap-spec"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -21,7 +21,8 @@
   },
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobx": "^2.2.0"
+    "mobx": "^2.2.0",
+    "react": "^0.13.0 || ^0.14.0 || ^15.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.11.4",
@@ -37,6 +38,7 @@
     "react": "^15.2.0",
     "react-addons-test-utils": "^15.2.0",
     "react-dom": "^15.2.0",
+    "tap-spec": "^4.1.1",
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
     "typescript": "^1.8.10",
