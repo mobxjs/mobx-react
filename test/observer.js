@@ -4,6 +4,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var TestUtils = require('react-addons-test-utils');
 var observer = require('../').observer;
+var inject = require('../').inject;
 var $ = require('jquery');
 
 $("<div></div>").attr("id","testroot").appendTo($(window.document.body));
@@ -215,5 +216,21 @@ test("changing state in render should fail", function(t) {
     }, "It is not allowed to change the state during a view");
 
     mobx._.resetGlobalState();
+    t.end();
+});
+
+test("component should not be inject", function(t) {
+    var msg = [];
+    var baseWarn = console.warn;
+    console.warn = (m) => msg.push(m);
+
+    observer(inject("foo")(React.createClass({
+        render: function() {
+            return e("div", {}, "context:" + this.props.foo);
+        }
+    })));
+
+    t.equal(msg.length, 1);
+    console.warn = baseWarn;
     t.end();
 });
