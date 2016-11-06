@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 3.6.0
+
+* Print warning when `inject` and `observer` are used in the wrong order, see #150, by @delaetthomas
+
 ### 3.5.9
 
 * Add react as a peer dependency 

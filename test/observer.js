@@ -30,7 +30,7 @@ var todoListWillReactCount = 0;
 var todoList = observer(React.createClass({
     renderings: 0,
     componentWillReact : function() {
-        todoListWillReactCount++;  
+        todoListWillReactCount++;
     },
     render: function() {
         todoListRenderings++;
@@ -222,7 +222,7 @@ test("changing state in render should fail", function(t) {
 test("component should not be inject", function(t) {
     var msg = [];
     var baseWarn = console.warn;
-    console.warn = (m) => msg.push(m);
+    console.warn = function(m) { msg.push(m); }
 
     observer(inject("foo")(React.createClass({
         render: function() {
