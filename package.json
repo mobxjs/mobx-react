@@ -11,7 +11,7 @@
   "scripts": {
     "build": "webpack && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
     "prepublish": "npm run build",
-    "test": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run | tap-spec && tsc -p test/ts",
+    "test": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run && tsc -p test/ts",
     "debug": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run --browser chrome | tap-spec"
   },
   "author": "Michel Weststrate",
