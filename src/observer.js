@@ -9,6 +9,8 @@ import inject from './inject';
  */
 let isDevtoolsEnabled = false;
 
+let isUsingStaticRendering = false;
+
 // WeakMap<Node, Object>;
 export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
 export const renderReporter = new EventEmitter();
@@ -40,6 +42,10 @@ export function trackComponents() {
     isDevtoolsEnabled = true;
 }
 
+export function useStaticRendering(useStaticRendering) {
+  isUsingStaticRendering = useStaticRendering;
+}
+
 /**
  * Utilities
  */
@@ -62,6 +68,8 @@ function patch(target, funcName) {
  */
 const reactiveMixin = {
   componentWillMount: function() {
+    if (isUsingStaticRendering === true)
+      return;
     // Generate friendly name for debugging
     const initialName = this.displayName
       || this.name
@@ -119,6 +127,8 @@ const reactiveMixin = {
   },
 
   componentWillUnmount: function() {
+    if (isUsingStaticRendering === true)
+      return;
     this.render.$mobx && this.render.$mobx.dispose();
     this.__$mobxIsUnmounted = true;
     if (isDevtoolsEnabled) {
@@ -147,6 +157,9 @@ const reactiveMixin = {
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
+    if (isUsingStaticRendering) {
+      console.warn("[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side.");
+    }
     // update on any state changes (as is the default)
     if (this.state !== nextState) {
       return true;

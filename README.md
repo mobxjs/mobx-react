@@ -76,6 +76,12 @@ const TodoView  = observer(class TodoView extends React.Component {
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+### Server Side Rendering with `useStaticRendering`
+
+When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
+Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
+To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. This makes sure the component won't try to react to any future data changes.
+
 ### Which components should be marked with `observer`?
 
 The simple rule of thumb is: _all components that render observable data_.
