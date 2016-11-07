@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/mobxjs/mobx-react.svg?branch=master)](https://travis-ci.org/mobxjs/mobx-react)
 [![Join the chat at https://gitter.im/mobxjs/mobx](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mobxjs/mobx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![#mobservable channel on reactiflux discord](https://img.shields.io/badge/discord-%23mobx%20%40reactiflux-blue.svg)](https://discord.gg/0ZcbPKXt5bYAa2J1)
 
 
 Package with react component wrapper for combining React with mobx.
@@ -76,6 +75,12 @@ const TodoView  = observer(class TodoView extends React.Component {
 
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
+
+### Server Side Rendering with `useStaticRendering`
+
+When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
+Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
+To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. This makes sure the component won't try to react to any future data changes.
 
 ### Which components should be marked with `observer`?
 

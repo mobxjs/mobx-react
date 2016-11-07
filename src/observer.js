@@ -9,6 +9,8 @@ import inject from './inject';
  */
 let isDevtoolsEnabled = false;
 
+let isUsingStaticRendering = false;
+
 // WeakMap<Node, Object>;
 export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
 export const renderReporter = new EventEmitter();
@@ -38,6 +40,10 @@ export function trackComponents() {
     throw new Error("[mobx-react] tracking components is not supported in this browser.");
   if (!isDevtoolsEnabled)
     isDevtoolsEnabled = true;
+}
+
+export function useStaticRendering(useStaticRendering) {
+  isUsingStaticRendering = useStaticRendering;
 }
 
 /**
@@ -89,6 +95,8 @@ function isObjectShallowModified(prev, next) {
  */
 const reactiveMixin = {
   componentWillMount: function() {
+    if (isUsingStaticRendering === true)
+      return;
     // Generate friendly name for debugging
     const initialName = this.displayName
       || this.name
@@ -143,8 +151,14 @@ const reactiveMixin = {
             // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
             // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
             // However, people also claim this migth happen during unit tests..
-            if (!skipRender) {
-              React.Component.prototype.forceUpdate.call(this)
+            let hasError = true;
+            try {
+              if (!skipRender) {
+                React.Component.prototype.forceUpdate.call(this);
+              }
+              hasError = false;
+            } finally {
+              if (hasError) reaction.dispose();
             }
           }
         }
@@ -173,6 +187,8 @@ const reactiveMixin = {
   },
 
   componentWillUnmount: function() {
+    if (isUsingStaticRendering === true)
+      return;
     this.render.$mobx && this.render.$mobx.dispose();
     this.__$mobxIsUnmounted = true;
     if (isDevtoolsEnabled) {
@@ -201,6 +217,9 @@ const reactiveMixin = {
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
+    if (isUsingStaticRendering) {
+      console.warn("[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side.");
+    }
     // update on any state changes (as is the default)
     if (this.state !== nextState) {
       return true;
@@ -229,6 +248,10 @@ export function observer(arg1, arg2) {
   }
   const componentClass = arg1;
 
+  if (componentClass.isInjector !== undefined && componentClass.isInjector) {
+    console.warn('Mobx Observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
+  }
+
   // Stateless function component:
   // If it is function but doesn't seem to be a react class constructor,
   // wrap it to a react class automatically
@@ -236,6 +259,7 @@ export function observer(arg1, arg2) {
     typeof componentClass === "function" &&
     (!componentClass.prototype || !componentClass.prototype.render) && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)
   ) {
+
     return observer(React.createClass({
       displayName: componentClass.displayName || componentClass.name,
       propTypes: componentClass.propTypes,
@@ -248,6 +272,7 @@ export function observer(arg1, arg2) {
   if (!componentClass) {
     throw new Error("Please pass a valid component to 'observer'");
   }
+
   const target = componentClass.prototype || componentClass;
   [
     "componentWillMount",

@@ -1,5 +1,14 @@
 # MobX-React Changelog
 
+### 3.6.0
+
+* Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
+* Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
+
+### 3.5.9
+
+* Add react as a peer dependency
+
 ### 3.5.8
 
 * Fixed issue where `props` where not passed properly to components in very rare cases. Also fixed #115
