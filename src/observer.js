@@ -57,6 +57,33 @@ function patch(target, funcName) {
   }
 }
 
+function isObjectShallowModified(prev, next) {
+  if (null == prev || null == next || typeof prev !== "object" || typeof next !== "object") {
+    return prev !== next;
+  }
+  const keys = Object.keys(prev);
+  if (keys.length !== Object.keys(next).length) {
+    return true;
+  }
+  let key;
+  for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
+    const newValue = next[key];
+    if (newValue !== prev[key]) {
+      return true;
+    } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
+      /**
+       * If the newValue is still the same object, but that object is not observable,
+       * fallback to the default React behavior: update, because the object *might* have changed.
+       * If you need the non default behavior, just use the React pure render mixin, as that one
+       * will work fine with mobx as well, instead of the default implementation of
+       * observer.
+       */
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * ReactiveMixin
  */
@@ -68,6 +95,37 @@ const reactiveMixin = {
       || (this.constructor && (this.constructor.displayName || this.constructor.name))
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
+
+    let skipRender = false;
+
+    function makePropertyObservableReference(propName) {
+      let valueHolder = this[propName];
+      const atom = new mobx.Atom("reactive " + propName);
+      Object.defineProperty(this, propName, {
+          configurable: true, enumerable: true,
+          get: function() {
+            atom.reportObserved();
+            return valueHolder;
+          },
+          set: function set(v) {
+            if (isObjectShallowModified(valueHolder, v)) {
+              valueHolder = v;
+              skipRender = true;
+              atom.reportChanged();
+              skipRender = false;
+            } else {
+              valueHolder = v;
+            }
+          }
+      })
+    }
+
+    // make this.props an observable reference, see #124
+    makePropertyObservableReference.call(this, "props")
+    // make state an observable reference
+    makePropertyObservableReference.call(this, "state")
+
+    // wire up reactive render
     const baseRender = this.render.bind(this);
     let reaction = null;
     let isRenderingPending = false;
@@ -85,7 +143,9 @@ const reactiveMixin = {
             // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
             // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
             // However, people also claim this migth happen during unit tests..
-            React.Component.prototype.forceUpdate.call(this)
+            if (!skipRender) {
+              React.Component.prototype.forceUpdate.call(this)
+            }
           }
         }
       });
@@ -146,27 +206,7 @@ const reactiveMixin = {
       return true;
     }
     // update if props are shallowly not equal, inspired by PureRenderMixin
-    const keys = Object.keys(this.props);
-    if (keys.length !== Object.keys(nextProps).length) {
-      return true;
-    }
-    let key;
-    for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
-      const newValue = nextProps[key];
-      if (newValue !== this.props[key]) {
-        return true;
-      } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
-        /**
-         * If the newValue is still the same object, but that object is not observable,
-         * fallback to the default React behavior: update, because the object *might* have changed.
-         * If you need the non default behavior, just use the React pure render mixin, as that one
-         * will work fine with mobx as well, instead of the default implementation of
-         * observer.
-         */
-        return true;
-      }
-    }
-    return false;
+    return isObjectShallowModified(this.props, nextProps);
   }
 };
 

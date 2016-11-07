@@ -142,10 +142,7 @@ test('verify prop changes are picked up', function(t) {
     var data = mobx.observable({
         items: [createItem(1, "hi")]
     })
-
-    var setState;
     var events = []
-    window.xxx = events
 
     var Child = observer(React.createClass({
         componentWillReceiveProps: function (nextProps) {
@@ -212,4 +209,244 @@ test('verify prop changes are picked up', function(t) {
             t.end()
         }, 100)
     })
+})
+
+
+test('verify props is reactive', function(t) {
+    function createItem(subid, label) {
+        const res = mobx.observable({
+            id: 1,
+            label: label,
+            get text() {
+                events.push(["compute", this.subid])
+                return this.id + "." + this.subid + "." + this.label + "." + data.items.indexOf(this)
+            }
+        })
+        res.subid = subid // non reactive
+        return res
+    }
+
+    var data = mobx.observable({
+        items: [createItem(1, "hi")]
+    })
+    var events = []
+
+    var Child = observer(React.createClass({
+        componentWillMount() {
+            events.push(["mount"])
+            mobx.extendObservable(this, {
+                computedLabel: function() {
+                    events.push(["computed label", this.props.item.subid])
+                    return this.props.item.label
+                }
+            })
+        },
+
+        componentWillReceiveProps: function (nextProps) {
+            events.push(["receive", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillUpdate: function (nextProps) {
+            events.push(["update", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillReact: function() {
+            events.push(["react", this.props.item.subid])
+        },
+
+        render: function() {
+            events.push(["render", this.props.item.subid, this.props.item.text, this.computedLabel])
+            return React.createElement("span", {}, this.props.item.text + this.computedLabel)
+        }
+    }))
+
+    var Parent = observer(React.createClass({
+        render: function() {
+            return React.createElement("div", {
+                onClick: changeStuff.bind(this), // event is needed to get batching!
+                id: "testDiv"
+            }, data.items.map(function(item) {
+                return React.createElement(Child, {
+                    key: "fixed",
+                    item: item
+                })
+            }))
+        }
+    }))
+
+    var Wrapper = React.createClass({ render: function() {
+        return React.createElement(Parent, {})
+    }})
+
+    function changeStuff() {
+        mobx.transaction(function() {
+            // components start rendeirng a new item, but computed is still based on old value
+            data.items = [createItem(2, "test")]
+        })
+    }
+
+    ReactDOM.render(React.createElement(Wrapper, {}), testRoot, function() {
+        t.deepEqual(events, [
+            ["mount"],
+            ["compute", 1],
+            ["computed label", 1],
+            ["render", 1, "1.1.hi.0", "hi"],
+        ])
+        events.splice(0)
+        $("#testDiv").click()
+
+        setTimeout(function() {
+            t.deepEqual(events, [
+                [ 'compute', 1 ],
+                [ 'react', 1 ],
+                [ 'receive', 1, 2 ],
+                [ 'update', 1, 2 ],
+                [ 'compute', 2 ],
+                [ "computed label", 2],
+                [ 'render', 2, '1.2.test.0', "test" ]
+            ])
+            t.end()
+        }, 100)
+    })
+})
+
+
+test('no re-render for shallow equal props', function(t) {
+    function createItem(subid, label) {
+        const res = mobx.observable({
+            id: 1,
+            label: label,
+        })
+        res.subid = subid // non reactive
+        return res
+    }
+
+    var data = mobx.observable({
+        items: [createItem(1, "hi")],
+        parentValue: 0
+    })
+    var events = []
+
+    var Child = observer(React.createClass({
+        componentWillMount() {
+            events.push(["mount"])
+        },
+
+        componentWillReceiveProps: function (nextProps) {
+            events.push(["receive", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillUpdate: function (nextProps) {
+            events.push(["update", this.props.item.subid, nextProps.item.subid])
+        },
+
+        componentWillReact: function() {
+            events.push(["react", this.props.item.subid])
+        },
+
+        render: function() {
+            events.push(["render", this.props.item.subid, this.props.item.label])
+            return React.createElement("span", {}, this.props.item.label)
+        }
+    }))
+
+    var Parent = observer(React.createClass({
+        render: function() {
+            t.equal(mobx.isObservable(this.props.nonObservable), false, "object has become observable!")
+            events.push(["parent render", data.parentValue])
+            return React.createElement("div", {
+                onClick: changeStuff.bind(this), // event is needed to get batching!
+                id: "testDiv"
+            }, data.items.map(function(item) {
+                return React.createElement(Child, {
+                    key: "fixed",
+                    item: item,
+                    value: 5
+                })
+            }))
+        }
+    }))
+
+    var Wrapper = React.createClass({ render: function() {
+        return React.createElement(Parent, { nonObservable: {} })
+    }})
+
+    function changeStuff() {
+        data.items[0].label = "hi" // no change
+        data.parentValue = 1 // rerender parent
+    }
+
+    ReactDOM.render(React.createElement(Wrapper, {}), testRoot, function() {
+        t.deepEqual(events, [
+            ["parent render", 0],
+            ["mount"],
+            ["render", 1, "hi"],
+        ])
+        events.splice(0)
+        $("#testDiv").click()
+
+        setTimeout(function() {
+            t.deepEqual(events, [
+                ["parent render", 1],
+                [ 'receive', 1, 1 ],
+            ])
+            t.end()
+        }, 100)
+    })
+})
+
+test('function passed in props is not invoked on property access', function(t) {
+  var Component = observer(React.createClass({
+    render: function() {
+      return React.createElement("div", {onClick: this.props.onClick})
+    }
+  }))
+  function onClick() {
+    t.fail(new Error("This function should not be called!"));
+  }
+  ReactDOM.render(React.createElement(Component, {onClick: onClick}), testRoot, function() {
+    t.end();
+  });
+})
+
+test('lifecycle callbacks called with correct arguments', function(t) {
+  t.timeoutAfter(200);
+  t.plan(6);
+  var Component = observer(React.createClass({
+    componentWillReceiveProps: function(nextProps) {
+      t.equal(nextProps.counter, 1, 'componentWillReceiveProps: nextProps.counter === 1');
+      t.equal(this.props.counter, 0, 'componentWillReceiveProps: this.props.counter === 1');
+    },
+    componentWillUpdate: function(nextProps, nextState) {
+      t.equal(nextProps.counter, 1, 'componentWillUpdate: nextProps.counter === 1');
+      t.equal(this.props.counter, 0, 'componentWillUpdate: this.props.counter === 0');
+    },
+    componentDidUpdate: function(prevProps, prevState) {
+      t.equal(prevProps.counter, 0, 'componentDidUpdate: prevProps.counter === 0');
+      t.equal(this.props.counter, 1, 'componentDidUpdate: this.props.counter === 1');
+    },
+    render: function() {
+      return React.createElement('div', {}, [
+        React.createElement('span', {key: "1"}, [this.props.counter]),
+        React.createElement('button', {key: "2", id: "testButton", onClick: this.props.onClick}),
+      ])
+    }
+  }))
+  var Root = React.createClass({
+    getInitialState: function() {
+      return {};
+    },
+    onButtonClick: function() {
+      this.setState({counter: (this.state.counter || 0) + 1})
+    },
+    render: function() {
+      return React.createElement(Component, {
+        counter: this.state.counter || 0,
+        onClick: this.onButtonClick,
+      })
+    },
+  })
+  ReactDOM.render(React.createElement(Root), testRoot, function() {
+    $("#testButton").click();
+  })
 })
