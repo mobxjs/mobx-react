@@ -2,8 +2,11 @@ var test = require('tape');
 var mobx = require('mobx');
 var React = require('react');
 var ReactDOM = require('react-dom');
+var ReactDOMServer = require('react-dom/server')
 var TestUtils = require('react-addons-test-utils');
-var observer = require('../').observer;
+var mobxReact = require('../');
+var observer = mobxReact.observer;
+var inject = mobxReact.inject;
 var $ = require('jquery');
 
 $("<div></div>").attr("id","testroot").appendTo($(window.document.body));
@@ -29,7 +32,7 @@ var todoListWillReactCount = 0;
 var todoList = observer(React.createClass({
     renderings: 0,
     componentWillReact : function() {
-        todoListWillReactCount++;  
+        todoListWillReactCount++;
     },
     render: function() {
         todoListRenderings++;
@@ -152,6 +155,71 @@ test('keep views alive', function(test) {
     });
 });
 
+
+test('does not views alive when using static rendering', function(test) {
+    mobxReact.useStaticRendering(true);
+
+    var renderCount = 0;
+    var data = mobx.observable({
+        z: "hi"
+    });
+
+    var component = observer(function testComponent() {
+        renderCount++;
+        return React.createElement("div", {}, data.z);
+    });
+
+    ReactDOM.render(e(component), testRoot, function() {
+
+        test.equal(renderCount, 1);
+        test.equal($(testRoot).text(), "hi");
+
+        data.z = "hello";
+        // no re-rendering on static rendering
+
+        setTimeout(function() {
+            test.equal(renderCount, 1);
+
+            test.equal($(testRoot).text(), "hi");
+            test.equal(renderCount, 1);
+
+            test.equal(getDNode(data, "z").observers.length, 0);
+
+            mobxReact.useStaticRendering(false);
+            test.end();
+        }, 100);
+    });
+});
+
+test('does not views alive when using static + string rendering', function(test) {
+    mobxReact.useStaticRendering(true);
+
+    var renderCount = 0;
+    var data = mobx.observable({
+        z: "hi"
+    });
+
+    var component = observer(function testComponent() {
+        renderCount++;
+        return React.createElement("div", {}, data.z);
+    });
+
+    const output = ReactDOMServer.renderToStaticMarkup(e(component))
+
+    data.z = "hello";
+
+    setTimeout(function() {
+        test.equal(output, "<div>hi</div>")
+        test.equal(renderCount, 1);
+
+        test.equal(getDNode(data, "z").observers.length, 0);
+
+        mobxReact.useStaticRendering(false);
+        test.end();
+    }, 100);
+});
+
+
 // From typescript compiler:
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -216,4 +284,47 @@ test("changing state in render should fail", function(t) {
 
     mobx._.resetGlobalState();
     t.end();
+});
+
+test("component should not be inject", function(t) {
+    var msg = [];
+    var baseWarn = console.warn;
+    console.warn = function(m) { msg.push(m); }
+
+    observer(inject("foo")(React.createClass({
+        render: function() {
+            return e("div", {}, "context:" + this.props.foo);
+        }
+    })));
+
+    t.equal(msg.length, 1);
+    console.warn = baseWarn;
+    t.end();
+});
+
+test("should stop updating if error was thrown in render (#134)", function(t) {
+    var data = mobx.observable(0);
+    var renderingsCount = 0;
+
+    var comp = observer(function() {
+        renderingsCount += 1;
+        if (data.get() === 2) {
+            throw new Error("Hello");
+        }
+        return e("div", {});
+    });
+
+    ReactDOM.render(e(comp), testRoot, function() {
+        data.set(1);
+        t.throws(function() {
+            data.set(2);
+        }, "Hello");
+        data.set(3);
+        data.set(4);
+        data.set(5);
+
+        t.equal(renderingsCount, 3);
+
+        t.end();
+    });
 });
