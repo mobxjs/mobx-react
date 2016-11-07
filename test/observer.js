@@ -301,3 +301,43 @@ test("component should not be inject", function(t) {
     console.warn = baseWarn;
     t.end();
 });
+
+test("124 - react to changes in this.props via computed", function(t) {
+    var c = observer(React.createClass({
+        componentWillMount: function() {
+            mobx.extendObservable(this, {
+                get computedProp() {
+                    return this.props.x
+                }
+            })
+        },
+        render: function() {
+            return e("span", {}, "x:" + this.computedProp)
+        }
+    }))
+
+    var parent = React.createClass({
+        getInitialState() {
+            return { v: 1 }
+        },
+        render: function() {
+            return e(
+                "div",
+                { onClick: function() {
+                    this.setState({ v: 2 })
+                }.bind(this)},
+                e(c, { x: this.state.v })
+            )
+        }
+    })
+
+    ReactDOM.render(e(parent), testRoot, function() {
+        t.equal($("span").text(), "x:1")
+        $("div").click()
+        setTimeout(function() {
+            t.equal($("span").text(), "x:2")
+            t.end()
+        }, 100)
+    })
+})
+
