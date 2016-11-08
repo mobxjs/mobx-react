@@ -7,6 +7,7 @@
 * Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 * export `PropTypes` as well, fixes #153
 * Add react as a peer dependency
+* Added minified browser build: `index.min.js`, fixes #147
 
 ### 3.5.8
 
