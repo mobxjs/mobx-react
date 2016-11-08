@@ -369,3 +369,24 @@ test("should stop updating if error was thrown in render (#134)", function(t) {
         t.end();
     });
 });
+
+test("should render component even if setState called with exactly the same props", function(t) {
+    let renderCount = 0;
+    const Component = observer(React.createClass({
+        onClick() {
+            this.setState({});
+        },
+        render() {
+            renderCount++;
+            return e("div", {onClick: this.onClick, id: "clickableDiv"});
+        }
+    }));
+    ReactDOM.render(e(Component), testRoot, function() {
+        t.equal(renderCount, 1, "renderCount === 1");
+        $("#clickableDiv").click();
+        t.equal(renderCount, 2, "renderCount === 2");
+        $("#clickableDiv").click();
+        t.equal(renderCount, 3, "renderCount === 3");
+        t.end();
+    });
+});
