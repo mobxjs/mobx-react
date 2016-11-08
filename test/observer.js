@@ -341,3 +341,31 @@ test("124 - react to changes in this.props via computed", function(t) {
     })
 })
 
+test("should stop updating if error was thrown in render (#134)", function(t) {
+    var data = mobx.observable(0);
+    var renderingsCount = 0;
+
+    var comp = observer(function() {
+        renderingsCount += 1;
+        if (data.get() === 2) {
+            throw new Error("Hello");
+        }
+        return e("div", {});
+    });
+
+    ReactDOM.render(e(comp), testRoot, function() {
+        t.equal(data.observers.length, 1);
+        data.set(1);
+        t.throws(function() {
+            data.set(2);
+        }, "Hello");
+        t.equal(data.observers.length, 0);
+        data.set(3);
+        data.set(4);
+        data.set(5);
+
+        t.equal(renderingsCount, 3);
+
+        t.end();
+    });
+});
