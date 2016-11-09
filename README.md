@@ -78,6 +78,8 @@ const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 
 ### `Observer`
 
+_This feature is still experimental and might change in the next minor release, or be deprecated_
+
 `Observer` is a React component, which applies `observer` to an unanymous region in your component.
 It takes as children a single, argumentless function which should return exactly one React component.
 The rendering in the function will be tracked and automatically be re-rendered when needed.
@@ -254,7 +256,40 @@ class MyComponent extends React.Component {
 }
 ```
 
+#### Customizing inject
 
+Instead of passing a list of store names, it is also possible to create a custom mapper function and pass it to inject.
+The mapper function receives all stores as argument, the properties with which the components are invoked and the context, and should produce a new set of properties,
+that are mapped into the original:
+
+`mapperFunction: (allStores, props, context) => additionalProps`
+
+Since version 4.0 the `mapperFunction` itself is tracked as well, so it is possible to do things like:
+
+```javascript
+const NameDisplayer = ({ name }) => <h1>{name}</h1>
+
+const UserNameDisplayer = inject(
+    stores => ({
+        name: stores.userStore.name
+    }),
+    NameDisplayer
+)
+
+const user = mobx.observable({
+    name: "Noa"
+})
+
+const App = () => (
+    <Provider userStore={user}>
+        <UserNameDisplayer />
+    </Provider>
+)
+
+ReactDOM.render(<App />, document.body)
+```
+
+_N.B. note that in this *specific* case neither `NameDisplayer` or `UserNameDisplayer` doesn't need to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
 
 #### Strongly typing inject
 

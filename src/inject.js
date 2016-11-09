@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
+import {observer} from './observer';
 
 /**
  * Store Injection
@@ -22,7 +23,6 @@ function createStoreInjector(grabStoresFn, component) {
 
       return React.createElement(component, newProps);
     }
-    // TODO: should have shouldComponentUpdate?
   });
 
   Injector.isInjector = true;
@@ -77,14 +77,19 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
   let grabStoresFn;
   if (typeof arguments[0] === "function") {
     grabStoresFn = arguments[0];
+    return function(componentClass) {
+      // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
+      // see #111
+      return observer(createStoreInjector(grabStoresFn, componentClass));
+    };
   } else {
     const storesNames = [];
     for (let i = 0; i < arguments.length; i++)
       storesNames[i] = arguments[i];
     grabStoresFn = grabStoresByName(storesNames);
+    return function(componentClass) {
+      return createStoreInjector(grabStoresFn, componentClass);
+    };
   }
-  return function(componentClass) {
-    return createStoreInjector(grabStoresFn, componentClass);
-  };
 }
 

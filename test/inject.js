@@ -327,5 +327,21 @@ test('inject based context', t => {
         t.end();
     })
 
+    test('using a custom injector is reactive', t => {
+        const user = mobx.observable({ name: "Noa"})
+        const mapper = (stores) => ({ name: stores.user.name })
+
+        const DisplayName = (props) => e("h1", {}, props.name)
+        const User = inject(mapper)(DisplayName)
+        const App = () => e(Provider, { user: user }, e(User, {}))
+
+        const wrapper = mount(e(App))
+        t.equal(wrapper.find("h1").text(), "Noa")
+
+        user.name = "Veria"
+        t.equal(wrapper.find("h1").text(), "Veria")
+        t.end()
+    })
+
     t.end()
 })

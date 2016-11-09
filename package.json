@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "3.5.9",
+  "version": "4.0.0-beta.2",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "typings": "index",

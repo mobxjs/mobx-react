@@ -2,13 +2,61 @@
 
 ### 4.0.0
 
-* Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
-* Introduced `Observer`. Can be used as alternative to the `observer` decorator. Marks a component region as reactiove. See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
+#### `inject(fn, component)` will now track `fn` as well
+
+`inject(func)` is now reactive as well, that means that transformation in the selector function will be tracked, see [#111](https://github.com/mobxjs/mobx-react/issues/111)
+
+```javascript
+const NameDisplayer = ({ name }) => <h1>{name}</h1>
+
+const UserNameDisplayer = inject(
+    stores => ({
+        name: stores.userStore.name
+    }),
+    NameDisplayer
+)
+
+const user = mobx.observable({
+    name: "Noa"
+})
+
+const App = () => (
+    <Provider userStore={user}>
+        <UserNameDisplayer />
+    </Provider>
+)
+
+ReactDOM.render(<App />, document.body)
+```
+
+#### Better support for Server Side Rendering
+
+Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
+
+#### Introduced `Observer` as alternative syntax to the `observer` decorator.
+
+_This feature is still experimental and might change in the next minor release, or be deprecated_
+
+Introduced `Observer`. Can be used as alternative to the `observer` decorator. Marks a component region as reactiove. See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
+Example:
+
+```javascript
+const UserNameDisplayer = ({ user }) => (
+    <Observer>
+        {() => <div>{user.name}</div>}
+    </Observer>
+)
+```
+
+#### Other improvements
+
 * Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
 * Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 * export `PropTypes` as well, fixes #153
 * Add react as a peer dependency
 * Added minified browser build: `index.min.js`, fixes #147
+
+---
 
 ### 3.5.8
 
