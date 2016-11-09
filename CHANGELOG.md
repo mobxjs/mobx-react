@@ -50,6 +50,7 @@ const UserNameDisplayer = ({ user }) => (
 
 #### Other improvements
 
+* It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`), see #120, #142. This is implemented by forwarding _writes_ to these attributes to the `wrappedComponent`, instead of applying it on the HoC itself.
 * Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
 * Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 * export `PropTypes` as well, fixes #153
