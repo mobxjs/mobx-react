@@ -13,6 +13,7 @@ if (!React)
 
 export {
   observer,
+  Observer,
   renderReporter,
   componentByNodeRegistery,
   trackComponents,

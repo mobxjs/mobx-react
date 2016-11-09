@@ -76,6 +76,36 @@ const TodoView  = observer(class TodoView extends React.Component {
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+### `Observer`
+
+`Observer` is a React component, which applies `observer` to an unanymous region in your component.
+It takes as children a single, argumentless function which should return exactly one React component.
+The rendering in the function will be tracked and automatically be re-rendered when needed.
+This can come in handy when needing to pass render function to external components (for example the React Native listview), or if you
+dislike the `observer` decorator / function.
+
+Example:
+
+```
+class App extends React.Component {
+  render() {
+     return (
+         <div>
+            {this.props.person.name}
+            <Observer>
+                {() => <div>{this.props.person.name}</div>}
+            </Observer>
+        </div>
+     )
+  }
+}
+
+const person = observable({ name: "John" })
+
+React.render(<App person={person} />, document.body)
+person.name = "Mike" // will cause the Observer region to re-render
+```
+
 ### Server Side Rendering with `useStaticRendering`
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.

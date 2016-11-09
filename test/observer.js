@@ -390,3 +390,26 @@ test("should render component even if setState called with exactly the same prop
         t.end();
     });
 });
+
+test("Observer regions should react", function(t) {
+    var data = mobx.observable("hi")
+
+    var comp = function() {
+        return e("div", {},
+            e(mobxReact.Observer, {}, function() {
+                return e("span", {}, data.get())
+            }),
+            e("li", {}, data.get())
+        )
+    }
+
+    ReactDOM.render(e(comp), testRoot, function() {
+        t.equal($("span").text(), "hi");
+        t.equal($("li").text(), "hi");
+
+        data.set("hello");
+        t.equal($("span").text(), "hello");
+        t.equal($("li").text(), "hi");
+        t.end();
+    })
+})

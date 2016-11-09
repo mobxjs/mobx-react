@@ -1,8 +1,9 @@
 # MobX-React Changelog
 
-### 3.5.9
+### 4.0.0
 
 * Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
+* Introduced `Observer`. Can be used as alternative to the `observer` decorator. Marks a component region as reactiove. See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
 * Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
 * Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 * export `PropTypes` as well, fixes #153

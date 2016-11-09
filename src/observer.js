@@ -249,7 +249,7 @@ export function observer(arg1, arg2) {
   const componentClass = arg1;
 
   if (componentClass.isInjector !== undefined && componentClass.isInjector) {
-    console.warn('Mobx Observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
+    console.warn('Mobx observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
   }
 
   // Stateless function component:
@@ -287,4 +287,11 @@ export function observer(arg1, arg2) {
   }
   componentClass.isMobXReactObserver = true;
   return componentClass;
+}
+
+// TODO: support injection somehow as well?
+export const Observer = observer(({ children }) => children())
+
+Observer.propTypes = {
+  children: React.PropTypes.func.isRequired
 }
