@@ -55,6 +55,7 @@ const UserNameDisplayer = ({ user }) => (
 * export `PropTypes` as well, fixes #153
 * Add react as a peer dependency
 * Added minified browser build: `index.min.js`, fixes #147
+* Generated better component name for `inject` HOC
 
 ---
 

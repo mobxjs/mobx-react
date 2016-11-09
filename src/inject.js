@@ -5,9 +5,13 @@ import {observer} from './observer';
 /**
  * Store Injection
  */
-function createStoreInjector(grabStoresFn, component) {
+function createStoreInjector(grabStoresFn, component, injectNames) {
+  let displayName = "inject-" + (component.displayName || component.name || (component.constructor && component.constructor.name) || "Unknown");
+  if (injectNames)
+    displayName += "-with-" + injectNames;
+
   const Injector = React.createClass({
-    displayName: "MobXStoreInjector",
+    displayName: displayName,
     render: function() {
       let newProps = {};
       for (let key in this.props) if (this.props.hasOwnProperty(key)) {
@@ -80,15 +84,15 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
     return function(componentClass) {
       // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
       // see #111
-      return observer(createStoreInjector(grabStoresFn, componentClass));
+      return observer(createStoreInjector(grabStoresFn, componentClass, grabStoresFn.name));
     };
   } else {
-    const storesNames = [];
+    const storeNames = [];
     for (let i = 0; i < arguments.length; i++)
-      storesNames[i] = arguments[i];
-    grabStoresFn = grabStoresByName(storesNames);
+      storeNames[i] = arguments[i];
+    grabStoresFn = grabStoresByName(storeNames);
     return function(componentClass) {
-      return createStoreInjector(grabStoresFn, componentClass);
+      return createStoreInjector(grabStoresFn, componentClass, storeNames.join("_"));
     };
   }
 }
