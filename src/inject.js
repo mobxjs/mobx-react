@@ -16,23 +16,6 @@ const proxiedInjectorProps = {
       console.warn("Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`");
     }
   },
-  propTypes: {
-    set: function (value) {
-      this.wrappedComponent.propTypes = value;
-    },
-    get: function () {
-      // MWE: or is this confusing? we want the propTypes to be defined on wrapped comp, but avoid React to check it on injected?
-      return null;
-    }
-  },
-  defaultProps: {
-    set: function (value) {
-      this.wrappedComponent.defaultProps = value;
-    },
-    get: function () {
-      return null; // see above
-    }
-  },
   isInjector: {
     value: true
   }

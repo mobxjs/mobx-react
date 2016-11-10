@@ -291,6 +291,47 @@ ReactDOM.render(<App />, document.body)
 
 _N.B. note that in this *specific* case neither `NameDisplayer` or `UserNameDisplayer` doesn't need to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
 
+#### Using `propTypes` and `defaultProps` and other static properties in combination with `inject`
+
+Inject wraps a new component around the component you pass into it.
+This means that assigning a static property to the resulting component, will be applied to the HoC, and not to the original component.
+So if you take the following example:
+
+```javascript
+const UserName = inject("userStore", ({ userStore, bold }) => someRendering())
+
+UserName.propTypes = {
+    bold: PropTypes.boolean.isRequired,
+    userStore: PropTypes.object.isRequired // will always fail
+}
+```
+
+The above propTypes are incorrect, `bold` needs to be provided by the caller of the `UserName` component and is checked by React.
+However, `userStore` does not need to be required! Although it is required for the original stateless function component, it is not
+required for the resulting inject component. After all, the whole point of that component is to provide that `userStore` itself.
+
+So if you want to make assertions on the data that is being injected (either stores or data resulting from a mapper function), the propTypes
+should be defined on the _wrapped_ component. Which is available through the static property `wrappedComponent` on the inject component:
+
+```javascript
+const UserName = inject("userStore", ({ userStore, bold }) => someRendering())
+
+UserName.propTypes = {
+    bold: PropTypes.boolean.isRequired // could be defined either here ...
+}
+
+UserName.wrappedComponent.propTypes = {
+    // ... or here
+    userStore: PropTypes.object.isRequired // correct
+}
+```
+
+The same principle applies to `defaultProps` and other static React properties.
+Note that it is not allowed to redefine `contextTypes` on `inject` components (but is possible to define it on `wrappedComponent`)
+
+Finally, mobx-react will automatically move non React related static properties from wrappedComponent to the inject component so that all static fields are
+actually available to the outside world without needing `.wrappedComponent`.
+
 #### Strongly typing inject
 
 `inject` also accepts a function (`(allStores, nextProps, nextContext) => additionalProps`) that can be used to pick all the desired stores from the available stores like this.
@@ -327,6 +368,9 @@ const mountedComponent = mount(
    <Person age={'30'} profile={profile} />
 )
 ```
+
+Bear in mind that using shallow rendering won't provide any useful results when testing injected components; only the injector will be rendered.
+To test with shallow rendering, instantiate the `.wrappedComponent instead:`: `shallow(<Person.wrappedComponent />)`
 
 ## FAQ
 
