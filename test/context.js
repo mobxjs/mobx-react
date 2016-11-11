@@ -9,6 +9,23 @@ var test = require('tape');
 var e = React.createElement;
 
 test('observer based context', t => {
+    test('using observer to inject throws warning', t => {
+        // This test is here because it is the first test file being run, and mobx-react warns only once
+        const w = console.warn
+        const warns = []
+        console.warn = msg => warns.push(msg)
+
+        observer(["test"], React.createClass({
+            render: () => null
+        }))
+
+        t.equal(warns.length, 1)
+        t.equal(warns[0], 'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`')
+
+        console.warn = w
+        t.end()
+    })
+
     test('basic context', t => {
         var C = observer(["foo"], React.createClass({
             render: function() {
