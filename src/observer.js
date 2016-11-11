@@ -248,7 +248,7 @@ export function observer(arg1, arg2) {
   }
   const componentClass = arg1;
 
-  if (componentClass.isInjector !== undefined && componentClass.isInjector) {
+  if (componentClass.isMobxInjector === true) {
     console.warn('Mobx observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
   }
 

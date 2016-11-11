@@ -304,6 +304,27 @@ test("component should not be inject", function(t) {
     t.end();
 });
 
+
+test("observer component can be injected", function(t) {
+    var msg = [];
+    var baseWarn = console.warn;
+    console.warn = function(m) { msg.push(m); }
+
+    inject("foo")(observer(React.createClass({
+        render: function() { return null; }
+    })))
+
+    // N.B, the injected component will be observer since mobx-react 4.0!
+    inject(function() {})(observer(React.createClass({
+        render: function() { return null; }
+    })))
+
+    t.equal(msg.length, 0);
+    console.warn = baseWarn;
+    t.end();
+});
+
+
 test("124 - react to changes in this.props via computed", function(t) {
     var c = observer(React.createClass({
         componentWillMount: function() {

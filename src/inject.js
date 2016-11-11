@@ -14,10 +14,15 @@ const proxiedInjectorProps = {
     },
     set: function (_) {
       console.warn("Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`");
-    }
+    },
+    configurable: true,
+    enumerable: false
   },
-  isInjector: {
-    value: true
+  isMobxInjector: {
+    value: true,
+    writable: true,
+    configurable: true,
+    enumerable: true
   }
 };
 
@@ -80,7 +85,11 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
     return function (componentClass) {
       // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
       // see #111
-      return observer(createStoreInjector(grabStoresFn, componentClass));
+      let injected = createStoreInjector(grabStoresFn, componentClass);
+      injected.isMobxInjector = false; // supress warning
+      injected = observer(injected);
+      injected.isMobxInjector = true; // restore warning
+      return injected;
     };
   } else {
     const storesNames = [];

@@ -52,12 +52,15 @@ const UserNameDisplayer = ({ user }) => (
 
 * It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
 * Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
-* Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 * export `PropTypes` as well, fixes #153
 * Add react as a peer dependency
 * Added minified browser build: `index.min.js`, fixes #147
 
 ---
+
+### 3.5.9
+
+* Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 
 ### 3.5.8
 
