@@ -11,6 +11,8 @@ let isDevtoolsEnabled = false;
 
 let isUsingStaticRendering = false;
 
+let warnedAboutObserverInjectDeprecation = false;
+
 // WeakMap<Node, Object>;
 export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
 export const renderReporter = new EventEmitter();
@@ -238,11 +240,14 @@ export function observer(arg1, arg2) {
   }
   if (Array.isArray(arg1)) {
     // component needs stores
+    if (!warnedAboutObserverInjectDeprecation) {
+      warnedAboutObserverInjectDeprecation = true;
+      console.warn('Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`')
+    }
     if (!arg2) {
       // invoked as decorator
       return componentClass => observer(arg1, componentClass);
     } else {
-      // TODO: deprecate this invocation style
       return inject.apply(null, arg1)(observer(arg2));
     }
   }

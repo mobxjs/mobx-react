@@ -241,21 +241,6 @@ var Button = inject("color")(observer(({ color }) => {
 }))
 ```
 
-#### Omitting inject
-If you are using `inject` with just store names, and there are no other (third party) decorators on the same component,
-you can pass the store names directly to `observer` as well, which will create an inject under the hood. (Mind the array notation!)
-
-```javascript
-var Button = observer(["color"], ({ color }) => {
-    /* ... etc ... */
-}))
-
-@observer(["session", "theme"])
-class MyComponent extends React.Component {
-  // etc
-}
-```
-
 #### Customizing inject
 
 Instead of passing a list of store names, it is also possible to create a custom mapper function and pass it to inject.

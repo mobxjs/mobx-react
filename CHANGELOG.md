@@ -48,6 +48,25 @@ const UserNameDisplayer = ({ user }) => (
 )
 ```
 
+#### Using `observer` to inject stores is deprecated
+
+The fact that `observer` could inject stores as well caused quite some confusion.
+Because in some cases `observer` would return the original component (when not inject), but it would return a HoC when injecting.
+To make this more consistent, you should always use `inject` to inject stores into a component. So use:
+
+```
+@inject("store1", "store2") @observer
+class MyComponent extends React.Component {
+```
+
+or:
+
+```
+const MyComponent = inject("store1", "store2")(observer(props => rendering))
+```
+
+For more info see the related [discussion](https://github.com/mobxjs/mobx-react/commit/666577b41b7af8209839e7b243064a31c9951632#commitcomment-19773706)
+
 #### Other improvements
 
 * It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
