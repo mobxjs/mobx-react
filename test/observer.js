@@ -1,438 +1,402 @@
-"use strict"
+import { createClass, createElement, Component } from 'react'
+import ReactDOM from 'react-dom'
+import ReactDOMServer from 'react-dom/server'
+import test from 'tape'
+import mobx from 'mobx'
+import mobxReact, { observer, inject } from '../'
+import $ from 'jquery'
 
-var test = require('tape');
-var mobx = require('mobx');
-var React = require('react');
-var ReactDOM = require('react-dom');
-var ReactDOMServer = require('react-dom/server')
-var TestUtils = require('react-addons-test-utils');
-var mobxReact = require('../');
-var observer = mobxReact.observer;
-var inject = mobxReact.inject;
-var $ = require('jquery');
+$('<div></div>').attr('id','testroot').appendTo($(window.document.body));
+const testRoot = document.getElementById('testroot');
 
-$("<div></div>").attr("id","testroot").appendTo($(window.document.body));
-var testRoot = document.getElementById("testroot");
-
-var e = React.createElement;
-
-var store = mobx.observable({
-    todos: [{
-        title: "a",
-        completed: false
-    }]
+const store = mobx.observable({
+  todos: [{
+    title: 'a',
+    completed: false
+  }]
 });
 
-var todoItemRenderings = 0;
-var todoItem = observer(function TodoItem(props) {
-    todoItemRenderings++;
-    return e("li", {}, "|" + props.todo.title);
+let todoItemRenderings = 0;
+const todoItem = observer(function TodoItem(props) {
+  todoItemRenderings++;
+  return createElement('li', {}, '|' + props.todo.title);
 });
 
-var todoListRenderings = 0;
-var todoListWillReactCount = 0;
-var todoList = observer(React.createClass({
-    renderings: 0,
-    componentWillReact : function() {
-        todoListWillReactCount++;
-    },
-    render: function() {
-        todoListRenderings++;
-        var todos = store.todos;
-        return e("div", {},
-            e("h1", null, todos.length),
-            todos.map(function(todo, idx) {
-                return e(todoItem, {
-                    key: idx,
-                    todo: todo
-                });
-            })
-        );
-    }
+let todoListRenderings = 0;
+let todoListWillReactCount = 0;
+const todoList = observer(createClass({
+  renderings: 0,
+  componentWillReact() {
+    todoListWillReactCount++;
+  },
+  render() {
+    todoListRenderings++;
+    const todos = store.todos;
+    return createElement('div', {},
+      createElement('h1', null, todos.length),
+      todos.map(function(todo, idx) {
+        return createElement(todoItem, {
+          key: idx,
+          todo: todo
+        });
+      })
+    );
+  }
 }));
 
-var app = React.createClass({
-    render: function() {
-        return e(todoList);
-    }
+const app = createClass({
+  render: () => createElement(todoList)
 });
 
 function getDNode(obj, prop) {
-    return obj.$mobx.values[prop];
+  return obj.$mobx.values[prop];
 }
 
-test('nestedRendering', function(test) {
-	ReactDOM.render(e(app), testRoot, function() {
-    	test.equal(todoListRenderings, 1, "should have rendered list once");
-        test.equal(todoListWillReactCount, 0, "should not have reacted yet")
-		test.equal($("li").length, 1);
-        test.equal($("li").text(), "|a");
+test('nestedRendering', t => {
+  ReactDOM.render(createElement(app), testRoot, () => {
+    t.equal(todoListRenderings, 1, 'should have rendered list once');
+    t.equal(todoListWillReactCount, 0, 'should not have reacted yet')
+    t.equal($('li').length, 1);
+    t.equal($('li').text(), '|a');
 
-        test.equal(todoItemRenderings, 1, "item1 should render once");
+    t.equal(todoItemRenderings, 1, 'item1 should render once');
 
-        test.equal(getDNode(store, "todos").observers.length, 1);
-        test.equal(getDNode(store.todos[0], "title").observers.length, 1);
+    t.equal(getDNode(store, 'todos').observers.length, 1);
+    t.equal(getDNode(store.todos[0], 'title').observers.length, 1);
 
-        store.todos[0].title += "a";
-        setTimeout(function() {
+    store.todos[0].title += 'a';
 
-            test.equal(todoListRenderings, 1, "should have rendered list once");
-            test.equal(todoListWillReactCount, 0, "should not have reacted")
-            test.equal(todoItemRenderings, 2, "item1 should have rendered twice");
-            test.equal(getDNode(store, "todos").observers.length, 1, "observers count shouldn't change");
-            test.equal(getDNode(store.todos[0], "title").observers.length, 1, "title observers should not have increased");
+    setTimeout(() => {
+      t.equal(todoListRenderings, 1, 'should have rendered list once');
+      t.equal(todoListWillReactCount, 0, 'should not have reacted')
+      t.equal(todoItemRenderings, 2, 'item1 should have rendered twice');
+      t.equal(getDNode(store, 'todos').observers.length, 1, 'observers count shouldn\'t change');
+      t.equal(getDNode(store.todos[0], 'title').observers.length, 1, 'title observers should not have increased');
 
-            store.todos.push({
-                title: "b",
-                completed: true
-            });
+      store.todos.push({
+        title: 'b',
+        completed: true
+      });
 
-            setTimeout(function() {
+      setTimeout(() => {
+        t.equal($('li').length, 2, 'list should two items in in the list');
+        t.equal($('li').text(), '|aa|b');
 
+        t.equal(todoListRenderings, 2, 'should have rendered list twice');
+        t.equal(todoListWillReactCount, 1, 'should have reacted')
+        t.equal(todoItemRenderings, 3, 'item2 should have rendered as well');
+        t.equal(getDNode(store.todos[1], 'title').observers.length, 1, 'title observers should have increased');
+        t.equal(getDNode(store.todos[1], 'completed').observers.length, 0, 'completed observers should not have increased');
 
-                test.equal($("li").length, 2, "list should two items in in the list");
-                test.equal($("li").text(), "|aa|b");
+        const oldTodo = store.todos.pop();
+        setTimeout(() => {
+          t.equal(todoListRenderings, 3, 'should have rendered list another time');
+          t.equal(todoListWillReactCount, 2, 'should have reacted')
+          t.equal(todoItemRenderings, 3, 'item1 should not have rerendered');
+          t.equal($('li').length, 1, 'list should have only on item in list now');
+          t.equal(getDNode(oldTodo, 'title').observers.length, 0, 'title observers should have decreased');
+          t.equal(getDNode(oldTodo, 'completed').observers.length, 0, 'completed observers should not have decreased');
 
-                test.equal(todoListRenderings, 2, "should have rendered list twice");
-                test.equal(todoListWillReactCount, 1, "should have reacted")
-                test.equal(todoItemRenderings, 3, "item2 should have rendered as well");
-                test.equal(getDNode(store.todos[1], "title").observers.length, 1, "title observers should have increased");
-                test.equal(getDNode(store.todos[1], "completed").observers.length, 0, "completed observers should not have increased");
-
-                var oldTodo = store.todos.pop();
-
-                setTimeout(function() {
-                    test.equal(todoListRenderings, 3, "should have rendered list another time");
-                    test.equal(todoListWillReactCount, 2, "should have reacted")
-
-                    test.equal(todoItemRenderings, 3, "item1 should not have rerendered");
-                    test.equal($("li").length, 1, "list should have only on item in list now");
-
-                    test.equal(getDNode(oldTodo, "title").observers.length, 0, "title observers should have decreased");
-                    test.equal(getDNode(oldTodo, "completed").observers.length, 0, "completed observers should not have decreased");
-
-                    test.end();
-                });
-            }, 100);
-        }, 100);
-	});
+          t.end();
+        });
+      }, 100);
+    }, 100);
+  });
 });
 
-test('keep views alive', function(test) {
-    var yCalcCount = 0;
-    var data = mobx.observable({
-        x: 3,
-        y: function() {
-            yCalcCount++;
-            return this.x * 2;
-        },
-        z: "hi"
-    });
+test('keep views alive', t => {
+  let yCalcCount = 0;
+  const data = mobx.observable({
+    x: 3,
+    y: function() {
+      yCalcCount++;
+      return this.x * 2;
+    },
+    z: 'hi'
+  });
 
-    var component = observer(function testComponent() {
-        return React.createElement("div", {}, data.z + data.y);
-    });
+  const component = observer(function testComponent() {
+    return createElement('div', {}, data.z + data.y)
+  })
 
-    ReactDOM.render(e(component), testRoot, function() {
+  ReactDOM.render(createElement(component), testRoot, function() {
+    t.equal(yCalcCount, 1);
+    t.equal($(testRoot).text(), 'hi6');
 
-        test.equal(yCalcCount, 1);
-        test.equal($(testRoot).text(), "hi6");
+    data.z = 'hello';
+    // test: rerender should not need a recomputation of data.y because the subscription is kept alive
 
-        data.z = "hello";
-        // test: rerender should not need a recomputation of data.y because the subscription is kept alive
+    setTimeout(() => {
+      t.equal(yCalcCount, 1);
 
-        setTimeout(function() {
-            test.equal(yCalcCount, 1);
+      t.equal($(testRoot).text(), 'hello6');
+      t.equal(yCalcCount, 1);
 
-            test.equal($(testRoot).text(), "hello6");
-            test.equal(yCalcCount, 1);
+      t.equal(getDNode(data, 'y').observers.length, 1);
 
-            test.equal(getDNode(data, "y").observers.length, 1);
-
-            ReactDOM.render(e("div"), testRoot, function() {
-                test.equal(getDNode(data, "y").observers.length, 0);
-                test.end();
-            });
-        }, 100);
-    });
+      ReactDOM.render(createElement('div'), testRoot, () => {
+        t.equal(getDNode(data, 'y').observers.length, 0);
+        t.end();
+      });
+    }, 100);
+  });
 });
 
+test('does not views alive when using static rendering', t => {
+  mobxReact.useStaticRendering(true);
 
-test('does not views alive when using static rendering', function(test) {
-    mobxReact.useStaticRendering(true);
+  let renderCount = 0;
+  const data = mobx.observable({
+    z: 'hi'
+  });
 
-    var renderCount = 0;
-    var data = mobx.observable({
-        z: "hi"
-    });
+  const component = observer(function testComponent() {
+    renderCount++;
+    return createElement('div', {}, data.z);
+  });
 
-    var component = observer(function testComponent() {
-        renderCount++;
-        return React.createElement("div", {}, data.z);
-    });
+  ReactDOM.render(createElement(component), testRoot, function() {
 
-    ReactDOM.render(e(component), testRoot, function() {
+    t.equal(renderCount, 1);
+    t.equal($(testRoot).text(), 'hi');
 
-        test.equal(renderCount, 1);
-        test.equal($(testRoot).text(), "hi");
+    data.z = 'hello';
+    // no re-rendering on static rendering
 
-        data.z = "hello";
-        // no re-rendering on static rendering
+    setTimeout(() => {
+      t.equal(renderCount, 1);
 
-        setTimeout(function() {
-            test.equal(renderCount, 1);
+      t.equal($(testRoot).text(), 'hi');
+      t.equal(renderCount, 1);
 
-            test.equal($(testRoot).text(), "hi");
-            test.equal(renderCount, 1);
+      t.equal(getDNode(data, 'z').observers.length, 0);
 
-            test.equal(getDNode(data, "z").observers.length, 0);
-
-            mobxReact.useStaticRendering(false);
-            test.end();
-        }, 100);
-    });
+      mobxReact.useStaticRendering(false);
+      t.end();
+    }, 100);
+  });
 });
 
 test('does not views alive when using static + string rendering', function(test) {
-    mobxReact.useStaticRendering(true);
+  mobxReact.useStaticRendering(true);
 
-    var renderCount = 0;
-    var data = mobx.observable({
-        z: "hi"
-    });
+  let renderCount = 0;
+  const data = mobx.observable({
+    z: 'hi'
+  });
 
-    var component = observer(function testComponent() {
-        renderCount++;
-        return React.createElement("div", {}, data.z);
-    });
+  const component = observer(function testComponent() {
+    renderCount++;
+    return createElement('div', {}, data.z);
+  });
 
-    const output = ReactDOMServer.renderToStaticMarkup(e(component))
+  const output = ReactDOMServer.renderToStaticMarkup(createElement(component))
 
-    data.z = "hello";
+  data.z = 'hello';
 
-    setTimeout(function() {
-        test.equal(output, "<div>hi</div>")
-        test.equal(renderCount, 1);
+  setTimeout(() => {
+    test.equal(output, '<div>hi</div>')
+    test.equal(renderCount, 1);
 
-        test.equal(getDNode(data, "z").observers.length, 0);
+    test.equal(getDNode(data, 'z').observers.length, 0);
 
-        mobxReact.useStaticRendering(false);
-        test.end();
-    }, 100);
+    mobxReact.useStaticRendering(false);
+    test.end();
+  }, 100);
 });
-
-
-// From typescript compiler:
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 
 test('issue 12', function(t) {
-    var data = mobx.observable({
-        selected: "coffee",
-        items: [{
-            name: "coffee"
-        }, {
-            name: "tea"
-        }]
-    });
+  const data = mobx.observable({
+    selected: 'coffee',
+    items: [{
+      name: 'coffee'
+    }, {
+      name: 'tea'
+    }]
+  });
 
-    /** Row Class */
-    var _super = React.Component;
-    var Row  = function() {
-        _super.apply(this, arguments);
+  /** Row Class */
+  class Row extends Component {
+    constructor(props) {
+      super(props)
     }
-    __extends(Row, _super);
-    Row.prototype.render = function() {
-        return e("div", {}, this.props.item.name + (data.selected === this.props.item.name ? "!" : ""));
-    };
 
-    /** table stateles component */
-    var table = observer(function table() {
-        return e("div", {}, data.items.map(function(item) {
-            return e(Row, { key: item.name, item: item})
-        }));
-    })
+    render() {
+      return createElement('div', {}, this.props.item.name + (data.selected === this.props.item.name ? '!' : ""));
+    }
+  }
 
-    ReactDOM.render(e(table), testRoot, function() {
-        t.equal($(testRoot).text(), "coffee!tea");
+  /** table stateles component */
+  var table = observer(function table() {
+    return createElement('div', {}, data.items.map(function(item) {
+      return createElement(Row, { key: item.name, item: item})
+    }));
+  })
 
-        mobx.transaction(function() {
-            data.items[1].name = "boe";
-            data.items.splice(0, 2, { name : "soup" });
-            data.selected = "tea";
-        });
+  ReactDOM.render(createElement(table), testRoot, function() {
+    t.equal($(testRoot).text(), 'coffee!tea');
 
-        setTimeout(function() {
-            t.equal($(testRoot).text(), "soup");
-            t.end();
-        }, 50);
-    });
-});
-
-test("changing state in render should fail", function(t) {
-    var data = mobx.observable(2);
-    var comp = observer(function() {
-        data(3);
-        return e("div", {}, data());
+    mobx.transaction(() => {
+      data.items[1].name = 'boe';
+      data.items.splice(0, 2, { name : 'soup' });
+      data.selected = 'tea';
     });
 
-
-    t.throws(function() {
-        ReactDOM.render(e(comp), testRoot);
-    }, "It is not allowed to change the state during a view");
-
-    mobx._.resetGlobalState();
-    t.end();
+    setTimeout(() => {
+      t.equal($(testRoot).text(), 'soup');
+      t.end();
+    }, 50);
+  });
 });
 
-test("component should not be inject", function(t) {
-    var msg = [];
-    var baseWarn = console.warn;
-    console.warn = function(m) { msg.push(m); }
+test('changing state in render should fail', function(t) {
+  const data = mobx.observable(2);
+  const comp = observer(() => {
+    data(3);
+    return createElement('div', {}, data());
+  });
 
-    observer(inject("foo")(React.createClass({
-        render: function() {
-            return e("div", {}, "context:" + this.props.foo);
-        }
-    })));
+  t.throws(
+    () => ReactDOM.render(createElement(comp), testRoot),
+    'It is not allowed to change the state during a view'
+  );
 
-    t.equal(msg.length, 1);
-    console.warn = baseWarn;
-    t.end();
+  mobx._.resetGlobalState();
+  t.end();
 });
 
+test('component should not be inject', function(t) {
+  const msg = [];
+  const baseWarn = console.warn;
+  console.warn = m => msg.push(m);
 
-test("observer component can be injected", function(t) {
-    var msg = [];
-    var baseWarn = console.warn;
-    console.warn = function(m) { msg.push(m); }
+  observer(inject('foo')(createClass({
+    render() {
+      return createElement('div', {}, 'context:' + this.props.foo);
+    }
+  })));
 
-    inject("foo")(observer(React.createClass({
-        render: function() { return null; }
-    })))
-
-    // N.B, the injected component will be observer since mobx-react 4.0!
-    inject(function() {})(observer(React.createClass({
-        render: function() { return null; }
-    })))
-
-    t.equal(msg.length, 0);
-    console.warn = baseWarn;
-    t.end();
+  t.equal(msg.length, 1);
+  console.warn = baseWarn;
+  t.end();
 });
 
+test('observer component can be injected', t => {
+  const msg = [];
+  const baseWarn = console.warn;
+  console.warn = m => msg.push(m)
 
-test("124 - react to changes in this.props via computed", function(t) {
-    var c = observer(React.createClass({
-        componentWillMount: function() {
-            mobx.extendObservable(this, {
-                get computedProp() {
-                    return this.props.x
-                }
-            })
-        },
-        render: function() {
-            return e("span", {}, "x:" + this.computedProp)
+  inject('foo')(observer(createClass({
+    render: () => null
+  })));
+
+  // N.B, the injected component will be observer since mobx-react 4.0!
+  inject(() => {})(observer(createClass({
+    render: () => null
+  })));
+
+  t.equal(msg.length, 0);
+  console.warn = baseWarn;
+  t.end();
+});
+
+test('124 - react to changes in this.props via computed', function(t) {
+  const c = observer(createClass({
+    componentWillMount() {
+      mobx.extendObservable(this, {
+        get computedProp() {
+          return this.props.x
         }
-    }))
+      })
+    },
+    render() {
+      return createElement('span', {}, 'x:' + this.computedProp)
+    }
+  }))
 
-    var parent = React.createClass({
-        getInitialState() {
-            return { v: 1 }
-        },
-        render: function() {
-            return e(
-                "div",
-                { onClick: function() {
-                    this.setState({ v: 2 })
-                }.bind(this)},
-                e(c, { x: this.state.v })
-            )
-        }
-    })
+  const parent = createClass({
+    getInitialState() {
+      return { v: 1 }
+    },
+    render() {
+      return createElement(
+        'div',
+        { onClick: () => this.setState({ v: 2 }) },
+        createElement(c, { x: this.state.v })
+      )
+    }
+  })
 
-    ReactDOM.render(e(parent), testRoot, function() {
-        t.equal($("span").text(), "x:1")
-        $("div").click()
-        setTimeout(function() {
-            t.equal($("span").text(), "x:2")
-            t.end()
-        }, 100)
-    })
+  ReactDOM.render(createElement(parent), testRoot, () => {
+    t.equal($('span').text(), 'x:1')
+    $('div').click()
+    setTimeout(() => {
+      t.equal($('span').text(), 'x:2')
+      t.end()
+    }, 100)
+  })
 })
 
-test("should stop updating if error was thrown in render (#134)", function(t) {
-    var data = mobx.observable(0);
-    var renderingsCount = 0;
+test('should stop updating if error was thrown in render (#134)', function(t) {
+  const data = mobx.observable(0);
+  let renderingsCount = 0;
 
-    var comp = observer(function() {
-        renderingsCount += 1;
-        if (data.get() === 2) {
-            throw new Error("Hello");
-        }
-        return e("div", {});
-    });
-
-    ReactDOM.render(e(comp), testRoot, function() {
-        t.equal(data.observers.length, 1);
-        data.set(1);
-        t.throws(function() {
-            data.set(2);
-        }, "Hello");
-        t.equal(data.observers.length, 0);
-        data.set(3);
-        data.set(4);
-        data.set(5);
-
-        t.equal(renderingsCount, 3);
-
-        t.end();
-    });
-});
-
-test("should render component even if setState called with exactly the same props", function(t) {
-    let renderCount = 0;
-    const Component = observer(React.createClass({
-        onClick() {
-            this.setState({});
-        },
-        render() {
-            renderCount++;
-            return e("div", {onClick: this.onClick, id: "clickableDiv"});
-        }
-    }));
-    ReactDOM.render(e(Component), testRoot, function() {
-        t.equal(renderCount, 1, "renderCount === 1");
-        $("#clickableDiv").click();
-        t.equal(renderCount, 2, "renderCount === 2");
-        $("#clickableDiv").click();
-        t.equal(renderCount, 3, "renderCount === 3");
-        t.end();
-    });
-});
-
-test("Observer regions should react", function(t) {
-    var data = mobx.observable("hi")
-
-    var comp = function() {
-        return e("div", {},
-            e(mobxReact.Observer, {}, function() {
-                return e("span", {}, data.get())
-            }),
-            e("li", {}, data.get())
-        )
+  const comp = observer(function() {
+    renderingsCount += 1;
+    if (data.get() === 2) {
+      throw new Error('Hello');
     }
+    return createElement('div', {});
+  });
 
-    ReactDOM.render(e(comp), testRoot, function() {
-        t.equal($("span").text(), "hi");
-        t.equal($("li").text(), "hi");
+  ReactDOM.render(createElement(comp), testRoot, () => {
+    t.equal(data.observers.length, 1);
+    data.set(1);
+    t.throws(() => data.set(2), 'Hello');
+    t.equal(data.observers.length, 0);
+    data.set(3);
+    data.set(4);
+    data.set(5);
 
-        data.set("hello");
-        t.equal($("span").text(), "hello");
-        t.equal($("li").text(), "hi");
-        t.end();
-    })
+    t.equal(renderingsCount, 3);
+    t.end();
+  });
+});
+
+test('should render component even if setState called with exactly the same props', function(t) {
+  let renderCount = 0;
+  const Component = observer(createClass({
+    onClick() {
+      this.setState({});
+    },
+    render() {
+      renderCount++;
+      return createElement('div', {onClick: this.onClick, id: 'clickableDiv'});
+    }
+  }));
+  ReactDOM.render(createElement(Component), testRoot, () => {
+    t.equal(renderCount, 1, 'renderCount === 1');
+    $('#clickableDiv').click();
+    t.equal(renderCount, 2, 'renderCount === 2');
+    $('#clickableDiv').click();
+    t.equal(renderCount, 3, 'renderCount === 3');
+    t.end();
+  });
+});
+test('Observer regions should react', t => {
+  const data = mobx.observable('hi')
+  const comp = () => createElement('div', {},
+    createElement(mobxReact.Observer, {}, () => createElement('span', {}, data.get())),
+    createElement('li', {}, data.get())
+  );
+
+  ReactDOM.render(createElement(comp), testRoot, () => {
+    t.equal($('span').text(), 'hi');
+    t.equal($('li').text(), 'hi');
+
+    data.set('hello');
+    t.equal($('span').text(), 'hello');
+    t.equal($('li').text(), 'hi');
+    t.end();
+  })
 })
