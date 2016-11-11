@@ -4,7 +4,7 @@
 
 #### `inject(fn, component)` will now track `fn` as well
 
-`inject(func)` is now reactive as well, that means that transformation in the selector function will be tracked, see [#111](https://github.com/mobxjs/mobx-react/issues/111)
+`inject(func)` is now reactive as well, that means that transformations in the selector function will be tracked, see [#111](https://github.com/mobxjs/mobx-react/issues/111)
 
 ```javascript
 const NameDisplayer = ({ name }) => <h1>{name}</h1>
@@ -29,6 +29,8 @@ const App = () => (
 ReactDOM.render(<App />, document.body)
 ```
 
+_N.B. note that in this specific case NameDisplayer doesn't have to be an `observer`, as it doesn't receive observables, but just plain data from the transformer function._
+
 #### `this.props` and `this.state` in React components are now observables as well
 
 A common cause of confusion were cases like:
@@ -47,7 +49,7 @@ A common cause of confusion were cases like:
 
 This component would re-render if `user.name` was modified, but it would still render the previous user's name if a complete new user was received!
 The reason for that is that in the above example the only observable tracked by the computed value is `user.name`, but not `this.props.user`.
-So a change to the latter would be picked up, but not the first.
+So a change to the first would be picked up, but a change in `props` itself, assigning a new user, not.
 
 Although this is technically correct, it was a source of confusion.
 For that reason `this.state` and `this.props` are now automatically converted to observables in any `observer` based react component.
@@ -55,13 +57,14 @@ For more details, see [#136](https://github.com/mobxjs/mobx-react/pull/136) by @
 
 #### Better support for Server Side Rendering
 
-Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
+Introduced `useStaticRendering(boolean)` to better support server-side rendering scenarios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
 
 #### Introduced `Observer` as alternative syntax to the `observer` decorator.
 
 _This feature is still experimental and might change in the next minor release, or be deprecated_
 
-Introduced `Observer`. Can be used as alternative to the `observer` decorator. Marks a component region as reactiove. See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
+Introduced `Observer`. Can be used as alternative to the `observer` decorator. Marks a component region as reactive.
+See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
 Example:
 
 ```javascript
