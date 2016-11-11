@@ -29,6 +29,30 @@ const App = () => (
 ReactDOM.render(<App />, document.body)
 ```
 
+#### `this.props` and `this.state` in React components are now observables as well
+
+A common cause of confusion were cases like:
+
+```javascript
+@observer class MyComponent() {
+    @computed upperCaseName() {
+        return this.props.user.name.toUpperCase()
+    }
+
+    render() {
+        return <h1>{this.upperCaseName}</h1>
+    }
+}
+```
+
+This component would re-render if `user.name` was modified, but it would still render the previous user's name if a complete new user was received!
+The reason for that is that in the above example the only observable tracked by the computed value is `user.name`, but not `this.props.user`.
+So a change to the latter would be picked up, but not the first.
+
+Although this is technically correct, it was a source of confusion.
+For that reason `this.state` and `this.props` are now automatically converted to observables in any `observer` based react component.
+For more details, see [#136](https://github.com/mobxjs/mobx-react/pull/136) by @Strate
+
 #### Better support for Server Side Rendering
 
 Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
@@ -71,10 +95,10 @@ For more info see the related [discussion](https://github.com/mobxjs/mobx-react/
 
 * It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
 * Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
-* export `PropTypes` as well, fixes #153
+* export `PropTypes` as well in typescript typings, fixes #153
 * Add react as a peer dependency
 * Added minified browser build: `index.min.js`, fixes #147
-* Generated better component name for `inject` HOC
+* Generate better component names when using `inject`
 
 ---
 
