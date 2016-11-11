@@ -8,3 +8,5 @@ custom.d.ts
 index.js
 index.d.ts
 index.min.js
+test/browser/test_bundle.js
+.idea

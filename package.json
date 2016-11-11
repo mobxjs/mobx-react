@@ -9,11 +9,13 @@
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
+    "test:ts": "tsc -p test/ts",
+    "test:travis": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run && npm run test:ts",
+    "test:build": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -o ./tests/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] ]",
+    "test:console": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] ] | tape-run | tap-spec && npm run test:ts",
+    "test:browser": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] ] | tape-run --browser chrome --render='tap-spec'",
     "build": "webpack && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
-    "prepublish": "npm run build",
-    "test": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run | tap-spec && tsc -p test/ts",
-    "travis": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run && tsc -p test/ts",
-    "debug": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js | tape-run --browser chrome | tap-spec"
+    "prepublish": "npm run build"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -30,6 +32,8 @@
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-class-properties": "^6.11.5",
     "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.16.0",
+    "babelify": "^7.3.0",
     "browserify": "^13.1.0",
     "empty-module": "0.0.2",
     "enzyme": "^2.3.0",
