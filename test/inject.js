@@ -256,72 +256,121 @@ test('inject based context', t => {
         t.end();
     })
 
-    test('warning is printed when attaching propTypes/defaultProps/contextTypes to HOC not in production', t => {
+    test('warning is printed when attaching contextTypes to HOC', t => {
         var msg = [];
         var baseWarn = console.warn;
         console.warn = (m) => msg.push(m);
 
-        var C = observer(["foo"], React.createClass({
+        var C = inject(["foo"])(React.createClass({
             displayName: 'C',
-            render: function () {
+            render: function() {
                 return e("div", {}, "context:" + this.props.foo);
             }
         }));
 
-        C.propTypes = {};
-        C.defaultProps = {};
         C.contextTypes = {};
 
         var B = React.createClass({
-            render: function () {
+            render: function() {
                 return e(C, {});
             }
         });
 
         var A = React.createClass({
-            render: function () {
+            render: function() {
                 return e(Provider, { foo: "bar" }, e(B, {}))
             }
         })
 
         const wrapper = mount(e(A));
-        t.equal(msg.length, 3);
-        t.equal(msg[0], "Mobx Injector: you are trying to attach propTypes to HOC instead of C. Use `wrappedComponent` property.");
-        t.equal(msg[1], "Mobx Injector: you are trying to attach defaultProps to HOC instead of C. Use `wrappedComponent` property.");
-        t.equal(msg[2], "Mobx Injector: you are trying to attach contextTypes to HOC instead of C. Use `wrappedComponent` property.");
+        t.equal(msg.length, 1);
+        t.equal(msg[0], "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`");
 
         console.warn = baseWarn;
         t.end();
     })
 
 
-    test('warning is not printed when attaching propTypes to wrapped component', t => {
+    test('propTypes and defaultProps are forwarded', t => {
+        var msg = [];
+        var baseError = console.error;
+        console.error = (m) => msg.push(m);
+
+        var C = inject(["foo"])(React.createClass({
+            displayName: 'C',
+            render: function() {
+                t.equal(this.props.y, 3);
+                t.equal(this.props.x, undefined);
+                return null;
+            }
+        }));
+
+        C.propTypes = {
+            x: React.PropTypes.func.isRequired,
+            z: React.PropTypes.string.isRequired,
+        };
+        C.wrappedComponent.propTypes = {
+            a: React.PropTypes.func.isRequired,
+        };
+        C.defaultProps = {
+            y: 3
+        };
+
+        var B = React.createClass({
+            render: function() {
+                return e(C, { z: "test" });
+            }
+        });
+
+        var A = React.createClass({
+            render: function() {
+                return e(Provider, { foo: "bar" }, e(B, {}))
+            }
+        })
+
+        const wrapper = mount(e(A));
+        t.equal(msg.length, 2);
+        t.equal(msg[0].split("\n")[0], 'Warning: Failed prop type: Required prop `x` was not specified in `MobXStoreInjector`.');
+        t.equal(msg[1].split("\n")[0], 'Warning: Failed prop type: Required prop `a` was not specified in `C`.');
+
+        console.error = baseError;
+        t.end();
+    })
+
+
+   test('warning is not printed when attaching propTypes to injected component', t => {
         var msg = [];
         var baseWarn = console.warn;
         console.warn = (m) => msg = m;
 
-        var C = observer(["foo"], React.createClass({
+        var C = inject(["foo"])(React.createClass({
             displayName: 'C',
-            render: function () {
+            render: function() {
+                return e("div", {}, "context:" + this.props.foo);
+            }
+        }));
+
+        C.propTypes = {};
+
+        t.equal(msg.length, 0);
+        console.warn = baseWarn;
+        t.end();
+    })
+
+   test('warning is not printed when attaching propTypes to wrappedComponent', t => {
+        var msg = [];
+        var baseWarn = console.warn;
+        console.warn = (m) => msg = m;
+
+        var C = inject(["foo"])(React.createClass({
+            displayName: 'C',
+            render: function() {
                 return e("div", {}, "context:" + this.props.foo);
             }
         }));
 
         C.wrappedComponent.propTypes = {};
 
-        var B = React.createClass({
-            render: function () {
-                return e(C, {});
-            }
-        });
-
-        var A = React.createClass({
-            render: function () {
-                return e(Provider, { foo: "bar" }, e(B, {}))
-            }
-        })
-
-        const wrapper = mount(e(A));
         t.equal(msg.length, 0);
         console.warn = baseWarn;
         t.end();

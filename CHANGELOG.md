@@ -48,16 +48,39 @@ const UserNameDisplayer = ({ user }) => (
 )
 ```
 
+#### Using `observer` to inject stores is deprecated
+
+The fact that `observer` could inject stores as well caused quite some confusion.
+Because in some cases `observer` would return the original component (when not inject), but it would return a HoC when injecting.
+To make this more consistent, you should always use `inject` to inject stores into a component. So use:
+
+```
+@inject("store1", "store2") @observer
+class MyComponent extends React.Component {
+```
+
+or:
+
+```
+const MyComponent = inject("store1", "store2")(observer(props => rendering))
+```
+
+For more info see the related [discussion](https://github.com/mobxjs/mobx-react/commit/666577b41b7af8209839e7b243064a31c9951632#commitcomment-19773706)
+
 #### Other improvements
 
+* It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
 * Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
-* Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 * export `PropTypes` as well, fixes #153
 * Add react as a peer dependency
 * Added minified browser build: `index.min.js`, fixes #147
 * Generated better component name for `inject` HOC
 
 ---
+
+### 3.5.9
+
+* Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 
 ### 3.5.8
 
