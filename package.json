@@ -11,7 +11,7 @@
   "scripts": {
     "test:ts": "tsc -p test/ts",
     "test:build": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] ]",
-    "test:travis": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] ] | tape-run && npm run test:ts",
+    "test:travis": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] ] | tape-run && npm run test:ts",
     "test:console": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] ] | tape-run | tap-spec && npm run test:ts",
     "test:open": " open ./test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open",
