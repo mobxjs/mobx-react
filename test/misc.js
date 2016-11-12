@@ -1,4 +1,4 @@
-import { createClass, createElement } from 'react'
+import React, { createClass, createElement } from 'react'
 import ReactDOM from 'react-dom'
 import { mount, shallow } from 'enzyme'
 import test from 'tape'
@@ -9,10 +9,10 @@ test('custom shouldComponentUpdate is not respected for observable changes (#50)
   let called = 0;
   const x = mobx.observable(3);
   const C = observer(createClass({
-    render: () => createElement('div', {}, 'value:' + x.get()),
+    render: () => <div>value:{ x.get() }</div>,
     shouldComponentUpdate: () => called++
   }));
-  const wrapper = mount(createElement(C));
+  const wrapper = mount(<C />);
   t.equal(wrapper.find('div').text(), 'value:3');
   t.equal(called, 0)
   x.set(42);
@@ -27,7 +27,7 @@ test('custom shouldComponentUpdate is not respected for observable changes (#50)
   const y = mobx.observable(5)
   const C = observer(createClass({
     render() {
-      return createElement('div', {}, 'value:' + this.props.y);
+      return <div>value:{ this.props.y }</div>
     },
     shouldComponentUpdate(nextProps) {
       called++;
@@ -35,9 +35,12 @@ test('custom shouldComponentUpdate is not respected for observable changes (#50)
     }
   }));
   const B = observer(createClass({
-    render: () => createElement('span', {}, createElement(C, {y: y.get()}))
+    render: () =>
+      <span>
+        <C y={ y.get() } />
+      </span>
   }));
-  const wrapper = mount(createElement(B));
+  const wrapper = mount(<B />);
   t.equal(wrapper.find('div').text(), 'value:5');
   t.equal(called, 0)
 
@@ -60,27 +63,28 @@ test('issue mobx 405', t => {
   function ExampleState() {
     mobx.extendObservable(this, {
       name: 'test',
-      greetings: function() {
+      greetings() {
         return 'Hello my name is ' + this.name;
       }
     })
   }
 
   const ExampleView = observer(createClass({
-    render: function() {
-      return createElement('div', {},
-        createElement('input', {
-          type: 'text',
-          value: this.props.exampleState.name,
-          onChange: e => this.props.exampleState.name = e.target.value
-        }),
-        createElement('span', {}, this.props.exampleState.greetings)
-      );
+    render() {
+      return (
+        <div>
+          <input
+            type='text'
+            onChange={ e => this.props.exampleState.name = e.target.value }
+            value={ this.props.exampleState.name } />
+          <span>{ this.props.exampleState.greetings }</span>
+        </div>
+      )
     }
   }));
 
   const exampleState = new ExampleState();
-  const wrapper = shallow(createElement(ExampleView, { exampleState }));
+  const wrapper = shallow(<ExampleView exampleState={ exampleState } />);
   t.equal(wrapper.find('span').text(), 'Hello my name is test');
 
   t.end();
@@ -88,22 +92,18 @@ test('issue mobx 405', t => {
 
 test('#85 Should handle state changing in constructors', function(t) {
   const a = mobx.observable(2);
-  const child = observer(createClass({
+  const Child = observer(createClass({
     displayName: 'Child',
     getInitialState() {
       a.set(3); // one shouldn't do this!
       return {};
     },
-    render: () => createElement('div', {}, 'child:', a.get(), ' - ')
+    render: () => <div>child:{ a.get() } - </div>
   }));
-  const parent = observer(function Parent() {
-    return createElement('span', {},
-      createElement(child, {}),
-      'parent:',
-      a.get()
-    );
+  const ParentWrapper = observer(function Parent() {
+    return <span><Child />parent:{ a.get() }</span>
   });
-  ReactDOM.render(createElement(parent, {}), document.getElementById('testroot'), () => {
+  ReactDOM.render(<ParentWrapper />, document.getElementById('testroot'), () => {
     t.equal(document.getElementsByTagName('span')[0].textContent, 'child:3 - parent:3');
     a.set(5);
     t.equal(document.getElementsByTagName('span')[0].textContent, 'child:5 - parent:5');

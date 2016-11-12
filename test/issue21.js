@@ -1,4 +1,4 @@
-import { createClass, createElement, DOM } from 'react'
+import React, { createClass, createElement, DOM } from 'react'
 import ReactDOM from 'react-dom'
 import test from 'tape'
 import mobx from 'mobx'
@@ -48,17 +48,17 @@ const wizardModel = mobx.observable({
 
 const Wizard = observer(createClass({
   displayName: 'Wizard',
-  render: function () {
+  render() {
     return DOM.div(null,
-      createElement('div', null,
-        createElement('h1', null, 'Active Step: '),
-        createElement(WizardStep, {step: this.props.model.activeStep, key: 'activeMode', tester: true})
-      ),
-      createElement('div', null,
-        createElement('h1', null, 'All Step: '),
-        createElement('p',null,'Clicking on these steps will render the active step just once.  This is what I expected.'),
-        createElement(WizardSteps, {steps: this.props.model.steps, key: 'modeList'})
-      )
+      <div>
+        <h1>Active Step: </h1>
+        <WizardStep step={ this.props.model.activeStep } key='activeMode' tester />
+      </div>,
+      <div>
+        <h1>All Step: </h1>
+        <p>Clicking on these steps will render the active step just once.  This is what I expected.</p>
+        <WizardStep step={ this.props.model.steps } key='modeList' />
+      </div>
     );
   }
 }));
@@ -71,7 +71,7 @@ const WizardSteps = observer(createClass({
   render() {
     var steps = _.map(this.props.steps, step =>
       DOM.div({key: step.title},
-        createElement(WizardStep, {step: step, key: step.title})
+        <WizardStep step={ step } key={ step.title } />
       )
     );
     return DOM.div(null, steps);
@@ -108,7 +108,7 @@ const changeStep = stepNumber => wizardModel.setActiveStep(wizardModel.steps[ste
 
 test('verify issue 21', t => {
   t.plan(3)
-  ReactDOM.render(createElement(Wizard, {model: wizardModel}),testRoot, () => {
+  ReactDOM.render(<Wizard model={ wizardModel } />, testRoot, () => {
     t.equal(topRenderCount, 1);
     changeStep(0);
     setTimeout(() => {
@@ -148,26 +148,24 @@ test('verify prop changes are picked up', t => {
     },
     render() {
       events.push(['render', this.props.item.subid, this.props.item.text]);
-      return createElement('span', {}, this.props.item.text);
+      return <span>{ this.props.item.text }</span>
     }
   }))
 
   const Parent = observer(createClass({
     render() {
-      return createElement('div', {
-        onClick: changeStuff.bind(this), // event is needed to get batching!
-        id: 'testDiv'
-      }, data.items.map(item => createElement(Child, {
-          key: 'fixed',
-          item: item
-        })
-      ));
+      return (
+        <div
+          onClick={ changeStuff.bind(this) }
+          id='testDiv'
+        >
+          { data.items.map(item => <Child key='fixed' item={ item } />) }
+        </div>
+      )
     }
   }));
 
-  const Wrapper = createClass({
-    render: () => createElement(Parent, {})
-  });
+  const Wrapper = () => <Parent />
 
   function changeStuff() {
     mobx.transaction(() => {
@@ -177,7 +175,7 @@ test('verify prop changes are picked up', t => {
     this.setState({}); // trigger update
   }
 
-  ReactDOM.render(createElement(Wrapper, {}), testRoot, () => {
+  ReactDOM.render(<Wrapper />, testRoot, () => {
     t.plan(2);
     t.deepEqual(events, [
       ['compute', 1],
@@ -236,26 +234,21 @@ test('verify props is reactive', function(t) {
     },
     render() {
       events.push(['render', this.props.item.subid, this.props.item.text, this.computedLabel])
-      return createElement('span', {}, this.props.item.text + this.computedLabel)
+      return <span>{this.props.item.text}{this.computedLabel}</span>
     }
   }));
 
   const Parent = observer(createClass({
     render() {
-      return createElement('div', {
-        onClick: changeStuff.bind(this), // event is needed to get batching!
-        id: 'testDiv'
-      }, data.items.map(item => createElement(Child, {
-          key: 'fixed',
-          item: item
-        })
-      ))
+      return (
+        <div onClick={ changeStuff.bind(this) } id='testDiv'>
+          { data.items.map(item => <Child key='fixed' item={ item } />) }
+        </div>
+      )
     }
   }));
 
-  const Wrapper = createClass({
-    render: () => createElement(Parent, {})
-  });
+  const Wrapper = () => <Parent />
 
   function changeStuff() {
     mobx.transaction(() => {
@@ -264,7 +257,7 @@ test('verify props is reactive', function(t) {
     })
   }
 
-  ReactDOM.render(createElement(Wrapper, {}), testRoot, () => {
+  ReactDOM.render(<Wrapper />, testRoot, () => {
     t.plan(2)
     t.deepEqual(events, [
       ['mount'],
@@ -318,7 +311,7 @@ test('no re-render for shallow equal props', function(t) {
     },
     render() {
       events.push(['render', this.props.item.subid, this.props.item.label]);
-      return createElement('span', {}, this.props.item.label);
+      return <span>{this.props.item.label}</span>;
     }
   }));
 
@@ -326,29 +319,25 @@ test('no re-render for shallow equal props', function(t) {
     render() {
       t.equal(mobx.isObservable(this.props.nonObservable), false, 'object has become observable!')
       events.push(['parent render', data.parentValue])
-      return createElement('div', {
-        onClick: changeStuff.bind(this), // event is needed to get batching!
-        id: 'testDiv'
-      }, data.items.map(function(item) {
-        return createElement(Child, {
-          key: 'fixed',
-          item: item,
-          value: 5
-        })
-      }))
+      return (
+        <div
+          onClick={ changeStuff.bind(this) }
+          id='testDiv'
+        >
+          { data.items.map(item => <Child key='fixed' item={ item } value={ 5 } />) }
+        </div>
+      )
     }
   }));
 
-  const Wrapper = createClass({
-    render: () => createElement(Parent, { nonObservable: {} })
-  });
+  const Wrapper = () => <Parent nonObservable={{}} />
 
   function changeStuff() {
     data.items[0].label = 'hi'; // no change
     data.parentValue = 1; // rerender parent
   }
 
-  ReactDOM.render(createElement(Wrapper, {}), testRoot, () => {
+  ReactDOM.render(<Wrapper />, testRoot, () => {
     t.plan(4);
     t.deepEqual(events, [
       ['parent render', 0],
@@ -380,11 +369,13 @@ test('lifecycle callbacks called with correct arguments', t => {
       t.equal(prevProps.counter, 0, 'componentDidUpdate: prevProps.counter === 0');
       t.equal(this.props.counter, 1, 'componentDidUpdate: this.props.counter === 1');
     },
-    render: function() {
-      return createElement('div', {}, [
-        createElement('span', {key: '1'}, [this.props.counter]),
-        createElement('button', {key: '2', id: 'testButton', onClick: this.props.onClick}),
-      ]);
+    render() {
+      return (
+        <div>
+          <span key='1'>{ [this.props.counter] }</span>
+          <button  key='2' id='testButton' onClick={ this.props.onClick } />
+        </div>
+      )
     }
   }));
   const Root = createClass({
@@ -395,11 +386,11 @@ test('lifecycle callbacks called with correct arguments', t => {
       this.setState({counter: (this.state.counter || 0) + 1});
     },
     render() {
-      return createElement(Component, {
-        counter: this.state.counter || 0,
-        onClick: this.onButtonClick,
-      });
+      return <Component
+        counter={ this.state.counter || 0 }
+        onClick={ this.onButtonClick }
+      />
     },
   });
-  ReactDOM.render(createElement(Root), testRoot, () => $('#testButton').click());
+  ReactDOM.render(<Root />, testRoot, () => $('#testButton').click());
 });

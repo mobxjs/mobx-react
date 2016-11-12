@@ -1,4 +1,4 @@
-import { createClass, createElement, Component } from 'react'
+import React, { createClass, createElement, Component } from 'react'
 import ReactDOM from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 import test from 'tape'
@@ -17,14 +17,14 @@ const store = mobx.observable({
 });
 
 let todoItemRenderings = 0;
-const todoItem = observer(function TodoItem(props) {
+const TodoItem = observer(function TodoItem(props) {
   todoItemRenderings++;
-  return createElement('li', {}, '|' + props.todo.title);
+  return <li>|{ props.todo.title }</li>
 });
 
 let todoListRenderings = 0;
 let todoListWillReactCount = 0;
-const todoList = observer(createClass({
+const TodoList = observer(createClass({
   renderings: 0,
   componentWillReact() {
     todoListWillReactCount++;
@@ -32,28 +32,21 @@ const todoList = observer(createClass({
   render() {
     todoListRenderings++;
     const todos = store.todos;
-    return createElement('div', {},
-      createElement('h1', null, todos.length),
-      todos.map(function(todo, idx) {
-        return createElement(todoItem, {
-          key: idx,
-          todo: todo
-        });
-      })
-    );
+    return (
+      <div>
+        <hi>{ todos.length }</hi>
+        { todos.map((todo, idx) => <TodoItem key={ idx } todo={ todo } />) }
+      </div>
+    )
   }
 }));
 
-const app = createClass({
-  render: () => createElement(todoList)
-});
+const App = () => <TodoList />
 
-function getDNode(obj, prop) {
-  return obj.$mobx.values[prop];
-}
+const getDNode = (obj, prop) => obj.$mobx.values[prop]
 
 test('nestedRendering', t => {
-  ReactDOM.render(createElement(app), testRoot, () => {
+  ReactDOM.render(<App />, testRoot, () => {
     t.equal(todoListRenderings, 1, 'should have rendered list once');
     t.equal(todoListWillReactCount, 0, 'should not have reacted yet')
     t.equal($('li').length, 1);
@@ -115,11 +108,11 @@ test('keep views alive', t => {
     z: 'hi'
   });
 
-  const component = observer(function testComponent() {
-    return createElement('div', {}, data.z + data.y)
+  const TestComponent = observer(function testComponent() {
+    return <div>{data.z}{data.y}</div>
   })
 
-  ReactDOM.render(createElement(component), testRoot, function() {
+  ReactDOM.render(<TestComponent />, testRoot, function() {
     t.equal(yCalcCount, 1);
     t.equal($(testRoot).text(), 'hi6');
 
@@ -134,7 +127,7 @@ test('keep views alive', t => {
 
       t.equal(getDNode(data, 'y').observers.length, 1);
 
-      ReactDOM.render(createElement('div'), testRoot, () => {
+      ReactDOM.render(<div />, testRoot, () => {
         t.equal(getDNode(data, 'y').observers.length, 0);
         t.end();
       });
@@ -150,12 +143,12 @@ test('does not views alive when using static rendering', t => {
     z: 'hi'
   });
 
-  const component = observer(function testComponent() {
+  const TestComponent = observer(function testComponent() {
     renderCount++;
-    return createElement('div', {}, data.z);
+    return <div>{ data.z }</div>
   });
 
-  ReactDOM.render(createElement(component), testRoot, function() {
+  ReactDOM.render(<TestComponent />, testRoot, function() {
 
     t.equal(renderCount, 1);
     t.equal($(testRoot).text(), 'hi');
@@ -185,12 +178,12 @@ test('does not views alive when using static + string rendering', function(test)
     z: 'hi'
   });
 
-  const component = observer(function testComponent() {
+  const TestComponent = observer(function testComponent() {
     renderCount++;
-    return createElement('div', {}, data.z);
+    return <div>{ data.z }</div>
   });
 
-  const output = ReactDOMServer.renderToStaticMarkup(createElement(component))
+  const output = ReactDOMServer.renderToStaticMarkup(<TestComponent />)
 
   data.z = 'hello';
 
@@ -222,18 +215,25 @@ test('issue 12', function(t) {
     }
 
     render() {
-      return createElement('div', {}, this.props.item.name + (data.selected === this.props.item.name ? '!' : ""));
+      return (
+        <div>
+          { this.props.item.name }
+          { data.selected === this.props.item.name ? '!' : '' }
+        </div>
+      )
     }
   }
 
   /** table stateles component */
-  var table = observer(function table() {
-    return createElement('div', {}, data.items.map(function(item) {
-      return createElement(Row, { key: item.name, item: item})
-    }));
+  var Table = observer(function table() {
+    return (
+      <div>
+        {  data.items.map(item => <Row key={ item.name } item={ item } />) }
+      </div>
+    )
   })
 
-  ReactDOM.render(createElement(table), testRoot, function() {
+  ReactDOM.render(<Table />, testRoot, function() {
     t.equal($(testRoot).text(), 'coffee!tea');
 
     mobx.transaction(() => {
@@ -251,13 +251,13 @@ test('issue 12', function(t) {
 
 test('changing state in render should fail', function(t) {
   const data = mobx.observable(2);
-  const comp = observer(() => {
+  const Comp = observer(() => {
     data(3);
-    return createElement('div', {}, data());
+    return <div>{ data() }</div>
   });
 
   t.throws(
-    () => ReactDOM.render(createElement(comp), testRoot),
+    () => ReactDOM.render(<Comp />, testRoot),
     'It is not allowed to change the state during a view'
   );
 
@@ -272,7 +272,7 @@ test('component should not be inject', function(t) {
 
   observer(inject('foo')(createClass({
     render() {
-      return createElement('div', {}, 'context:' + this.props.foo);
+      return <div>context:{ this.props.foo }</div>
     }
   })));
 
@@ -301,7 +301,7 @@ test('observer component can be injected', t => {
 });
 
 test('124 - react to changes in this.props via computed', function(t) {
-  const c = observer(createClass({
+  const Comp = observer(createClass({
     componentWillMount() {
       mobx.extendObservable(this, {
         get computedProp() {
@@ -310,24 +310,24 @@ test('124 - react to changes in this.props via computed', function(t) {
       })
     },
     render() {
-      return createElement('span', {}, 'x:' + this.computedProp)
+      return <span>x:{ this.computedProp }</span>
     }
   }))
 
-  const parent = createClass({
+  const Parent = createClass({
     getInitialState() {
       return { v: 1 }
     },
     render() {
-      return createElement(
-        'div',
-        { onClick: () => this.setState({ v: 2 }) },
-        createElement(c, { x: this.state.v })
+      return (
+        <div onClick={ () => this.setState({ v: 2 }) }>
+          <Comp x={ this.state.v } />
+        </div>
       )
     }
   })
 
-  ReactDOM.render(createElement(parent), testRoot, () => {
+  ReactDOM.render(<Parent />, testRoot, () => {
     t.equal($('span').text(), 'x:1')
     $('div').click()
     setTimeout(() => {
@@ -341,15 +341,15 @@ test('should stop updating if error was thrown in render (#134)', function(t) {
   const data = mobx.observable(0);
   let renderingsCount = 0;
 
-  const comp = observer(function() {
+  const Comp = observer(function() {
     renderingsCount += 1;
     if (data.get() === 2) {
       throw new Error('Hello');
     }
-    return createElement('div', {});
+    return <div />
   });
 
-  ReactDOM.render(createElement(comp), testRoot, () => {
+  ReactDOM.render(<Comp />, testRoot, () => {
     t.equal(data.observers.length, 1);
     data.set(1);
     t.throws(() => data.set(2), 'Hello');
@@ -371,10 +371,10 @@ test('should render component even if setState called with exactly the same prop
     },
     render() {
       renderCount++;
-      return createElement('div', {onClick: this.onClick, id: 'clickableDiv'});
+      return <div onClick={ this.onClick } id='clickableDiv' />
     }
   }));
-  ReactDOM.render(createElement(Component), testRoot, () => {
+  ReactDOM.render(<Component />, testRoot, () => {
     t.equal(renderCount, 1, 'renderCount === 1');
     $('#clickableDiv').click();
     t.equal(renderCount, 2, 'renderCount === 2');
@@ -383,14 +383,18 @@ test('should render component even if setState called with exactly the same prop
     t.end();
   });
 });
+
 test('Observer regions should react', t => {
   const data = mobx.observable('hi')
-  const comp = () => createElement('div', {},
-    createElement(mobxReact.Observer, {}, () => createElement('span', {}, data.get())),
-    createElement('li', {}, data.get())
-  );
-
-  ReactDOM.render(createElement(comp), testRoot, () => {
+  const Observer = mobxReact.Observer
+  const Comp = () =>
+    <div>
+      <Observer>
+        { () => <span>{ data.get() }</span> }
+      </Observer>
+      <li>{ data.get() }</li>
+    </div>
+  ReactDOM.render(<Comp />, testRoot, () => {
     t.equal($('span').text(), 'hi');
     t.equal($('li').text(), 'hi');
 

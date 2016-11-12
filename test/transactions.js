@@ -1,4 +1,4 @@
-import { createClass, createElement } from 'react'
+import React, { createClass } from 'react'
 import ReactDOM from 'react-dom'
 import test from 'tape'
 import mobx from 'mobx'
@@ -21,12 +21,10 @@ test('mobx issue 50', t => {
 	}
 	let asText = '';
 	let willReactCount = 0;
-	mobx.autorun(function() {
-		asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(':');
-	});
+	mobx.autorun(() => asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(':'));
 	const Test = mobxReact.observer(createClass({
 		componentWillReact: () => willReactCount++,
-		render: () => createElement('div', { id: 'x' }, [foo.a.get(), foo.b.get(), foo.c.get()].join(','))
+		render: () => <div id='x'>{ [foo.a.get(), foo.b.get(), foo.c.get()].join(',') }</div>
 	}));
 	// In 3 seconds, flip a and b. This will change c.
 	setTimeout(flipStuff, 200);
@@ -38,7 +36,7 @@ test('mobx issue 50', t => {
 		t.end();
 	}, 400);
 
-	ReactDOM.render(createElement(Test), document.getElementById('testroot'));
+	ReactDOM.render(<Test />, document.getElementById('testroot'));
 });
 
 test('React.render should respect transaction', t => {
@@ -46,15 +44,15 @@ test('React.render should respect transaction', t => {
 	const loaded = mobx.observable(false);
 	const valuesSeen = [];
 
-	const component = mobxReact.observer(() => {
+	const Component = mobxReact.observer(() => {
 		valuesSeen.push(a.get());
 		if (loaded.get())
-			return createElement('div', {}, a.get());
+			return <div>{ a.get() }</div>
 		else
-			return createElement('div', {}, 'loading');
+			return <div>loading</div>
 	});
 
-	ReactDOM.render(createElement(component, {}), document.getElementById('testroot'));
+	ReactDOM.render(<Component />, document.getElementById('testroot'));
 	mobx.transaction(() => {
 		a.set(3);
 		a.set(4);
@@ -72,17 +70,17 @@ test('React.render in transaction should succeed', t => {
 	const a = mobx.observable(2);
 	const loaded = mobx.observable(false);
 	const valuesSeen = [];
-	const component = mobxReact.observer(() => {
+	const Component = mobxReact.observer(() => {
 		valuesSeen.push(a.get());
 		if (loaded.get())
-			return createElement('div', {}, a.get());
+			return <div>{ a.get() }</div>
 		else
-			return createElement('div', {}, 'loading');
+			return <div>loading</div>
 	});
 
 	mobx.transaction(() => {
 		a.set(3);
-		ReactDOM.render(createElement(component, {}), document.getElementById('testroot'));
+		ReactDOM.render(<Component />, document.getElementById('testroot'));
 		a.set(4);
 		loaded.set(true);
 	});
