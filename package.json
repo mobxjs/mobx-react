@@ -46,7 +46,7 @@
     "react-dom": "^15.2.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.2.2",
-    "tape-run": "^2.1.4",
+    "tape-run": "2.1.0",
     "typescript": "^1.8.10",
     "webpack": "^1.13.1"
   },
