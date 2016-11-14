@@ -36,7 +36,13 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
 
   const Injector = React.createClass({
     displayName: displayName,
+    storeRef: function(instance) {
+      this.wrappedInstance = instance
+    },
     render: function () {
+      // Optimization: it might be more efficient to apply the mapper function *outside* the render method
+      // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
+      // See this test: 'using a custom injector is not too reactive' in inject.js
       let newProps = {};
       for (let key in this.props) if (this.props.hasOwnProperty(key)) {
         newProps[key] = this.props[key];
@@ -45,9 +51,7 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
       for (let key in additionalProps) {
         newProps[key] = additionalProps[key];
       }
-      newProps.ref = instance => {
-        this.wrappedInstance = instance;
-      }
+      newProps.ref = this.storeRef
 
       return React.createElement(component, newProps);
     }

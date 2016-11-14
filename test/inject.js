@@ -1,8 +1,13 @@
 import React, { createClass, PropTypes } from 'react'
+import ReactDOM from 'react-dom'
 import { mount } from 'enzyme'
 import test from 'tape'
-import mobx from 'mobx'
+import mobx, { action, observable, computed } from 'mobx'
 import { observer, inject, Provider } from '../'
+import $ from 'jquery'
+
+$('<div></div>').attr('id','testroot').appendTo($(window.document.body));
+const testRoot = document.getElementById('testroot');
 
 test('inject based context', t => {
   test('basic context', t => {
@@ -50,9 +55,9 @@ test('inject based context', t => {
       render: () =>
         <Provider foo='bar' bar={1337}>
           <div>
-          <span>
-            <B />
-          </span>
+            <span>
+              <B />
+            </span>
             <section>
               <Provider foo={42}>
                 <B />
@@ -150,7 +155,7 @@ test('inject based context', t => {
   test('custom storesToProps', t => {
     const C = inject(
       (stores, props, context) => {
-        t.deepEqual(context, { mobxStores: { foo: 'bar' }});
+        t.deepEqual(context, { mobxStores: { foo: 'bar' } });
         t.deepEqual(stores, { foo: 'bar' });
         t.deepEqual(props, { baz: 42 });
         return {
@@ -175,7 +180,7 @@ test('inject based context', t => {
     t.end();
   });
 
-  test('support static hoisting, wrappedComponent and wrappedInstance', t=> {
+  test('support static hoisting, wrappedComponent and wrappedInstance', t => {
     const B = createClass({
       render() {
         this.testField = 1;
@@ -188,7 +193,7 @@ test('inject based context', t => {
     B.bla = 17;
     B.bla2 = {};
     const C = inject('booh')(B);
-    
+
     t.equal(C.wrappedComponent, B);
     t.equal(B.bla, 17);
     t.equal(C.bla, 17);
@@ -294,7 +299,7 @@ test('inject based context', t => {
   });
 
   test('using a custom injector is reactive', t => {
-    const user = mobx.observable({ name: 'Noa'});
+    const user = mobx.observable({ name: 'Noa' });
     const mapper = stores => ({ name: stores.user.name });
     const DisplayName = props => <h1>{ props.name }</h1>
     const User = inject(mapper)(DisplayName);
@@ -310,6 +315,103 @@ test('inject based context', t => {
     t.equal(wrapper.find('h1').text(), 'Veria');
     t.end();
   });
+
+  test('using a custom injector is not too reactive', t => {
+    let listRender = 0;
+    let itemRender = 0;
+    let injectRender = 0;
+
+    function connect() {
+      return (component) => inject.apply(this, arguments)(observer(component))
+    }
+
+    class State {
+      @observable highlighted = null;
+      isHighlighted(item) {
+        return this.highlighted == item;
+      }
+
+      @action highlight = (item) => {
+        this.highlighted = item;
+      }
+    }
+
+    const items = observable([
+      { title: 'ItemA' },
+      { title: 'ItemB' },
+      { title: 'ItemC' },
+      { title: 'ItemD' },
+      { title: 'ItemE' },
+      { title: 'ItemF' },
+    ])
+
+    const state = new State();
+
+    class ListComponent extends React.Component {
+
+      render() {
+        listRender++;
+        const {items} = this.props;
+
+        return <ul>{
+          items.map((item) => <ItemComponent key={item.title} item={item}/>)
+        }</ul>
+      }
+    }
+
+    @connect(({state}, {item}) => {
+      injectRender++;
+      if (injectRender > 6) {
+        debugger;
+      }
+      return ({
+        // Using
+        // highlighted: expr(() => state.isHighlighted(item)) // seems to fix the problem
+        highlighted: state.isHighlighted(item),
+        highlight: state.highlight
+      })
+    })
+    class ItemComponent extends React.Component {
+      highlight = () => {
+        const {item, highlight} = this.props;
+        highlight(item);
+      }
+
+      render() {
+        itemRender++;
+        const {highlighted, item} = this.props;
+        return <li className={"hl_" + item.title} onClick={this.highlight}>{ item.title } { highlighted ? '(highlighted)' : '' } </li>
+      }
+    }
+
+    ReactDOM.render(
+      <Provider state={state}>
+        <ListComponent items={items}/>
+      </Provider>,
+      testRoot,
+      () => {
+        t.equal(listRender, 1);
+        t.equal(injectRender, 6);
+        t.equal(itemRender, 6);
+
+        $(".hl_ItemB").click();
+        setTimeout(() => {
+          t.equal(listRender, 1);
+          t.equal(injectRender, 12); // ideally, 7
+          t.equal(itemRender, 7);
+
+          $(".hl_ItemF").click();
+          setTimeout(() => {
+            t.equal(listRender, 1);
+            t.equal(injectRender, 18); // ideally, 9
+            t.equal(itemRender, 9);
+
+            t.end()
+          }, 20)
+        }, 20)
+      }
+    );
+  })
 
   t.end();
 });

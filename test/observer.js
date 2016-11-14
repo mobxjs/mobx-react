@@ -431,7 +431,7 @@ test('it rerenders correctly if some props are non-observables - 1', t => {
   });
 })
 
-test.only('it rerenders correctly if some props are non-observables - 2', t => {
+test('it rerenders correctly if some props are non-observables - 2', t => {
   let renderCount = 0;
   let odata = mobx.observable({ x: 1 })
 
