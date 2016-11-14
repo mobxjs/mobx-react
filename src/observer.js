@@ -106,7 +106,16 @@ const reactiveMixin = {
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
 
+    /**
+     * If props are shallowly modified, react will render anyway,
+     * so atom.reportChanged() should not result in yet another re-render
+     */
     let skipRender = false;
+    /**
+     * forceUpdate will re-assign this.props. We don't want that to cause a loop,
+     * so detect these changes
+     */
+    let isForcingUpdate = false;
 
     function makePropertyObservableReference(propName) {
       let valueHolder = this[propName];
@@ -118,7 +127,7 @@ const reactiveMixin = {
             return valueHolder;
           },
           set: function set(v) {
-            if (isObjectShallowModified(valueHolder, v)) {
+            if (!isForcingUpdate && isObjectShallowModified(valueHolder, v)) {
               valueHolder = v;
               skipRender = true;
               atom.reportChanged();
@@ -155,12 +164,14 @@ const reactiveMixin = {
             // However, people also claim this migth happen during unit tests..
             let hasError = true;
             try {
-              if (!skipRender) {
+              isForcingUpdate = true;
+              if (!skipRender)
                 React.Component.prototype.forceUpdate.call(this);
-              }
               hasError = false;
             } finally {
-              if (hasError) reaction.dispose();
+              isForcingUpdate = false;
+              if (hasError)
+                reaction.dispose();
             }
           }
         }
@@ -227,6 +238,9 @@ const reactiveMixin = {
       return true;
     }
     // update if props are shallowly not equal, inspired by PureRenderMixin
+    // we could return just 'false' here, and avoid the `skipRender` checks etc
+    // however, it is nicer if lifecycle events are triggered like usually,
+    // so we return true here if props are shallowly modified.
     return isObjectShallowModified(this.props, nextProps);
   }
 };

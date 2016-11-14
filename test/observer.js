@@ -384,6 +384,96 @@ test('should render component even if setState called with exactly the same prop
   });
 });
 
+test('it rerenders correctly if some props are non-observables - 1', t => {
+  let renderCount = 0;
+  let odata = mobx.observable({ x: 1 })
+  let data = { y : 1 }
+
+  @observer class Component extends React.Component {
+    @mobx.computed get computed () {
+      return this.props.data.y; // should recompute, since props.data is observable
+    }
+    render() {
+      renderCount++;
+      return <span onClick={stuff} >{this.props.odata.x}-{this.props.data.y}-{this.computed}</span>
+    }
+  }
+
+  const Parent = observer(createClass({
+    render() {
+      // this.props.odata.x;
+      return <Component data={this.props.data} odata={this.props.odata} />
+    }
+  }))
+
+  function stuff() {
+    data.y++;
+    odata.x++;
+  }
+
+  ReactDOM.render(<Parent odata={odata} data={data} />, testRoot, () => {
+    t.equal(renderCount, 1, 'renderCount === 1');
+    t.equal($("span").text(), "1-1-1");
+
+    $("span").click();
+    setTimeout(() => {
+      t.equal(renderCount, 2, 'renderCount === 2');
+      t.equal($("span").text(), "2-2-2");
+
+      $("span").click();
+      setTimeout(() => {
+        t.equal(renderCount, 3, 'renderCount === 3');
+        t.equal($("span").text(), "3-3-3");
+
+        t.end();
+      }, 10);
+    }, 20)
+  });
+})
+
+test.only('it rerenders correctly if some props are non-observables - 2', t => {
+  let renderCount = 0;
+  let odata = mobx.observable({ x: 1 })
+
+  @observer class Component extends React.Component {
+    render() {
+      renderCount++;
+      return <span onClick={stuff}>{this.props.data.y}</span>
+    }
+  }
+
+  const Parent = observer(createClass({
+    render() {
+      let data = { y : this.props.odata.x }
+      return <Component data={data} odata={this.props.odata} />
+    }
+  }))
+
+  function stuff() {
+    odata.x++;
+  }
+
+  ReactDOM.render(<Parent odata={odata} />, testRoot, () => {
+    t.equal(renderCount, 1, 'renderCount === 1');
+    t.equal($("span").text(), "1");
+
+    $("span").click();
+    setTimeout(() => {
+      t.equal(renderCount, 2, 'renderCount === 2');
+      t.equal($("span").text(), "2");
+
+      $("span").click();
+      setTimeout(() => {
+        t.equal(renderCount, 3, 'renderCount === 3');
+        t.equal($("span").text(), "3");
+
+        t.end();
+      }, 10);
+    }, 20)
+  });
+})
+
+
 test('Observer regions should react', t => {
   const data = mobx.observable('hi')
   const Observer = mobxReact.Observer
