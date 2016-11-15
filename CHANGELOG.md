@@ -2,6 +2,23 @@
 
 ### 4.0.0
 
+#### `observer` now uses shallow comparision for all props _(Breaking change)_
+
+`observer` used to compare all properties shallow in the built-in _shouldComponentUpdate_, except when it received
+non-observable data structures.
+Because mobx-react cannot know whether a non observable has been deeply modified, it took no chances and just re-renders.
+
+However, the downside of this when an unchanged, non-observable object is passed in to an observer component again, it would still cause a re-render.
+Objects such as styling etc. To fix this mobx-react will now always compare all properties in a pure manner.
+In general this should cause no trouble, as typically mutable data in mobx based objects is captured in observable objects, which will still cause components to re-render if needed.
+
+If you need to pass in a deeply modified object and still want to make sure to cause a re-render, either
+
+ * make sure the object / array is an observable
+ * do not decorate your component with `observer`, but use `Observer` regions instead (see below)
+
+See [#160](https://github.com/mobxjs/mobx-react/issues/160) for more details.
+
 #### `inject(fn, component)` will now track `fn` as well
 
 `inject(func)` is now reactive as well, that means that transformations in the selector function will be tracked, see [#111](https://github.com/mobxjs/mobx-react/issues/111)

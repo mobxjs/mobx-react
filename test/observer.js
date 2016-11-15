@@ -391,7 +391,8 @@ test('it rerenders correctly if some props are non-observables - 1', t => {
 
   @observer class Component extends React.Component {
     @mobx.computed get computed () {
-      return this.props.data.y; // should recompute, since props.data is observable
+      // n.b: data.y would not rerender! shallowly new equal props are not stored
+      return this.props.odata.x;
     }
     render() {
       renderCount++;
@@ -436,9 +437,13 @@ test('it rerenders correctly if some props are non-observables - 2', t => {
   let odata = mobx.observable({ x: 1 })
 
   @observer class Component extends React.Component {
+    @mobx.computed get computed () {
+      return this.props.data.y; // should recompute, since props.data is changed
+    }
+
     render() {
       renderCount++;
-      return <span onClick={stuff}>{this.props.data.y}</span>
+      return <span onClick={stuff}>{this.props.data.y}-{this.computed}</span>
     }
   }
 
@@ -455,24 +460,23 @@ test('it rerenders correctly if some props are non-observables - 2', t => {
 
   ReactDOM.render(<Parent odata={odata} />, testRoot, () => {
     t.equal(renderCount, 1, 'renderCount === 1');
-    t.equal($("span").text(), "1");
+    t.equal($("span").text(), "1-1");
 
     $("span").click();
     setTimeout(() => {
       t.equal(renderCount, 2, 'renderCount === 2');
-      t.equal($("span").text(), "2");
+      t.equal($("span").text(), "2-2");
 
       $("span").click();
       setTimeout(() => {
         t.equal(renderCount, 3, 'renderCount === 3');
-        t.equal($("span").text(), "3");
+        t.equal($("span").text(), "3-3");
 
         t.end();
       }, 10);
     }, 20)
   });
 })
-
 
 test('Observer regions should react', t => {
   const data = mobx.observable('hi')
@@ -492,5 +496,36 @@ test('Observer regions should react', t => {
     t.equal($('span').text(), 'hello');
     t.equal($('li').text(), 'hi');
     t.end();
+  })
+
+  test('Observer should not re-render on shallow equal new props', t => {
+    let childRendering = 0;
+    let parentRendering = 0;
+    const data = { x : 1 }
+    const odata = mobx.observable({ y: 1 })
+
+    const Child = observer(({ data }) => {
+      childRendering++
+      return <span>{data.x}</span>
+    })
+    const Parent = observer(() => {
+      parentRendering++
+      odata.y; /// depend
+      return <Child data={data} />
+    })
+
+    ReactDOM.render(<Parent />, testRoot, () => {
+      t.equal(parentRendering, 1);
+      t.equal(childRendering, 1);
+      t.equal($('span').text(), '1');
+
+      odata.y++;
+      setTimeout(() => {
+        t.equal(parentRendering, 2);
+        t.equal(childRendering, 1);
+        t.equal($('span').text(), '1');
+        t.end();
+      }, 20)
+    })
   })
 })
