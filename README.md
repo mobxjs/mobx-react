@@ -131,7 +131,10 @@ TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, 
 ### About `shouldComponentUpdate`
 
 It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoid as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
-If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`), but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted.
+If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`),
+but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted.
+
+Since version 4, `mobx-react` will no longer trigger a re-rendering for non-observable objects that have been deeply changed.
 
 ### `componentWillReact` (lifecycle hook)
 

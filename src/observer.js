@@ -75,17 +75,7 @@ function isObjectShallowModified(prev, next) {
   }
   let key;
   for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
-    const newValue = next[key];
-    if (newValue !== prev[key]) {
-      return true;
-    } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
-      /**
-       * If the newValue is still the same object, but that object is not observable,
-       * fallback to the default React behavior: update, because the object *might* have changed.
-       * If you need the non default behavior, just use the React pure render mixin, as that one
-       * will work fine with mobx as well, instead of the default implementation of
-       * observer.
-       */
+    if (next[key] !== prev[key]) {
       return true;
     }
   }
