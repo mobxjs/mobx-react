@@ -2,7 +2,7 @@ import React, { createClass, createElement, Component } from 'react'
 import ReactDOM from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 import test from 'tape'
-import mobx from 'mobx'
+import mobx, { observable, action, computed} from 'mobx'
 import mobxReact, { observer, inject } from '../'
 import $ from 'jquery'
 
@@ -337,7 +337,8 @@ test('124 - react to changes in this.props via computed', function(t) {
   })
 })
 
-test('should stop updating if error was thrown in render (#134)', function(t) {
+// Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
+test.skip('should stop updating if error was thrown in render (#134)', function(t) {
   const data = mobx.observable(0);
   let renderingsCount = 0;
 
@@ -528,4 +529,57 @@ test('Observer regions should react', t => {
       }, 20)
     })
   })
+})
+
+test('parent / childs render in the right order', t => {
+  t.plan(2)
+  let events = []
+
+  class User {
+    @observable name = "User's name";
+  }
+
+  class Store {
+    @observable user = new User();
+    @action logout() {
+      this.user = null;
+    }
+  }
+
+  function tryLogout() {
+    console.log("Logging out...");
+    try {
+      // ReactDOM.unstable_batchedUpdates(() => {
+        store.logout();
+        t.ok(true)
+      // });
+    } catch(e) {
+      t.fail(e)
+    }
+  }
+
+  const store = new Store();
+
+  const Parent =  observer(() => {
+    events.push("parent")
+    if (!store.user)
+      return <span>Not logged in.</span>;
+    return <div>
+      <Child />
+      <button onClick={tryLogout}>Logout</button>
+    </div>;
+  });
+
+  const Child = observer(() => {
+    events.push("child")
+    return <span>Logged in as: {store.user.name}</span>;
+  });
+
+  ReactDOM.render(<Parent />, testRoot)
+
+  tryLogout();
+
+  t.deepEqual(events, ["parent", "child", "parent"])
+  t.end()
+
 })

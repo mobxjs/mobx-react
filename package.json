@@ -11,9 +11,9 @@
   "scripts": {
     "test": "npm run build && npm run test:console",
     "test:ts": "tsc -p test/ts",
-    "test:build": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ]",
-    "test:travis": "webpack && browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run && npm run test:ts",
-    "test:console": "browserify -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec && npm run test:ts",
+    "test:build": "browserify -x react/addons -x react-native -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ]",
+    "test:travis": "webpack && browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run && npm run test:ts",
+    "test:console": "browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec && npm run test:ts",
     "test:open": " open ./test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open",
     "build": "webpack && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
@@ -26,7 +26,7 @@
   },
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobx": "^2.2.0",
+    "mobx": "^2.6.3",
     "react": "^0.13.0 || ^0.14.0 || ^15.0.0"
   },
   "devDependencies": {
@@ -39,10 +39,10 @@
     "babelify": "^7.3.0",
     "browserify": "^13.1.0",
     "empty-module": "0.0.2",
-    "enzyme": "^2.3.0",
+    "enzyme": "^2.6.0",
     "jquery": "^2.1.4",
     "lodash": "^4.0.1",
-    "mobx": "^2.6.0",
+    "mobx": "^2.6.3",
     "react": "^15.2.0",
     "react-addons-test-utils": "^15.2.0",
     "react-dom": "^15.2.0",

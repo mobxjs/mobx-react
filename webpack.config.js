@@ -23,7 +23,8 @@ function makeConfig(target, minify) {
     resolve: {
       extensions: ['', '.js'],
       alias: {
-        'react-dom': 'empty-module'
+        'react-dom': 'empty-module',
+        'react-native': 'empty-module'
       }
     },
     module: {
@@ -32,8 +33,8 @@ function makeConfig(target, minify) {
         exclude: /node_modules/,
         loader: 'babel',
         query: {
-          presets: ['es2015'],
-          plugins: ['transform-class-properties'],
+          presets: ['es2015', 'react'],
+          plugins: ['transform-decorators-legacy', 'transform-class-properties'],
         }
       }]
     },
@@ -50,6 +51,15 @@ function makeConfig(target, minify) {
           commonjs: 'react-dom',
           commonjs2: 'react-dom',
           amd: 'react-dom'
+        };
+        return false; // not external, will use empty-module  alias
+      } ()),
+      'react-native': (function () {
+        if (target === 'native') return {
+          root: 'ReactNative',
+          commonjs: 'react-native',
+          commonjs2: 'react-native',
+          amd: 'react-native'
         };
         return false; // not external, will use empty-module  alias
       } ()),

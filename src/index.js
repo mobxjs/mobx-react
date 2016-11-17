@@ -11,6 +11,11 @@ if (!mobx)
 if (!React)
   throw new Error(TARGET_LIB_NAME + ' requires React to be available');
 
+if (__TARGET__ === 'browser')
+  mobx.extras.setReactionScheduler(require('react-dom').unstable_batchedUpdates);
+if (__TARGET__ === 'native')
+  mobx.extras.setReactionScheduler(require('react-native').unstable_batchedUpdates);
+
 export {
   observer,
   Observer,
