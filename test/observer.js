@@ -532,6 +532,7 @@ test('Observer regions should react', t => {
 })
 
 test('parent / childs render in the right order', t => {
+  // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
   t.plan(2)
   let events = []
 
