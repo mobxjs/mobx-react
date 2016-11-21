@@ -1,13 +1,11 @@
-var test = require('tape');
-var React = require('react');
-var PropTypes = require('../').propTypes;
-var mobx = require('mobx');
-var observable = mobx.observable;
-var asMap = mobx.asMap;
+import React from 'react'
+import { PropTypes } from '../'
+import test from 'tape'
+import { observable, asMap } from 'mobx'
 
 function typeCheckFail(test, declaration, value, message) {
-  var props = {testProp: value};
-  var error = declaration(
+  const props = {testProp: value};
+  const error = declaration(
     props,
     'testProp',
     'testComponent',
@@ -19,12 +17,12 @@ function typeCheckFail(test, declaration, value, message) {
 }
 
 function typeCheckFailRequiredValues(test, declaration) {
-  var specifiedButIsNullMsg = 'The prop `testProp` is marked as required in ' +
+  const specifiedButIsNullMsg = 'The prop `testProp` is marked as required in ' +
     '`testComponent`, but its value is `null`.';
-  var unspecifiedMsg = 'The prop `testProp` is marked as required in ' +
+  const unspecifiedMsg = 'The prop `testProp` is marked as required in ' +
     '`testComponent`, but its value is \`undefined\`.';
-  var props1 = {testProp: null};
-  var error1 = declaration(
+  const props1 = {testProp: null};
+  const error1 = declaration(
     props1,
     'testProp',
     'testComponent',
@@ -33,8 +31,8 @@ function typeCheckFailRequiredValues(test, declaration) {
   );
   test.equal(error1 instanceof Error, true);
   test.equal(error1.message, specifiedButIsNullMsg);
-  var props2 = {testProp: undefined};
-  var error2 = declaration(
+  const props2 = {testProp: undefined};
+  const error2 = declaration(
     props2,
     'testProp',
     'testComponent',
@@ -43,8 +41,8 @@ function typeCheckFailRequiredValues(test, declaration) {
   );
   test.equal(error2 instanceof Error, true);
   test.equal(error2.message, unspecifiedMsg);
-  var props3 = {};
-  var error3 = declaration(
+  const props3 = {};
+  const error3 = declaration(
     props3,
     'testProp',
     'testComponent',
@@ -56,8 +54,8 @@ function typeCheckFailRequiredValues(test, declaration) {
 }
 
 function typeCheckPass(test, declaration, value) {
-  var props = {testProp: value};
-  var error = declaration(
+  const props = {testProp: value};
+  const error = declaration(
     props,
     'testProp',
     'testComponent',
@@ -67,181 +65,180 @@ function typeCheckPass(test, declaration, value) {
   test.equal(error, null);
 }
 
-
-test('Valid values', function (test) {
-  typeCheckPass(test, PropTypes.observableArray, observable([]));
-  typeCheckPass(test, PropTypes.observableArrayOf(React.PropTypes.string), observable([""]));
-  typeCheckPass(test, PropTypes.arrayOrObservableArray, observable([]));
-  typeCheckPass(test, PropTypes.arrayOrObservableArray, []);
-  typeCheckPass(test, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string), observable([""]));
-  typeCheckPass(test, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string), [""]);
-  typeCheckPass(test, PropTypes.observableObject, observable({}));
-  typeCheckPass(test, PropTypes.objectOrObservableObject, {});
-  typeCheckPass(test, PropTypes.objectOrObservableObject, observable({}));
-  typeCheckPass(test, PropTypes.observableMap, observable(asMap({})));
-  test.end();
+test('Valid values', t => {
+  typeCheckPass(t, PropTypes.observableArray, observable([]));
+  typeCheckPass(t, PropTypes.observableArrayOf(React.PropTypes.string), observable(['']));
+  typeCheckPass(t, PropTypes.arrayOrObservableArray, observable([]));
+  typeCheckPass(t, PropTypes.arrayOrObservableArray, []);
+  typeCheckPass(t, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string), observable(['']));
+  typeCheckPass(t, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string), ['']);
+  typeCheckPass(t, PropTypes.observableObject, observable({}));
+  typeCheckPass(t, PropTypes.objectOrObservableObject, {});
+  typeCheckPass(t, PropTypes.objectOrObservableObject, observable({}));
+  typeCheckPass(t, PropTypes.observableMap, observable(asMap({})));
+  t.end();
 });
 
-test('should be implicitly optional and not warn', function (test) {
-  typeCheckPass(test, PropTypes.observableArray, undefined);
-  typeCheckPass(test, PropTypes.observableArrayOf(React.PropTypes.string), undefined);
-  typeCheckPass(test, PropTypes.arrayOrObservableArray, undefined);
-  typeCheckPass(test, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string), undefined);
-  typeCheckPass(test, PropTypes.observableObject, undefined);
-  typeCheckPass(test, PropTypes.objectOrObservableObject, undefined);
-  typeCheckPass(test, PropTypes.observableMap, undefined);
-  test.end()
+test('should be implicitly optional and not warn', t => {
+  typeCheckPass(t, PropTypes.observableArray, undefined);
+  typeCheckPass(t, PropTypes.observableArrayOf(React.PropTypes.string), undefined);
+  typeCheckPass(t, PropTypes.arrayOrObservableArray, undefined);
+  typeCheckPass(t, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string), undefined);
+  typeCheckPass(t, PropTypes.observableObject, undefined);
+  typeCheckPass(t, PropTypes.objectOrObservableObject, undefined);
+  typeCheckPass(t, PropTypes.observableMap, undefined);
+  t.end()
 });
 
-test('should warn for missing required values, function (test)', function(test) {
-  typeCheckFailRequiredValues(test, PropTypes.observableArray.isRequired, undefined);
-  typeCheckFailRequiredValues(test, PropTypes.observableArrayOf(React.PropTypes.string).isRequired, undefined);
-  typeCheckFailRequiredValues(test, PropTypes.arrayOrObservableArray.isRequired, undefined);
-  typeCheckFailRequiredValues(test, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string).isRequired, undefined);
-  typeCheckFailRequiredValues(test, PropTypes.observableObject.isRequired, undefined);
-  typeCheckFailRequiredValues(test, PropTypes.objectOrObservableObject.isRequired, undefined);
-  typeCheckFailRequiredValues(test, PropTypes.observableMap.isRequired, undefined);
-  test.end()
+test('should warn for missing required values, function (test)', t => {
+  typeCheckFailRequiredValues(t, PropTypes.observableArray.isRequired, undefined);
+  typeCheckFailRequiredValues(t, PropTypes.observableArrayOf(React.PropTypes.string).isRequired, undefined);
+  typeCheckFailRequiredValues(t, PropTypes.arrayOrObservableArray.isRequired, undefined);
+  typeCheckFailRequiredValues(t, PropTypes.arrayOrObservableArrayOf(React.PropTypes.string).isRequired, undefined);
+  typeCheckFailRequiredValues(t, PropTypes.observableObject.isRequired, undefined);
+  typeCheckFailRequiredValues(t, PropTypes.objectOrObservableObject.isRequired, undefined);
+  typeCheckFailRequiredValues(t, PropTypes.observableMap.isRequired, undefined);
+  t.end()
 });
 
-test('should fail date and regexp correctly', function (test) {
+test('should fail date and regexp correctly', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableObject,
     new Date(),
     'Invalid prop `testProp` of type `date` supplied to ' +
     '`testComponent`, expected `mobx.ObservableObject`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableArray,
     /please/,
     'Invalid prop `testProp` of type `regexp` supplied to ' +
     '`testComponent`, expected `mobx.ObservableArray`.'
   );
-  test.end()
+  t.end()
 });
 
-test('observableArray', function (test) {
+test('observableArray', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableArray,
     [],
     'Invalid prop `testProp` of type `array` supplied to ' +
     '`testComponent`, expected `mobx.ObservableArray`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableArray,
-    "",
+    '',
     'Invalid prop `testProp` of type `string` supplied to ' +
     '`testComponent`, expected `mobx.ObservableArray`.'
   );
-  test.end();
+  t.end();
 });
 
-test('arrayOrObservableArray', function (test) {
+test('arrayOrObservableArray', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.arrayOrObservableArray,
-    "",
+    '',
     'Invalid prop `testProp` of type `string` supplied to ' +
     '`testComponent`, expected `mobx.ObservableArray` or javascript `array`.'
   );
-  test.end();
+  t.end();
 });
 
-test('observableObject', function (test) {
+test('observableObject', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableObject,
     {},
     'Invalid prop `testProp` of type `object` supplied to ' +
     '`testComponent`, expected `mobx.ObservableObject`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableObject,
     '',
     'Invalid prop `testProp` of type `string` supplied to ' +
     '`testComponent`, expected `mobx.ObservableObject`.'
   );
-  test.end();
+  t.end();
 });
 
-test('objectOrObservableObject', function (test) {
+test('objectOrObservableObject', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.objectOrObservableObject,
-    "",
+    '',
     'Invalid prop `testProp` of type `string` supplied to ' +
     '`testComponent`, expected `mobx.ObservableObject` or javascript `object`.'
   );
-  test.end();
+  t.end();
 });
 
-test('observableMap', function (test) {
+test('observableMap', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableMap,
     {},
     'Invalid prop `testProp` of type `object` supplied to ' +
     '`testComponent`, expected `mobx.ObservableMap`.'
   );
-  test.end();
+  t.end();
 });
 
-test('observableArrayOf', function (test) {
+test('observableArrayOf', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableArrayOf(React.PropTypes.string),
     2,
     'Invalid prop `testProp` of type `number` supplied to ' +
     '`testComponent`, expected `mobx.ObservableArray`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableArrayOf(React.PropTypes.string),
     observable([2]),
     'Invalid prop `testProp[0]` of type `number` supplied to ' +
     '`testComponent`, expected `string`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.observableArrayOf({ foo: PropTypes.string }),
     { foo: 'bar' },
     'Property `testProp` of component `testComponent` has invalid PropType notation.'
   );
-  test.end();
+  t.end();
 });
 
-test('arrayOrObservableArrayOf', function (test) {
+test('arrayOrObservableArrayOf', t => {
   typeCheckFail(
-    test,
+    t,
     PropTypes.arrayOrObservableArrayOf(React.PropTypes.string),
     2,
     'Invalid prop `testProp` of type `number` supplied to ' +
     '`testComponent`, expected `mobx.ObservableArray` or javascript `array`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.arrayOrObservableArrayOf(React.PropTypes.string),
     observable([2]),
     'Invalid prop `testProp[0]` of type `number` supplied to ' +
     '`testComponent`, expected `string`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.arrayOrObservableArrayOf(React.PropTypes.string),
     [2],
     'Invalid prop `testProp[0]` of type `number` supplied to ' +
     '`testComponent`, expected `string`.'
   );
   typeCheckFail(
-    test,
+    t,
     PropTypes.arrayOrObservableArrayOf({ foo: PropTypes.string }),
     { foo: 'bar' },
     'Property `testProp` of component `testComponent` has invalid PropType notation.'
   );
-  test.end();
+  t.end();
 });

@@ -76,6 +76,38 @@ const TodoView  = observer(class TodoView extends React.Component {
 const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 ```
 
+### `Observer`
+
+_This feature is still experimental and might change in the next minor release, or be deprecated_
+
+`Observer` is a React component, which applies `observer` to an unanymous region in your component.
+It takes as children a single, argumentless function which should return exactly one React component.
+The rendering in the function will be tracked and automatically be re-rendered when needed.
+This can come in handy when needing to pass render function to external components (for example the React Native listview), or if you
+dislike the `observer` decorator / function.
+
+Example:
+
+```
+class App extends React.Component {
+  render() {
+     return (
+         <div>
+            {this.props.person.name}
+            <Observer>
+                {() => <div>{this.props.person.name}</div>}
+            </Observer>
+        </div>
+     )
+  }
+}
+
+const person = observable({ name: "John" })
+
+React.render(<App person={person} />, document.body)
+person.name = "Mike" // will cause the Observer region to re-render
+```
+
 ### Server Side Rendering with `useStaticRendering`
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
@@ -99,7 +131,10 @@ TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, 
 ### About `shouldComponentUpdate`
 
 It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoid as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
-If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`), but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted.
+If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`),
+but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted.
+
+Since version 4, `mobx-react` will no longer trigger a re-rendering for non-observable objects that have been deeply changed.
 
 ### `componentWillReact` (lifecycle hook)
 
@@ -209,22 +244,81 @@ var Button = inject("color")(observer(({ color }) => {
 }))
 ```
 
-#### Omitting inject
-If you are using `inject` with just store names, and there are no other (third party) decorators on the same component,
-you can pass the store names directly to `observer` as well, which will create an inject under the hood. (Mind the array notation!)
+#### Customizing inject
+
+Instead of passing a list of store names, it is also possible to create a custom mapper function and pass it to inject.
+The mapper function receives all stores as argument, the properties with which the components are invoked and the context, and should produce a new set of properties,
+that are mapped into the original:
+
+`mapperFunction: (allStores, props, context) => additionalProps`
+
+Since version 4.0 the `mapperFunction` itself is tracked as well, so it is possible to do things like:
 
 ```javascript
-var Button = observer(["color"], ({ color }) => {
-    /* ... etc ... */
-}))
+const NameDisplayer = ({ name }) => <h1>{name}</h1>
 
-@observer(["session", "theme"])
-class MyComponent extends React.Component {
-  // etc
+const UserNameDisplayer = inject(
+    stores => ({
+        name: stores.userStore.name
+    }),
+    NameDisplayer
+)
+
+const user = mobx.observable({
+    name: "Noa"
+})
+
+const App = () => (
+    <Provider userStore={user}>
+        <UserNameDisplayer />
+    </Provider>
+)
+
+ReactDOM.render(<App />, document.body)
+```
+
+_N.B. note that in this *specific* case neither `NameDisplayer` or `UserNameDisplayer` doesn't need to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
+
+#### Using `propTypes` and `defaultProps` and other static properties in combination with `inject`
+
+Inject wraps a new component around the component you pass into it.
+This means that assigning a static property to the resulting component, will be applied to the HoC, and not to the original component.
+So if you take the following example:
+
+```javascript
+const UserName = inject("userStore", ({ userStore, bold }) => someRendering())
+
+UserName.propTypes = {
+    bold: PropTypes.boolean.isRequired,
+    userStore: PropTypes.object.isRequired // will always fail
 }
 ```
 
+The above propTypes are incorrect, `bold` needs to be provided by the caller of the `UserName` component and is checked by React.
+However, `userStore` does not need to be required! Although it is required for the original stateless function component, it is not
+required for the resulting inject component. After all, the whole point of that component is to provide that `userStore` itself.
 
+So if you want to make assertions on the data that is being injected (either stores or data resulting from a mapper function), the propTypes
+should be defined on the _wrapped_ component. Which is available through the static property `wrappedComponent` on the inject component:
+
+```javascript
+const UserName = inject("userStore", ({ userStore, bold }) => someRendering())
+
+UserName.propTypes = {
+    bold: PropTypes.boolean.isRequired // could be defined either here ...
+}
+
+UserName.wrappedComponent.propTypes = {
+    // ... or here
+    userStore: PropTypes.object.isRequired // correct
+}
+```
+
+The same principle applies to `defaultProps` and other static React properties.
+Note that it is not allowed to redefine `contextTypes` on `inject` components (but is possible to define it on `wrappedComponent`)
+
+Finally, mobx-react will automatically move non React related static properties from wrappedComponent to the inject component so that all static fields are
+actually available to the outside world without needing `.wrappedComponent`.
 
 #### Strongly typing inject
 
@@ -262,6 +356,9 @@ const mountedComponent = mount(
    <Person age={'30'} profile={profile} />
 )
 ```
+
+Bear in mind that using shallow rendering won't provide any useful results when testing injected components; only the injector will be rendered.
+To test with shallow rendering, instantiate the `.wrappedComponent instead:`: `shallow(<Person.wrappedComponent />)`
 
 ## FAQ
 

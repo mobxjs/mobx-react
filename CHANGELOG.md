@@ -1,11 +1,131 @@
 # MobX-React Changelog
 
+### 4.0.0
+
+#### `observer` now uses shallow comparision for all props _(Breaking change)_
+
+`observer` used to compare all properties shallow in the built-in _shouldComponentUpdate_, except when it received
+non-observable data structures.
+Because mobx-react cannot know whether a non observable has been deeply modified, it took no chances and just re-renders.
+
+However, the downside of this when an unchanged, non-observable object is passed in to an observer component again, it would still cause a re-render.
+Objects such as styling etc. To fix this mobx-react will now always compare all properties in a pure manner.
+In general this should cause no trouble, as typically mutable data in mobx based objects is captured in observable objects, which will still cause components to re-render if needed.
+
+If you need to pass in a deeply modified object and still want to make sure to cause a re-render, either
+
+ * make sure the object / array is an observable
+ * do not decorate your component with `observer`, but use `Observer` regions instead (see below)
+
+See [#160](https://github.com/mobxjs/mobx-react/issues/160) for more details.
+
+#### `inject(fn, component)` will now track `fn` as well
+
+`inject(func)` is now reactive as well, that means that transformations in the selector function will be tracked, see [#111](https://github.com/mobxjs/mobx-react/issues/111)
+
+```javascript
+const NameDisplayer = ({ name }) => <h1>{name}</h1>
+
+const UserNameDisplayer = inject(
+    stores => ({
+        name: stores.userStore.name
+    }),
+    NameDisplayer
+)
+
+const user = mobx.observable({
+    name: "Noa"
+})
+
+const App = () => (
+    <Provider userStore={user}>
+        <UserNameDisplayer />
+    </Provider>
+)
+
+ReactDOM.render(<App />, document.body)
+```
+
+_N.B. note that in this specific case NameDisplayer doesn't have to be an `observer`, as it doesn't receive observables, but just plain data from the transformer function._
+
+#### `this.props` and `this.state` in React components are now observables as well
+
+A common cause of confusion were cases like:
+
+```javascript
+@observer class MyComponent() {
+    @computed upperCaseName() {
+        return this.props.user.name.toUpperCase()
+    }
+
+    render() {
+        return <h1>{this.upperCaseName}</h1>
+    }
+}
+```
+
+This component would re-render if `user.name` was modified, but it would still render the previous user's name if a complete new user was received!
+The reason for that is that in the above example the only observable tracked by the computed value is `user.name`, but not `this.props.user`.
+So a change to the first would be picked up, but a change in `props` itself, assigning a new user, not.
+
+Although this is technically correct, it was a source of confusion.
+For that reason `this.state` and `this.props` are now automatically converted to observables in any `observer` based react component.
+For more details, see [#136](https://github.com/mobxjs/mobx-react/pull/136) by @Strate
+
+#### Better support for Server Side Rendering
+
+Introduced `useStaticRendering(boolean)` to better support server-side rendering scenarios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
+
+#### Introduced `Observer` as alternative syntax to the `observer` decorator.
+
+_This feature is still experimental and might change in the next minor release, or be deprecated_
+
+Introduced `Observer`. Can be used as alternative to the `observer` decorator. Marks a component region as reactive.
+See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
+Example:
+
+```javascript
+const UserNameDisplayer = ({ user }) => (
+    <Observer>
+        {() => <div>{user.name}</div>}
+    </Observer>
+)
+```
+
+#### Using `observer` to inject stores is deprecated
+
+The fact that `observer` could inject stores as well caused quite some confusion.
+Because in some cases `observer` would return the original component (when not inject), but it would return a HoC when injecting.
+To make this more consistent, you should always use `inject` to inject stores into a component. So use:
+
+```
+@inject("store1", "store2") @observer
+class MyComponent extends React.Component {
+```
+
+or:
+
+```
+const MyComponent = inject("store1", "store2")(observer(props => rendering))
+```
+
+For more info see the related [discussion](https://github.com/mobxjs/mobx-react/commit/666577b41b7af8209839e7b243064a31c9951632#commitcomment-19773706)
+
+#### Other improvements
+
+* If `mobx` and `mobx-react` are used in combination, all reactions are run as part of React's batched updates. This minimizes the work of the reconciler, guarantees optimal rendering order of components (if the rendering was not triggered from within a React event). Tnx @gkaemmer for the suggestion.
+* It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
+* Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
+* export `PropTypes` as well in typescript typings, fixes #153
+* Add react as a peer dependency
+* Added minified browser build: `index.min.js`, fixes #147
+* Generate better component names when using `inject`
+
+---
+
 ### 3.5.9
 
-* Introduced `useStaticRendering(boolean)` to better support server-side rendering scenerios. See [#140](https://github.com/mobxjs/mobx-react/issues/140)
 * Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
-* export `PropTypes` as well, fixes #153
-* Add react as a peer dependency
 
 ### 3.5.8
 

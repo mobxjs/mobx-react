@@ -1,5 +1,7 @@
 import mobx from 'mobx';
 import React from 'react';
+import {unstable_batchedUpdates as rdBatched} from 'react-dom';
+import {unstable_batchedUpdates as rnBatched} from 'react-native';
 
 let TARGET_LIB_NAME;
 if (__TARGET__ === 'browser') TARGET_LIB_NAME = 'mobx-react';
@@ -11,8 +13,14 @@ if (!mobx)
 if (!React)
   throw new Error(TARGET_LIB_NAME + ' requires React to be available');
 
+if (__TARGET__ === 'browser' && typeof rdBatched === "function")
+  mobx.extras.setReactionScheduler(rdBatched);
+if (__TARGET__ === 'native' && typeof rnBatched === "function")
+  mobx.extras.setReactionScheduler(rnBatched);
+
 export {
   observer,
+  Observer,
   renderReporter,
   componentByNodeRegistery,
   trackComponents,

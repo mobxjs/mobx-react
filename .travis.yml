@@ -1,5 +1,5 @@
 language: node_js
-script: npm run travis
+script: npm run test:travis
 after_success:
   - cat ./coverage/lcov.info|./node_modules/coveralls/bin/coveralls.js
 node_js:

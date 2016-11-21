@@ -1,33 +1,33 @@
-var test = require('tape');
-var mobx = require('mobx');
-var observer = require('../').observer;
+import test from 'tape'
+import mobx from 'mobx'
+import { observer } from '../'
 
 // TODO:
-test.skip('testIsComponentReactive', function(test) {
-    var component = observer({ render: function() {}});
-    test.equal(component.isMobXReactObserver, true);
-    test.equal(mobx.isObservable(component), false); // dependencies not known yet
-    test.equal(mobx.isObservable(component.render), false); // dependencies not known yet
+test.skip('testIsComponentReactive', t => {
+    const component = observer({ render: () => null });
+    t.equal(component.isMobXReactObserver, true);
+    t.equal(mobx.isObservable(component), false); // dependencies not known yet
+    t.equal(mobx.isObservable(component.render), false); // dependencies not known yet
 
     component.componentWillMount();
     component.render();
-    test.equal(mobx.isObservable(component.render), true); // dependencies not known yet
-    test.equal(mobx.isObservable(component), false);
+    t.equal(mobx.isObservable(component.render), true); // dependencies not known yet
+    t.equal(mobx.isObservable(component), false);
 
     mobx.extendObservable(component, {});
-    test.equal(mobx.isObservable(component), true);
+    t.equal(mobx.isObservable(component), true);
 
-    test.end();
+    t.end();
 });
 
 // TODO:
-test.skip('testGetDNode', function(test) {
+test.skip('testGetDNode', t => {
     var getD = mobx.extras.getDNode;
 
-    var c = observer({ render: function() {}});
+    const c = observer({ render: function() {}});
     c.componentWillMount();
     c.render();
-    test.ok(c.$mobx);
+    t.ok(c.$mobx);
 
-    test.end();
+    t.end();
 });

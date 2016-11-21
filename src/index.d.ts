@@ -24,6 +24,10 @@ export class Provider extends React.Component<any, {}> {
 
 }
 
+export class Observer extends React.Component<{ children?: () => React.ReactElement<any> }, {}> {
+
+}
+
 /**
  * Enable dev tool support, makes sure that renderReport emits events.
  */

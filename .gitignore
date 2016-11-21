@@ -7,3 +7,7 @@ custom.js
 custom.d.ts
 index.js
 index.d.ts
+index.min.js
+.vscode
+.idea
+test/browser/test_bundle.js

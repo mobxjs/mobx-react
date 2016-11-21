@@ -11,6 +11,8 @@ let isDevtoolsEnabled = false;
 
 let isUsingStaticRendering = false;
 
+let warnedAboutObserverInjectDeprecation = false;
+
 // WeakMap<Node, Object>;
 export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
 export const renderReporter = new EventEmitter();
@@ -63,6 +65,23 @@ function patch(target, funcName) {
   }
 }
 
+function isObjectShallowModified(prev, next) {
+  if (null == prev || null == next || typeof prev !== "object" || typeof next !== "object") {
+    return prev !== next;
+  }
+  const keys = Object.keys(prev);
+  if (keys.length !== Object.keys(next).length) {
+    return true;
+  }
+  let key;
+  for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
+    if (next[key] !== prev[key]) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * ReactiveMixin
  */
@@ -76,6 +95,46 @@ const reactiveMixin = {
       || (this.constructor && (this.constructor.displayName || this.constructor.name))
       || "<component>";
     const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
+
+    /**
+     * If props are shallowly modified, react will render anyway,
+     * so atom.reportChanged() should not result in yet another re-render
+     */
+    let skipRender = false;
+    /**
+     * forceUpdate will re-assign this.props. We don't want that to cause a loop,
+     * so detect these changes
+     */
+    let isForcingUpdate = false;
+
+    function makePropertyObservableReference(propName) {
+      let valueHolder = this[propName];
+      const atom = new mobx.Atom("reactive " + propName);
+      Object.defineProperty(this, propName, {
+          configurable: true, enumerable: true,
+          get: function() {
+            atom.reportObserved();
+            return valueHolder;
+          },
+          set: function set(v) {
+            if (!isForcingUpdate && isObjectShallowModified(valueHolder, v)) {
+              valueHolder = v;
+              skipRender = true;
+              atom.reportChanged();
+              skipRender = false;
+            } else {
+              valueHolder = v;
+            }
+          }
+      })
+    }
+
+    // make this.props an observable reference, see #124
+    makePropertyObservableReference.call(this, "props")
+    // make state an observable reference
+    makePropertyObservableReference.call(this, "state")
+
+    // wire up reactive render
     const baseRender = this.render.bind(this);
     let reaction = null;
     let isRenderingPending = false;
@@ -95,10 +154,14 @@ const reactiveMixin = {
             // However, people also claim this migth happen during unit tests..
             let hasError = true;
             try {
-              React.Component.prototype.forceUpdate.call(this);
+              isForcingUpdate = true;
+              if (!skipRender)
+                React.Component.prototype.forceUpdate.call(this);
               hasError = false;
             } finally {
-              if (hasError) reaction.dispose();
+              isForcingUpdate = false;
+              if (hasError)
+                reaction.dispose();
             }
           }
         }
@@ -165,27 +228,10 @@ const reactiveMixin = {
       return true;
     }
     // update if props are shallowly not equal, inspired by PureRenderMixin
-    const keys = Object.keys(this.props);
-    if (keys.length !== Object.keys(nextProps).length) {
-      return true;
-    }
-    let key;
-    for (let i = keys.length - 1; i >= 0, key = keys[i]; i--) {
-      const newValue = nextProps[key];
-      if (newValue !== this.props[key]) {
-        return true;
-      } else if (newValue && typeof newValue === "object" && !mobx.isObservable(newValue)) {
-        /**
-         * If the newValue is still the same object, but that object is not observable,
-         * fallback to the default React behavior: update, because the object *might* have changed.
-         * If you need the non default behavior, just use the React pure render mixin, as that one
-         * will work fine with mobx as well, instead of the default implementation of
-         * observer.
-         */
-        return true;
-      }
-    }
-    return false;
+    // we could return just 'false' here, and avoid the `skipRender` checks etc
+    // however, it is nicer if lifecycle events are triggered like usually,
+    // so we return true here if props are shallowly modified.
+    return isObjectShallowModified(this.props, nextProps);
   }
 };
 
@@ -198,18 +244,21 @@ export function observer(arg1, arg2) {
   }
   if (Array.isArray(arg1)) {
     // component needs stores
+    if (!warnedAboutObserverInjectDeprecation) {
+      warnedAboutObserverInjectDeprecation = true;
+      console.warn('Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`')
+    }
     if (!arg2) {
       // invoked as decorator
       return componentClass => observer(arg1, componentClass);
     } else {
-      // TODO: deprecate this invocation style
       return inject.apply(null, arg1)(observer(arg2));
     }
   }
   const componentClass = arg1;
 
-  if (componentClass.isInjector !== undefined && componentClass.isInjector) {
-    console.warn('Mobx Observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
+  if (componentClass.isMobxInjector === true) {
+    console.warn('Mobx observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
   }
 
   // Stateless function component:
@@ -247,4 +296,11 @@ export function observer(arg1, arg2) {
   }
   componentClass.isMobXReactObserver = true;
   return componentClass;
+}
+
+// TODO: support injection somehow as well?
+export const Observer = observer(({ children }) => children())
+
+Observer.propTypes = {
+  children: React.PropTypes.func.isRequired
 }
