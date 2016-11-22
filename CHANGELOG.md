@@ -19,7 +19,7 @@ If you need to pass in a deeply modified object and still want to make sure to c
 
 See [#160](https://github.com/mobxjs/mobx-react/issues/160) for more details.
 
-#### `inject(fn, component)` will now track `fn` as well
+#### `inject(fn)(component)` will now track `fn` as well
 
 `inject(func)` is now reactive as well, that means that transformations in the selector function will be tracked, see [#111](https://github.com/mobxjs/mobx-react/issues/111)
 
@@ -29,9 +29,8 @@ const NameDisplayer = ({ name }) => <h1>{name}</h1>
 const UserNameDisplayer = inject(
     stores => ({
         name: stores.userStore.name
-    }),
-    NameDisplayer
-)
+    })
+)(NameDisplayer)
 
 const user = mobx.observable({
     name: "Noa"

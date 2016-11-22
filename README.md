@@ -260,9 +260,8 @@ const NameDisplayer = ({ name }) => <h1>{name}</h1>
 const UserNameDisplayer = inject(
     stores => ({
         name: stores.userStore.name
-    }),
-    NameDisplayer
-)
+    })
+)(NameDisplayer)
 
 const user = mobx.observable({
     name: "Noa"
