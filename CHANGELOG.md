@@ -1,5 +1,10 @@
 # MobX-React Changelog
 
+### 4.0.1
+
+* Improved typings, by @timmolendijk, fixes #164, #166
+* Fixed `inject` signature in readme, by @farwayer
+
 ### 4.0.0
 
 #### `observer` now uses shallow comparision for all props _(Breaking change)_
