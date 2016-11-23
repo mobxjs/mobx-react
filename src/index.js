@@ -1,4 +1,4 @@
-import mobx from 'mobx';
+import * as mobx from 'mobx';
 import React from 'react';
 import {unstable_batchedUpdates as rdBatched} from 'react-dom';
 import {unstable_batchedUpdates as rnBatched} from 'react-native';
