@@ -1,5 +1,10 @@
 # MobX-React Changelog
 
+### 4.0.2
+
+* Fixed order of `inject` overloads, see #169
+* Fixed import of `mobx` when using Webpack without commonjs plugin, see: #168
+
 ### 4.0.1
 
 * Improved typings, by @timmolendijk, fixes #164, #166
