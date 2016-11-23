@@ -36,17 +36,6 @@ export { propTypes as PropTypes };
 
 export default module.exports;
 
-/* Deprecated */
-
-export const reactiveComponent = () => {
-  console.warn(
-    '[mobx-react] `reactiveComponent` has been renamed to `observer` ' +
-    'and will be removed in 1.1.'
-  );
-  return observer.apply(null, arguments);
-};
-
-
 /* DevTool support */
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
   __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports, mobx)
