@@ -17,10 +17,10 @@ export function observer<P>(stores: string[], clazz: React.ComponentClass<P>): R
 export function observer<P>(stores: string[]): <TFunction extends React.ComponentClass<P>>(target: TFunction) => TFunction; // decorator signature
 
 // inject
-export function inject<P>(...stores: string[]): <TFunction extends React.ComponentClass<P>>(target: TFunction) => TFunction; // decorator signature
-export function inject<T, P>(storesToProps : (stores: any, nextProps: P, context:any) => T): <TFunction extends React.ComponentClass<T | P>>(target: TFunction) => TFunction; // decorator
 export function inject<P>(...stores: string[]): <TFunction extends React.StatelessComponent<P>>(target: TFunction) => TFunction; // decorator signature
+export function inject<P>(...stores: string[]): <TFunction extends React.ComponentClass<P>>(target: TFunction) => TFunction; // decorator signature
 export function inject<T, P>(storesToProps : (stores: any, nextProps: P, context:any) => T): <TFunction extends React.StatelessComponent<T | P>>(target: TFunction) => TFunction; // decorator
+export function inject<T, P>(storesToProps : (stores: any, nextProps: P, context:any) => T): <TFunction extends React.ComponentClass<T | P>>(target: TFunction) => TFunction; // decorator
 
 export class Provider extends React.Component<any, {}> {
 
