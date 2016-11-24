@@ -135,6 +135,23 @@ test('keep views alive', t => {
   });
 });
 
+test('componentWillMount from mixin is run first', t => {
+  t.plan(1)
+  debugger;
+  const Comp = observer(React.createClass({
+    componentWillMount: function() {
+      // ugly check, but proofs that observer.willmount has run
+      t.equal(this.render.name, "initialRender");
+    },
+    render() {
+      return null
+    }
+  }))
+  ReactDOM.render(<Comp />, testRoot, () => {
+    t.end()
+  })
+})
+
 test('does not views alive when using static rendering', t => {
   mobxReact.useStaticRendering(true);
 

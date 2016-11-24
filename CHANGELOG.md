@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.0.3
+
+* Fixed issue where userland componentWilMount was run before observer componentWillMount
+
 ### 4.0.2
 
 * Fixed order of `inject` overloads, see #169

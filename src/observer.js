@@ -52,16 +52,21 @@ export function useStaticRendering(useStaticRendering) {
  * Utilities
  */
 
-function patch(target, funcName) {
+function patch(target, funcName, runMixinFirst = false) {
   const base = target[funcName];
   const mixinFunc = reactiveMixin[funcName];
   if (!base) {
     target[funcName] = mixinFunc;
   } else {
-    target[funcName] = function() {
-      base.apply(this, arguments);
-      mixinFunc.apply(this, arguments);
-    }
+    target[funcName] = runMixinFirst === true
+      ? function() {
+        mixinFunc.apply(this, arguments);
+        base.apply(this, arguments);
+      }
+      : function() {
+        base.apply(this, arguments);
+        mixinFunc.apply(this, arguments);
+      }
   }
 }
 
@@ -283,10 +288,16 @@ export function observer(arg1, arg2) {
   }
 
   const target = componentClass.prototype || componentClass;
+  mixinLifecycleEvents(target)
+  componentClass.isMobXReactObserver = true;
+  return componentClass;
+}
+
+function mixinLifecycleEvents(target) {
+  patch(target, "componentWillMount", true);
   [
-    "componentWillMount",
-    "componentWillUnmount",
     "componentDidMount",
+    "componentWillUnmount",
     "componentDidUpdate"
   ].forEach(function(funcName) {
     patch(target, funcName)
@@ -294,8 +305,6 @@ export function observer(arg1, arg2) {
   if (!target.shouldComponentUpdate) {
     target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
   }
-  componentClass.isMobXReactObserver = true;
-  return componentClass;
 }
 
 // TODO: support injection somehow as well?
