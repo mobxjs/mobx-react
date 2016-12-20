@@ -223,7 +223,7 @@ class MessageList extends React.Component {
 
 Notes:
 * If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
-* Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks.
+* Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, mobx will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop on your own risk.
 * When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
 * The original component wrapped by `inject` is available as the `wrappedComponent` property of created the higher order component.
 * For mounted component instances, the wrapped component instance is available through the `wrappedInstance` property.
@@ -422,4 +422,3 @@ Data will have one of the following formats:
 
 WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
 This map is only available after invoking `trackComponents`.
-
