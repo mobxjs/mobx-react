@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.0.4
+
+* Introduced `suppressChangedStoreWarning` to optionally supresss change store warnings, by @dropfen, see #182, #183
+
 ### 4.0.3
 
 * Fixed issue where userland componentWilMount was run before observer componentWillMount
