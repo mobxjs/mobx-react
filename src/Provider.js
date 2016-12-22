@@ -25,7 +25,7 @@ export default class Provider extends Component {
     }
     // add own stores
     for (let key in this.props)
-      if (!specialReactKeys[key])
+      if (!specialReactKeys[key] && key !== "suppressChangedStoreWarning")
         stores[key] = this.props[key];
     return {
       mobxStores: stores
@@ -36,8 +36,9 @@ export default class Provider extends Component {
     // Maybe this warning is to aggressive?
     if (Object.keys(nextProps).length !== Object.keys(this.props).length)
       console.warn("MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children");
-    for (let key in nextProps)
-      if (!specialReactKeys[key] && this.props[key] !== nextProps[key])
-        console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
+    if (!nextProps.suppressChangedStoreWarning)
+      for (let key in nextProps)
+        if (!specialReactKeys[key] && this.props[key] !== nextProps[key])
+          console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
   }
 }

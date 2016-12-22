@@ -139,5 +139,38 @@ test('observer based context', t => {
     t.end();
   });
 
+  test('warning is not printed when changing stores, but suppressed explicitly', t => {
+    let msg = null;
+    const baseWarn = console.warn;
+    console.warn = m => msg = m;
+    const a = mobx.observable(3);
+    const C = observer(['foo'], createClass({
+      render() {
+        return <div>context:{ this.props.foo }</div>;
+      }
+    }));
+    const B = observer(createClass({
+      render: () => <C />
+    }));
+    const A = observer(createClass({
+      render: () =>
+        <section>
+          <span>{ a.get() }</span>,
+          <Provider foo={ a.get() } suppressChangedStoreWarning >
+            <B />
+          </Provider>
+        </section>
+    }));
+    const wrapper = mount(<A />);
+    t.equal(wrapper.find('span').text(), '3');
+    t.equal(wrapper.find('div').text(), 'context:3');
+    a.set(42);
+    t.equal(wrapper.find('span').text(), '42');
+    t.equal(wrapper.find('div').text(), 'context:3');
+    t.equal(msg, null);
+    console.warn = baseWarn;
+    t.end();
+  });
+
   t.end();
 });
