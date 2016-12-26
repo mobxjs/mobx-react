@@ -122,7 +122,7 @@ If you don't want to mark a component as observer, for example to reduce the dep
 
 ### Enabling decorators (optional)
 
-Decorators are currently a stage-2 ESNext feature. How to enable them is document [here](https://github.com/mobxjs/mobx#enabling-decorators-optional).
+Decorators are currently a stage-2 ESNext feature. How to enable them is documented [here](https://github.com/mobxjs/mobx#enabling-decorators-optional).
 
 ### Should I still use smart and dumb components?
 
