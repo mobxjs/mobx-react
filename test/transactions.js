@@ -8,7 +8,7 @@ test('mobx issue 50', t => {
 	const foo = {
 		a: mobx.observable(true),
 		b: mobx.observable(false),
-		c: mobx.observable(function() {
+		c: mobx.computed(function() {
 			console.log('evaluate c');
 			return foo.b.get();
 		})

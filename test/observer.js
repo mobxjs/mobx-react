@@ -101,7 +101,7 @@ test('keep views alive', t => {
   let yCalcCount = 0;
   const data = mobx.observable({
     x: 3,
-    y: function() {
+    get y() {
       yCalcCount++;
       return this.x * 2;
     },

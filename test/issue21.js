@@ -25,7 +25,7 @@ const wizardModel = mobx.observable({
       active: false
     }
   ],
-  activeStep() {
+  get activeStep() {
     return _.find(this.steps, 'active');
   },
   activateNextStep: mobx.asReference(function () {
@@ -217,7 +217,7 @@ test('verify props is reactive', function(t) {
     componentWillMount() {
       events.push(['mount'])
       mobx.extendObservable(this, {
-        computedLabel() {
+        get computedLabel() {
           events.push(['computed label', this.props.item.subid])
           return this.props.item.label
         }

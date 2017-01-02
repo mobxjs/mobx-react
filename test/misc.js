@@ -63,7 +63,7 @@ test('issue mobx 405', t => {
   function ExampleState() {
     mobx.extendObservable(this, {
       name: 'test',
-      greetings() {
+      get greetings() {
         return 'Hello my name is ' + this.name;
       }
     })
