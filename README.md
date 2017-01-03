@@ -140,7 +140,7 @@ Since version 4, `mobx-react` will no longer trigger a re-rendering for non-obse
 ### `componentWillReact` (lifecycle hook)
 
 React components usually render on a fresh stack, so that makes it often hard to figure out what _caused_ a component to re-render.
-When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component will be scheduled to re-render because
+When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component will be scheduled to re-rendered because
 data it observes has changed. This makes it easy to trace renders back to the action that caused the rendering.
 
 ```javascript
