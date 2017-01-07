@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.1.0
+
+* Added support for MobX3. Note that using MobX3 changes the error semantics. If an `observer` component throws, it will no longer crash the app, but just log the exceptions instead.
+
 ### 4.0.4
 
 * Introduced `suppressChangedStoreWarning` to optionally supresss change store warnings, by @dropfen, see #182, #183

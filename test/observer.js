@@ -278,7 +278,7 @@ test('changing state in render should fail', function(t) {
     'It is not allowed to change the state during a view'
   );
 
-  mobx._.resetGlobalState();
+  mobx.extras.resetGlobalState();
   t.end();
 });
 
