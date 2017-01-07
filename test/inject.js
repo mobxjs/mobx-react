@@ -261,8 +261,8 @@ test('inject based context', t => {
       </Provider>
     mount(<A />);
     t.equal(msg.length, 2);
-    t.equal(msg[0].split("\n")[0], 'Warning: Failed prop type: Required prop `x` was not specified in `inject-C-with-foo`.');
-    t.equal(msg[1].split("\n")[0], 'Warning: Failed prop type: Required prop `a` was not specified in `C`.');
+    t.equal(msg[0].split("\n")[0], 'Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`.');
+    t.equal(msg[1].split("\n")[0], 'Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`.');
     console.error = baseError;
     t.end();
   });
