@@ -102,7 +102,7 @@ class T15 extends Component<{ pizza: number, x?: number }, {}> {
 }
 const T16 = inject(() => ({ x: 3 }))(T15);
 
-class T17 extends React.Component<{}, {}> {
+class T17 extends Component<{}, {}> {
     render() {
         return <div>
             <T11 pizza={3} x={1} />
