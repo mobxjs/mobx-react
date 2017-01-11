@@ -8,7 +8,7 @@ export type IReactComponent<P> = React.StatelessComponent<P> | React.ComponentCl
 
 export function observer<P>(clazz: IReactComponent<P>): React.ClassicComponentClass<P>;
 export function observer<P>(clazz: React.ClassicComponentClass<P>): React.ClassicComponentClass<P>;
-export function observer<P, TFunction extends React.ComponentClass<P>>(target: TFunction): TFunction; // decorator signature
+export function observer<P, TFunction extends React.ComponentClass<P | void>>(target: TFunction): TFunction; // decorator signature
 
 export function inject<P>(...stores: string[]): <TFunction extends IReactComponent<P>>(target: TFunction) => TFunction; // decorator signature
 export function inject<T, P>(storesToProps : IStoresToProps<T, P>): <TFunction extends IReactComponent<T | P>>(target: TFunction) => TFunction; // decorator

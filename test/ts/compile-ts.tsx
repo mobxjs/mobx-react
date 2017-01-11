@@ -151,3 +151,13 @@ class ObserverTest extends Component<any, any> {
 		return <Observer>{() => <div>test</div>}</Observer>;
 	}
 }
+
+@observer
+class ComponentWithoutPropsAndState extends Component<void, void> {
+    componentDidUpdate() {
+    }
+
+    render() {
+        return (<div>Hello!</div>)
+    }
+}
