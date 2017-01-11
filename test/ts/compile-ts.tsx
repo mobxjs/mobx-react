@@ -23,10 +23,10 @@ const T2 = observer(React.createClass({
 }));
 
 const T3 = observer((props: { hamburger: number }) => {
-	return <T2 cake={this.props.hamburger} />;
+	return <T2 cake={props.hamburger} />;
 });
 
-const T4 = ({sandwich}: { sandwich: number }) => <div><T3 hamburger={this.props.sandwich} /></div>;
+const T4 = ({sandwich}: { sandwich: number }) => <div><T3 hamburger={sandwich} /></div>;
 
 const T5 = observer(() => {
 	return <T3 hamburger={17} />;
@@ -75,7 +75,7 @@ const T9 = observer(["stores"], React.createClass({
 }));
 
 const T10 = observer(["stores"], (props: { hamburger: number }) => {
-	return <T2 cake={this.props.hamburger} />;
+	return <T2 cake={props.hamburger} />;
 });
 
 React.createElement(observer(T8), { pizza: 4 });
