@@ -358,7 +358,7 @@ const mountedComponent = mount(
 ```
 
 Bear in mind that using shallow rendering won't provide any useful results when testing injected components; only the injector will be rendered.
-To test with shallow rendering, instantiate the wrapped сomponent instead: `shallow(<Person.wrappedComponent />)`
+To test with shallow rendering, instantiate the `wrappedComponent` instead: `shallow(<Person.wrappedComponent />)`
 
 ## FAQ
 
