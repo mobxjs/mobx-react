@@ -340,7 +340,7 @@ Make sure to mark `userStore` as optional property. It should not (necessarily) 
 
 #### Testing store injection
 
-It is allowed to pass any declared stored in directly as property as well. This makes it easy to set up individual component tests without a provider.
+It is allowed to pass any declared store in directly as property as well. This makes it easy to set up individual component tests without a provider.
 
 So if you have in your app something like:
 ```javascript
@@ -358,7 +358,7 @@ const mountedComponent = mount(
 ```
 
 Bear in mind that using shallow rendering won't provide any useful results when testing injected components; only the injector will be rendered.
-To test with shallow rendering, instantiate the `.wrappedComponent instead:`: `shallow(<Person.wrappedComponent />)`
+To test with shallow rendering, instantiate the `wrappedComponent` instead: `shallow(<Person.wrappedComponent />)`
 
 ## FAQ
 
