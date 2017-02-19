@@ -89,7 +89,7 @@ dislike the `observer` decorator / function.
 
 Example:
 
-```
+```javascript
 class App extends React.Component {
   render() {
      return (
