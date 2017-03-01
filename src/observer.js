@@ -1,4 +1,4 @@
-import mobx from 'mobx';
+import {Atom, Reaction, extras} from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import EventEmitter from './utils/EventEmitter';
@@ -114,7 +114,7 @@ const reactiveMixin = {
 
     function makePropertyObservableReference(propName) {
       let valueHolder = this[propName];
-      const atom = new mobx.Atom("reactive " + propName);
+      const atom = new Atom("reactive " + propName);
       Object.defineProperty(this, propName, {
           configurable: true, enumerable: true,
           get: function() {
@@ -145,7 +145,7 @@ const reactiveMixin = {
     let isRenderingPending = false;
 
     const initialRender = () => {
-      reaction = new mobx.Reaction(`${initialName}#${rootNodeID}.render()`, () => {
+      reaction = new Reaction(`${initialName}#${rootNodeID}.render()`, () => {
         if (!isRenderingPending) {
           // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
           // This unidiomatic React usage but React will correctly warn about this so we continue as usual
@@ -183,7 +183,7 @@ const reactiveMixin = {
         if (isDevtoolsEnabled) {
           this.__$mobRenderStart = Date.now();
         }
-        rendering = mobx.extras.allowStateChanges(false, baseRender);
+        rendering = extras.allowStateChanges(false, baseRender);
         if (isDevtoolsEnabled) {
           this.__$mobRenderEnd = Date.now();
         }

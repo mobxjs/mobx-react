@@ -1,5 +1,10 @@
 # MobX-React Changelog
 
+### 4.1.1
+
+* Exposed `wrappedInstance` and `wrappedComponent` in typings
+* Fixed accidental use of `default` import from `mobx` package.
+
 ### 4.1.0
 
 * Added support for MobX3. Note that using MobX3 changes the error semantics. If an `observer` component throws, it will no longer crash the app, but just log the exceptions instead.
