@@ -344,7 +344,7 @@ It is allowed to pass any declared store in directly as property as well. This m
 
 So if you have in your app something like:
 ```javascript
-<Provider profile ={profile}>
+<Provider profile={profile}>
     <Person age={'30'} />
 </Provider>
 ```
