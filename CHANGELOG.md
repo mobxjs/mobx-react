@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.1.2
+
+* Exceptions caught during render are now rethrown with proper stack, fixes #206
+
 ### 4.1.1
 
 * Exposed `wrappedInstance` and `wrappedComponent` in typings

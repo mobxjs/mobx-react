@@ -601,3 +601,37 @@ test('parent / childs render in the right order', t => {
   t.end()
 
 })
+
+
+test('206 - @observer should produce usefull errors if it throws', t => {
+  const data = observable({x : 1})
+  let renderCount = 0;
+
+  @observer
+  class Child extends React.Component {
+    render() {
+      renderCount++;
+      if (data.x === 42)
+        throw new Error("Oops!")
+      return <span>{data.x}</span>;
+    }
+  }
+
+  ReactDOM.render(<Child />, testRoot);
+  t.equal(renderCount, 1);
+
+  try {
+    data.x = 42;
+    t.fail();
+  } catch (e) {
+    const lines = e.stack.split("\n");
+    t.equal(lines[0], "Error: Oops!");
+    t.equal(lines[1].indexOf("at Child.render"), 4);
+    t.equal(renderCount, 2);
+  }
+
+  data.x = 3; // component recovers!
+  t.equal(renderCount, 3);
+
+  t.end();
+});

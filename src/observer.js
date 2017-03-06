@@ -178,16 +178,23 @@ const reactiveMixin = {
 
     const reactiveRender = () => {
       isRenderingPending = false;
+      let exception = undefined;
       let rendering = undefined;
       reaction.track(() => {
         if (isDevtoolsEnabled) {
           this.__$mobRenderStart = Date.now();
         }
-        rendering = extras.allowStateChanges(false, baseRender);
+        try {
+          rendering = extras.allowStateChanges(false, baseRender);
+        } catch (e) {
+          exception = e;
+        }
         if (isDevtoolsEnabled) {
           this.__$mobRenderEnd = Date.now();
         }
       });
+      if (exception)
+        throw exception;
       return rendering;
     };
 
