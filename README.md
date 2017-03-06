@@ -5,10 +5,10 @@
 [![CDNJS](https://img.shields.io/cdnjs/v/mobx-react.svg)](https://cdnjs.com/libraries/mobx-react)
 
 
-Package with react component wrapper for combining React with mobx.
+Package with React component wrapper for combining React with MobX.
 Exports the `observer` decorator and some development utilities.
-For documentation, see the [mobx](https://mobxjs.github.io/mobx) project.
-This package supports both React and React-Native.
+For documentation, see the [MobX](https://mobxjs.github.io/mobx) project.
+This package supports both React and React Native.
 
 ## Installation
 
@@ -34,7 +34,7 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 * Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript-Boilerplate](https://github.com/mobxjs/mobx-react-typescript-boilerplate)
 * Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
 [jspm-react](https://github.com/capaj/jspm-react)
-* React-Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
+* React Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
 
 
 ## API documentation
@@ -42,7 +42,7 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 ### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
-See the [mobx](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
+See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
 ```javascript
 import {observer} from "mobx-react";
@@ -81,9 +81,9 @@ const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 
 _This feature is still experimental and might change in the next minor release, or be deprecated_
 
-`Observer` is a React component, which applies `observer` to an unanymous region in your component.
+`Observer` is a React component, which applies `observer` to an anonymous region in your component.
 It takes as children a single, argumentless function which should return exactly one React component.
-The rendering in the function will be tracked and automatically be re-rendered when needed.
+The rendering in the function will be tracked and automatically re-rendered when needed.
 This can come in handy when needing to pass render function to external components (for example the React Native listview), or if you
 dislike the `observer` decorator / function.
 
@@ -131,7 +131,7 @@ TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, 
 
 ### About `shouldComponentUpdate`
 
-It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoid as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
+It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoided as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
 If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`),
 but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponent` is not consulted.
 
@@ -140,7 +140,7 @@ Since version 4, `mobx-react` will no longer trigger a re-rendering for non-obse
 ### `componentWillReact` (lifecycle hook)
 
 React components usually render on a fresh stack, so that makes it often hard to figure out what _caused_ a component to re-render.
-When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component will be scheduled to re-rendered because
+When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component is scheduled to be re-rendered because
 data it observes has changed. This makes it easy to trace renders back to the action that caused the rendering.
 
 ```javascript
@@ -222,9 +222,9 @@ class MessageList extends React.Component {
 
 Notes:
 * If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
-* Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, mobx will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop on your own risk.
+* Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
 * When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
-* The original component wrapped by `inject` is available as the `wrappedComponent` property of created the higher order component.
+* The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
 * For mounted component instances, the wrapped component instance is available through the `wrappedInstance` property.
 
 #### Inject as function
@@ -277,7 +277,7 @@ const App = () => (
 ReactDOM.render(<App />, document.body)
 ```
 
-_N.B. note that in this *specific* case neither `NameDisplayer` or `UserNameDisplayer` doesn't need to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
+_N.B. note that in this *specific* case neither `NameDisplayer` nor `UserNameDisplayer` needs to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
 
 #### Using `propTypes` and `defaultProps` and other static properties in combination with `inject`
 
@@ -336,11 +336,11 @@ class MyComponent extends React.Component<{ userStore?: IUserStore; otherProp: n
 }
 ```
 
-Make sure to mark `userStore` as optional property. It should not (necessarily) be passed in by parent components after all!
+Make sure to mark `userStore` as an optional property. It should not (necessarily) be passed in by parent components at all!
 
 #### Testing store injection
 
-It is allowed to pass any declared store in directly as property as well. This makes it easy to set up individual component tests without a provider.
+It is allowed to pass any declared store in directly as a property as well. This makes it easy to set up individual component tests without a provider.
 
 So if you have in your app something like:
 ```javascript
