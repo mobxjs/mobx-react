@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.1.3
+
+* Fixed `ReactDOM.findDOMNode` exception when using react-test-runner, #216
+
 ### 4.1.2
 
 * Exceptions caught during render are now rethrown with proper stack, fixes #206

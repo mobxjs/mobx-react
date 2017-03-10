@@ -18,8 +18,16 @@ export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new Wea
 export const renderReporter = new EventEmitter();
 
 function findDOMNode(component) {
-  if (ReactDOM)
-    return ReactDOM.findDOMNode(component);
+  if (ReactDOM) {
+    try {
+      return ReactDOM.findDOMNode(component);
+    } catch (e) {
+      // findDOMNode will throw in react-test-renderer, see:
+      // See https://github.com/mobxjs/mobx-react/issues/216
+      // Is there a better heuristic?
+      return null;
+    }
+  }
   return null;
 }
 
