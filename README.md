@@ -18,8 +18,6 @@ Or CDN: https://unpkg.com/mobx-react (namespace: `mobxReact`)
 
 ```javascript
 import {observer} from 'mobx-react';
-// - or -
-import {observer} from 'mobx-react/native';
 // - or, for custom renderers without DOM: -
 import {observer} from 'mobx-react/custom';
 ```
