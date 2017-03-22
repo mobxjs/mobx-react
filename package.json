@@ -3,6 +3,7 @@
   "version": "4.1.3",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
+  "react-native": "native.js",
   "typings": "index",
   "repository": {
     "type": "git",
