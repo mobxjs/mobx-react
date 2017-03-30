@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.1.5
+
+* Improved typescript typings, fixes #223
+
 ### 4.1.4
 
 * Made lifecycle hooks used by mobx-react read-only to make sure they are not accidentally overwritten in component instances. Fixes, #195, #202. Note that they can still be defined, just make sure to define them on the prototype (`componentWillMount() {}`) instead of the instance (`componentWillMount = () => {}`). Which is best practice anyway.

@@ -39,7 +39,7 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 
 ### observer(componentClass)
 
-Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component.
+Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
 ```javascript

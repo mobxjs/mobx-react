@@ -161,3 +161,21 @@ class ComponentWithoutPropsAndState extends Component<void, void> {
         return (<div>Hello!</div>)
     }
 }
+
+const AppInner = observer((props: { a: number }) => {
+  return <div>
+    <h1>Hello</h1>
+    { props.a }
+  </div>;
+})
+
+const App = inject("store")(AppInner);
+
+App.wrappedComponent
+
+@inject("store") @observer
+class App2 extends Component<{ a: number }, {}> {
+
+}
+
+// TODO: not possible: App2.wrappedComponent
