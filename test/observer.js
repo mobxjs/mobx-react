@@ -635,3 +635,52 @@ test('206 - @observer should produce usefull errors if it throws', t => {
 
   t.end();
 });
+
+test('195 - async componentWillMount does not work', t => {
+  const renderedValues = []
+
+  @observer
+  class WillMount extends React.Component {
+    @observable counter = 0
+
+    @action inc = () => this.counter++
+
+    componentWillMount() {
+      setTimeout(() => this.inc(), 300)
+    }
+
+    render() {
+      renderedValues.push(this.counter)
+      return <p>{this.counter}<button onClick={this.inc}>+</button></p>
+    }
+  }
+
+  ReactDOM.render(<WillMount />, testRoot);
+
+  setTimeout(() => {
+    t.deepEqual(renderedValues, [0, 1])
+    t.end()
+  }, 500)
+})
+
+
+test('195 - should throw if trying to overwrite lifecycle methods', t => {
+  // "use strict"
+  // const renderedValues = []
+
+  @observer
+  class WillMount extends React.Component {
+    componentWillMount = () => {
+    }
+
+    render() {
+      return null;
+    }
+  }
+
+  t.throws(() => {
+    ReactDOM.render(<WillMount />, testRoot);
+  }, /Cannot assign to read only property 'componentWillMount'/)
+  t.end()
+})
+

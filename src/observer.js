@@ -63,19 +63,23 @@ export function useStaticRendering(useStaticRendering) {
 function patch(target, funcName, runMixinFirst = false) {
   const base = target[funcName];
   const mixinFunc = reactiveMixin[funcName];
-  if (!base) {
-    target[funcName] = mixinFunc;
-  } else {
-    target[funcName] = runMixinFirst === true
-      ? function() {
-        mixinFunc.apply(this, arguments);
-        base.apply(this, arguments);
-      }
-      : function() {
-        base.apply(this, arguments);
-        mixinFunc.apply(this, arguments);
-      }
-  }
+  const f = !base
+    ? mixinFunc
+    : runMixinFirst === true
+        ? function() {
+          mixinFunc.apply(this, arguments);
+          base.apply(this, arguments);
+        }
+        : function() {
+          base.apply(this, arguments);
+          mixinFunc.apply(this, arguments);
+        }
+  ;
+
+  Object.defineProperty(target, funcName, {
+    writable: false, configurable: true, enumerable: false,
+    value: f
+  });
 }
 
 function isObjectShallowModified(prev, next) {
