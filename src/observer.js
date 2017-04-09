@@ -1,7 +1,8 @@
 import {Atom, Reaction, extras} from 'mobx';
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import EventEmitter from './utils/EventEmitter';
+import * as PropTypes from './propTypes';
 import inject from './inject';
 
 /**
@@ -293,13 +294,13 @@ export function observer(arg1, arg2) {
     (!componentClass.prototype || !componentClass.prototype.render) && !componentClass.isReactClass && !React.Component.isPrototypeOf(componentClass)
   ) {
 
-    return observer(React.createClass({
-      displayName: componentClass.displayName || componentClass.name,
-      propTypes: componentClass.propTypes,
-      contextTypes: componentClass.contextTypes,
-      getDefaultProps: function() { return componentClass.defaultProps; },
-      render: function() { return componentClass.call(this, this.props, this.context); }
-    }));
+    return observer(class extends Component {
+      displayName = componentClass.displayName || componentClass.name;
+      propTypes = componentClass.propTypes;
+      contextTypes = componentClass.contextTypes;
+      defaultProps = componentClass.defaultProps;
+      render() { return componentClass.call(this, this.props, this.context); }
+    });
   }
 
   if (!componentClass) {
@@ -330,5 +331,11 @@ function mixinLifecycleEvents(target) {
 export const Observer = observer(({ children }) => children())
 
 Observer.propTypes = {
-  children: React.PropTypes.func.isRequired
+  children: (propValue, key, componentName, location, propFullName) => {
+    if (typeof propValue[key] !== 'function')
+      return new Error(
+        'Invalid prop `' + propFullName + '` of type `' + typeof propValue[key] + '` supplied to' +
+        ' `' + componentName + '`, expected `function`.'
+      );
+  }
 }

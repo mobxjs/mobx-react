@@ -1,15 +1,16 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import * as PropTypes from './propTypes';
 
 const specialReactKeys = { children: true, key: true, ref: true };
 
 export default class Provider extends Component {
 
   static contextTypes = {
-    mobxStores: PropTypes.object,
+    mobxStores: PropTypes.objectOrObservableObject,
   };
 
   static childContextTypes = {
-    mobxStores: PropTypes.object.isRequired,
+    mobxStores: PropTypes.objectOrObservableObject.isRequired,
   };
 
   render() {

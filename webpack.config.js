@@ -6,7 +6,6 @@ function makeConfig(target, minify) {
 
   return {
     entry: './src/index.js',
-    hot: false,
     output: {
       libraryTarget: 'umd',
       library: 'mobxReact',
@@ -21,7 +20,7 @@ function makeConfig(target, minify) {
       } ())
     },
     resolve: {
-      extensions: ['', '.js'],
+      extensions: ['.js'],
       alias: {
         'react-dom': 'empty-module',
         'react-native': 'empty-module'
@@ -31,7 +30,7 @@ function makeConfig(target, minify) {
       loaders: [{
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           presets: ['es2015', 'react'],
           plugins: ['transform-decorators-legacy', 'transform-class-properties'],
