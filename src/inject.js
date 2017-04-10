@@ -37,7 +37,7 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
 
   class Injector extends Component {
 
-    displayName = displayName;
+    static displayName = displayName;
 
     storeRef = (instance) => { this.wrappedInstance = instance };
 

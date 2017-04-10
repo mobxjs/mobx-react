@@ -295,10 +295,10 @@ export function observer(arg1, arg2) {
   ) {
 
     return observer(class extends Component {
-      displayName = componentClass.displayName || componentClass.name;
-      propTypes = componentClass.propTypes;
-      contextTypes = componentClass.contextTypes;
-      defaultProps = componentClass.defaultProps;
+      static displayName = componentClass.displayName || componentClass.name;
+      static contextTypes = componentClass.contextTypes;
+      static propTypes = componentClass.propTypes;
+      static defaultProps = componentClass.defaultProps;
       render() { return componentClass.call(this, this.props, this.context); }
     });
   }
