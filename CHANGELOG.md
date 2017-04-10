@@ -1,6 +1,6 @@
 # MobX-React Changelog
 
-### 4.1.6
+### 4.1.7
 
 * Added support for React 15.5 (no deprecation warnings) and 16.0 (no proptypes / createClass), by @andykog, see #238. Fixes #233, #237
 
