@@ -50,7 +50,7 @@
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
     "typescript": "^2.2.2",
-    "webpack": "^1.13.1"
+    "webpack": "^2.3.3"
   },
   "dependencies": {
     "hoist-non-react-statics": "^1.2.0"
