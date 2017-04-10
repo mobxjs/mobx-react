@@ -41,7 +41,6 @@
     "browserify": "^14.3.0",
     "empty-module": "0.0.2",
     "enzyme": "^2.8.0",
-    "jquery": "^3.2.1",
     "lodash": "^4.17.4",
     "mobx": "^3.1.9",
     "react": "^15.5.3",

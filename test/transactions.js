@@ -5,6 +5,8 @@ import mobx from 'mobx'
 import mobxReact from '../'
 
 test('mobx issue 50', t => {
+	const testRoot = document.createElement('div');
+	document.body.appendChild(testRoot);
 	const foo = {
 		a: mobx.observable(true),
 		b: mobx.observable(false),
@@ -31,15 +33,18 @@ test('mobx issue 50', t => {
 
 	setTimeout(() => {
 		t.equal(asText, 'false:true:true');
-		t.equal(document.getElementById('x').innerHTML, 'false,true,true');
+		t.equal(document.getElementById('x').innerText, 'false,true,true');
 		t.equal(willReactCount, 1);
+		testRoot.parentNode.removeChild(testRoot);
 		t.end();
 	}, 400);
 
-	ReactDOM.render(<Test />, document.getElementById('testroot'));
+	ReactDOM.render(<Test />, testRoot);
 });
 
 test('React.render should respect transaction', t => {
+	const testRoot = document.createElement('div');
+	document.body.appendChild(testRoot);
 	const a = mobx.observable(2);
 	const loaded = mobx.observable(false);
 	const valuesSeen = [];
@@ -52,7 +57,7 @@ test('React.render should respect transaction', t => {
 			return <div>loading</div>
 	});
 
-	ReactDOM.render(<Component />, document.getElementById('testroot'));
+	ReactDOM.render(<Component />, testRoot);
 	mobx.transaction(() => {
 		a.set(3);
 		a.set(4);
@@ -60,13 +65,16 @@ test('React.render should respect transaction', t => {
 	});
 
 	setTimeout(() => {
-		t.equal(document.body.textContent.replace(/\s+/g,''), '4');
+		t.equal(testRoot.textContent.replace(/\s+/g,''), '4');
 		t.deepEqual(valuesSeen, [2, 4]);
+		testRoot.parentNode.removeChild(testRoot);
 		t.end();
 	}, 400);
 });
 
 test('React.render in transaction should succeed', t => {
+	const testRoot = document.createElement('div');
+	document.body.appendChild(testRoot);
 	const a = mobx.observable(2);
 	const loaded = mobx.observable(false);
 	const valuesSeen = [];
@@ -80,14 +88,15 @@ test('React.render in transaction should succeed', t => {
 
 	mobx.transaction(() => {
 		a.set(3);
-		ReactDOM.render(<Component />, document.getElementById('testroot'));
+		ReactDOM.render(<Component />, testRoot);
 		a.set(4);
 		loaded.set(true);
 	});
 
 	setTimeout(() => {
-		t.equal(document.body.textContent.replace(/\s+/g,''), '4');
+		t.equal(testRoot.textContent.replace(/\s+/g,''), '4');
 		t.deepEqual(valuesSeen, [3, 4]);
+		testRoot.parentNode.removeChild(testRoot);
 		t.end();
 	}, 400);
 });

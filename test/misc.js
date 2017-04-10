@@ -91,6 +91,8 @@ test('issue mobx 405', t => {
 });
 
 test('#85 Should handle state changing in constructors', function(t) {
+  const testRoot = document.createElement('div');
+  document.body.appendChild(testRoot);
   const a = mobx.observable(2);
   const Child = observer(createClass({
     displayName: 'Child',
@@ -103,12 +105,13 @@ test('#85 Should handle state changing in constructors', function(t) {
   const ParentWrapper = observer(function Parent() {
     return <span><Child />parent:{ a.get() }</span>
   });
-  ReactDOM.render(<ParentWrapper />, document.getElementById('testroot'), () => {
-    t.equal(document.getElementsByTagName('span')[0].textContent, 'child:3 - parent:3');
+  ReactDOM.render(<ParentWrapper />, testRoot, () => {
+    t.equal(testRoot.getElementsByTagName('span')[0].textContent, 'child:3 - parent:3');
     a.set(5);
-    t.equal(document.getElementsByTagName('span')[0].textContent, 'child:5 - parent:5');
+    t.equal(testRoot.getElementsByTagName('span')[0].textContent, 'child:5 - parent:5');
     a.set(7);
-    t.equal(document.getElementsByTagName('span')[0].textContent, 'child:7 - parent:7');
+    t.equal(testRoot.getElementsByTagName('span')[0].textContent, 'child:7 - parent:7');
+    testRoot.parentNode.removeChild(testRoot);
     t.end();
   });
 });
