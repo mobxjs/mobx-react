@@ -5,7 +5,7 @@ function makeConfig(target, minify) {
   var targetExt = minify ? '.min.js' : '.js';
 
   return {
-    entry: './src/index.js',
+    entry: './src',
     output: {
       libraryTarget: 'umd',
       library: 'mobxReact',
