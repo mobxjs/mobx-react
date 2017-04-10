@@ -1,9 +1,10 @@
-import React, { PropTypes } from 'react';
+import React, { Component } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
+import * as PropTypes from './propTypes';
 import {observer} from './observer';
 
 const injectorContextTypes = {
-  mobxStores: PropTypes.object
+  mobxStores: PropTypes.objectOrObservableObject
 };
 Object.seal(injectorContextTypes);
 
@@ -34,12 +35,13 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
   if (injectNames)
     displayName += "-with-" + injectNames;
 
-  const Injector = React.createClass({
-    displayName: displayName,
-    storeRef: function(instance) {
-      this.wrappedInstance = instance
-    },
-    render: function () {
+  class Injector extends Component {
+
+    static displayName = displayName;
+
+    storeRef = (instance) => { this.wrappedInstance = instance };
+
+    render() {
       // Optimization: it might be more efficient to apply the mapper function *outside* the render method
       // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
       // See this test: 'using a custom injector is not too reactive' in inject.js
@@ -55,7 +57,7 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
 
       return React.createElement(component, newProps);
     }
-  });
+  }
 
   // Static fields from component should be visible on the generated Injector
   hoistStatics(Injector, component);

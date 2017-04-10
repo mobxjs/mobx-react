@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom'
 import test from 'tape'
 import mobx from 'mobx'
 import { observer, propTypes } from '../'
-import $ from 'jquery'
-
 
 const stateLessComp = ({testProp}) => <div>result: { testProp }</div>
 
@@ -15,9 +13,12 @@ stateLessComp.defaultProps = {
   testProp: 'default value for prop testProp'
 }
 
+const testRoot = document.createElement('div');
+document.body.appendChild(testRoot);
+
 test('stateless component with propTypes', t => {
   const StatelessCompObserver = observer(stateLessComp);
-  t.equal(StatelessCompObserver.getDefaultProps().testProp, 'default value for prop testProp', 'default property value should be propagated');
+  t.equal(StatelessCompObserver.defaultProps.testProp, 'default value for prop testProp', 'default property value should be propagated');
   const originalConsoleError = console.error
   let beenWarned = false
   console.error =  () => beenWarned = true;
@@ -27,9 +28,9 @@ test('stateless component with propTypes', t => {
 
   ReactDOM.render(
     <StatelessCompObserver testProp='hello world' />,
-    document.getElementById('testroot'),
+    testRoot,
     function () {
-      t.equal($('#testroot').text(), 'result: hello world');
+      t.equal(testRoot.innerText, 'result: hello world');
       t.end();
     }
     );
@@ -44,8 +45,8 @@ test('stateless component with context support', t => {
     getChildContext: () => ({ testContext: 'hello world' }),
     render: () => <StateLessCompWithContextObserver />
   })
-  ReactDOM.render(<ContextProvider />, document.getElementById('testroot'), () => {
-    t.equal($('#testroot').text(), 'context: hello world');
+  ReactDOM.render(<ContextProvider />, testRoot, () => {
+    t.equal(testRoot.innerText, 'context: hello world');
     t.end();
   });
 });

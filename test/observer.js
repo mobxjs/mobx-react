@@ -4,10 +4,9 @@ import ReactDOMServer from 'react-dom/server'
 import test from 'tape'
 import mobx, { observable, action, computed} from 'mobx'
 import mobxReact, { observer, inject } from '../'
-import $ from 'jquery'
 
-$('<div></div>').attr('id','testroot').appendTo($(window.document.body));
-const testRoot = document.getElementById('testroot');
+const testRoot = document.createElement('div');
+document.body.appendChild(testRoot);
 
 const store = mobx.observable({
   todos: [{
@@ -49,8 +48,8 @@ test('nestedRendering', t => {
   ReactDOM.render(<App />, testRoot, () => {
     t.equal(todoListRenderings, 1, 'should have rendered list once');
     t.equal(todoListWillReactCount, 0, 'should not have reacted yet')
-    t.equal($('li').length, 1);
-    t.equal($('li').text(), '|a');
+    t.equal(testRoot.querySelectorAll('li').length, 1);
+    t.equal(testRoot.querySelector('li').innerText, '|a');
 
     t.equal(todoItemRenderings, 1, 'item1 should render once');
 
@@ -72,8 +71,8 @@ test('nestedRendering', t => {
       });
 
       setTimeout(() => {
-        t.equal($('li').length, 2, 'list should two items in in the list');
-        t.equal($('li').text(), '|aa|b');
+        t.equal(testRoot.querySelectorAll('li').length, 2, 'list should two items in in the list');
+        t.deepEqual(Array.from(testRoot.querySelectorAll('li')).map(e => e.innerText), ['|aa', '|b']);
 
         t.equal(todoListRenderings, 2, 'should have rendered list twice');
         t.equal(todoListWillReactCount, 1, 'should have reacted')
@@ -86,7 +85,7 @@ test('nestedRendering', t => {
           t.equal(todoListRenderings, 3, 'should have rendered list another time');
           t.equal(todoListWillReactCount, 2, 'should have reacted')
           t.equal(todoItemRenderings, 3, 'item1 should not have rerendered');
-          t.equal($('li').length, 1, 'list should have only on item in list now');
+          t.equal(testRoot.querySelectorAll('li').length, 1, 'list should have only on item in list now');
           t.equal(getDNode(oldTodo, 'title').observers.length, 0, 'title observers should have decreased');
           t.equal(getDNode(oldTodo, 'completed').observers.length, 0, 'completed observers should not have decreased');
 
@@ -114,7 +113,7 @@ test('keep views alive', t => {
 
   ReactDOM.render(<TestComponent />, testRoot, function() {
     t.equal(yCalcCount, 1);
-    t.equal($(testRoot).text(), 'hi6');
+    t.equal(testRoot.innerText, 'hi6');
 
     data.z = 'hello';
     // test: rerender should not need a recomputation of data.y because the subscription is kept alive
@@ -122,7 +121,7 @@ test('keep views alive', t => {
     setTimeout(() => {
       t.equal(yCalcCount, 1);
 
-      t.equal($(testRoot).text(), 'hello6');
+      t.equal(testRoot.innerText, 'hello6');
       t.equal(yCalcCount, 1);
 
       t.equal(getDNode(data, 'y').observers.length, 1);
@@ -137,7 +136,6 @@ test('keep views alive', t => {
 
 test('componentWillMount from mixin is run first', t => {
   t.plan(1)
-  debugger;
   const Comp = observer(React.createClass({
     componentWillMount: function() {
       // ugly check, but proofs that observer.willmount has run
@@ -168,7 +166,7 @@ test('does not views alive when using static rendering', t => {
   ReactDOM.render(<TestComponent />, testRoot, function() {
 
     t.equal(renderCount, 1);
-    t.equal($(testRoot).text(), 'hi');
+    t.equal(testRoot.querySelector('div').innerText, 'hi');
 
     data.z = 'hello';
     // no re-rendering on static rendering
@@ -176,7 +174,7 @@ test('does not views alive when using static rendering', t => {
     setTimeout(() => {
       t.equal(renderCount, 1);
 
-      t.equal($(testRoot).text(), 'hi');
+      t.equal(testRoot.querySelector('div').innerText, 'hi');
       t.equal(renderCount, 1);
 
       t.equal(getDNode(data, 'z').observers.length, 0);
@@ -233,25 +231,18 @@ test('issue 12', function(t) {
 
     render() {
       return (
-        <div>
-          { this.props.item.name }
-          { data.selected === this.props.item.name ? '!' : '' }
-        </div>
+        <span>{this.props.item.name}{data.selected === this.props.item.name ? '!' : ''}</span>
       )
     }
   }
 
   /** table stateles component */
   var Table = observer(function table() {
-    return (
-      <div>
-        {  data.items.map(item => <Row key={ item.name } item={ item } />) }
-      </div>
-    )
+    return <div>{data.items.map(item => <Row key={ item.name } item={ item } />)}</div>
   })
 
   ReactDOM.render(<Table />, testRoot, function() {
-    t.equal($(testRoot).text(), 'coffee!tea');
+    t.equal(testRoot.querySelector('div').innerText, 'coffee!tea');
 
     mobx.transaction(() => {
       data.items[1].name = 'boe';
@@ -260,7 +251,7 @@ test('issue 12', function(t) {
     });
 
     setTimeout(() => {
-      t.equal($(testRoot).text(), 'soup');
+      t.equal(testRoot.querySelector('div').innerText, 'soup');
       t.end();
     }, 50);
   });
@@ -345,10 +336,10 @@ test('124 - react to changes in this.props via computed', function(t) {
   })
 
   ReactDOM.render(<Parent />, testRoot, () => {
-    t.equal($('span').text(), 'x:1')
-    $('div').click()
+    t.equal(testRoot.querySelector('span').innerText, 'x:1')
+    testRoot.querySelector('div').click()
     setTimeout(() => {
-      t.equal($('span').text(), 'x:2')
+      t.equal(testRoot.querySelector('span').innerText, 'x:2')
       t.end()
     }, 100)
   })
@@ -394,9 +385,9 @@ test('should render component even if setState called with exactly the same prop
   }));
   ReactDOM.render(<Component />, testRoot, () => {
     t.equal(renderCount, 1, 'renderCount === 1');
-    $('#clickableDiv').click();
+    testRoot.querySelector('#clickableDiv').click();
     t.equal(renderCount, 2, 'renderCount === 2');
-    $('#clickableDiv').click();
+    testRoot.querySelector('#clickableDiv').click();
     t.equal(renderCount, 3, 'renderCount === 3');
     t.end();
   });
@@ -432,17 +423,17 @@ test('it rerenders correctly if some props are non-observables - 1', t => {
 
   ReactDOM.render(<Parent odata={odata} data={data} />, testRoot, () => {
     t.equal(renderCount, 1, 'renderCount === 1');
-    t.equal($("span").text(), "1-1-1");
+    t.equal(testRoot.querySelector("span").innerText, "1-1-1");
 
-    $("span").click();
+    testRoot.querySelector("span").click();
     setTimeout(() => {
       t.equal(renderCount, 2, 'renderCount === 2');
-      t.equal($("span").text(), "2-2-2");
+      t.equal(testRoot.querySelector("span").innerText, "2-2-2");
 
-      $("span").click();
+      testRoot.querySelector("span").click();
       setTimeout(() => {
         t.equal(renderCount, 3, 'renderCount === 3');
-        t.equal($("span").text(), "3-3-3");
+        t.equal(testRoot.querySelector("span").innerText, "3-3-3");
 
         t.end();
       }, 10);
@@ -478,17 +469,17 @@ test('it rerenders correctly if some props are non-observables - 2', t => {
 
   ReactDOM.render(<Parent odata={odata} />, testRoot, () => {
     t.equal(renderCount, 1, 'renderCount === 1');
-    t.equal($("span").text(), "1-1");
+    t.equal(testRoot.querySelector("span").innerText, "1-1");
 
-    $("span").click();
+    testRoot.querySelector("span").click();
     setTimeout(() => {
       t.equal(renderCount, 2, 'renderCount === 2');
-      t.equal($("span").text(), "2-2");
+      t.equal(testRoot.querySelector("span").innerText, "2-2");
 
-      $("span").click();
+      testRoot.querySelector("span").click();
       setTimeout(() => {
         t.equal(renderCount, 3, 'renderCount === 3');
-        t.equal($("span").text(), "3-3");
+        t.equal(testRoot.querySelector("span").innerText, "3-3");
 
         t.end();
       }, 10);
@@ -507,12 +498,12 @@ test('Observer regions should react', t => {
       <li>{ data.get() }</li>
     </div>
   ReactDOM.render(<Comp />, testRoot, () => {
-    t.equal($('span').text(), 'hi');
-    t.equal($('li').text(), 'hi');
+    t.equal(testRoot.querySelector('span').innerText, 'hi');
+    t.equal(testRoot.querySelector('li').innerText, 'hi');
 
     data.set('hello');
-    t.equal($('span').text(), 'hello');
-    t.equal($('li').text(), 'hi');
+    t.equal(testRoot.querySelector('span').innerText, 'hello');
+    t.equal(testRoot.querySelector('li').innerText, 'hi');
     t.end();
   })
 
@@ -535,13 +526,13 @@ test('Observer regions should react', t => {
     ReactDOM.render(<Parent />, testRoot, () => {
       t.equal(parentRendering, 1);
       t.equal(childRendering, 1);
-      t.equal($('span').text(), '1');
+      t.equal(testRoot.querySelector("span").innerText, '1');
 
       odata.y++;
       setTimeout(() => {
         t.equal(parentRendering, 2);
         t.equal(childRendering, 1);
-        t.equal($('span').text(), '1');
+        t.equal(testRoot.querySelector("span").innerText, '1');
         t.end();
       }, 20)
     })

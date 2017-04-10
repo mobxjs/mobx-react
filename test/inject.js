@@ -4,10 +4,6 @@ import { mount } from 'enzyme'
 import test from 'tape'
 import mobx, { action, observable, computed } from 'mobx'
 import { observer, inject, Provider } from '../'
-import $ from 'jquery'
-
-$('<div></div>').attr('id','testroot').appendTo($(window.document.body));
-const testRoot = document.getElementById('testroot');
 
 test('inject based context', t => {
   test('basic context', t => {
@@ -317,6 +313,9 @@ test('inject based context', t => {
   });
 
   test('using a custom injector is not too reactive', t => {
+    const testRoot = document.createElement('div');
+    document.body.appendChild(testRoot);
+
     let listRender = 0;
     let itemRender = 0;
     let injectRender = 0;
@@ -362,7 +361,7 @@ test('inject based context', t => {
     @connect(({state}, {item}) => {
       injectRender++;
       if (injectRender > 6) {
-        debugger;
+        // debugger;
       }
       return ({
         // Using
@@ -394,18 +393,19 @@ test('inject based context', t => {
         t.equal(injectRender, 6);
         t.equal(itemRender, 6);
 
-        $(".hl_ItemB").click();
+        testRoot.querySelectorAll(".hl_ItemB").forEach(e => e.click());
         setTimeout(() => {
           t.equal(listRender, 1);
           t.equal(injectRender, 12); // ideally, 7
           t.equal(itemRender, 7);
 
-          $(".hl_ItemF").click();
+          testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click());
           setTimeout(() => {
             t.equal(listRender, 1);
             t.equal(injectRender, 18); // ideally, 9
             t.equal(itemRender, 9);
 
+            testRoot.parentNode.removeChild(testRoot);
             t.end()
           }, 20)
         }, 20)

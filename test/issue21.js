@@ -3,11 +3,10 @@ import ReactDOM from 'react-dom'
 import test from 'tape'
 import mobx from 'mobx'
 import { observer } from '../'
-import $ from 'jquery'
 import _ from 'lodash'
 
-$('<div></div>').attr('id','testroot').appendTo($(window.document.body));
-const testRoot = document.getElementById('testroot');
+const testRoot = document.createElement('div');
+document.body.appendChild(testRoot);
 let topRenderCount = 0;
 
 const wizardModel = mobx.observable({
@@ -182,7 +181,7 @@ test('verify prop changes are picked up', t => {
       ['render', 1, '1.1.hi.0'],
     ])
     events.splice(0)
-    $('#testDiv').click()
+    testRoot.querySelector('#testDiv').click()
     setTimeout(() => t.deepEqual(events, [
       [ 'compute', 1 ],
       [ 'react', 1 ],
@@ -266,7 +265,7 @@ test('verify props is reactive', function(t) {
       ['render', 1, '1.1.hi.0', 'hi'],
     ]);
     events.splice(0);
-    $('#testDiv').click();
+    testRoot.querySelector('#testDiv').click();
     setTimeout(() => t.deepEqual(events, [
       [ 'compute', 1 ],
       [ 'react', 1 ],
@@ -345,7 +344,7 @@ test('no re-render for shallow equal props', function(t) {
       ['render', 1, 'hi'],
     ]);
     events.splice(0);
-    $('#testDiv').click();
+    testRoot.querySelector('#testDiv').click();
     setTimeout(() => t.deepEqual(events, [
       ['parent render', 1],
       [ 'receive', 1, 1 ],
@@ -392,5 +391,5 @@ test('lifecycle callbacks called with correct arguments', t => {
       />
     },
   });
-  ReactDOM.render(<Root />, testRoot, () => $('#testButton').click());
+  ReactDOM.render(<Root />, testRoot, () => testRoot.querySelector('#testButton').click());
 });
