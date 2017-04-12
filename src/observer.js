@@ -77,10 +77,9 @@ function patch(target, funcName, runMixinFirst = false) {
         }
   ;
 
-  Object.defineProperty(target, funcName, {
-    writable: false, configurable: true, enumerable: false,
-    value: f
-  });
+  // MWE: ideally we freeze here to protect against accidental overwrites in component instances, see #195
+  // ...but that breaks react-hot-loader, see #231...
+  target[funcName] = f;
 }
 
 function isObjectShallowModified(prev, next) {

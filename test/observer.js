@@ -655,9 +655,8 @@ test('195 - async componentWillMount does not work', t => {
 })
 
 
-test('195 - should throw if trying to overwrite lifecycle methods', t => {
-  // "use strict"
-  // const renderedValues = []
+test.skip('195 - should throw if trying to overwrite lifecycle methods', t => {
+  // Test disabled, see #231...
 
   @observer
   class WillMount extends React.Component {
