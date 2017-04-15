@@ -13,7 +13,7 @@
     "test": "npm run build && npm run test:console",
     "test:ts": "tsc -p test/ts",
     "test:build": "browserify -x react/addons -x react-native -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ]",
-    "test:travis": "webpack && browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run && npm run test:ts",
+    "test:travis": "node build-rollup.js && browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run && npm run test:ts",
     "test:console": "browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec && npm run test:ts",
     "test:open": " open ./test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open",
