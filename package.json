@@ -17,7 +17,7 @@
     "test:console": "browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec && npm run test:ts",
     "test:open": " open ./test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open",
-    "build": "webpack && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
+    "build": "node build-rollup.js && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
     "prepublish": "npm run build"
   },
   "author": "Michel Weststrate",
@@ -32,14 +32,14 @@
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
-    "babel-loader": "^6.4.1",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2015-rollup": "^3.0.0",
     "babel-preset-react": "^6.24.1",
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
-    "empty-module": "0.0.2",
     "enzyme": "^2.8.0",
     "lodash": "^4.17.4",
     "mobx": "^3.1.9",
@@ -47,11 +47,19 @@
     "react-addons-test-utils": "^15.5.1",
     "react-dom": "^15.5.3",
     "react-test-renderer": "^15.5.4",
+    "rollup": "^0.41.6",
+    "rollup-plugin-alias": "^1.3.0",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-filesize": "^1.2.1",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-progress": "^0.2.1",
+    "rollup-plugin-replace": "^1.1.1",
+    "rollup-plugin-uglify": "^1.0.1",
     "tap-spec": "^4.1.1",
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
-    "typescript": "^2.2.2",
-    "webpack": "^2.3.3"
+    "typescript": "^2.2.2"
   },
   "dependencies": {
     "hoist-non-react-statics": "^1.2.0"
