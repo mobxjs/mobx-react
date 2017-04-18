@@ -46,6 +46,7 @@
     "react": "^15.5.3",
     "react-addons-test-utils": "^15.5.1",
     "react-dom": "^15.5.3",
+    "react-test-renderer": "^15.5.4",
     "tap-spec": "^4.1.1",
     "tape": "^4.2.2",
     "tape-run": "2.1.0",
