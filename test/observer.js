@@ -36,7 +36,7 @@ const TodoList = observer(
             const todos = store.todos
             return (
                 <div>
-                    <hi>{todos.length}</hi>
+                    <span>{todos.length}</span>
                     {todos.map((todo, idx) => <TodoItem key={idx} todo={todo} />)}
                 </div>
             )
@@ -312,7 +312,7 @@ test("changing state in render should fail", function(t) {
     const data = mobx.observable(2)
     const Comp = observer(() => {
         data(3)
-        return <div>{data()}</div>
+        return <div>{data.get()}</div>
     })
 
     t.throws(
