@@ -77,8 +77,6 @@ const TodoView = observer(({todo}) => <div>{todo.title}</div>)
 
 ### `Observer`
 
-_This feature is still experimental and might change in the next minor release, or be deprecated_
-
 `Observer` is a React component, which applies `observer` to an anonymous region in your component.
 It takes as children a single, argumentless function which should return exactly one React component.
 The rendering in the function will be tracked and automatically re-rendered when needed.
