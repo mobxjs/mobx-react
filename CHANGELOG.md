@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### NEXT
+
+* Reduced module size by 31% (switched to roullup.js)
+
 ### 4.1.8
 
 * Undid change introduced in 4.1.4 where the lifecycle hooks were protected, as this breaks react-hot-loader.... Fixes #231
