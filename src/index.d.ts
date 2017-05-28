@@ -17,6 +17,9 @@ export function observer<P, TFunction extends React.ComponentClass<P | void>>(ta
 export function inject<P>(...stores: string[]): (<TFunction extends IReactComponent<P>>(target: TFunction) => (TFunction & IWrappedComponent<P>)); // decorator signature
 export function inject<T, P>(storesToProps : IStoresToProps<T, P>): (<TFunction extends IReactComponent<T | P>>(target: TFunction) => (TFunction & IWrappedComponent<T>)); // decorator
 
+export function onError(cb: () => void): void;
+export function offError(cb: () => void): void;
+
 // Deprecated: observer with with stores
 export function observer<P>(stores: string[], clazz: IReactComponent<P>): React.ClassicComponentClass<P>;
 export function observer<P>(stores: string[], clazz: React.ClassicComponentClass<P>): React.ClassicComponentClass<P>;

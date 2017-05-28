@@ -34,6 +34,10 @@ import * as propTypes from './propTypes';
 export { propTypes };
 export { propTypes as PropTypes };
 
+import { errorsReporter } from './observer';
+export const onError = (fn) => errorsReporter.on(fn);
+export const offError = (fn) => errorsReporter.removeListener(fn);
+
 export default module.exports;
 
 /* DevTool support */

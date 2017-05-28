@@ -598,6 +598,10 @@ test('206 - @observer should produce usefull errors if it throws', t => {
   const data = observable({x : 1})
   let renderCount = 0;
 
+  const emmitedErrors = [];
+  const handleError = error => emmitedErrors.push(error);
+  observer.onError(handleError);
+
   @observer
   class Child extends React.Component {
     render() {
@@ -624,6 +628,8 @@ test('206 - @observer should produce usefull errors if it throws', t => {
   data.x = 3; // component recovers!
   t.equal(renderCount, 3);
 
+  t.deepEqual(emmitedErrors, [new Error("Oops!")]);
+  observer.offError(handleError);
   t.end();
 });
 
