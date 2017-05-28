@@ -61,16 +61,20 @@ export const componentByNodeRegistery: any;
  */
 export const propTypes: {
     observableArray: React.Requireable<any>;
+    observableArrayOf: (type: React.Validator<any>) => React.Requireable<any>;
     observableMap: React.Requireable<any>;
     observableObject: React.Requireable<any>;
     arrayOrObservableArray: React.Requireable<any>;
+    arrayOrObservableArrayOf: (type: React.Validator<any>) => React.Requireable<any>;
     objectOrObservableObject: React.Requireable<any>;
 }
 
 export const PropTypes: {
     observableArray: React.Requireable<any>;
+    observableArrayOf: (type: React.Validator<any>) => React.Requireable<any>;
     observableMap: React.Requireable<any>;
     observableObject: React.Requireable<any>;
     arrayOrObservableArray: React.Requireable<any>;
+    arrayOrObservableArrayOf: (type: React.Validator<any>) => React.Requireable<any>;
     objectOrObservableObject: React.Requireable<any>;
 }
