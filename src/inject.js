@@ -75,7 +75,7 @@ function grabStoresByName(storeNames) {
       if (storeName in nextProps) // prefer props over stores
         return;
       if (!(storeName in baseStores))
-        throw new Error("MobX observer: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
+        throw new Error("MobX injector: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
       nextProps[storeName] = baseStores[storeName];
     });
     return nextProps;
