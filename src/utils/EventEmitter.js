@@ -15,9 +15,4 @@ export default class EventEmitter {
   emit(data) {
     this.listeners.forEach(fn => fn(data));
   };
-  
-  removeListener(cb) {
-    const idx = this.listeners.indexOf(cb);
-    if (idx > -1) this.listeners.splice(idx, 1);
-  };
 }
