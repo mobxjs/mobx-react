@@ -2,7 +2,7 @@
 
 ### NEXT
 
-* Reduced module size by 31% (switched to roullup.js)
+* Reduced module size by 31% (switched to rollup.js)
 
 ### 4.1.8
 
