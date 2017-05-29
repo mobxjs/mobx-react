@@ -1,11 +1,15 @@
 # MobX-React Changelog
 
-### 4.2.0
+### 4.2.1
 
 * Reduced module size by 31% (switched to rollup.js). See #244 by @rossipedia
 * Skip creation of `.wrappedInstance` reference for stateless components. See #254 by @farwayer
 * Introduced global `onError` handler hook to be notified on errors thrown by `@observer` components. See #262 by @andykog
 * Improved typescript typings of the exposed `propTypes`, See #263 by @panjiesw
+
+### 4.2.0
+
+* Same as 4.2.1, but contained build issue and is unpublished
 
 ### 4.1.8
 
