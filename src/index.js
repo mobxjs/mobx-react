@@ -37,9 +37,9 @@ export { propTypes as PropTypes };
 import { errorsReporter } from './observer';
 export const onError = fn => errorsReporter.on(fn);
 
-export default module.exports;
+export default exports;
 
 /* DevTool support */
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
-  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports, mobx)
+  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(exports, mobx)
 }
