@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 import test from 'tape'
 import mobx, { observable, action, computed} from 'mobx'
-import mobxReact, { observer, inject } from '../'
+import mobxReact, { observer, inject, onError, offError } from '../'
 
 const testRoot = document.createElement('div');
 document.body.appendChild(testRoot);
@@ -598,6 +598,9 @@ test('206 - @observer should produce usefull errors if it throws', t => {
   const data = observable({x : 1})
   let renderCount = 0;
 
+  const emmitedErrors = [];
+  const disposeErrorsHandler = onError(error => emmitedErrors.push(error));
+
   @observer
   class Child extends React.Component {
     render() {
@@ -624,6 +627,8 @@ test('206 - @observer should produce usefull errors if it throws', t => {
   data.x = 3; // component recovers!
   t.equal(renderCount, 3);
 
+  t.deepEqual(emmitedErrors, [new Error("Oops!")]);
+  disposeErrorsHandler();
   t.end();
 });
 

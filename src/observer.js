@@ -58,6 +58,12 @@ export function useStaticRendering(useStaticRendering) {
 }
 
 /**
+ * Errors reporter
+ */
+
+export const errorsReporter = new EventEmitter();
+
+/**
  * Utilities
  */
 
@@ -205,8 +211,10 @@ const reactiveMixin = {
           this.__$mobRenderEnd = Date.now();
         }
       });
-      if (exception)
+      if (exception) {
+        errorsReporter.emit(exception);
         throw exception;
+      }
       return rendering;
     };
 
@@ -311,6 +319,7 @@ export function observer(arg1, arg2) {
   componentClass.isMobXReactObserver = true;
   return componentClass;
 }
+
 
 function mixinLifecycleEvents(target) {
   patch(target, "componentWillMount", true);
