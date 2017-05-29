@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import * as PropTypes from './propTypes';
 import {observer} from './observer';
+import {isStateless} from './utils/utils';
 
 const injectorContextTypes = {
   mobxStores: PropTypes.objectOrObservableObject
@@ -53,7 +54,10 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
       for (let key in additionalProps) {
         newProps[key] = additionalProps[key];
       }
-      newProps.ref = this.storeRef
+
+      if (!isStateless(component)) {
+        newProps.ref = this.storeRef;
+      }
 
       return React.createElement(component, newProps);
     }

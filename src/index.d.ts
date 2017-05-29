@@ -7,7 +7,7 @@ export type IStoresToProps<T, P> = (stores: any, nextProps: P, context:any) => T
 export type IReactComponent<P> = React.StatelessComponent<P> | React.ComponentClass<P>;
 export type IWrappedComponent<P> = {
     wrappedComponent: IReactComponent<P>;
-    wrappedInstance: React.ReactElement<P>;
+    wrappedInstance: React.ReactElement<P> | void;
 }
 
 export function observer<P>(clazz: IReactComponent<P>): React.ClassicComponentClass<P>;
