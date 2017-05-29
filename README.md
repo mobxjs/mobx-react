@@ -105,6 +105,12 @@ React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
+### Global error handler with `onError`
+
+If a component throws an error, this logs to the console but does not 'crash' the app, so it might go unnoticed.
+For this reason it is possible to attach a global error handler using `onError` to intercept any error thrown in the render of an `observer` component.
+This can be used to hook up any client side error collection system.
+
 ### Server Side Rendering with `useStaticRendering`
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.

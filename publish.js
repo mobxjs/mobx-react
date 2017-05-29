@@ -1,8 +1,12 @@
-#!/usr/bin/nscript
+#!./node_modules/.bin/nscript
 /* To run this script, nscript is needed: [sudo] npm install -g nscript
 /* Publish.js, publish a new version of the npm package as found in the current directory */
 module.exports = function(shell, npm, git) {
     var pkg = JSON.parse(shell.read('package.json'));
+
+    // work around; rollup bails out when running npm run build from nscript...
+    if (shell.prompt("Did you run 'npm run buid' first?", "Y") !== "Y")
+        shell.exit(1, "Aborted.");
 
     // Bump version number
     var nrs = pkg.version.split(".");
@@ -20,7 +24,6 @@ module.exports = function(shell, npm, git) {
 
         shell.write('package.json', JSON.stringify(pkg, null, 2));
 
-        // Finally, commit and publish!
         npm("publish");
         git("commit","-am","Published version " + version);
         git("tag", version);

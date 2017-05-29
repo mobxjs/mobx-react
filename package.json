@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "4.1.8",
+  "version": "4.2.0",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "react-native": "native.js",
@@ -17,8 +17,7 @@
     "test:console": "browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec && npm run test:ts",
     "test:open": " open ./test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open",
-    "build": "node build-rollup.js && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
-    "prepublish": "npm run build"
+    "build": "node build-rollup.js && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -43,6 +42,7 @@
     "enzyme": "^2.8.0",
     "lodash": "^4.17.4",
     "mobx": "^3.1.9",
+    "nscript": "^0.1.10",
     "react": "^15.5.3",
     "react-addons-test-utils": "^15.5.1",
     "react-dom": "^15.5.3",
