@@ -40,6 +40,8 @@ export const onError = fn => errorsReporter.on(fn);
 export default exports;
 
 /* DevTool support */
+import { renderReporter, componentByNodeRegistery, trackComponents } from './observer';
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
-  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(exports, mobx)
+  const mobxReact = { renderReporter, componentByNodeRegistery, trackComponents };
+  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(mobxReact, mobx)
 }
