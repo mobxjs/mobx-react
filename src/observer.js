@@ -317,6 +317,7 @@ export function observer(arg1, arg2) {
   const target = componentClass.prototype || componentClass;
   mixinLifecycleEvents(target)
   componentClass.isMobXReactObserver = true;
+  componentClass.displayName = 'Observer(' + (componentClass.displayName || componentClass.name || '<unknown>') + ')';
   return componentClass;
 }
 
