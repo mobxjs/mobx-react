@@ -1,6 +1,12 @@
 # MobX-React Changelog
 
+### 4.2.2
+
+* Fixed check for stateless components, by @leader22, see #280
+
 ### 4.2.1
+
+_Note: Due to pull / rebase issue the release commit is incorrect. This is the released [commit](https://github.com/mobxjs/mobx-react/commit/f1b3eefc5239cb451b317204fa8aad94b4dcfc2f)_
 
 * Reduced module size by 31% (switched to rollup.js). See #244 by @rossipedia
 * Skip creation of `.wrappedInstance` reference for stateless components. See #254 by @farwayer
