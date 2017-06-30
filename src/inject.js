@@ -72,15 +72,47 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
   return Injector;
 }
 
+/**
+ * Parse injection name
+ */
+function parseStoreName(storeName){
+  let storeNameSplited = storeName.split(':');
+  let fromName = storeNameSplited[0];
+  return {
+    fromName:fromName,
+    toName:storeNameSplited[1] || fromName
+  }
+}
+
+
+function objectHasProp(object,propName){
+  if(propName == undefined) return false;
+  let propNames = propName.split('.'),
+  namesLength = propNames.length,
+  curObject = object,
+  curProp;
+  for(let i = 0; i < namesLength; i++){
+    curProp = propNames[i];
+    if(curProp in curObject){
+      curObject = curObject[curProp];
+    }else{
+      return false
+    }
+  }
+  return curObject;
+}
 
 function grabStoresByName(storeNames) {
   return function (baseStores, nextProps) {
     storeNames.forEach(function (storeName) {
-      if (storeName in nextProps) // prefer props over stores
+      let parsedName = parseStoreName(storeName);
+      const{fromName,toName} = parsedName;
+      if(toName in nextProps) // prefer props over stores
         return;
-      if (!(storeName in baseStores))
+      let storeProp = objectHasProp(baseStores,fromName);
+      if (!storeProp)
         throw new Error("MobX injector: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
-      nextProps[storeName] = baseStores[storeName];
+      nextProps[toName] = storeProp;
     });
     return nextProps;
   }
