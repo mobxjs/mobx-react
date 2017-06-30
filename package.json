@@ -10,12 +10,12 @@
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
-    "test": "npm run build && npm run test:console",
+    "test": "npm run build && npm run test:console && npm run test:ts",
     "test:ts": "tsc -p test/ts",
-    "test:build": "browserify -x react/addons -x react-native -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ]",
-    "test:travis": "npm run build && browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run && npm run test:ts",
-    "test:console": "browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/*.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec && npm run test:ts",
-    "test:open": " open ./test/browser/index.html",
+    "test:build": "browserify -x react/addons -x react-native -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/index.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ]",
+    "test:travis": "npm run test",
+    "test:console": "browserify -x react-native -x react/addons -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/index.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ] | tape-run | tap-spec",
+    "test:open": "open ./test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open",
     "build": "node build-rollup.js && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts"
   },

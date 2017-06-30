@@ -4,9 +4,9 @@ import test from 'tape'
 import mobx from 'mobx'
 import { observer } from '../'
 import _ from 'lodash'
+import {createTestRoot} from "./index"
 
-const testRoot = document.createElement('div');
-document.body.appendChild(testRoot);
+const testRoot = createTestRoot();
 let topRenderCount = 0;
 
 const wizardModel = mobx.observable({

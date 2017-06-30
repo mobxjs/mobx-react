@@ -10,9 +10,7 @@ test('observer based context', t => {
     const warns = []
     console.warn = msg => warns.push(msg)
 
-    observer(['test'], createClass({
-      render: () => null
-    }))
+    observer(['test'], () => null)
 
     t.equal(warns.length, 1)
     t.equal(warns[0], 'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`')

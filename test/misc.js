@@ -4,6 +4,9 @@ import { mount, shallow } from 'enzyme'
 import test from 'tape'
 import mobx from 'mobx'
 import { observer } from '../'
+import {createTestRoot} from "./index"
+
+const testRoot = createTestRoot();
 
 test('custom shouldComponentUpdate is not respected for observable changes (#50)', t => {
   let called = 0;
@@ -91,8 +94,6 @@ test('issue mobx 405', t => {
 });
 
 test('#85 Should handle state changing in constructors', function(t) {
-  const testRoot = document.createElement('div');
-  document.body.appendChild(testRoot);
   const a = mobx.observable(2);
   const Child = observer(createClass({
     displayName: 'Child',

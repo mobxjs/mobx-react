@@ -4,6 +4,9 @@ import { mount } from 'enzyme'
 import test from 'tape'
 import mobx, { action, observable, computed } from 'mobx'
 import { observer, inject, Provider } from '../'
+import {createTestRoot} from "./index"
+
+const testRoot = createTestRoot();
 
 test('inject based context', t => {
   test('basic context', t => {
@@ -313,9 +316,6 @@ test('inject based context', t => {
   });
 
   test('using a custom injector is not too reactive', t => {
-    const testRoot = document.createElement('div');
-    document.body.appendChild(testRoot);
-
     let listRender = 0;
     let itemRender = 0;
     let injectRender = 0;

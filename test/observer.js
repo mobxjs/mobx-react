@@ -4,9 +4,9 @@ import ReactDOMServer from 'react-dom/server'
 import test from 'tape'
 import mobx, { observable, action, computed} from 'mobx'
 import mobxReact, { observer, inject, onError, offError } from '../'
+import {createTestRoot} from "./index"
 
-const testRoot = document.createElement('div');
-document.body.appendChild(testRoot);
+const testRoot = createTestRoot();
 
 const store = mobx.observable({
   todos: [{

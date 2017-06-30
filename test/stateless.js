@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom'
 import test from 'tape'
 import mobx from 'mobx'
 import { observer, propTypes } from '../'
+import {createTestRoot} from "./index"
+
+const testRoot = createTestRoot();
 
 const stateLessComp = ({testProp}) => <div>result: { testProp }</div>
 
@@ -13,8 +16,6 @@ stateLessComp.defaultProps = {
   testProp: 'default value for prop testProp'
 }
 
-const testRoot = document.createElement('div');
-document.body.appendChild(testRoot);
 
 test('stateless component with propTypes', t => {
   const StatelessCompObserver = observer(stateLessComp);
@@ -46,7 +47,7 @@ test('stateless component with context support', t => {
     render: () => <StateLessCompWithContextObserver />
   })
   ReactDOM.render(<ContextProvider />, testRoot, () => {
-    t.equal(testRoot.innerText, 'context: hello world');
+    t.equal(testRoot.innerText.replace(/\n/,""), 'context: hello world');
     t.end();
   });
 });

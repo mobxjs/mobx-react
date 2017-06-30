@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom'
 import test from 'tape'
 import mobx from 'mobx'
 import mobxReact from '../'
+import {createTestRoot} from "./index"
 
 test('mobx issue 50', t => {
-	const testRoot = document.createElement('div');
-	document.body.appendChild(testRoot);
+	const testRoot = createTestRoot();
 	const foo = {
 		a: mobx.observable(true),
 		b: mobx.observable(false),
@@ -43,8 +43,7 @@ test('mobx issue 50', t => {
 });
 
 test('React.render should respect transaction', t => {
-	const testRoot = document.createElement('div');
-	document.body.appendChild(testRoot);
+	const testRoot = createTestRoot();
 	const a = mobx.observable(2);
 	const loaded = mobx.observable(false);
 	const valuesSeen = [];
@@ -73,8 +72,7 @@ test('React.render should respect transaction', t => {
 });
 
 test('React.render in transaction should succeed', t => {
-	const testRoot = document.createElement('div');
-	document.body.appendChild(testRoot);
+	const testRoot = createTestRoot();
 	const a = mobx.observable(2);
 	const loaded = mobx.observable(false);
 	const valuesSeen = [];
