@@ -4,9 +4,7 @@
 module.exports = function(shell, npm, git) {
     var pkg = JSON.parse(shell.read('package.json'));
 
-    // work around; rollup bails out when running npm run build from nscript...
-    if (shell.prompt("Did you run 'npm run buid' first?", "Y") !== "Y")
-        shell.exit(1, "Aborted.");
+    npm("run", "build")
 
     // Bump version number
     var nrs = pkg.version.split(".");

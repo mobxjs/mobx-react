@@ -1,5 +1,4 @@
 var path = require('path');
-var progress = require('rollup-plugin-progress');
 var filesize = require('rollup-plugin-filesize');
 var babel = require('rollup-plugin-babel');
 
@@ -80,7 +79,7 @@ function build(target, minify) {
     );
   }
 
-  plugins.push(progress(), filesize());
+  plugins.push(filesize());
 
   var trueFn = function() {
     return true;
