@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import EventEmitter from './utils/EventEmitter';
 import * as PropTypes from './propTypes';
 import inject from './inject';
+import empty from '../empty';
 
 /**
  * dev tool support
@@ -19,7 +20,7 @@ export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new Wea
 export const renderReporter = new EventEmitter();
 
 function findDOMNode(component) {
-  if (ReactDOM) {
+  if (ReactDOM !== empty) {
     try {
       return ReactDOM.findDOMNode(component);
     } catch (e) {
