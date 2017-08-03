@@ -4,3 +4,8 @@ publish.js
 *.patch
 src
 webpack.config.js
+*.html
+README.md
+build-rollup.js
+CHANGELOG.md
+.vscode
