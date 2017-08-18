@@ -4,3 +4,6 @@ publish.js
 *.patch
 src
 webpack.config.js
+*.html
+build-rollup.js
+.vscode
