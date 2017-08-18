@@ -19,7 +19,7 @@ export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new Wea
 export const renderReporter = new EventEmitter();
 
 function findDOMNode(component) {
-  if (ReactDOM) {
+  if (ReactDOM && ReactDOM.findDOMNode) {
     try {
       return ReactDOM.findDOMNode(component);
     } catch (e) {
