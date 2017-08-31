@@ -189,6 +189,7 @@ const reactiveMixin = {
           }
         }
       });
+      reaction.reactComponent = this;
       reactiveRender.$mobx = reaction;
       this.render = reactiveRender;
       return reactiveRender();
