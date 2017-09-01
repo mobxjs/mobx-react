@@ -199,6 +199,15 @@ const reactiveMixin = {
       isRenderingPending = false;
       let exception = undefined;
       let rendering = undefined;
+
+      if (_this.$mobx) {
+        const state = {};
+        for (let [key, value] of Object.entries(_this.$mobx.values)) {
+          state[key] = value.value;
+        }
+        _this.state = Object.assign({}, _this.state, state);
+       }
+
       reaction.track(() => {
         if (isDevtoolsEnabled) {
           this.__$mobRenderStart = Date.now();
