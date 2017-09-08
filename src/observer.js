@@ -117,14 +117,14 @@ const reactiveMixin = {
         const rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID
 
         /**
-     * If props are shallowly modified, react will render anyway,
-     * so atom.reportChanged() should not result in yet another re-render
-     */
+         * If props are shallowly modified, react will render anyway,
+         * so atom.reportChanged() should not result in yet another re-render
+         */
         let skipRender = false
         /**
-     * forceUpdate will re-assign this.props. We don't want that to cause a loop,
-     * so detect these changes
-     */
+         * forceUpdate will re-assign this.props. We don't want that to cause a loop,
+         * so detect these changes
+         */
         let isForcingUpdate = false
 
         function makePropertyObservableReference(propName) {
