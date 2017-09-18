@@ -14,7 +14,7 @@ var {rollup} = require('rollup');
 var reactDomModulePath = require.resolve('react-dom');
 var emptyModulePath = path.resolve(__dirname, 'empty.js');
 
-function build(target, filename, minify) {
+function build(target, mode, filename) {
   var namedExports = {};
   namedExports[emptyModulePath] = ['unstable_batchedUpdates'];
   namedExports[reactDomModulePath] = ['unstable_batchedUpdates'];
@@ -54,7 +54,7 @@ function build(target, filename, minify) {
     }),
   ];
 
-  if (minify) {
+  if (mode.endsWith('.min')) {
     plugins.push(
       uglify({
         compressor: {
@@ -91,8 +91,9 @@ function build(target, filename, minify) {
     plugins: plugins,
   })
     .then(function(bundle) {
-
-      var baseOptions = {
+      var options = {
+        dest: path.resolve(__dirname, filename),
+        format: mode.endsWith(".min") ? mode.slice(0, -".min".length) : mode,
         moduleName: 'mobxReact',
         exports: 'named',
         globals: {
@@ -103,19 +104,7 @@ function build(target, filename, minify) {
         },
       };
 
-      var options = [];
-      options.push(Object.assign({}, baseOptions, {
-        format: 'umd',
-        dest: path.resolve(__dirname, filename + (minify ? '.min.js' : '.js'))
-      }));
-      if (!minify) {
-        options.push(Object.assign({}, baseOptions, {
-          format: 'es',
-          dest: path.resolve(__dirname, filename + '.module.js')
-        }));
-      }
-
-      return Promise.all(options.map(function(option) { return bundle.write(option); }));
+      return bundle.write(options);
     })
     .catch(function(reason) {
       console.error(reason);
@@ -124,8 +113,10 @@ function build(target, filename, minify) {
 }
 
 Promise.all([
-    build('browser', 'index'),
-    build('native', 'native'),
-    build('custom', 'custom'),
-    build('browser', 'index', true),
+    build('browser', 'umd', 'index.js'),
+    build('browser', 'umd.min', 'index.min.js'),
+    build('browser', 'es', 'index.module.js'),
+    build('native', 'es', 'native.js'),
+    build('custom', 'umd', 'custom.js'),
+    build('custom', 'es', 'custom.module.js')
 ]);
