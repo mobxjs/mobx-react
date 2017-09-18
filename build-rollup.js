@@ -14,21 +14,7 @@ var {rollup} = require('rollup');
 var reactDomModulePath = require.resolve('react-dom');
 var emptyModulePath = path.resolve(__dirname, 'empty.js');
 
-function build(target, minify) {
-  var targetExt = minify ? '.min.js' : '.js';
-  var filename = (function() {
-    switch (target) {
-      case 'browser':
-        return 'index' + targetExt;
-      case 'native':
-        return 'native' + targetExt;
-      case 'custom':
-        return 'custom' + targetExt;
-      default:
-        throw new Error('Unexpected target: ' + target);
-    }
-  })();
-
+function build(target, filename, minify) {
   var namedExports = {};
   namedExports[emptyModulePath] = ['unstable_batchedUpdates'];
   namedExports[reactDomModulePath] = ['unstable_batchedUpdates'];
@@ -105,9 +91,8 @@ function build(target, minify) {
     plugins: plugins,
   })
     .then(function(bundle) {
-      var options = {
-        dest: path.resolve(__dirname, filename),
-        format: 'umd',
+
+      var baseOptions = {
         moduleName: 'mobxReact',
         exports: 'named',
         globals: {
@@ -118,7 +103,19 @@ function build(target, minify) {
         },
       };
 
-      return bundle.write(options);
+      var options = [];
+      options.push(Object.assign({}, baseOptions, {
+        format: 'umd',
+        dest: path.resolve(__dirname, filename + (minify ? '.min.js' : '.js'))
+      }));
+      if (!minify) {
+        options.push(Object.assign({}, baseOptions, {
+          format: 'es',
+          dest: path.resolve(__dirname, filename + '.module.js')
+        }));
+      }
+
+      return Promise.all(options.map(function(option) { return bundle.write(option); }));
     })
     .catch(function(reason) {
       console.error(reason);
@@ -126,8 +123,9 @@ function build(target, minify) {
     });
 }
 
-build('browser')
-  .then(build('native'))
-  .then(build('custom'))
-  .then(build('browser', true))
-  ;
+Promise.all([
+    build('browser', 'index'),
+    build('native', 'native'),
+    build('custom', 'custom'),
+    build('browser', 'index', true),
+]);
