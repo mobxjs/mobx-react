@@ -115,8 +115,8 @@ function build(target, mode, filename) {
 Promise.all([
     build('browser', 'umd', 'index.js'),
     build('browser', 'umd.min', 'index.min.js'),
-    build('browser', 'es', 'index.module.js'),
+    build('browser', 'es', 'index.mjs'),
     build('native', 'es', 'native.js'),
     build('custom', 'umd', 'custom.js'),
-    build('custom', 'es', 'custom.module.js')
+    build('custom', 'es', 'custom.mjs')
 ]);
