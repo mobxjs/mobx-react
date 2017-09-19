@@ -2,7 +2,6 @@ import { Atom, Reaction, extras } from "mobx"
 import React, { Component } from "react"
 import ReactDOM from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
-import * as PropTypes from "./propTypes"
 import inject from "./inject"
 
 /**
