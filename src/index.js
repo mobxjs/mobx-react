@@ -1,5 +1,5 @@
 import {extras, spy} from 'mobx';
-import React from 'react';
+import { Component } from 'react';
 import {unstable_batchedUpdates as rdBatched} from 'react-dom';
 import {unstable_batchedUpdates as rnBatched} from 'react-native';
 
@@ -8,7 +8,7 @@ if (__TARGET__ === 'browser') TARGET_LIB_NAME = 'mobx-react';
 if (__TARGET__ === 'native') TARGET_LIB_NAME = 'mobx-react/native';
 if (__TARGET__ === 'custom') TARGET_LIB_NAME = 'mobx-react/custom';
 
-if (!React)
+if (!Component)
   throw new Error(TARGET_LIB_NAME + ' requires React to be available');
 
 if (__TARGET__ === 'browser' && typeof rdBatched === "function")
