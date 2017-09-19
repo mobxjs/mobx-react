@@ -32,8 +32,6 @@ export { propTypes as PropTypes }
 import { errorsReporter } from "./observer"
 export const onError = fn => errorsReporter.on(fn)
 
-export default exports
-
 /* DevTool support */
 // See: https://github.com/andykog/mobx-devtools/blob/d8976c24b8cb727ed59f9a0bc905a009df79e221/src/backend/installGlobalHook.js
 

@@ -3,7 +3,7 @@ import ReactDOM from "react-dom"
 import ReactDOMServer from "react-dom/server"
 import test from "tape"
 import mobx, { observable, action, computed } from "mobx"
-import mobxReact, { observer, inject, onError, offError } from "../"
+import { observer, inject, onError, offError, useStaticRendering, Observer } from "../"
 import { createTestRoot } from "./index"
 
 const testRoot = createTestRoot()
@@ -197,7 +197,7 @@ test("componentWillMount from mixin is run first", t => {
 })
 
 test("does not views alive when using static rendering", t => {
-    mobxReact.useStaticRendering(true)
+    useStaticRendering(true)
 
     let renderCount = 0
     const data = mobx.observable({
@@ -224,14 +224,14 @@ test("does not views alive when using static rendering", t => {
 
             t.equal(getDNode(data, "z").observers.length, 0)
 
-            mobxReact.useStaticRendering(false)
+            useStaticRendering(false)
             t.end()
         }, 100)
     })
 })
 
 test("does not views alive when using static + string rendering", function(test) {
-    mobxReact.useStaticRendering(true)
+    useStaticRendering(true)
 
     let renderCount = 0
     const data = mobx.observable({
@@ -253,7 +253,7 @@ test("does not views alive when using static + string rendering", function(test)
 
         test.equal(getDNode(data, "z").observers.length, 0)
 
-        mobxReact.useStaticRendering(false)
+        useStaticRendering(false)
         test.end()
     }, 100)
 })
@@ -572,7 +572,6 @@ test("it rerenders correctly if some props are non-observables - 2", t => {
 
 test("Observer regions should react", t => {
     const data = mobx.observable("hi")
-    const Observer = mobxReact.Observer
     const Comp = () => (
         <div>
             <Observer>{() => <span>{data.get()}</span>}</Observer>

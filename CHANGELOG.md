@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+### 4.3.2
+
+Killed accidentally exposed default exports.
+
+If you are still using `import mobxReact from "mobx-react"`, use `import * as mobxReact from "mobx-react"`, or better `import { whatYouNeed } from "mobx-react"` instead.
+
 ### 4.3.1
 ### 4.3.0 (unpublished)
 

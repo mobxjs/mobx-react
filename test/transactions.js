@@ -2,7 +2,7 @@ import React, { createClass } from "react"
 import ReactDOM from "react-dom"
 import test from "tape"
 import mobx from "mobx"
-import mobxReact from "../"
+import * as mobxReact from "../"
 import { createTestRoot } from "./index"
 
 test("mobx issue 50", t => {
