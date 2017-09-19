@@ -3,17 +3,14 @@ import { Component } from 'react';
 import {unstable_batchedUpdates as rdBatched} from 'react-dom';
 import {unstable_batchedUpdates as rnBatched} from 'react-native';
 
-let TARGET_LIB_NAME;
-if (__TARGET__ === 'browser') TARGET_LIB_NAME = 'mobx-react';
-if (__TARGET__ === 'native') TARGET_LIB_NAME = 'mobx-react/native';
-if (__TARGET__ === 'custom') TARGET_LIB_NAME = 'mobx-react/custom';
-
 if (!Component)
-  throw new Error(TARGET_LIB_NAME + ' requires React to be available');
+  throw new Error('mobx-react requires React to be available');
+if (!extras)
+  throw new Error('mobx-react requires mobx to be available');
 
-if (__TARGET__ === 'browser' && typeof rdBatched === "function")
+if (typeof rdBatched === "function")
   extras.setReactionScheduler(rdBatched);
-if (__TARGET__ === 'native' && typeof rnBatched === "function")
+else if (typeof rnBatched === "function")
   extras.setReactionScheduler(rnBatched);
 
 export {
@@ -38,6 +35,7 @@ export const onError = fn => errorsReporter.on(fn)
 export default exports
 
 /* DevTool support */
+// MWE: is any tool still using this? Seems it can be killed
 import { renderReporter, componentByNodeRegistery, trackComponents } from './observer';
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
   const mobx = { spy, extras };

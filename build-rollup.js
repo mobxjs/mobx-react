@@ -5,7 +5,6 @@ var babel = require('rollup-plugin-babel');
 var commonjs = require('rollup-plugin-commonjs');
 var resolve = require('rollup-plugin-node-resolve');
 
-var replace = require('rollup-plugin-replace');
 var uglify = require('rollup-plugin-uglify');
 var alias = require('rollup-plugin-alias');
 
@@ -14,36 +13,38 @@ var {rollup} = require('rollup');
 var reactDomModulePath = require.resolve('react-dom');
 var emptyModulePath = path.resolve(__dirname, 'empty.js');
 
+function getExternals(target) {
+    switch (target) {
+        case "browser": return ["react", "mobx", "react-dom"]
+        case "native": return  ["react", "mobx", "react-native"]
+        case "custom": return  ["react", "mobx"]
+    }
+}
+
+function getAliases(target) {
+    switch (target) {
+        case "browser": return { "react-native": emptyModulePath }
+        case "native": return { "react-dom": emptyModulePath }
+        case "custom": return { "react-native": emptyModulePath, "react-dom": emptyModulePath }
+    }
+}
+
 function build(target, mode, filename) {
-  var namedExports = {};
-  namedExports[emptyModulePath] = ['unstable_batchedUpdates', 'findDOMNode'];
+  let externals;
+  let aliases;
 
   var plugins = [
-    replace({
-      __TARGET__: JSON.stringify(target),
-    }),
+    alias(getAliases(target)),
     babel({
       exclude: 'node_modules/**',
       presets: ['es2015-rollup', 'react'],
       plugins: ['transform-decorators-legacy', 'transform-class-properties'],
     }),
-    alias({
-      'react-dom': emptyModulePath,
-      'react-native': emptyModulePath,
-    }),
     resolve({
       module: true,
       main: true,
     }),
-    commonjs({
-      exclude: [
-        'node_modules/react/**',
-        'node_modules/react-dom/**',
-        'node_modules/react-native/**',
-        'node_modules/mobx/**',
-      ],
-      namedExports: namedExports,
-    }),
+    commonjs(),
   ];
 
   if (mode.endsWith('.min')) {
@@ -59,27 +60,9 @@ function build(target, mode, filename) {
 
   plugins.push(filesize());
 
-  var trueFn = function() {
-    return true;
-  };
-  var falseFn = function() {
-    return false;
-  };
-
   return rollup({
     entry: 'src/index.js',
-    external: function(moduleId) {
-      return ({
-        react: trueFn,
-        'react-dom': function() {
-          return target === 'browser';
-        },
-        'react-native': function() {
-          return target === 'native';
-        },
-        mobx: trueFn,
-      }[moduleId] || falseFn)();
-    },
+    external: getExternals(target),
     plugins: plugins,
   })
     .then(function(bundle) {

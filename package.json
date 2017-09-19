@@ -59,7 +59,6 @@
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-filesize": "^1.2.1",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-replace": "^1.1.1",
     "rollup-plugin-uglify": "^1.0.1",
     "tap-spec": "^4.1.1",
     "tape": "^4.2.2",
