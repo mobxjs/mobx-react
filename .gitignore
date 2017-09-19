@@ -12,5 +12,8 @@
 /index.min.js
 /.vscode
 /.idea
+/*.iml
+/*.ipr
+/*.iws
 /test/browser/test_bundle.js
 /.source.*
