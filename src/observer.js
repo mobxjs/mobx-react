@@ -2,7 +2,6 @@ import {Atom, Reaction, extras} from 'mobx';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import EventEmitter from './utils/EventEmitter';
-import * as PropTypes from './propTypes';
 import inject from './inject';
 
 /**
@@ -174,7 +173,7 @@ const reactiveMixin = {
           if (this.__$mobxIsUnmounted !== true) {
             // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
             // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
-            // However, people also claim this migth happen during unit tests..
+            // However, people also claim this might happen during unit tests..
             let hasError = true;
             try {
               isForcingUpdate = true;
