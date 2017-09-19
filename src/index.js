@@ -35,7 +35,8 @@ export const onError = fn => errorsReporter.on(fn)
 export default exports
 
 /* DevTool support */
-// MWE: is any tool still using this? Seems it can be killed
+// See: https://github.com/andykog/mobx-devtools/blob/d8976c24b8cb727ed59f9a0bc905a009df79e221/src/backend/installGlobalHook.js
+
 import { renderReporter, componentByNodeRegistery, trackComponents } from './observer';
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
   const mobx = { spy, extras };

@@ -4,11 +4,11 @@
 /native.js
 /native.d.ts
 /custom.js
-/custom.mjs
+/custom.module.js
 /custom.d.ts
 /test/custom.d.ts
 /index.js
-/index.mjs
+/index.module.js
 /index.min.js
 /index.d.ts
 /test/index.d.ts
