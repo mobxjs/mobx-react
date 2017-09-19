@@ -1,20 +1,17 @@
-import * as mobx from "mobx"
-import React from "react"
-import { unstable_batchedUpdates as rdBatched } from "react-dom"
-import { unstable_batchedUpdates as rnBatched } from "react-native"
+import {extras, spy} from 'mobx';
+import { Component } from 'react';
+import {unstable_batchedUpdates as rdBatched} from 'react-dom';
+import {unstable_batchedUpdates as rnBatched} from 'react-native';
 
-let TARGET_LIB_NAME
-if (__TARGET__ === "browser") TARGET_LIB_NAME = "mobx-react"
-if (__TARGET__ === "native") TARGET_LIB_NAME = "mobx-react/native"
-if (__TARGET__ === "custom") TARGET_LIB_NAME = "mobx-react/custom"
+if (!Component)
+  throw new Error('mobx-react requires React to be available');
+if (!extras)
+  throw new Error('mobx-react requires mobx to be available');
 
-if (!mobx) throw new Error(TARGET_LIB_NAME + " requires the MobX package")
-if (!React) throw new Error(TARGET_LIB_NAME + " requires React to be available")
-
-if (__TARGET__ === "browser" && typeof rdBatched === "function")
-    mobx.extras.setReactionScheduler(rdBatched)
-if (__TARGET__ === "native" && typeof rnBatched === "function")
-    mobx.extras.setReactionScheduler(rnBatched)
+if (typeof rdBatched === "function")
+  extras.setReactionScheduler(rdBatched);
+else if (typeof rnBatched === "function")
+  extras.setReactionScheduler(rnBatched);
 
 export {
     observer,
@@ -38,8 +35,11 @@ export const onError = fn => errorsReporter.on(fn)
 export default exports
 
 /* DevTool support */
-import { renderReporter, componentByNodeRegistery, trackComponents } from "./observer"
-if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === "object") {
-    const mobxReact = { renderReporter, componentByNodeRegistery, trackComponents }
-    __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(mobxReact, mobx)
+// See: https://github.com/andykog/mobx-devtools/blob/d8976c24b8cb727ed59f9a0bc905a009df79e221/src/backend/installGlobalHook.js
+
+import { renderReporter, componentByNodeRegistery, trackComponents } from './observer';
+if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
+  const mobx = { spy, extras };
+  const mobxReact = { renderReporter, componentByNodeRegistery, trackComponents };
+  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(mobxReact, mobx);
 }

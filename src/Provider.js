@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import { Children, Component } from "react"
 import * as PropTypes from "./propTypes"
 
 const specialReactKeys = { children: true, key: true, ref: true }
@@ -13,7 +13,7 @@ export default class Provider extends Component {
     }
 
     render() {
-        return React.Children.only(this.props.children)
+        return Children.only(this.props.children)
     }
 
     getChildContext() {
