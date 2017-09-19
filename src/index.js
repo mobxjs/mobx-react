@@ -17,25 +17,25 @@ if (__TARGET__ === 'native' && typeof rnBatched === "function")
   extras.setReactionScheduler(rnBatched);
 
 export {
-  observer,
-  Observer,
-  renderReporter,
-  componentByNodeRegistery,
-  trackComponents,
-  useStaticRendering
-} from './observer';
+    observer,
+    Observer,
+    renderReporter,
+    componentByNodeRegistery,
+    trackComponents,
+    useStaticRendering
+} from "./observer"
 
-export { default as Provider } from './Provider';
-export { default as inject } from './inject';
+export { default as Provider } from "./Provider"
+export { default as inject } from "./inject"
 
-import * as propTypes from './propTypes';
-export { propTypes };
-export { propTypes as PropTypes };
+import * as propTypes from "./propTypes"
+export { propTypes }
+export { propTypes as PropTypes }
 
-import { errorsReporter } from './observer';
-export const onError = fn => errorsReporter.on(fn);
+import { errorsReporter } from "./observer"
+export const onError = fn => errorsReporter.on(fn)
 
-export default exports;
+export default exports
 
 /* DevTool support */
 import { renderReporter, componentByNodeRegistery, trackComponents } from './observer';

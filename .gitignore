@@ -14,5 +14,9 @@
 /test/index.d.ts
 /.vscode
 /.idea
+/*.iml
+/*.ipr
+/*.iws
 /test/browser/test_bundle.js
 /.source.*
+yarn-error.log
