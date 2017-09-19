@@ -1,6 +1,7 @@
 # MobX-React Changelog
 
-### 4.3.0
+### 4.3.1
+### 4.3.0 (unpublished)
 
 Improved module rollup setup, enabling better tree shaking. See #324 / #328
 
