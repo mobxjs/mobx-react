@@ -16,15 +16,7 @@ var emptyModulePath = path.resolve(__dirname, 'empty.js');
 
 function build(target, mode, filename) {
   var namedExports = {};
-  namedExports[emptyModulePath] = ['unstable_batchedUpdates'];
-  namedExports[reactDomModulePath] = ['unstable_batchedUpdates'];
-
-  var aliases = {};
-
-  if (target === 'native' || target === 'custom')
-    aliases['react-dom'] = emptyModulePath;
-  if (target === 'browser' || target === 'custom')
-    aliases['react-native'] = emptyModulePath;
+  namedExports[emptyModulePath] = ['unstable_batchedUpdates', 'findDOMNode'];
 
   var plugins = [
     replace({
