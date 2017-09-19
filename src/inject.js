@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import { Component, createElement } from "react"
 import hoistStatics from "hoist-non-react-statics"
 import * as PropTypes from "./propTypes"
 import { observer } from "./observer"
@@ -68,7 +68,7 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
                 newProps.ref = this.storeRef
             }
 
-            return React.createElement(component, newProps)
+            return createElement(component, newProps)
         }
     }
 

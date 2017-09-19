@@ -1,6 +1,6 @@
 import { Atom, Reaction, extras } from "mobx"
-import React, { Component } from "react"
-import ReactDOM from "react-dom"
+import { Component } from "react"
+import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
 
@@ -18,9 +18,9 @@ export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new Wea
 export const renderReporter = new EventEmitter()
 
 function findDOMNode(component) {
-    if (ReactDOM && ReactDOM.findDOMNode) {
+    if (baseFindDOMNode) {
         try {
-            return ReactDOM.findDOMNode(component)
+            return baseFindDOMNode(component)
         } catch (e) {
             // findDOMNode will throw in react-test-renderer, see:
             // See https://github.com/mobxjs/mobx-react/issues/216
@@ -174,7 +174,7 @@ const reactiveMixin = {
                         let hasError = true
                         try {
                             isForcingUpdate = true
-                            if (!skipRender) React.Component.prototype.forceUpdate.call(this)
+                            if (!skipRender) Component.prototype.forceUpdate.call(this)
                             hasError = false
                         } finally {
                             isForcingUpdate = false
@@ -300,7 +300,7 @@ export function observer(arg1, arg2) {
         typeof componentClass === "function" &&
         (!componentClass.prototype || !componentClass.prototype.render) &&
         !componentClass.isReactClass &&
-        !React.Component.isPrototypeOf(componentClass)
+        !Component.isPrototypeOf(componentClass)
     ) {
         return observer(
             class extends Component {
