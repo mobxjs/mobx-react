@@ -3,6 +3,7 @@
   "version": "4.2.2",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
+  "jsnext:main": "index.mjs",
   "module": "index.mjs",
   "react-native": "native.js",
   "typings": "index",
