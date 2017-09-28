@@ -33,7 +33,7 @@ test("stateless component with propTypes", t => {
     t.equal(beenWarned, true, "an error should be logged with a property type warning")
 
     ReactDOM.render(<StatelessCompObserver testProp="hello world" />, testRoot, function() {
-        t.equal(testRoot.innerText, "result: hello world")
+        t.equal(testRoot.innerText.trim(), "result: hello world")
         t.end()
     })
 })

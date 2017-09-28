@@ -462,10 +462,14 @@ test("should render component even if setState called with exactly the same prop
     ReactDOM.render(<Component />, testRoot, () => {
         t.equal(renderCount, 1, "renderCount === 1")
         testRoot.querySelector("#clickableDiv").click()
-        t.equal(renderCount, 2, "renderCount === 2")
-        testRoot.querySelector("#clickableDiv").click()
-        t.equal(renderCount, 3, "renderCount === 3")
-        t.end()
+        setTimeout(()=> {
+            t.equal(renderCount, 2, "renderCount === 2")
+            testRoot.querySelector("#clickableDiv").click()
+            setTimeout(() => {
+                t.equal(renderCount, 3, "renderCount === 3")
+                t.end()
+            }, 10)
+        }, 10)
     })
 })
 

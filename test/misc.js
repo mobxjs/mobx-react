@@ -124,12 +124,16 @@ test("#85 Should handle state changing in constructors", function(t) {
         )
     })
     ReactDOM.render(<ParentWrapper />, testRoot, () => {
-        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:3 - parent:3")
+        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:3 - parent:2")
         a.set(5)
-        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:5 - parent:5")
-        a.set(7)
-        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:7 - parent:7")
-        testRoot.parentNode.removeChild(testRoot)
-        t.end()
+        setTimeout(() => {
+            t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:5 - parent:5")
+            a.set(7)
+            setTimeout(() => {
+                t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:7 - parent:7")
+                testRoot.parentNode.removeChild(testRoot)
+                t.end()
+            }, 10)
+        }, 10)
     })
 })
