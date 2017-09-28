@@ -1,5 +1,6 @@
 import React from "react";
 
+// FIXME: saddly, this does not work as hoped, see: https://github.com/facebook/react/issues/10474#issuecomment-332810203
 export default class ErrorCatcher extends React.Component {
   constructor(props) {
     super(props);

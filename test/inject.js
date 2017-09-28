@@ -91,7 +91,8 @@ test("inject based context", t => {
         t.end()
     })
 
-    // TODO: fix for React 16
+    // FIXME: see other comments related to error catching in React
+    // test does work as expected when running manually
     test.skip("store should be available", t => {
         const C = inject("foo")(
             observer(
