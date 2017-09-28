@@ -690,7 +690,7 @@ test("parent / childs render in the right order", t => {
     t.end()
 })
 
-// TODO: fix for React 16
+// FIXME: test seems to work correctly, but errors cannot tested atm with DOM rendering
 test.skip("206 - @observer should produce usefull errors if it throws", t => {
     const data = observable({ x: 1 })
     let renderCount = 0

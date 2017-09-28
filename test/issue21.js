@@ -1,4 +1,4 @@
-import React, { createElement, DOM } from "react"
+import React, { createElement } from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import test from "tape"
@@ -50,7 +50,7 @@ const Wizard = observer(
     createClass({
         displayName: "Wizard",
         render() {
-            return DOM.div(
+            return createElement("div",
                 null,
                 <div>
                     <h1>Active Step: </h1>
@@ -77,9 +77,9 @@ const WizardSteps = observer(
         },
         render() {
             var steps = _.map(this.props.steps, step =>
-                DOM.div({ key: step.title }, <WizardStep step={step} key={step.title} />)
+                createElement("div", { key: step.title }, <WizardStep step={step} key={step.title} />)
             )
-            return DOM.div(null, steps)
+            return createElement("div", null, steps)
         }
     })
 )
@@ -98,7 +98,7 @@ const WizardStep = observer(
             if (this.props.tester === true) {
                 topRenderCount++
             }
-            return DOM.div(
+            return createElement("div",
                 { onClick: this.modeClickHandler },
                 "RenderCount: " +
                     this.renderCount++ +
@@ -119,8 +119,7 @@ const WizardStep = observer(
 
 const changeStep = stepNumber => wizardModel.setActiveStep(wizardModel.steps[stepNumber])
 
-// TODO: fix for React 16
-test.skip("verify issue 21", t => {
+test.only("verify issue 21", t => {
     t.plan(3)
     ReactDOM.render(<Wizard model={wizardModel} />, testRoot, () => {
         t.equal(topRenderCount, 1)
