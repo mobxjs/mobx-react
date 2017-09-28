@@ -310,24 +310,25 @@ test("issue 12", function(t) {
     })
 })
 
-// FIXME: this test works correct, the boundary catches the correct error.
-// But somehow React also rethrows the exception uncaught, causing the test runner to die...
-test.skip("changing state in render should fail", function(t) {
+test("changing state in render should fail", function(t) {
+    t.plan(1)
     const data = mobx.observable(2)
     const Comp = observer(() => {
         if (data.get() === 3) {
-            data.set(4) // wouldn't throw first time for lack of observers.. (could we tighten this?)
+            try {
+                data.set(4) // wouldn't throw first time for lack of observers.. (could we tighten this?)
+            } catch(err) {
+                t.true(/Side effects like changing state are not allowed at this point/.test(err), "Unexpected error: " + err)
+            }
         }
         return <div>{data.get()}</div>
     })
 
-    ReactDOM.render(<Comp />, testRoot, () => {
+    ReactDOM.render(<ErrorCatcher><Comp /></ErrorCatcher> , testRoot, () => {
         data.set(3) // cause throw
         setTimeout(()=> {
-            const err = ErrorCatcher.getError()
-            t.true(/Side effects like changing state are not allowed at this point/.test(err), "Unexpected error: " + err)
             mobx.extras.resetGlobalState()
-            t2.end()
+            t.end()
         }, 200)
     })
 })
