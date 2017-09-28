@@ -136,7 +136,7 @@ class T13 extends Component<{ pizza: number }, {}> {
     store: {},
 }))
 @observer
-class LoginContainer extends Component<any, void> {
+class LoginContainer extends Component<{}, {}> {
     static contextTypes: React.ValidationMap<any> = {
         router: PropTypes.func.isRequired,
     }
@@ -155,7 +155,7 @@ class ObserverTest extends Component<any, any> {
 }
 
 @observer
-class ComponentWithoutPropsAndState extends Component<void, void> {
+class ComponentWithoutPropsAndState extends Component<{}, {}> {
     componentDidUpdate() {
     }
 
