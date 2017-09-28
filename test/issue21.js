@@ -119,7 +119,7 @@ const WizardStep = observer(
 
 const changeStep = stepNumber => wizardModel.setActiveStep(wizardModel.steps[stepNumber])
 
-test.only("verify issue 21", t => {
+test("verify issue 21", t => {
     t.plan(3)
     ReactDOM.render(<Wizard model={wizardModel} />, testRoot, () => {
         t.equal(topRenderCount, 1)
