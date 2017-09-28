@@ -256,7 +256,6 @@ test("inject based context", t => {
 
         const wrapper = mount(<C booh={42} />)
         setTimeout(() => {
-            debugger;
             t.equal(wrapper.instance().wrappedInstance.testField, 1)
             t.end()
         }, 10)
