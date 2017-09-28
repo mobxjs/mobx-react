@@ -1,8 +1,9 @@
-import React, { createClass, createElement } from "react"
+import React, { createElement } from "react"
+import createClass from "create-react-class";
 import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import test from "tape"
-import mobx from "mobx"
+import * as mobx from "mobx"
 import { observer } from "../"
 import { createTestRoot } from "./index"
 
@@ -123,12 +124,48 @@ test("#85 Should handle state changing in constructors", function(t) {
         )
     })
     ReactDOM.render(<ParentWrapper />, testRoot, () => {
-        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:3 - parent:3")
+        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:3 - parent:2")
         a.set(5)
-        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:5 - parent:5")
-        a.set(7)
-        t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:7 - parent:7")
-        testRoot.parentNode.removeChild(testRoot)
-        t.end()
+        setTimeout(() => {
+            t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:5 - parent:5")
+            a.set(7)
+            setTimeout(() => {
+                t.equal(testRoot.getElementsByTagName("span")[0].textContent, "child:7 - parent:7")
+                testRoot.parentNode.removeChild(testRoot)
+                t.end()
+            }, 10)
+        }, 10)
     })
+})
+
+test("testIsComponentReactive", t => {
+    const C = observer(() => null )
+    const wrapper = mount(<C />)
+    const instance = wrapper.instance()
+
+    t.equal(C.isMobXReactObserver, true)
+
+    // instance is something different then the rendering reaction!
+    t.equal(mobx.isObservable(instance), false)
+    t.equal(mobx.isObservable(instance.render), true)
+
+    mobx.extendObservable(instance, {})
+    t.equal(mobx.isObservable(instance), true)
+
+    t.end()
+})
+
+test("testGetDNode", t => {
+    const C = observer(() => null)
+
+    const wrapper = mount(<C />)
+    t.ok(wrapper.instance().render.$mobx)
+    t.ok(mobx.extras.getAtom(wrapper.instance().render))
+
+    mobx.extendObservable(wrapper.instance(), {
+        x: 3
+    })
+    t.notStrictEqual(mobx.extras.getAtom(wrapper.instance(), "x"), mobx.extras.getAtom(wrapper.instance().render))
+
+    t.end()
 })

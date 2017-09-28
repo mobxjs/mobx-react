@@ -5,4 +5,4 @@ after_success:
 after_failure:
   - cat ./npm-debug.log
 node_js:
-  - "6.0.0"
+  - "6.9.0"

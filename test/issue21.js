@@ -1,4 +1,5 @@
-import React, { createClass, createElement, DOM } from "react"
+import React, { createElement } from "react"
+import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import test from "tape"
 import mobx from "mobx"
@@ -49,7 +50,7 @@ const Wizard = observer(
     createClass({
         displayName: "Wizard",
         render() {
-            return DOM.div(
+            return createElement("div",
                 null,
                 <div>
                     <h1>Active Step: </h1>
@@ -76,9 +77,9 @@ const WizardSteps = observer(
         },
         render() {
             var steps = _.map(this.props.steps, step =>
-                DOM.div({ key: step.title }, <WizardStep step={step} key={step.title} />)
+                createElement("div", { key: step.title }, <WizardStep step={step} key={step.title} />)
             )
-            return DOM.div(null, steps)
+            return createElement("div", null, steps)
         }
     })
 )
@@ -97,7 +98,7 @@ const WizardStep = observer(
             if (this.props.tester === true) {
                 topRenderCount++
             }
-            return DOM.div(
+            return createElement("div",
                 { onClick: this.modeClickHandler },
                 "RenderCount: " +
                     this.renderCount++ +

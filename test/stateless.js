@@ -1,4 +1,6 @@
-import React, { createClass, PropTypes, createElement } from "react"
+import React, { createElement } from "react"
+import * as PropTypes from 'prop-types'
+import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import test from "tape"
 import mobx from "mobx"
@@ -31,7 +33,7 @@ test("stateless component with propTypes", t => {
     t.equal(beenWarned, true, "an error should be logged with a property type warning")
 
     ReactDOM.render(<StatelessCompObserver testProp="hello world" />, testRoot, function() {
-        t.equal(testRoot.innerText, "result: hello world")
+        t.equal(testRoot.innerText.trim(), "result: hello world")
         t.end()
     })
 })

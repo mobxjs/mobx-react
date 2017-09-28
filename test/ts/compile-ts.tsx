@@ -1,7 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Component, PropTypes} from 'react';
+import {Component} from 'react';
+import * as PropTypes from 'prop-types';
 import {observer, Provider, propTypes, inject, Observer} from '../../';
+const  createClass = require("create-react-class");
 
 @observer
 class T1 extends Component<{ pizza: number }, {}> {
@@ -10,7 +12,7 @@ class T1 extends Component<{ pizza: number }, {}> {
 	}
 }
 
-const T2 = observer(React.createClass({
+const T2 = observer(createClass({
 	getDefaultProps() {
 		return { cake: 7 };
 	},
@@ -65,7 +67,7 @@ class T8 extends Component<{ pizza: number }, {}> {
 	}
 }
 
-const T9 = observer(["stores"], React.createClass({
+const T9 = observer(["stores"], createClass({
 	getDefaultProps() {
 		return { cake: 7 };
 	},
@@ -134,7 +136,7 @@ class T13 extends Component<{ pizza: number }, {}> {
     store: {},
 }))
 @observer
-class LoginContainer extends Component<any, void> {
+class LoginContainer extends Component<{}, {}> {
     static contextTypes: React.ValidationMap<any> = {
         router: PropTypes.func.isRequired,
     }
@@ -153,7 +155,7 @@ class ObserverTest extends Component<any, any> {
 }
 
 @observer
-class ComponentWithoutPropsAndState extends Component<void, void> {
+class ComponentWithoutPropsAndState extends Component<{}, {}> {
     componentDidUpdate() {
     }
 

@@ -50,10 +50,8 @@ function build(target, mode, filename) {
   if (mode.endsWith('.min')) {
     plugins.push(
       uglify({
-        compressor: {
-          screw_ie8: true,
-          warnings: false,
-        },
+        ie8: false,
+        warnings: false,
       })
     );
   }
@@ -61,15 +59,15 @@ function build(target, mode, filename) {
   plugins.push(filesize());
 
   return rollup({
-    entry: 'src/index.js',
+    input: 'src/index.js',
     external: getExternals(target),
     plugins: plugins,
   })
     .then(function(bundle) {
       var options = {
-        dest: path.resolve(__dirname, filename),
+        file: path.resolve(__dirname, filename),
         format: mode.endsWith(".min") ? mode.slice(0, -".min".length) : mode,
-        moduleName: 'mobxReact',
+        name: 'mobxReact',
         exports: 'named',
         globals: {
           react: 'React',

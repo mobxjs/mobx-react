@@ -1,4 +1,5 @@
-import React, { createClass } from "react"
+import React from "react"
+import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import test from "tape"
 import mobx from "mobx"
