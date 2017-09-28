@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.3.3
+
+Added support for React 16. (No changes)
+
 ### 4.3.2
 
 Killed accidentally exposed default exports.
