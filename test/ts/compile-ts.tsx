@@ -1,7 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Component, PropTypes} from 'react';
+import {Component} from 'react';
+import * as PropTypes from 'prop-types';
 import {observer, Provider, propTypes, inject, Observer} from '../../';
+const  createClass = require("create-react-class");
 
 @observer
 class T1 extends Component<{ pizza: number }, {}> {
@@ -10,7 +12,7 @@ class T1 extends Component<{ pizza: number }, {}> {
 	}
 }
 
-const T2 = observer(React.createClass({
+const T2 = observer(createClass({
 	getDefaultProps() {
 		return { cake: 7 };
 	},
@@ -65,7 +67,7 @@ class T8 extends Component<{ pizza: number }, {}> {
 	}
 }
 
-const T9 = observer(["stores"], React.createClass({
+const T9 = observer(["stores"], createClass({
 	getDefaultProps() {
 		return { cake: 7 };
 	},

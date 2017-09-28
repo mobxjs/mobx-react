@@ -31,9 +31,10 @@
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
     "mobx": "^2.6.3 || ^3.0.0",
-    "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0-0"
+    "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
+    "@types/prop-types": "^15.5.2",
     "babel-core": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -43,12 +44,15 @@
     "babel-preset-react": "^6.24.1",
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
+    "create-react-class": "^15.6.2",
     "enzyme": "^3.0.0",
+    "enzyme-adapter-react-16": "^1.0.0",
     "lint-staged": "^4.2.3",
     "lodash": "^4.17.4",
     "mobx": "^3.3.0",
     "nscript": "^0.1.10",
     "prettier": "^1.7.2",
+    "prop-types": "^15.6.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-test-renderer": "^16.0.0",

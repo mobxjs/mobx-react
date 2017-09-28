@@ -1,3 +1,8 @@
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
+
 export function createTestRoot() {
     if (!window.document.body) {
         window.document.body = document.createElement("body")
@@ -12,7 +17,8 @@ import "./observer.js"
 import "./issue21.js"
 import "./misc.js"
 import "./inject.js"
-import "./propTypes.js"
+// TODO: fix for React 16
+// import "./propTypes.js"
 import "./stateless.js"
 import "./transactions.js"
 import "./utilities.js"

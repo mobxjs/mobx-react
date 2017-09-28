@@ -1,4 +1,5 @@
-import React, { createClass, createElement } from "react"
+import React, { createElement } from "react"
+import createClass from "create-react-class";
 import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import test from "tape"
