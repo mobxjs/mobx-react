@@ -324,7 +324,7 @@ test("changing state in render should fail", function(t) {
         return <div>{data.get()}</div>
     })
 
-    ReactDOM.render(<ErrorCatcher><Comp /></ErrorCatcher> , testRoot, () => {
+    ReactDOM.render(<Comp />, testRoot, () => {
         data.set(3) // cause throw
         setTimeout(()=> {
             mobx.extras.resetGlobalState()
@@ -588,13 +588,15 @@ test("Observer regions should react", t => {
         </div>
     )
     ReactDOM.render(<Comp />, testRoot, () => {
-        t.equal(testRoot.querySelector("span").innerText, "hi")
-        t.equal(testRoot.querySelector("li").innerText, "hi")
+        t.equal(testRoot.querySelector("span").innerText.trim(), "hi")
+        t.equal(testRoot.querySelector("li").innerText.trim(), "hi")
 
         data.set("hello")
-        t.equal(testRoot.querySelector("span").innerText, "hello")
-        t.equal(testRoot.querySelector("li").innerText, "hi")
-        t.end()
+        setTimeout(() => {
+            t.equal(testRoot.querySelector("span").innerText.trim(), "hello")
+            t.equal(testRoot.querySelector("li").innerText.trim(), "hi")
+            t.end()
+        }, 10)
     })
 
     test("Observer should not re-render on shallow equal new props", t => {
@@ -616,13 +618,13 @@ test("Observer regions should react", t => {
         ReactDOM.render(<Parent />, testRoot, () => {
             t.equal(parentRendering, 1)
             t.equal(childRendering, 1)
-            t.equal(testRoot.querySelector("span").innerText, "1")
+            t.equal(testRoot.querySelector("span").innerText.trim(), "1")
 
             odata.y++
             setTimeout(() => {
                 t.equal(parentRendering, 2)
                 t.equal(childRendering, 1)
-                t.equal(testRoot.querySelector("span").innerText, "1")
+                t.equal(testRoot.querySelector("span").innerText.trim(), "1")
                 t.end()
             }, 20)
         })

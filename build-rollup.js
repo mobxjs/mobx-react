@@ -59,7 +59,7 @@ function build(target, mode, filename) {
   plugins.push(filesize());
 
   return rollup({
-    entry: 'src/index.js',
+    input: 'src/index.js',
     external: getExternals(target),
     plugins: plugins,
   })
