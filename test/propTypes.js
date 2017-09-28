@@ -4,38 +4,56 @@ import { PropTypes } from "../"
 import test from "tape"
 import { observable, asMap } from "mobx"
 
+// Cause `checkPropTypes` caches errors and doesn't print them twice....
+// https://github.com/facebook/prop-types/issues/91
+let testComponentId = 0;
+
 function typeCheckFail(test, declaration, value, message) {
+    const baseError = console.error;
+    let error = "";
+    console.error = msg => { error = msg }
+
     const props = { testProp: value }
-    const error = ReactPropTypes.checkPropTypes(declaration, props, "testProp", "testComponent", "prop", null)
-    test.equal(error instanceof Error, true)
-    test.equal(error.message, message)
+    const propTypes = { testProp: declaration }
+
+    const compId = "testComponent" + (++testComponentId)
+    ReactPropTypes.checkPropTypes(propTypes, props, "prop", compId, null)
+
+    error = error.replace(compId, "testComponent")
+    test.equal(error, "Warning: Failed prop type: "+ message)
+    console.error = baseError
 }
 
 function typeCheckFailRequiredValues(test, declaration) {
-    const specifiedButIsNullMsg =
-        "The prop `testProp` is marked as required in " +
-        "`testComponent`, but its value is `null`."
-    const unspecifiedMsg =
-        "The prop `testProp` is marked as required in " +
-        "`testComponent`, but its value is `undefined`."
+    const baseError = console.error;
+    let error = "";
+    console.error = msg => { error = msg }
+
+    const propTypes = { testProp: declaration }
+    const specifiedButIsNullMsg = /but its value is `null`\./
+    const unspecifiedMsg =/but its value is `undefined`\./
+
     const props1 = { testProp: null }
-    const error1 = ReactPropTypes.checkPropTypes(declaration, props1, "testProp", "testComponent", "prop", null)
-    test.equal(error1 instanceof Error, true)
-    test.equal(error1.message, specifiedButIsNullMsg)
+    ReactPropTypes.checkPropTypes(propTypes, props1, "testProp", "testComponent" + (++testComponentId), null)
+    test.ok(specifiedButIsNullMsg.test(error))
+
+    error = ""
     const props2 = { testProp: undefined }
-    const error2 = ReactPropTypes.checkPropTypes(declaration, props2, "testProp", "testComponent", "prop", null)
-    test.equal(error2 instanceof Error, true)
-    test.equal(error2.message, unspecifiedMsg)
+    ReactPropTypes.checkPropTypes(propTypes, props2, "testProp", "testComponent" + (++testComponentId), null)
+    test.ok(unspecifiedMsg.test(error))
+
+    error = ""
     const props3 = {}
-    const error3 = ReactPropTypes.checkPropTypes(declaration, props3, "testProp", "testComponent", "prop", null)
-    test.equal(error3 instanceof Error, true)
-    test.equal(error3.message, unspecifiedMsg)
+    ReactPropTypes.checkPropTypes(propTypes, props3, "testProp", "testComponent" + (++testComponentId), null)
+    test.ok(unspecifiedMsg.test(error))
+
+    console.error = baseError
 }
 
 function typeCheckPass(test, declaration, value) {
     const props = { testProp: value }
-    const error = ReactPropTypes.checkPropTypes(declaration, props, "testProp", "testComponent", "prop", null)
-    test.equal(error, null)
+    const error = ReactPropTypes.checkPropTypes({ testProp: declaration }, props, "testProp", "testComponent" + (++testComponentId), null)
+    test.equal(error, undefined)
 }
 
 test("Valid values", t => {
