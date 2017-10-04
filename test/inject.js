@@ -1,5 +1,5 @@
 import React from "react"
-import * as PropTypes from 'prop-types'
+import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import { mount } from "enzyme"

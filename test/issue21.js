@@ -50,7 +50,8 @@ const Wizard = observer(
     createClass({
         displayName: "Wizard",
         render() {
-            return createElement("div",
+            return createElement(
+                "div",
                 null,
                 <div>
                     <h1>Active Step: </h1>
@@ -77,7 +78,11 @@ const WizardSteps = observer(
         },
         render() {
             var steps = _.map(this.props.steps, step =>
-                createElement("div", { key: step.title }, <WizardStep step={step} key={step.title} />)
+                createElement(
+                    "div",
+                    { key: step.title },
+                    <WizardStep step={step} key={step.title} />
+                )
             )
             return createElement("div", null, steps)
         }
@@ -98,7 +103,8 @@ const WizardStep = observer(
             if (this.props.tester === true) {
                 topRenderCount++
             }
-            return createElement("div",
+            return createElement(
+                "div",
                 { onClick: this.modeClickHandler },
                 "RenderCount: " +
                     this.renderCount++ +

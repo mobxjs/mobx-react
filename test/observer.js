@@ -317,8 +317,11 @@ test("changing state in render should fail", function(t) {
         if (data.get() === 3) {
             try {
                 data.set(4) // wouldn't throw first time for lack of observers.. (could we tighten this?)
-            } catch(err) {
-                t.true(/Side effects like changing state are not allowed at this point/.test(err), "Unexpected error: " + err)
+            } catch (err) {
+                t.true(
+                    /Side effects like changing state are not allowed at this point/.test(err),
+                    "Unexpected error: " + err
+                )
             }
         }
         return <div>{data.get()}</div>
@@ -326,7 +329,7 @@ test("changing state in render should fail", function(t) {
 
     ReactDOM.render(<Comp />, testRoot, () => {
         data.set(3) // cause throw
-        setTimeout(()=> {
+        setTimeout(() => {
             mobx.extras.resetGlobalState()
             t.end()
         }, 200)
@@ -462,7 +465,7 @@ test("should render component even if setState called with exactly the same prop
     ReactDOM.render(<Component />, testRoot, () => {
         t.equal(renderCount, 1, "renderCount === 1")
         testRoot.querySelector("#clickableDiv").click()
-        setTimeout(()=> {
+        setTimeout(() => {
             t.equal(renderCount, 2, "renderCount === 2")
             testRoot.querySelector("#clickableDiv").click()
             setTimeout(() => {
