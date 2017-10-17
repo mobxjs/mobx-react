@@ -12,7 +12,7 @@
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
-    "prettier": "prettier --write --print-width 100 --tab-width 4 --no-semi \"**/*.js\" \"**/*.ts\"",
+    "prettier": "prettier --write \"**/*.js\" \"**/*.ts\"",
     "test": "npm run build && npm run test:console && npm run test:ts",
     "test:ts": "tsc -p test/ts",
     "test:build": "browserify -x react/addons -x react-native -x react/lib/ReactContext -x react/lib/ExecutionEnvironment test/index.js -o ./test/browser/test_bundle.js -t [ babelify --presets [ es2015 react ] --plugins [ transform-decorators-legacy transform-class-properties ] ]",

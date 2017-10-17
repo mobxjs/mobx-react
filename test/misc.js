@@ -1,5 +1,5 @@
 import React, { createElement } from "react"
-import createClass from "create-react-class";
+import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import test from "tape"
@@ -139,7 +139,7 @@ test("#85 Should handle state changing in constructors", function(t) {
 })
 
 test("testIsComponentReactive", t => {
-    const C = observer(() => null )
+    const C = observer(() => null)
     const wrapper = mount(<C />)
     const instance = wrapper.instance()
 
@@ -165,7 +165,10 @@ test("testGetDNode", t => {
     mobx.extendObservable(wrapper.instance(), {
         x: 3
     })
-    t.notStrictEqual(mobx.extras.getAtom(wrapper.instance(), "x"), mobx.extras.getAtom(wrapper.instance().render))
+    t.notStrictEqual(
+        mobx.extras.getAtom(wrapper.instance(), "x"),
+        mobx.extras.getAtom(wrapper.instance().render)
+    )
 
     t.end()
 })

@@ -1,5 +1,5 @@
 import React from "react"
-import createClass from "create-react-class";
+import createClass from "create-react-class"
 import { mount } from "enzyme"
 import test from "tape"
 import mobx from "mobx"
@@ -108,17 +108,18 @@ test("observer based context", t => {
                 throw new Error("Oops")
             }
         })
-        const B = () => <ErrorCatcher><C /></ErrorCatcher>
+        const B = () => (
+            <ErrorCatcher>
+                <C />
+            </ErrorCatcher>
+        )
         console.log("About to mount")
         mount(<B />)
         console.log("mounted")
-        setTimeout(
-            () => {
-                t.ok(/Oops/.test(ErrorCatcher.getError()))
-                t.end()
-            },
-            100
-        )
+        setTimeout(() => {
+            t.ok(/Oops/.test(ErrorCatcher.getError()))
+            t.end()
+        }, 100)
     })
 
     test.skip("store should be available", t => {
@@ -130,14 +131,22 @@ test("observer based context", t => {
                 }
             })
         )
-        const B = () => <ErrorCatcher><C /></ErrorCatcher>
+        const B = () => (
+            <ErrorCatcher>
+                <C />
+            </ErrorCatcher>
+        )
         const A = () => (
             <Provider baz={42}>
                 <B />
             </Provider>
         )
         mount(<A />)
-        t.ok(/Store 'foo' is not available! Make sure it is provided by some Provider/.test(ErrorCatcher.getError()))
+        t.ok(
+            /Store 'foo' is not available! Make sure it is provided by some Provider/.test(
+                ErrorCatcher.getError()
+            )
+        )
         t.end()
     })
 
