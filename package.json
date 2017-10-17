@@ -35,8 +35,8 @@
   },
   "devDependencies": {
     "@types/prop-types": "^15.5.2",
-    "@types/react": "^16.0.7",
-    "@types/react-dom": "^15.5.5",
+    "@types/react": "^16.0.13",
+    "@types/react-dom": "^16.0.1",
     "babel-core": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
