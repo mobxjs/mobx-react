@@ -25,7 +25,7 @@ export function observer<P>(
 
 export function observer<P>(clazz: IReactComponent<P>): React.ClassicComponentClass<P>
 export function observer<P>(clazz: React.ClassicComponentClass<P>): React.ClassicComponentClass<P>
-export function observer<P, TFunction extends React.ComponentClass<P | void>>(
+export function observer<P, TFunction extends React.ComponentClass<P>>(
     target: TFunction
 ): TFunction // decorator signature
 
