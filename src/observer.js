@@ -340,6 +340,8 @@ function mixinLifecycleEvents(target) {
 // TODO: support injection somehow as well?
 export const Observer = observer(({ children }) => children())
 
+Observer.displayName = "Observer"
+
 Observer.propTypes = {
     children: (propValue, key, componentName, location, propFullName) => {
         if (typeof propValue[key] !== "function")
