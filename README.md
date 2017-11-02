@@ -340,6 +340,15 @@ class MyComponent extends React.Component<{ userStore?: IUserStore; otherProp: n
 
 Make sure to mark `userStore` as an optional property. It should not (necessarily) be passed in by parent components at all!
 
+Note: If you have strict null checking enabled, you could muffle the nullable type by using the `!` operator:
+
+```
+public render() {
+   const {a, b} = this.store!
+   // ...
+}
+```
+
 #### Testing store injection
 
 It is allowed to pass any declared store in directly as a property as well. This makes it easy to set up individual component tests without a provider.
