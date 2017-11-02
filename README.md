@@ -340,6 +340,35 @@ class MyComponent extends React.Component<{ userStore?: IUserStore; otherProp: n
 
 Make sure to mark `userStore` as an optional property. It should not (necessarily) be passed in by parent components at all!
 
+#### Strongly typing inject (option 2)
+
+The above approach might be frustrating if you have "strictNullChecking" enabled, in which case you'd have to check `this.userStore` for null everytime you want to use it.
+
+An alternative is to beat the type system at call site, by making creating an `any` alias for `MyComponent`.
+
+```
+const userStore = new UserStore()
+
+function MyApp() {
+    const MyComponent_: any = MyComponent
+    
+    return (
+        <Provider userStore={userStore}>
+            <MyComponent_>
+        </Provider>
+    )
+}
+```
+
+And make the `userStore` property in `MyComponent` non-nullable:
+
+```
+class MyComponent extends React.Component<{ userStore: IUserStore; otherProp: number }, {}> {
+    /* etc */
+}
+```
+
+
 #### Testing store injection
 
 It is allowed to pass any declared store in directly as a property as well. This makes it easy to set up individual component tests without a provider.
