@@ -3,41 +3,65 @@
  */
 import React = require("react")
 
-export type IStoresToProps<T, P> = (stores: any, nextProps: P, context: any) => T
-export type IReactComponent<P> = React.StatelessComponent<P> | React.ComponentClass<P>
+export type IReactComponent<P = any> = React.StatelessComponent<P> | React.ComponentClass<P> | React.ClassicComponentClass<P>
+
+/**
+ * Observer
+ */
+
+// Deprecated: observer with with stores (as decorator)
+export function observer(
+    stores: string[]
+): <T extends IReactComponent>(clazz: T) => void
+// Deprecated: observer with with stores
+export function observer<T extends IReactComponent>(
+    stores: string[],
+    clazz: T
+): T
+export function observer<T extends IReactComponent>(
+    target: T
+): T
+
+
+/**
+ * Inject
+ */
+export type IValueMap = { [key: string]: any }
+export type IStoresToProps<S extends IValueMap = {}, P extends IValueMap = {}, I extends IValueMap = {}, C extends IValueMap = {}> = (stores:S, nextProps: P, context: C) => I
+
 export type IWrappedComponent<P> = {
     wrappedComponent: IReactComponent<P>
-    wrappedInstance: React.ReactElement<P> | void
+    wrappedInstance: React.ReactInstance | undefined
 }
 
-// Deprecated: observer with with stores
-export function observer<P>(
-    stores: string[],
-    clazz: IReactComponent<P>
-): React.ClassicComponentClass<P>
-export function observer<P>(
-    stores: string[],
-    clazz: React.ClassicComponentClass<P>
-): React.ClassicComponentClass<P>
-export function observer<P>(
-    stores: string[]
-): <TFunction extends IReactComponent<P>>(target: TFunction) => TFunction // decorator signature
-
-export function observer<P>(clazz: IReactComponent<P>): React.ClassicComponentClass<P>
-export function observer<P>(clazz: React.ClassicComponentClass<P>): React.ClassicComponentClass<P>
-export function observer<P, TFunction extends React.ComponentClass<P>>(
-    target: TFunction
-): TFunction // decorator signature
-
-export function inject<P>(
+// Ideally we would want to return React.ComponentClass<Partial<P>>,
+// but TS doesn't allow such things in decorators, like we do in the non-decorator version
+// See also #256
+export function inject(
     ...stores: string[]
-): (<TFunction extends IReactComponent<P>>(target: TFunction) => TFunction & IWrappedComponent<P>) // decorator signature
-export function inject<T, P>(
-    storesToProps: IStoresToProps<T, P>
-): (<TFunction extends IReactComponent<T | P>>(
-    target: TFunction
-) => TFunction & IWrappedComponent<T>) // decorator
+): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>;
+export function inject(
+    fn: IStoresToProps
+): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
 
+// Ideal implemetnation:
+// export function inject
+// (
+// fn: IStoresToProps
+// ):
+// <P>(target: IReactComponent<P>) => IReactComponent<Partial<P>> & IWrappedComponent<IReactComponent<Partial<P>>>
+//
+// Or even better: (but that would require type inference to work other way around)
+// export function inject<P, I>
+// (
+// fn: IStoresToProps<any, P, I>
+// ):
+// <T extends IReactComponent<P & S>(target: T) => IReactComponent<P> & IWrappedComponent<T>
+
+
+/**
+ * Utilities
+ */
 export function onError(cb: (error: Error) => void): () => void
 
 export class Provider extends React.Component<any, {}> {}

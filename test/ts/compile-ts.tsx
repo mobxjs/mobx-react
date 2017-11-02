@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import {Component} from 'react';
 import * as PropTypes from 'prop-types';
 import {observer, Provider, propTypes, inject, Observer} from '../../';
-const  createClass = require("create-react-class");
+import * as createClass from "create-react-class";
 
 @observer
 class T1 extends Component<{ pizza: number }, {}> {
@@ -63,7 +63,9 @@ ReactDOM.render(<T5 />, document.body);
 @observer(["store1", "store2"])
 class T8 extends Component<{ pizza: number }, {}> {
 	render() {
-		return <div>{this.props.pizza}</div>;
+		return (<div>
+			{this.props.pizza}
+		</div>);
 	}
 }
 
@@ -121,7 +123,9 @@ class T17 extends Component<{}, {}> {
 @inject("a", "b")
 class T12 extends Component<{ pizza: number }, {}> {
 	render() {
-		return <div>{this.props.pizza}</div>;
+		return (<div>
+			{this.props.pizza}
+		</div>);
 	}
 }
 
@@ -132,19 +136,52 @@ class T13 extends Component<{ pizza: number }, {}> {
 	}
 }
 
-@inject((allStores) => ({
-    store: {},
-}))
-@observer
-class LoginContainer extends Component<{}, {}> {
+const LoginContainer = inject((allStores, props) => ({
+    store: { y: true, z: 2 }, z: 7
+}))(observer(
+class _LoginContainer extends Component<{
+	x: string,
+	store?: { y: boolean, z: number }
+}, {}> {
     static contextTypes: React.ValidationMap<any> = {
         router: PropTypes.func.isRequired,
     }
 
     render() {
-        return (<div>Hello!</div>)
+        return (<div>
+			Hello!
+			{this.props.x}
+			{this.props.store!.y}
+		</div>)
     }
 }
+)
+)
+ReactDOM.render(<LoginContainer x="test"/>, document.body);
+
+
+@inject((allStores) => ({
+    store: { y: true, z: 2 },
+}))
+@observer
+class LoginContainer2 extends Component<{
+	x: string,
+	store?: { y: boolean }
+}, {}> {
+    static contextTypes: React.ValidationMap<any> = {
+        router: PropTypes.func.isRequired,
+    }
+
+    render() {
+        return (<div>
+			Hello!
+			{this.props.x}
+			{this.props.store!.y}
+		</div>)
+    }
+}
+
+ReactDOM.render(<LoginContainer2 x="test" />, document.body);
 
 ReactDOM.render(<T10 hamburger={3} />, document.body);
 

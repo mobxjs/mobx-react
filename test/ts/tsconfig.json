@@ -2,9 +2,7 @@
 	"version": "1.7.5",
 	"compilerOptions": {
 		"target": "es5",
-		"noImplicitAny": true,
-		"noImplicitThis": false,
-		"strictNullChecks": true,
+		"strict": true,
 		"experimentalDecorators": true,
 		"jsx": "react",
 		"noEmit": true,
