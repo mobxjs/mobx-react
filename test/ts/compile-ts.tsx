@@ -217,4 +217,12 @@ class App2 extends Component<{ a: number }, {}> {
 
 }
 
+class InjectSomeStores extends Component<{ x: any }, {}> {
+    render() {
+        return <div>Hello World</div>
+    }
+}
+
+inject(({ x }) => ({ x }))(InjectSomeStores)
+
 // TODO: not possible: App2.wrappedComponent
