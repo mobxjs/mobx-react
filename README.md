@@ -324,6 +324,8 @@ actually available to the outside world without needing `.wrappedComponent`.
 
 #### Strongly typing inject
 
+##### With TypeScript
+
 `inject` also accepts a function (`(allStores, nextProps, nextContext) => additionalProps`) that can be used to pick all the desired stores from the available stores like this.
 The `additionalProps` will be merged into the original `nextProps` before being provided to the next component.
 
@@ -348,6 +350,10 @@ public render() {
    // ...
 }
 ```
+
+##### With Flow
+
+Currently, there is a community-discussion around the best way to use `inject` with Flow. Join the discussion at [this gist](https://gist.github.com/vonovak/29c972c6aa9efbb7d63a6853d021fba9).
 
 #### Testing store injection
 
