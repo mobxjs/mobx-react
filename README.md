@@ -288,7 +288,7 @@ This means that assigning a static property to the resulting component, will be 
 So if you take the following example:
 
 ```javascript
-const UserName = inject("userStore", ({ userStore, bold }) => someRendering())
+const UserName = inject("userStore")(({ userStore, bold }) => someRendering())
 
 UserName.propTypes = {
     bold: PropTypes.boolean.isRequired,
@@ -304,7 +304,7 @@ So if you want to make assertions on the data that is being injected (either sto
 should be defined on the _wrapped_ component. Which is available through the static property `wrappedComponent` on the inject component:
 
 ```javascript
-const UserName = inject("userStore", ({ userStore, bold }) => someRendering())
+const UserName = inject("userStore")(({ userStore, bold }) => someRendering())
 
 UserName.propTypes = {
     bold: PropTypes.boolean.isRequired // could be defined either here ...
