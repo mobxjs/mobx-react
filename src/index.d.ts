@@ -3,31 +3,31 @@
  */
 import React = require("react")
 
-export type IReactComponent<P = any> = React.StatelessComponent<P> | React.ComponentClass<P> | React.ClassicComponentClass<P>
+export type IReactComponent<P = any> =
+    | React.StatelessComponent<P>
+    | React.ComponentClass<P>
+    | React.ClassicComponentClass<P>
 
 /**
  * Observer
  */
 
 // Deprecated: observer with with stores (as decorator)
-export function observer(
-    stores: string[]
-): <T extends IReactComponent>(clazz: T) => void
+export function observer(stores: string[]): <T extends IReactComponent>(clazz: T) => void
 // Deprecated: observer with with stores
-export function observer<T extends IReactComponent>(
-    stores: string[],
-    clazz: T
-): T
-export function observer<T extends IReactComponent>(
-    target: T
-): T
-
+export function observer<T extends IReactComponent>(stores: string[], clazz: T): T
+export function observer<T extends IReactComponent>(target: T): T
 
 /**
  * Inject
  */
 export type IValueMap = { [key: string]: any }
-export type IStoresToProps<S extends IValueMap = {}, P extends IValueMap = {}, I extends IValueMap = {}, C extends IValueMap = {}> = (stores:S, nextProps: P, context: C) => I
+export type IStoresToProps<
+    S extends IValueMap = {},
+    P extends IValueMap = {},
+    I extends IValueMap = {},
+    C extends IValueMap = {}
+> = (stores: S, nextProps: P, context: C) => I
 
 export type IWrappedComponent<P> = {
     wrappedComponent: IReactComponent<P>
@@ -39,9 +39,9 @@ export type IWrappedComponent<P> = {
 // See also #256
 export function inject(
     ...stores: string[]
-): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>;
-export function inject(
-    fn: IStoresToProps
+): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
+export function inject<S, P, I, C>(
+    fn: IStoresToProps<S, P, I, C>
 ): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
 
 // Ideal implemetnation:
@@ -57,7 +57,6 @@ export function inject(
 // fn: IStoresToProps<any, P, I>
 // ):
 // <T extends IReactComponent<P & S>(target: T) => IReactComponent<P> & IWrappedComponent<T>
-
 
 /**
  * Utilities
