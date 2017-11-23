@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.3.5
+
+Fixed some issues with the typescript typings. See for example #353
+
 ### 4.3.4
 
 Improved typescript typings, including support for `strict` mode in TS 2.6. Fixes
