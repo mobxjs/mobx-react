@@ -65,7 +65,7 @@ export function onError(cb: (error: Error) => void): () => void
 
 export class Provider extends React.Component<any, {}> {}
 
-export class Observer extends React.Component<{ children?: () => React.ReactElement<any> }, {}> {}
+export class Observer extends React.Component<{ children?: () => React.ReactNode }, {}> {}
 
 export function useStaticRendering(value: boolean): void
 
