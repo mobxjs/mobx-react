@@ -1,5 +1,7 @@
 import { configure } from "enzyme"
 import Adapter from "enzyme-adapter-react-16"
+import React from "react"
+import ReactDOM from "react-dom"
 
 configure({ adapter: new Adapter() })
 
@@ -18,4 +20,8 @@ export function sleepHelper(time){
    })
 }
 
-
+export function asyncReactDOMRender(Component,root){
+    return new Promise((resolve)=>{
+        ReactDOM.render(<Component />, root, resolve)
+    })
+}
