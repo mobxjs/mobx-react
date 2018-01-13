@@ -435,27 +435,25 @@ describe("inject based context", () => {
                 <ListComponent items={items} />
             </Provider>,
             testRoot,
-            () => {
+            async() => {
                expect(listRender).toBe(1)
                expect(injectRender).toBe(6)
                expect(itemRender).toBe(6)
 
                 testRoot.querySelectorAll(".hl_ItemB").forEach(e => e.click())
+                await sleepHelper(20)
+                expect(listRender).toBe(1)
+                expect(injectRender).toBe(12)// ideally, 7
+                expect(itemRender).toBe(7)
 
-                    expect(listRender).toBe(1)
-                    expect(injectRender).toBe(12)// ideally, 7
-                    expect(itemRender).toBe(7)
+                testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click())
+                await sleepHelper(20)
+                expect(listRender).toBe(1)
+                expect(injectRender).toBe(18)// ideally, 9
+                expect(itemRender).toBe(9)
 
-                    testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click())
-                    setTimeout(() => {
-                        expect(listRender).toBe(1)
-                        expect(injectRender).toBe(18)// ideally, 9
-                        expect(itemRender).toBe(9)
-
-                        testRoot.parentNode.removeChild(testRoot)
-                        done()
-                    }, 20)
-                }, 20)
+                testRoot.parentNode.removeChild(testRoot)
+                done()
             }
         )
     })
