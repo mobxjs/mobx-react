@@ -21,7 +21,9 @@
     "test:open": "opn http://localhost:5010/test/browser/index.html",
     "test:browser": "npm run test:build && npm run test:open && serve -p 5010",
     "build": "node build-rollup.js && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "jest":"jest",
+    "test:jest":"npm run build && npm run jest"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
