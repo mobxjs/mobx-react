@@ -3,7 +3,7 @@ import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from 'react-dom/test-utils'
-import mobx from "mobx"
+import * as mobx from "mobx"
 import { observer, propTypes } from "../"
 import { createTestRoot } from "./index"
 
