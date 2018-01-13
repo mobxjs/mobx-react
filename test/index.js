@@ -22,6 +22,6 @@ export function sleepHelper(time){
 
 export function asyncReactDOMRender(Component,root){
     return new Promise((resolve)=>{
-        ReactDOM.render(<Component />, root, resolve)
+        ReactDOM.render(Component, root, resolve)
     })
 }

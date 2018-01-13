@@ -34,7 +34,7 @@ test("mobx issue 50", async() => {
     )
     
 
-    await asyncReactDOMRender(Test,testRoot)
+    await asyncReactDOMRender(<Test />,testRoot)
 
     // In 3 seconds, flip a and b. This will change c.
     await sleepHelper(200)
@@ -59,7 +59,7 @@ test("React.render should respect transaction", async() => {
         else return <div>loading</div>
     })
     
-    await asyncReactDOMRender(Component,testRoot)
+    await asyncReactDOMRender(<Component />,testRoot)
 
     mobx.transaction(() => {
         a.set(3)
