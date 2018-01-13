@@ -5,7 +5,7 @@ import mobx from "mobx"
 import {shallow} from 'enzyme';
 import ErrorCatcher from "./ErrorCatcher"
 import { Provider, observer} from '../'
-import './index'
+import { sleepHelper } from './'
 
 
 describe("observer based context", () => {
@@ -105,8 +105,7 @@ describe("observer based context", () => {
 
      //FIXME: this test works correct, but since React in dev always rethrows exception, it is impossible to prevent tape-run from dying on the uncaught exception
     // See: https://github.com/facebook/react/issues/10474#issuecomment-332810203
-    test("ErrorCatcher should work", done => {
-        // t.plan(1)
+    test("ErrorCatcher should work", async() => {
         const C = createClass({
             render() {
                 throw new Error("Oops")
@@ -120,10 +119,8 @@ describe("observer based context", () => {
         console.log("About to mount")
         mount(<B />)
         console.log("mounted")
-        setTimeout(() => {
-            expect(/Oops/.test(ErrorCatcher.getError())).toBeTruthy()
-            done()
-        }, 100)
+        await sleepHelper(10)
+        expect(/Oops/.test(ErrorCatcher.getError())).toBeTruthy()
     })
 
     test("store should be available", done => {

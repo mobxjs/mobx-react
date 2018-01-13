@@ -12,11 +12,10 @@ export function createTestRoot() {
     return testRoot
 }
 
-import "./context.js"
-import "./observer.js"
-import "./issue21.js"
-import "./misc.js"
-import "./inject.js"
-import "./propTypes.js"
-import "./stateless.js"
-import "./transactions.js"
+export function sleepHelper(time){
+   return new Promise((resolve)=>{
+       setTimeout(resolve, time);
+   })
+}
+
+
