@@ -475,270 +475,261 @@ describe("it rerenders correctly if some props are non-observables - 1",()=>{
     })
 })
 
-// describe("it rerenders correctly if some props are non-observables - 2",()=>{
-//     let renderCount = 0
-//     let odata = mobx.observable({ x: 1 })
+describe("it rerenders correctly if some props are non-observables - 2",()=>{
+    let renderCount = 0
+    let odata = mobx.observable({ x: 1 })
 
-//     @observer
-//     class Component extends React.Component {
-//         @mobx.computed
-//         get computed() {
-//             return this.props.data.y // should recompute, since props.data is changed
-//         }
+    @observer
+    class Component extends React.Component {
+        @mobx.computed
+        get computed() {
+            return this.props.data.y // should recompute, since props.data is changed
+        }
 
-//         render() {
-//             renderCount++
-//             return (
-//                 <span onClick={stuff}>
-//                     {this.props.data.y}-{this.computed}
-//                 </span>
-//             )
-//         }
-//     }
+        render() {
+            renderCount++
+            return (
+                <span onClick={stuff}>
+                    {this.props.data.y}-{this.computed}
+                </span>
+            )
+        }
+    }
 
-//     const Parent = observer(
-//         createClass({
-//             render() {
-//                 let data = { y: this.props.odata.x }
-//                 return <Component data={data} odata={this.props.odata} />
-//             }
-//         })
-//     )
+    const Parent = observer(
+        createClass({
+            render() {
+                let data = { y: this.props.odata.x }
+                return <Component data={data} odata={this.props.odata} />
+            }
+        })
+    )
 
-//     function stuff() {
-//         odata.x++
-//     }
+    function stuff() {
+        odata.x++
+    }
 
-//     const container = TestUtils.renderIntoDocument(<Parent odata={odata} />)
+    beforeAll(async(done)=>{
+        await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
+        done()
+    })
 
-//     test("init renderCount === 1",()=>{
-//         expect(renderCount).toBe(1)
-//         expect(TestUtils.findRenderedDOMComponentWithTag(container,'span').innerHTML).toBe("1-1")
-//     })
+    test("init renderCount === 1",()=>{
+        expect(renderCount).toBe(1)
+        expect(testRoot.querySelector("span").innerHTML).toBe("1-1")
+    })
 
-//     test("after click renderCount === 2",(done)=>{
-//         TestUtils.findRenderedDOMComponentWithTag(container,'span').click()
-//         setTimeout(()=>{
-//             expect(TestUtils.findRenderedDOMComponentWithTag(container,'span').innerHTML).toBe("2-2")
-//         },10)
-//         done()
-//     })
+    test("after click renderCount === 2", async()=>{
+        testRoot.querySelector("span").click()
+        await sleepHelper(10)
+        expect(testRoot.querySelector("span").innerHTML).toBe("2-2")
+    })
 
-//     test("after click renderCount === 3",(done)=>{
-//         TestUtils.findRenderedDOMComponentWithTag(container,'span').click()
-//         setTimeout(()=>{
-//             expect(TestUtils.findRenderedDOMComponentWithTag(container,'span').innerHTML).toBe("3-3")
-//         },10)
-//         done()
-//     })
-// })
+    test("after click renderCount === 3", async()=>{
+        testRoot.querySelector("span").click()
+        await sleepHelper(10)
+        expect(testRoot.querySelector("span").innerHTML).toBe("3-3")
+    })
+})
 
 
-// describe("Observer regions should react", () => {
-//     const data = mobx.observable("hi")
-//     const Comp = () => (
-//         <div>
-//             <Observer>{() => <span>{data.get()}</span>}</Observer>
-//             <li>{data.get()}</li>
-//         </div>
-//     )
-//         const container = TestUtils.renderIntoDocument(<Comp />)
+describe("Observer regions should react", () => {
+    const data = mobx.observable("hi")
+    const Comp = () => (
+        <div>
+            <Observer>{() => <span>{data.get()}</span>}</Observer>
+            <li>{data.get()}</li>
+        </div>
+    )
+        
+        beforeAll(async(done)=>{
+            await asyncReactDOMRender(<Comp />, testRoot)
+            done()
+        })
 
-//         test('init state is correct',(done)=>{
-//             setTimeout(()=>{
-//                expect(TestUtils.findRenderedDOMComponentWithTag(container,'span').innerHTML).toBe('hi')
-//                expect(TestUtils.findRenderedDOMComponentWithTag(container,'li').innerHTML).toBe('hi')
-//             },10)
-//             done()
-           
-//         })
+        test('init state is correct', ()=>{
+            expect(testRoot.querySelector("span").innerHTML).toBe('hi')
+            expect(testRoot.querySelector("li").innerHTML).toBe('hi')
+        })
        
-//         test('set the data to hello',(done)=>{
-//             setTimeout(()=>{
-//             expect(TestUtils.findRenderedDOMComponentWithTag(container,'span').innerHTML).toBe('hello')
-//             expect(TestUtils.findRenderedDOMComponentWithTag(container,'li').innerHTML).toBe('hi')
-//             },10)
-//             done()
-//         })
-// })
+        test('set the data to hello',async()=>{
+            data.set("hello")
+            await sleepHelper(10)
+            expect(testRoot.querySelector("span").innerHTML).toBe('hello')
+            expect(testRoot.querySelector("li").innerHTML).toBe('hi')
+        })
+})
 
-// describe("Observer should not re-render on shallow equal new props",()=>{
-//     let childRendering = 0
-//     let parentRendering = 0
-//     const data = { x: 1 }
-//     const odata = mobx.observable({ y: 1 })
+describe("Observer should not re-render on shallow equal new props",()=>{
+    let childRendering = 0
+    let parentRendering = 0
+    const data = { x: 1 }
+    const odata = mobx.observable({ y: 1 })
 
-//     const Child = observer(({ data }) => {
-//         childRendering++
-//         return <span>{data.x}</span>
-//     })
-//     const Parent = observer(() => {
-//         parentRendering++
-//         odata.y /// depend
-//         return <Child data={data} />
-//     })
+    const Child = observer(({ data }) => {
+        childRendering++
+        return <span>{data.x}</span>
+    })
+    const Parent = observer(() => {
+        parentRendering++
+        odata.y /// depend
+        return <Child data={data} />
+    })
 
-//     const element = TestUtils.renderIntoDocument(<Parent />)
+    beforeAll(async()=>{
+        await asyncReactDOMRender(<Parent />, testRoot)
+    })
 
-//     test("init state is correct",()=>{
-//         expect(parentRendering).toBe(1)
-//         expect(childRendering).toBe(1)
-//         expect(TestUtils.findRenderedDOMComponentWithTag(element,'span').innerHTML).toBe("1")
-//     })
+    test("init state is correct", ()=>{
+        expect(parentRendering).toBe(1)
+        expect(childRendering).toBe(1)
+        expect(testRoot.querySelector("span").innerHTML).toBe("1")
+    })
 
-//     test("after odata change",(done)=>{
-//         odata.y++
-//         setTimeout(()=>{
-//             expect(parentRendering).toBe(2)
-//             expect(childRendering).toBe(1)
-//             expect(TestUtils.findRenderedDOMComponentWithTag(element,'span').innerHTML).toBe("1")
-//         },10)
-//         done()
-//     })
-// })
+    test("after odata change", async()=>{
+        odata.y++
+        sleepHelper(10)
+        expect(parentRendering).toBe(2)
+        expect(childRendering).toBe(1)
+        expect(testRoot.querySelector("span").innerHTML).toBe("1")
+    })
+})
 
 
-// test("parent / childs render in the right order", done => {
-//     // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
-//     let events = []
+test("parent / childs render in the right order", done => {
+    // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
+    let events = []
 
-//     class User {
-//         @mobx.observable name = "User's name"
-//     }
+    class User {
+        @mobx.observable name = "User's name"
+    }
 
-//     class Store {
-//         @mobx.observable user = new User()
-//         @mobx.action
-//         logout() {
-//             this.user = null
-//         }
-//     }
+    class Store {
+        @mobx.observable user = new User()
+        @mobx.action
+        logout() {
+            this.user = null
+        }
+    }
 
-//     function tryLogout() {
-//         console.log("Logging out...")
-//         try {
-//             // ReactDOM.unstable_batchedUpdates(() => {
-//             store.logout()
-//             expect(true).toBeTruthy(true)
-//             // });
-//         } catch (e) {
-//             // t.fail(e)
-//         }
-//     }
+    function tryLogout() {
+        console.log("Logging out...")
+        try {
+            // ReactDOM.unstable_batchedUpdates(() => {
+            store.logout()
+            expect(true).toBeTruthy(true)
+            // });
+        } catch (e) {
+            // t.fail(e)
+        }
+    }
 
-//     const store = new Store()
+    const store = new Store()
 
-//     const Parent = observer(() => {
-//         events.push("parent")
-//         if (!store.user) return <span>Not logged in.</span>
-//         return (
-//             <div>
-//                 <Child />
-//                 <button onClick={tryLogout}>Logout</button>
-//             </div>
-//         )
-//     })
+    const Parent = observer(() => {
+        events.push("parent")
+        if (!store.user) return <span>Not logged in.</span>
+        return (
+            <div>
+                <Child />
+                <button onClick={tryLogout}>Logout</button>
+            </div>
+        )
+    })
 
-//     const Child = observer(() => {
-//         events.push("child")
-//         return <span>Logged in as: {store.user.name}</span>
-//     })
+    const Child = observer(() => {
+        events.push("child")
+        return <span>Logged in as: {store.user.name}</span>
+    })
 
-//     const container = TestUtils.renderIntoDocument(<Parent />)
+    const container = TestUtils.renderIntoDocument(<Parent />)
 
-//     tryLogout()
-//     expect(events).toEqual(["parent", "child", "parent"])
-//     done()
-// })
+    tryLogout()
+    expect(events).toEqual(["parent", "child", "parent"])
+    done()
+})
 
-// describe("206 - @observer should produce usefull errors if it throws", () => {
-//     const data = mobx.observable({ x: 1 })
-//     let renderCount = 0
+describe("206 - @observer should produce usefull errors if it throws", () => {
+    const data = mobx.observable({ x: 1 })
+    let renderCount = 0
 
-//     const emmitedErrors = []
-//     const disposeErrorsHandler = onError(error => emmitedErrors.push(error))
+    const emmitedErrors = []
+    const disposeErrorsHandler = onError(error => emmitedErrors.push(error))
     
-//     @observer
-//     class Child extends React.Component {
-//         render() {
-//             renderCount++
-//             if (data.x === 42) throw new Error("Oops!")
-//             return <span>{data.x}</span>
-//         }
-//     }
+    @observer
+    class Child extends React.Component {
+        render() {
+            renderCount++
+            if (data.x === 42) throw new Error("Oops!")
+            return <span>{data.x}</span>
+        }
+    }
 
-//     TestUtils.renderIntoDocument(<Child />)
+    beforeAll(async(done)=>{
+        await asyncReactDOMRender(<Child />, testRoot)
+        done()
+    })
     
-//     beforeAll(()=>{
-//         disposeErrorsHandler()
-//     })
+   
+    test('init renderCount should === 1',()=>{
+        expect(renderCount).toBe(1)
+    })
 
-//     test('init renderCount should === 1',()=>{
-//         expect(renderCount).toBe(1)
-//     })
-
-//     test('catch exception',()=>{
-//         try{
-//          data.x = 42
-//         }catch(e){
-//           expect(lines[0]).toBe("Error: Oops!")
-//           expect(lines[1].indexOf("at Child.render")).toBe(4)
-//           expect(renderCount).toBe(2)
-//         }
-//     })
+    test('catch exception',()=>{
+        expect(()=>{
+            data.x = 42
+        }).toThrow(/Oops!/)
+        expect(renderCount).toBe(2)
+    })
     
-//     test('component recovers!',(done)=>{
-//         setTimeout(()=>{
-//             data.x=3
-//             expect(renderCount).toBe(3)
-//             expect(emmitedErrors).toEqual([new Error("Oops!")])
-//             done()
-//         },500)
-//     })
-// })
+    test('component recovers!',async()=>{
+        await sleepHelper(500)
+        data.x = 3
+        TestUtils.renderIntoDocument(<Child />)
+        expect(renderCount).toBe(3)
+        expect(emmitedErrors).toEqual([new Error("Oops!")])
+    })
+})
 
-// test("195 - async componentWillMount does not work",(done)=>{
-//     const renderedValues = []
+test("195 - async componentWillMount does not work", async()=>{
+    const renderedValues = []
 
-//     @observer
-//     class WillMount extends React.Component {
-//         @observable counter = 0
+    @observer
+    class WillMount extends React.Component {
+        @mobx.observable counter = 0
 
-//         @action inc = () => this.counter++
+        @mobx.action inc = () => this.counter++
 
-//         componentWillMount() {
-//             setTimeout(() => this.inc(), 300)
-//         }
+        componentWillMount() {
+            setTimeout(() => this.inc(), 300)
+        }
 
-//         render() {
-//             renderedValues.push(this.counter)
-//             return (
-//                 <p>
-//                     {this.counter}
-//                     <button onClick={this.inc}>+</button>
-//                 </p>
-//             )
-//         }
-//     }
-//     TestUtils.renderIntoDocument(<WillMount />)
+        render() {
+            renderedValues.push(this.counter)
+            return (
+                <p>
+                    {this.counter}
+                    <button onClick={this.inc}>+</button>
+                </p>
+            )
+        }
+    }
+    TestUtils.renderIntoDocument(<WillMount />)
+    
+    await sleepHelper(500)
+    expect(renderedValues).toEqual([0, 1])
+})
 
-//     setTimeout(()=>{
-//        expect(renderedValues).toEqual([0, 1])
-//        done()
-//     },500)
-// })
+test.skip("195 - should throw if trying to overwrite lifecycle methods", () => {
+    // Test disabled, see #231...
 
-// test.skip("195 - should throw if trying to overwrite lifecycle methods", done => {
-//     // Test disabled, see #231...
+    @observer
+    class WillMount extends React.Component {
+        componentWillMount = () => {}
 
-//     @observer
-//     class WillMount extends React.Component {
-//         componentWillMount = () => {}
-
-//         render() {
-//             return null
-//         }
-//     }
-//     expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(/Cannot assign to read only property 'componentWillMount'/)
-//     done()
-// })
+        render() {
+            return null
+        }
+    }
+    expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(/Cannot assign to read only property 'componentWillMount'/)
+})
