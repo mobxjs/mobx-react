@@ -3,15 +3,15 @@ import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import { mount } from "enzyme"
-import test from "tape"
 import mobx, { action, observable, computed } from "mobx"
 import { observer, inject, Provider } from "../"
 import { createTestRoot } from "./index"
+import { sleepHelper } from './index'
 
 const testRoot = createTestRoot()
 
-test("inject based context", t => {
-    test("basic context", t => {
+describe("inject based context", () => {
+    test("basic context", () => {
         const C = inject("foo")(
             observer(
                 createClass({
@@ -28,11 +28,10 @@ test("inject based context", t => {
             </Provider>
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("div").text(), "context:bar")
-        t.end()
+        expect(wrapper.find("div").text()).toEqual("context:bar")
     })
 
-    test("props override context", t => {
+    test("props override context", () => {
         const C = inject("foo")(
             createClass({
                 render() {
@@ -49,11 +48,10 @@ test("inject based context", t => {
             )
         })
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("div").text(), "context:42")
-        t.end()
+        expect(wrapper.find("div").text()).toEqual("context:42")
     })
 
-    test("overriding stores is supported", t => {
+    test("overriding stores is supported", () => {
         const C = inject("foo", "bar")(
             observer(
                 createClass({
@@ -86,14 +84,13 @@ test("inject based context", t => {
             )
         })
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("span").text(), "context:bar1337")
-        t.equal(wrapper.find("section").text(), "context:421337")
-        t.end()
+        expect(wrapper.find("span").text()).toEqual("context:bar1337")
+        expect(wrapper.find("section").text()).toEqual("context:421337")
     })
 
     // FIXME: see other comments related to error catching in React
     // test does work as expected when running manually
-    test.skip("store should be available", t => {
+    test("store should be available", () => {
         const C = inject("foo")(
             observer(
                 createClass({
@@ -111,14 +108,10 @@ test("inject based context", t => {
                 </Provider>
             )
         })
-        t.throws(
-            () => mount(<A />),
-            /Store 'foo' is not available! Make sure it is provided by some Provider/
-        )
-        t.end()
+        expect(() => mount(<A />)).toThrow(/Store 'foo' is not available! Make sure it is provided by some Provider/)
     })
 
-    test("store is not required if prop is available", t => {
+    test("store is not required if prop is available", () => {
         const C = inject("foo")(
             observer(
                 createClass({
@@ -130,17 +123,15 @@ test("inject based context", t => {
         )
         const B = () => <C foo="bar" />
         const wrapper = mount(<B />)
-        t.equal(wrapper.find("div").text(), "context:bar")
-        t.end()
+        expect(wrapper.find("div").text()).toEqual("context:bar")
     })
 
-    test("inject merges (and overrides) props", t => {
-        t.plan(1)
+    test("inject merges (and overrides) props", () => {
         const C = inject(() => ({ a: 1 }))(
             observer(
                 createClass({
                     render() {
-                        t.deepEqual(this.props, { a: 1, b: 2 })
+                        expect(this.props).toEqual({ a: 1, b: 2 })
                         return null
                     }
                 })
@@ -150,7 +141,7 @@ test("inject based context", t => {
         mount(<B />)
     })
 
-    test("warning is printed when changing stores", t => {
+    test("warning is printed when changing stores", () => {
         let msg
         const baseWarn = console.warn
         console.warn = m => (msg = m)
@@ -182,27 +173,23 @@ test("inject based context", t => {
         )
         const wrapper = mount(<A />)
 
-        t.equal(wrapper.find("span").text(), "3")
-        t.equal(wrapper.find("div").text(), "context:3")
+       expect(wrapper.find("span").text()).toBe("3")
+       expect(wrapper.find("div").text()).toBe("context:3")
 
         a.set(42)
 
-        t.equal(wrapper.find("span").text(), "42")
-        t.equal(wrapper.find("div").text(), "context:3")
+       expect(wrapper.find("span").text()).toBe("42")
+       expect(wrapper.find("div").text()).toBe("context:3")
+       expect(msg).toBe("MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children")
 
-        t.equal(
-            msg,
-            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
-        )
         console.warn = baseWarn
-        t.end()
     })
 
-    test("custom storesToProps", t => {
+    test("custom storesToProps", () => {
         const C = inject((stores, props, context) => {
-            t.deepEqual(context, { mobxStores: { foo: "bar" } })
-            t.deepEqual(stores, { foo: "bar" })
-            t.deepEqual(props, { baz: 42 })
+           expect(context).toEqual({ mobxStores: { foo: "bar" } })
+           expect(stores).toEqual({ foo: "bar" })
+           expect(props).toEqual( { baz: 42 })
             return {
                 zoom: stores.foo,
                 baz: props.baz * 2
@@ -230,11 +217,10 @@ test("inject based context", t => {
             </Provider>
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("div").text(), "context:bar84")
-        t.end()
+        expect(wrapper.find("div").text()).toBe("context:bar84")
     })
 
-    test("support static hoisting, wrappedComponent and wrappedInstance", t => {
+    test("support static hoisting, wrappedComponent and wrappedInstance", async() => {
         class B extends React.Component {
             render() {
                 this.testField = 1
@@ -247,21 +233,18 @@ test("inject based context", t => {
         B.bla = 17
         B.bla2 = {}
         const C = inject("booh")(B)
-
-        t.equal(C.wrappedComponent, B)
-        t.equal(B.bla, 17)
-        t.equal(C.bla, 17)
-        t.ok(C.bla2 === B.bla2)
-        t.deepEqual(Object.keys(C.wrappedComponent.propTypes), ["x"])
+        expect(C.wrappedComponent).toBe(B)
+        expect(B.bla).toBe(17)
+        expect(C.bla).toBe(17)
+        expect(C.bla2 === B.bla2).toBeTruthy()
+        expect(Object.keys(C.wrappedComponent.propTypes)).toEqual(["x"])
 
         const wrapper = mount(<C booh={42} />)
-        setTimeout(() => {
-            t.equal(wrapper.instance().wrappedInstance.testField, 1)
-            t.end()
-        }, 10)
+        await sleepHelper(10)
+        expect(wrapper.instance().wrappedInstance.testField).toBe(1)
     })
 
-    test("warning is printed when attaching contextTypes to HOC", t => {
+    test("warning is printed when attaching contextTypes to HOC", () => {
         const msg = []
         const baseWarn = console.warn
         console.warn = m => msg.push(m)
@@ -284,16 +267,13 @@ test("inject based context", t => {
             </Provider>
         )
         mount(<A />)
-        t.equal(msg.length, 1)
-        t.equal(
-            msg[0],
-            "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`"
-        )
+        expect(msg.length).toBe(1)
+        expect(msg[0]).toBe("Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`")
+
         console.warn = baseWarn
-        t.end()
     })
 
-    test("propTypes and defaultProps are forwarded", t => {
+    test("propTypes and defaultProps are forwarded", () => {
         const msg = []
         const baseError = console.error
         console.error = m => msg.push(m)
@@ -302,8 +282,8 @@ test("inject based context", t => {
             createClass({
                 displayName: "C",
                 render() {
-                    t.equal(this.props.y, 3)
-                    t.equal(this.props.x, undefined)
+                    expect(this.props.y).toEqual( 3)
+                    expect(this.props.x).toBeUndefined()
                     return null
                 }
             })
@@ -325,20 +305,13 @@ test("inject based context", t => {
             </Provider>
         )
         mount(<A />)
-        t.equal(msg.length, 2)
-        t.equal(
-            msg[0].split("\n")[0],
-            "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`."
-        )
-        t.equal(
-            msg[1].split("\n")[0],
-            "Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`."
-        )
+        expect(msg.length).toBe(2)
+        expect( msg[0].split("\n")[0]).toBe( "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`.")
+        expect(msg[1].split("\n")[0]).toBe("Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`.")
         console.error = baseError
-        t.end()
     })
 
-    test("warning is not printed when attaching propTypes to injected component", t => {
+    test("warning is not printed when attaching propTypes to injected component", () => {
         let msg = []
         const baseWarn = console.warn
         console.warn = m => (msg = m)
@@ -351,12 +324,11 @@ test("inject based context", t => {
         )
         C.propTypes = {}
 
-        t.equal(msg.length, 0)
+        expect(msg.length).toBe(0)
         console.warn = baseWarn
-        t.end()
     })
 
-    test("warning is not printed when attaching propTypes to wrappedComponent", t => {
+    test("warning is not printed when attaching propTypes to wrappedComponent", () => {
         let msg = []
         const baseWarn = console.warn
         console.warn = m => (msg = m)
@@ -367,13 +339,11 @@ test("inject based context", t => {
             })
         )
         C.wrappedComponent.propTypes = {}
-
-        t.equal(msg.length, 0)
+        expect(msg.length).toBe(0)
         console.warn = baseWarn
-        t.end()
     })
 
-    test("using a custom injector is reactive", t => {
+    test("using a custom injector is reactive", () => {
         const user = mobx.observable({ name: "Noa" })
         const mapper = stores => ({ name: stores.user.name })
         const DisplayName = props => <h1>{props.name}</h1>
@@ -385,14 +355,12 @@ test("inject based context", t => {
         )
         const wrapper = mount(<App />)
 
-        t.equal(wrapper.find("h1").text(), "Noa")
-
+        expect(wrapper.find("h1").text()).toBe("Noa")
         user.name = "Veria"
-        t.equal(wrapper.find("h1").text(), "Veria")
-        t.end()
+        expect(wrapper.find("h1").text()).toBe("Veria")
     })
 
-    test("using a custom injector is not too reactive", t => {
+    test("using a custom injector is not too reactive", done => {
         let listRender = 0
         let itemRender = 0
         let injectRender = 0
@@ -467,30 +435,26 @@ test("inject based context", t => {
                 <ListComponent items={items} />
             </Provider>,
             testRoot,
-            () => {
-                t.equal(listRender, 1)
-                t.equal(injectRender, 6)
-                t.equal(itemRender, 6)
+            async() => {
+               expect(listRender).toBe(1)
+               expect(injectRender).toBe(6)
+               expect(itemRender).toBe(6)
 
                 testRoot.querySelectorAll(".hl_ItemB").forEach(e => e.click())
-                setTimeout(() => {
-                    t.equal(listRender, 1)
-                    t.equal(injectRender, 12) // ideally, 7
-                    t.equal(itemRender, 7)
+                await sleepHelper(20)
+                expect(listRender).toBe(1)
+                expect(injectRender).toBe(12)// ideally, 7
+                expect(itemRender).toBe(7)
 
-                    testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click())
-                    setTimeout(() => {
-                        t.equal(listRender, 1)
-                        t.equal(injectRender, 18) // ideally, 9
-                        t.equal(itemRender, 9)
+                testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click())
+                await sleepHelper(20)
+                expect(listRender).toBe(1)
+                expect(injectRender).toBe(18)// ideally, 9
+                expect(itemRender).toBe(9)
 
-                        testRoot.parentNode.removeChild(testRoot)
-                        t.end()
-                    }, 20)
-                }, 20)
+                testRoot.parentNode.removeChild(testRoot)
+                done()
             }
         )
     })
-
-    t.end()
 })

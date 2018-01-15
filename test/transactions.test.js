@@ -1,12 +1,13 @@
 import React from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import test from "tape"
-import mobx from "mobx"
+import TestUtils from 'react-dom/test-utils'
+import * as mobx from "mobx"
 import * as mobxReact from "../"
-import { createTestRoot } from "./index"
+import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 
-test("mobx issue 50", t => {
+
+test("mobx issue 50", async() => {
     const testRoot = createTestRoot()
     const foo = {
         a: mobx.observable(true),
@@ -31,21 +32,22 @@ test("mobx issue 50", t => {
             render: () => <div id="x">{[foo.a.get(), foo.b.get(), foo.c.get()].join(",")}</div>
         })
     )
+    
+
+    await asyncReactDOMRender(<Test />,testRoot)
+
     // In 3 seconds, flip a and b. This will change c.
-    setTimeout(flipStuff, 200)
-
-    setTimeout(() => {
-        t.equal(asText, "false:true:true")
-        t.equal(document.getElementById("x").innerText, "false,true,true")
-        t.equal(willReactCount, 1)
-        testRoot.parentNode.removeChild(testRoot)
-        t.end()
-    }, 400)
-
-    ReactDOM.render(<Test />, testRoot)
+    await sleepHelper(200)
+    flipStuff()
+    
+    await sleepHelper(400)
+    expect(asText).toBe("false:true:true")
+    console.log(document.getElementById("x").innerHTML)
+    expect(document.getElementById("x").innerHTML).toBe("false,true,true")
+    expect(willReactCount).toBe(1)
 })
 
-test("React.render should respect transaction", t => {
+test("React.render should respect transaction", async() => {
     const testRoot = createTestRoot()
     const a = mobx.observable(2)
     const loaded = mobx.observable(false)
@@ -56,23 +58,22 @@ test("React.render should respect transaction", t => {
         if (loaded.get()) return <div>{a.get()}</div>
         else return <div>loading</div>
     })
+    
+    await asyncReactDOMRender(<Component />,testRoot)
 
-    ReactDOM.render(<Component />, testRoot)
     mobx.transaction(() => {
         a.set(3)
         a.set(4)
         loaded.set(true)
     })
-
-    setTimeout(() => {
-        t.equal(testRoot.textContent.replace(/\s+/g, ""), "4")
-        t.deepEqual(valuesSeen, [2, 4])
-        testRoot.parentNode.removeChild(testRoot)
-        t.end()
-    }, 400)
+    
+    await sleepHelper(400)
+    expect(testRoot.textContent.replace(/\s+/g, "")).toBe("4")
+    expect(valuesSeen.sort()).toEqual([2, 4].sort())
+    testRoot.parentNode.removeChild(testRoot)
 })
 
-test("React.render in transaction should succeed", t => {
+test("React.render in transaction should succeed", async() => {
     const testRoot = createTestRoot()
     const a = mobx.observable(2)
     const loaded = mobx.observable(false)
@@ -89,11 +90,9 @@ test("React.render in transaction should succeed", t => {
         a.set(4)
         loaded.set(true)
     })
-
-    setTimeout(() => {
-        t.equal(testRoot.textContent.replace(/\s+/g, ""), "4")
-        t.deepEqual(valuesSeen, [3, 4])
-        testRoot.parentNode.removeChild(testRoot)
-        t.end()
-    }, 400)
+    
+    await sleepHelper(400)
+    expect(testRoot.textContent.replace(/\s+/g, "")).toBe("4")
+    expect(valuesSeen.sort()).toEqual([3, 4].sort())
+    testRoot.parentNode.removeChild(testRoot)
 })

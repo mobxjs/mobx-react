@@ -1,11 +1,10 @@
 import React, { createElement } from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import test from "tape"
-import mobx from "mobx"
+import * as mobx from "mobx"
 import { observer } from "../"
 import _ from "lodash"
-import { createTestRoot } from "./index"
+import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 
 const testRoot = createTestRoot()
 let topRenderCount = 0
@@ -28,7 +27,7 @@ const wizardModel = mobx.observable({
     get activeStep() {
         return _.find(this.steps, "active")
     },
-    activateNextStep: mobx.asReference(function() {
+    activateNextStep: mobx.observable.ref(function() {
         const nextStep = this.steps[_.findIndex(this.steps, "active") + 1]
         if (!nextStep) {
             return false
@@ -125,20 +124,19 @@ const WizardStep = observer(
 
 const changeStep = stepNumber => wizardModel.setActiveStep(wizardModel.steps[stepNumber])
 
-test("verify issue 21", t => {
-    t.plan(3)
-    ReactDOM.render(<Wizard model={wizardModel} />, testRoot, () => {
-        t.equal(topRenderCount, 1)
-        changeStep(0)
-        setTimeout(() => {
-            t.equal(topRenderCount, 2)
-            changeStep(2)
-            setTimeout(() => t.ok(topRenderCount, 3), 100)
-        }, 100)
-    })
+test("verify issue 21", async() => {
+    await asyncReactDOMRender(<Wizard model={wizardModel} />, testRoot)
+    expect(topRenderCount).toBe(1)
+    changeStep(0)
+    await sleepHelper(100)
+    expect(topRenderCount).toBe(2)
+    changeStep(2)
+    await sleepHelper(100)
+    expect(topRenderCount).toBe(3)
 })
 
-test("verify prop changes are picked up", t => {
+
+test("verify prop changes are picked up", async() => {
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -196,28 +194,23 @@ test("verify prop changes are picked up", t => {
         })
         this.setState({}) // trigger update
     }
-
-    ReactDOM.render(<Wrapper />, testRoot, () => {
-        t.plan(2)
-        t.deepEqual(events, [["compute", 1], ["render", 1, "1.1.hi.0"]])
-        events.splice(0)
-        testRoot.querySelector("#testDiv").click()
-        setTimeout(
-            () =>
-                t.deepEqual(events, [
-                    ["compute", 1],
-                    ["react", 1],
-                    ["receive", 1, 2],
-                    ["update", 1, 2],
-                    ["compute", 2],
-                    ["render", 2, "1.2.test.0"]
-                ]),
-            100
-        )
-    })
+   
+    await asyncReactDOMRender(<Wrapper />, testRoot)
+    expect(events.sort()).toEqual([["compute", 1], ["render", 1, "1.1.hi.0"]].sort())
+    events.splice(0)
+    testRoot.querySelector("#testDiv").click()
+    await sleepHelper(100)
+    expect(events.sort()).toEqual([
+      ["compute", 1],
+      ["react", 1],
+      ["receive", 1, 2],
+      ["update", 1, 2],
+      ["compute", 2],
+      ["render", 2, "1.2.test.0"]
+  ].sort())
 })
 
-test("verify props is reactive", function(t) {
+test("verify props is reactive", async()=>{
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -295,34 +288,30 @@ test("verify props is reactive", function(t) {
             data.items = [createItem(2, "test")]
         })
     }
-
-    ReactDOM.render(<Wrapper />, testRoot, () => {
-        t.plan(2)
-        t.deepEqual(events, [
-            ["mount"],
-            ["compute", 1],
-            ["computed label", 1],
-            ["render", 1, "1.1.hi.0", "hi"]
-        ])
-        events.splice(0)
-        testRoot.querySelector("#testDiv").click()
-        setTimeout(
-            () =>
-                t.deepEqual(events, [
-                    ["compute", 1],
-                    ["react", 1],
-                    ["receive", 1, 2],
-                    ["update", 1, 2],
-                    ["compute", 2],
-                    ["computed label", 2],
-                    ["render", 2, "1.2.test.0", "test"]
-                ]),
-            100
-        )
-    })
+    
+    await asyncReactDOMRender(<Wrapper />, testRoot)
+    expect(events.sort()).toEqual([
+      ["mount"],
+      ["compute", 1],
+      ["computed label", 1],
+      ["render", 1, "1.1.hi.0", "hi"]
+      ].sort())
+  
+    events.splice(0)
+    testRoot.querySelector("#testDiv").click()
+    await sleepHelper(100)
+    expect(events.sort()).toEqual([
+      ["compute", 1],
+      ["react", 1],
+      ["receive", 1, 2],
+      ["update", 1, 2],
+      ["compute", 2],
+      ["computed label", 2],
+      ["render", 2, "1.2.test.0", "test"]
+  ].sort())
 })
 
-test("no re-render for shallow equal props", function(t) {
+test("no re-render for shallow equal props", async()=>{
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -363,11 +352,8 @@ test("no re-render for shallow equal props", function(t) {
     const Parent = observer(
         createClass({
             render() {
-                t.equal(
-                    mobx.isObservable(this.props.nonObservable),
-                    false,
-                    "object has become observable!"
-                )
+                // "object has become observable!"
+                expect(mobx.isObservable(this.props.nonObservable)).toBeFalsy()
                 events.push(["parent render", data.parentValue])
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -381,39 +367,39 @@ test("no re-render for shallow equal props", function(t) {
     const Wrapper = () => <Parent nonObservable={{}} />
 
     function changeStuff() {
-        data.items[0].label = "hi" // no change
+        data.items[0].label = "hi" // no change.
         data.parentValue = 1 // rerender parent
     }
+    
+    await asyncReactDOMRender(<Wrapper />, testRoot)
+    expect(events.sort()).toEqual([["parent render", 0], ["mount"], ["render", 1, "hi"]].sort())
+    events.splice(0)
+    testRoot.querySelector("#testDiv").click()
+    await sleepHelper(100)
+    expect(events.sort()).toEqual([["parent render", 1], ["receive", 1, 1]].sort())
 
-    ReactDOM.render(<Wrapper />, testRoot, () => {
-        t.plan(4)
-        t.deepEqual(events, [["parent render", 0], ["mount"], ["render", 1, "hi"]])
-        events.splice(0)
-        testRoot.querySelector("#testDiv").click()
-        setTimeout(() => t.deepEqual(events, [["parent render", 1], ["receive", 1, 1]]), 100)
-    })
 })
 
-test("lifecycle callbacks called with correct arguments", t => {
-    t.timeoutAfter(200)
-    t.plan(6)
+test("lifecycle callbacks called with correct arguments", async() => {
     var Component = observer(
         createClass({
             componentWillReceiveProps(nextProps) {
-                t.equal(nextProps.counter, 1, "componentWillReceiveProps: nextProps.counter === 1")
-                t.equal(
-                    this.props.counter,
-                    0,
-                    "componentWillReceiveProps: this.props.counter === 1"
-                )
+                // "componentWillReceiveProps: nextProps.counter === 1"
+                expect(nextProps.counter).toBe(1)
+                // "componentWillReceiveProps: this.props.counter === 1"
+                expect(this.props.counter).toBe(0)
             },
             componentWillUpdate(nextProps, nextState) {
-                t.equal(nextProps.counter, 1, "componentWillUpdate: nextProps.counter === 1")
-                t.equal(this.props.counter, 0, "componentWillUpdate: this.props.counter === 0")
+                // "componentWillReceiveProps: nextProps.counter === 1"
+                expect(nextProps.counter).toBe(1)
+                // "componentWillReceiveProps: this.props.counter === 1"
+                expect(this.props.counter).toBe(0)
             },
             componentDidUpdate(prevProps, prevState) {
-                t.equal(prevProps.counter, 0, "componentDidUpdate: prevProps.counter === 0")
-                t.equal(this.props.counter, 1, "componentDidUpdate: this.props.counter === 1")
+                // "componentWillReceiveProps: nextProps.counter === 1"
+                expect(prevProps.counter).toBe(0)
+                // "componentWillReceiveProps: this.props.counter === 1"
+                expect(this.props.counter).toBe(1)               
             },
             render() {
                 return (
@@ -436,5 +422,6 @@ test("lifecycle callbacks called with correct arguments", t => {
             return <Component counter={this.state.counter || 0} onClick={this.onButtonClick} />
         }
     })
-    ReactDOM.render(<Root />, testRoot, () => testRoot.querySelector("#testButton").click())
+    await asyncReactDOMRender(<Root />, testRoot)
+    testRoot.querySelector("#testButton").click()
 })

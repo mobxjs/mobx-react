@@ -1,30 +1,34 @@
 import React from "react"
 import createClass from "create-react-class"
 import { mount } from "enzyme"
-import test from "tape"
 import mobx from "mobx"
-import { observer, Provider } from "../"
+import {shallow} from 'enzyme';
 import ErrorCatcher from "./ErrorCatcher"
+import { Provider, observer} from '../'
+import { sleepHelper } from './'
 
-test("observer based context", t => {
-    test("using observer to inject throws warning", t => {
+
+describe("observer based context", () => {
+    test("jest test",()=>{
+        const sum = 1 + 2
+        expect(sum).toBe(3)
+    })
+
+    test("using observer to inject throws warning", (done) => {
         const w = console.warn
         const warns = []
         console.warn = msg => warns.push(msg)
 
         observer(["test"], () => null)
 
-        t.equal(warns.length, 1)
-        t.equal(
-            warns[0],
-            'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`'
-        )
+        expect(warns.length).toBe(1)
+        expect(warns[0]).toBe( 'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`')
 
         console.warn = w
-        t.end()
+        done()
     })
 
-    test("basic context", t => {
+    test("basic context", done => {
         const C = observer(
             ["foo"],
             createClass({
@@ -40,11 +44,11 @@ test("observer based context", t => {
             </Provider>
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("div").text(), "context:bar")
-        t.end()
+        expect(wrapper.find("div").text()).toEqual("context:bar")
+        done()
     })
 
-    test("props override context", t => {
+    test("props override context", done => {
         const C = observer(
             ["foo"],
             createClass({
@@ -60,11 +64,11 @@ test("observer based context", t => {
             </Provider>
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("div").text(), "context:42")
-        t.end()
+        expect(wrapper.find("div").text()).toEqual("context:42")
+        done()
     })
-
-    test("overriding stores is supported", t => {
+    
+    test("overriding stores is supported", done => {
         const C = observer(
             ["foo", "bar"],
             createClass({
@@ -94,15 +98,14 @@ test("observer based context", t => {
             </Provider>
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("span").text(), "context:bar1337")
-        t.equal(wrapper.find("section").text(), "context:421337")
-        t.end()
+        expect(wrapper.find("span").text()).toEqual("context:bar1337")
+        expect(wrapper.find("section").text()).toEqual("context:421337")
+        done()
     })
 
-    // FIXME: this test works correct, but since React in dev always rethrows exception, it is impossible to prevent tape-run from dying on the uncaught exception
+     //FIXME: this test works correct, but since React in dev always rethrows exception, it is impossible to prevent tape-run from dying on the uncaught exception
     // See: https://github.com/facebook/react/issues/10474#issuecomment-332810203
-    test.skip("ErrorCatcher should work", t => {
-        t.plan(1)
+    test("ErrorCatcher should work", async() => {
         const C = createClass({
             render() {
                 throw new Error("Oops")
@@ -116,13 +119,11 @@ test("observer based context", t => {
         console.log("About to mount")
         mount(<B />)
         console.log("mounted")
-        setTimeout(() => {
-            t.ok(/Oops/.test(ErrorCatcher.getError()))
-            t.end()
-        }, 100)
+        await sleepHelper(10)
+        expect(/Oops/.test(ErrorCatcher.getError())).toBeTruthy()
     })
 
-    test.skip("store should be available", t => {
+    test("store should be available", done => {
         const C = observer(
             ["foo"],
             createClass({
@@ -142,15 +143,15 @@ test("observer based context", t => {
             </Provider>
         )
         mount(<A />)
-        t.ok(
+        expect(
             /Store 'foo' is not available! Make sure it is provided by some Provider/.test(
                 ErrorCatcher.getError()
             )
-        )
-        t.end()
+        ).toBeTruthy()
+        done()
     })
 
-    test("store is not required if prop is available", t => {
+    test("store is not required if prop is available", done => {
         const C = observer(
             ["foo"],
             createClass({
@@ -161,11 +162,11 @@ test("observer based context", t => {
         )
         const B = () => <C foo="bar" />
         const wrapper = mount(<B />)
-        t.equal(wrapper.find("div").text(), "context:bar")
-        t.end()
+        expect(wrapper.find("div").text()).toEqual("context:bar")
+        done()
     })
 
-    test("warning is printed when changing stores", t => {
+    test("warning is printed when changing stores", done => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
@@ -196,20 +197,17 @@ test("observer based context", t => {
             })
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("span").text(), "3")
-        t.equal(wrapper.find("div").text(), "context:3")
+        expect(wrapper.find("span").text()).toEqual("3")
+        expect(wrapper.find("div").text()).toEqual("context:3")
         a.set(42)
-        t.equal(wrapper.find("span").text(), "42")
-        t.equal(wrapper.find("div").text(), "context:3")
-        t.equal(
-            msg,
-            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
-        )
+        expect(wrapper.find("span").text()).toEqual("42")
+        expect(wrapper.find("div").text()).toEqual("context:3")
+        expect(msg).toEqual("MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children")
         console.warn = baseWarn
-        t.end()
+        done()
     })
 
-    test("warning is not printed when changing stores, but suppressed explicitly", t => {
+    test("warning is not printed when changing stores, but suppressed explicitly", done => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
@@ -240,15 +238,13 @@ test("observer based context", t => {
             })
         )
         const wrapper = mount(<A />)
-        t.equal(wrapper.find("span").text(), "3")
-        t.equal(wrapper.find("div").text(), "context:3")
+        expect(wrapper.find("span").text()).toEqual( "3")
+        expect(wrapper.find("div").text()).toEqual("context:3")
         a.set(42)
-        t.equal(wrapper.find("span").text(), "42")
-        t.equal(wrapper.find("div").text(), "context:3")
-        t.equal(msg, null)
+        expect(wrapper.find("span").text()).toEqual("42")
+        expect(wrapper.find("div").text()).toEqual("context:3")
+        expect(msg).toBeNull()
         console.warn = baseWarn
-        t.end()
+        done()
     })
-
-    t.end()
 })

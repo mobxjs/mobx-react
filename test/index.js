@@ -1,5 +1,7 @@
 import { configure } from "enzyme"
 import Adapter from "enzyme-adapter-react-16"
+import React from "react"
+import ReactDOM from "react-dom"
 
 configure({ adapter: new Adapter() })
 
@@ -12,11 +14,14 @@ export function createTestRoot() {
     return testRoot
 }
 
-import "./context.js"
-import "./observer.js"
-import "./issue21.js"
-import "./misc.js"
-import "./inject.js"
-import "./propTypes.js"
-import "./stateless.js"
-import "./transactions.js"
+export function sleepHelper(time){
+   return new Promise((resolve)=>{
+       setTimeout(resolve, time);
+   })
+}
+
+export function asyncReactDOMRender(Component,root){
+    return new Promise((resolve)=>{
+        ReactDOM.render(Component, root, resolve)
+    })
+}
