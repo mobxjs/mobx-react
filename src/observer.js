@@ -94,6 +94,9 @@ function isObjectShallowModified(prev, next) {
     }
     let key
     for (let i = keys.length - 1; i >= 0, (key = keys[i]); i--) {
+        if (isNaN(next[key]) && isNaN(prev[key])) {
+            continue
+        }
         if (next[key] !== prev[key]) {
             return true
         }
