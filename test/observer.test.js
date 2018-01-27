@@ -91,10 +91,6 @@ describe("nestedRendering",async()=>{
         expect(getDNode(store.todos[0], "title").observers.length).toBe(1)
     })
 
-    test("should rerender even when passed a prop with value `NaN`", ()=>{
-
-    })
-
     test("rerendering with outer store added",()=>{
         store.todos.push({
             title: "b",
