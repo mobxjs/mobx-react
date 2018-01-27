@@ -91,6 +91,10 @@ describe("nestedRendering",async()=>{
         expect(getDNode(store.todos[0], "title").observers.length).toBe(1)
     })
 
+    test("should rerender even when passed a prop with value `NaN`", ()=>{
+
+    })
+
     test("rerendering with outer store added",()=>{
         store.todos.push({
             title: "b",
@@ -113,6 +117,27 @@ describe("nestedRendering",async()=>{
         expect(testRoot.querySelectorAll("li").length).toBe(1)
         expect(getDNode(oldTodo, "title").observers.length).toBe(0)
         expect(getDNode(oldTodo, "completed").observers.length).toBe(0)
+    })
+})
+
+describe("isObjectShallowModified detects when React will update the component", ()=>{
+    const store = mobx.observable({ count: 0 })
+    let counterRenderings = 0
+    const Counter = observer(function TodoItem() {
+        counterRenderings++
+        return <div>{store.count}</div>
+    })
+    
+    beforeAll((done)=>{
+        useStaticRendering(false)
+        done()
+    })
+
+    test("does not assume React will update due to NaN prop", async(done)=>{
+        await asyncReactDOMRender(<Counter value={NaN} />, testRoot)
+        store.count++
+        expect(counterRenderings).toBe(2)
+        done()
     })
 })
 
