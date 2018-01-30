@@ -4,7 +4,7 @@ import ReactDOM from "react-dom"
 import ReactDOMServer from "react-dom/server"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, inject, onError, offError, useStaticRendering, Observer } from "../"
+import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../"
 import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 import ErrorCatcher from "./ErrorCatcher"
 
@@ -15,12 +15,6 @@ import ErrorCatcher from "./ErrorCatcher"
 const testRoot = createTestRoot()
 
 const getDNode = (obj, prop) => obj.$mobx.values[prop]
-
-const asyncRender = (element, root) => {
-    return new Promise(resolve => {
-        ReactDOM.render(<element />)
-    })
-}
 
 /*
  use TestUtils.renderIntoDocument  will re-mounted the component  with with different props
@@ -209,7 +203,6 @@ describe("does not views alive when using static rendering", () => {
     })
 
     test("no re-rendering on static rendering", () => {
-        expect(renderCount).toBe(1)
         data.z = "hello"
         expect(renderCount).toBe(1)
         expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
@@ -533,9 +526,10 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
     }
 
     mobx.reaction(() => odata.x, v => console.log(v))
-
-    beforeAll(async () => {
+    
+    beforeAll(async done => {
         await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
+        done()
     })
 
     test("init renderCount === 1", () => {
@@ -756,4 +750,61 @@ test.skip("195 - should throw if trying to overwrite lifecycle methods", () => {
     expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(
         /Cannot assign to read only property 'componentWillMount'/
     )
+})
+
+describe("use Observer inject and render sugar should work  ", () => {
+    test("use render without inject should be correct", async () => {
+        const Comp = () => (
+            <div>
+                <Observer render={props => <span>{123}</span>} />
+            </div>
+        )
+        await asyncReactDOMRender(<Comp />, testRoot)
+        expect(testRoot.querySelector("span").innerHTML).toBe("123")
+    })
+
+    test("use children without inject should be correct", async () => {
+        const Comp = () => (
+            <div>
+                <Observer>{props => <span>{123}</span>}</Observer>
+            </div>
+        )
+        await asyncReactDOMRender(<Comp />, testRoot)
+        expect(testRoot.querySelector("span").innerHTML).toBe("123")
+    })
+
+    test("use render with inject should be correct", async () => {
+        const Comp = () => (
+            <div>
+                <Observer
+                    inject={store => ({ h: store.h, w: store.w })}
+                    render={props => <span>{`${props.h} ${props.w}`}</span>}
+                />
+            </div>
+        )
+        const A = () => (
+            <Provider h="hello" w="world">
+                <Comp />
+            </Provider>
+        )
+        await asyncReactDOMRender(<A />, testRoot)
+        expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+    })
+
+    test("use children with inject should be correct", async () => {
+        const Comp = () => (
+            <div>
+                <Observer inject={store => ({ h: store.h, w: store.w })}>
+                    {props => <span>{`${props.h} ${props.w}`}</span>}
+                </Observer>
+            </div>
+        )
+        const A = () => (
+            <Provider h="hello" w="world">
+                <Comp />
+            </Provider>
+        )
+        await asyncReactDOMRender(<A />, testRoot)
+        expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+    })
 })
