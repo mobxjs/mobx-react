@@ -124,7 +124,7 @@ const WizardStep = observer(
 
 const changeStep = stepNumber => wizardModel.setActiveStep(wizardModel.steps[stepNumber])
 
-test("verify issue 21", async() => {
+test("verify issue 21", async () => {
     await asyncReactDOMRender(<Wizard model={wizardModel} />, testRoot)
     expect(topRenderCount).toBe(1)
     changeStep(0)
@@ -135,8 +135,7 @@ test("verify issue 21", async() => {
     expect(topRenderCount).toBe(3)
 })
 
-
-test("verify prop changes are picked up", async() => {
+test("verify prop changes are picked up", async () => {
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -194,23 +193,25 @@ test("verify prop changes are picked up", async() => {
         })
         this.setState({}) // trigger update
     }
-   
+
     await asyncReactDOMRender(<Wrapper />, testRoot)
     expect(events.sort()).toEqual([["compute", 1], ["render", 1, "1.1.hi.0"]].sort())
     events.splice(0)
     testRoot.querySelector("#testDiv").click()
     await sleepHelper(100)
-    expect(events.sort()).toEqual([
-      ["compute", 1],
-      ["react", 1],
-      ["receive", 1, 2],
-      ["update", 1, 2],
-      ["compute", 2],
-      ["render", 2, "1.2.test.0"]
-  ].sort())
+    expect(events.sort()).toEqual(
+        [
+            ["compute", 1],
+            ["react", 1],
+            ["receive", 1, 2],
+            ["update", 1, 2],
+            ["compute", 2],
+            ["render", 2, "1.2.test.0"]
+        ].sort()
+    )
 })
 
-test("verify props is reactive", async()=>{
+test("verify props is reactive", async () => {
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -288,30 +289,29 @@ test("verify props is reactive", async()=>{
             data.items = [createItem(2, "test")]
         })
     }
-    
+
     await asyncReactDOMRender(<Wrapper />, testRoot)
-    expect(events.sort()).toEqual([
-      ["mount"],
-      ["compute", 1],
-      ["computed label", 1],
-      ["render", 1, "1.1.hi.0", "hi"]
-      ].sort())
-  
+    expect(events.sort()).toEqual(
+        [["mount"], ["compute", 1], ["computed label", 1], ["render", 1, "1.1.hi.0", "hi"]].sort()
+    )
+
     events.splice(0)
     testRoot.querySelector("#testDiv").click()
     await sleepHelper(100)
-    expect(events.sort()).toEqual([
-      ["compute", 1],
-      ["react", 1],
-      ["receive", 1, 2],
-      ["update", 1, 2],
-      ["compute", 2],
-      ["computed label", 2],
-      ["render", 2, "1.2.test.0", "test"]
-  ].sort())
+    expect(events.sort()).toEqual(
+        [
+            ["compute", 1],
+            ["react", 1],
+            ["receive", 1, 2],
+            ["update", 1, 2],
+            ["compute", 2],
+            ["computed label", 2],
+            ["render", 2, "1.2.test.0", "test"]
+        ].sort()
+    )
 })
 
-test("no re-render for shallow equal props", async()=>{
+test("no re-render for shallow equal props", async () => {
     function createItem(subid, label) {
         const res = mobx.observable({
             id: 1,
@@ -370,17 +370,16 @@ test("no re-render for shallow equal props", async()=>{
         data.items[0].label = "hi" // no change.
         data.parentValue = 1 // rerender parent
     }
-    
+
     await asyncReactDOMRender(<Wrapper />, testRoot)
     expect(events.sort()).toEqual([["parent render", 0], ["mount"], ["render", 1, "hi"]].sort())
     events.splice(0)
     testRoot.querySelector("#testDiv").click()
     await sleepHelper(100)
     expect(events.sort()).toEqual([["parent render", 1], ["receive", 1, 1]].sort())
-
 })
 
-test("lifecycle callbacks called with correct arguments", async() => {
+test("lifecycle callbacks called with correct arguments", async () => {
     var Component = observer(
         createClass({
             componentWillReceiveProps(nextProps) {
@@ -399,7 +398,7 @@ test("lifecycle callbacks called with correct arguments", async() => {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(prevProps.counter).toBe(0)
                 // "componentWillReceiveProps: this.props.counter === 1"
-                expect(this.props.counter).toBe(1)               
+                expect(this.props.counter).toBe(1)
             },
             render() {
                 return (

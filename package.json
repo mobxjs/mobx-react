@@ -49,6 +49,7 @@
     "create-react-class": "^15.6.2",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.0.0",
+    "husky": "0.14.3",
     "jest": "^22.0.5",
     "jest-environment-jsdom": "^22.0.5",
     "lint-staged": "^4.2.3",
@@ -85,8 +86,8 @@
     "reactive"
   ],
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "prettier --write --print-width 100 --tab-width 4 --no-semi",
+    "*.{ts,js}": [
+      "prettier --write",
       "git add"
     ]
   },

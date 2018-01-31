@@ -83,7 +83,7 @@ function typeCheckPass(declaration, value) {
     expect(error).toBeUndefined()
 }
 
-test("Valid values", ()=> {
+test("Valid values", () => {
     typeCheckPass(PropTypes.observableArray, observable([]))
     typeCheckPass(PropTypes.observableArrayOf(ReactPropTypes.string), observable([""]))
     typeCheckPass(PropTypes.arrayOrObservableArray, observable([]))
@@ -107,137 +107,135 @@ test("should be implicitly optional and not warn", () => {
 })
 
 test("should warn for missing required values, function (test)", () => {
-  typeCheckFailRequiredValues( PropTypes.observableArray.isRequired, undefined)
-  typeCheckFailRequiredValues(
-      PropTypes.observableArrayOf(ReactPropTypes.string).isRequired,
-      undefined
-  )
-  typeCheckFailRequiredValues( PropTypes.arrayOrObservableArray.isRequired, undefined)
-  typeCheckFailRequiredValues(
-      PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string).isRequired,
-      undefined
-  )
-  typeCheckFailRequiredValues( PropTypes.observableObject.isRequired, undefined)
-  typeCheckFailRequiredValues( PropTypes.objectOrObservableObject.isRequired, undefined)
-  typeCheckFailRequiredValues( PropTypes.observableMap.isRequired, undefined)
+    typeCheckFailRequiredValues(PropTypes.observableArray.isRequired, undefined)
+    typeCheckFailRequiredValues(
+        PropTypes.observableArrayOf(ReactPropTypes.string).isRequired,
+        undefined
+    )
+    typeCheckFailRequiredValues(PropTypes.arrayOrObservableArray.isRequired, undefined)
+    typeCheckFailRequiredValues(
+        PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string).isRequired,
+        undefined
+    )
+    typeCheckFailRequiredValues(PropTypes.observableObject.isRequired, undefined)
+    typeCheckFailRequiredValues(PropTypes.objectOrObservableObject.isRequired, undefined)
+    typeCheckFailRequiredValues(PropTypes.observableMap.isRequired, undefined)
 })
 
 test("should fail date and regexp correctly", () => {
-  typeCheckFail(
-      PropTypes.observableObject,
-      new Date(),
-      "Invalid prop `testProp` of type `date` supplied to " +
-          "`testComponent`, expected `mobx.ObservableObject`."
-  )
-  typeCheckFail(
-      PropTypes.observableArray,
-      /please/,
-      "Invalid prop `testProp` of type `regexp` supplied to " +
-          "`testComponent`, expected `mobx.ObservableArray`."
-  )
+    typeCheckFail(
+        PropTypes.observableObject,
+        new Date(),
+        "Invalid prop `testProp` of type `date` supplied to " +
+            "`testComponent`, expected `mobx.ObservableObject`."
+    )
+    typeCheckFail(
+        PropTypes.observableArray,
+        /please/,
+        "Invalid prop `testProp` of type `regexp` supplied to " +
+            "`testComponent`, expected `mobx.ObservableArray`."
+    )
 })
 
 test("observableArray", () => {
-  typeCheckFail(
-      PropTypes.observableArray,
-      [],
-      "Invalid prop `testProp` of type `array` supplied to " +
-          "`testComponent`, expected `mobx.ObservableArray`."
-  )
-  typeCheckFail(
-      PropTypes.observableArray,
-      "",
-      "Invalid prop `testProp` of type `string` supplied to " +
-          "`testComponent`, expected `mobx.ObservableArray`."
-  )
+    typeCheckFail(
+        PropTypes.observableArray,
+        [],
+        "Invalid prop `testProp` of type `array` supplied to " +
+            "`testComponent`, expected `mobx.ObservableArray`."
+    )
+    typeCheckFail(
+        PropTypes.observableArray,
+        "",
+        "Invalid prop `testProp` of type `string` supplied to " +
+            "`testComponent`, expected `mobx.ObservableArray`."
+    )
 })
 
 test("arrayOrObservableArray", () => {
-  typeCheckFail(
-      PropTypes.arrayOrObservableArray,
-      "",
-      "Invalid prop `testProp` of type `string` supplied to " +
-          "`testComponent`, expected `mobx.ObservableArray` or javascript `array`."
-  )
+    typeCheckFail(
+        PropTypes.arrayOrObservableArray,
+        "",
+        "Invalid prop `testProp` of type `string` supplied to " +
+            "`testComponent`, expected `mobx.ObservableArray` or javascript `array`."
+    )
 })
 
 test("observableObject", () => {
-  typeCheckFail(
-      PropTypes.observableObject,
-      {},
-      "Invalid prop `testProp` of type `object` supplied to " +
-          "`testComponent`, expected `mobx.ObservableObject`."
-  )
-  typeCheckFail(
-      PropTypes.observableObject,
-      "",
-      "Invalid prop `testProp` of type `string` supplied to " +
-          "`testComponent`, expected `mobx.ObservableObject`."
-  )
+    typeCheckFail(
+        PropTypes.observableObject,
+        {},
+        "Invalid prop `testProp` of type `object` supplied to " +
+            "`testComponent`, expected `mobx.ObservableObject`."
+    )
+    typeCheckFail(
+        PropTypes.observableObject,
+        "",
+        "Invalid prop `testProp` of type `string` supplied to " +
+            "`testComponent`, expected `mobx.ObservableObject`."
+    )
 })
 
-
 test("objectOrObservableObject", () => {
-  typeCheckFail(
-      PropTypes.objectOrObservableObject,
-      "",
-      "Invalid prop `testProp` of type `string` supplied to " +
-          "`testComponent`, expected `mobx.ObservableObject` or javascript `object`."
-  )
+    typeCheckFail(
+        PropTypes.objectOrObservableObject,
+        "",
+        "Invalid prop `testProp` of type `string` supplied to " +
+            "`testComponent`, expected `mobx.ObservableObject` or javascript `object`."
+    )
 })
 
 test("observableMap", () => {
-  typeCheckFail(
-      PropTypes.observableMap,
-      {},
-      "Invalid prop `testProp` of type `object` supplied to " +
-          "`testComponent`, expected `mobx.ObservableMap`."
-  )
+    typeCheckFail(
+        PropTypes.observableMap,
+        {},
+        "Invalid prop `testProp` of type `object` supplied to " +
+            "`testComponent`, expected `mobx.ObservableMap`."
+    )
 })
 
 test("observableArrayOf", () => {
-  typeCheckFail(
-      PropTypes.observableArrayOf(ReactPropTypes.string),
-      2,
-      "Invalid prop `testProp` of type `number` supplied to " +
-          "`testComponent`, expected `mobx.ObservableArray`."
-  )
-  typeCheckFail(
-      PropTypes.observableArrayOf(ReactPropTypes.string),
-      observable([2]),
-      "Invalid prop `testProp[0]` of type `number` supplied to " +
-          "`testComponent`, expected `string`."
-  )
-  typeCheckFail(
-      PropTypes.observableArrayOf({ foo: PropTypes.string }),
-      { foo: "bar" },
-      "Property `testProp` of component `testComponent` has invalid PropType notation."
-  )
+    typeCheckFail(
+        PropTypes.observableArrayOf(ReactPropTypes.string),
+        2,
+        "Invalid prop `testProp` of type `number` supplied to " +
+            "`testComponent`, expected `mobx.ObservableArray`."
+    )
+    typeCheckFail(
+        PropTypes.observableArrayOf(ReactPropTypes.string),
+        observable([2]),
+        "Invalid prop `testProp[0]` of type `number` supplied to " +
+            "`testComponent`, expected `string`."
+    )
+    typeCheckFail(
+        PropTypes.observableArrayOf({ foo: PropTypes.string }),
+        { foo: "bar" },
+        "Property `testProp` of component `testComponent` has invalid PropType notation."
+    )
 })
 
 test("arrayOrObservableArrayOf", () => {
-  typeCheckFail(
-      PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string),
-      2,
-      "Invalid prop `testProp` of type `number` supplied to " +
-          "`testComponent`, expected `mobx.ObservableArray` or javascript `array`."
-  )
-  typeCheckFail(
-      PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string),
-      observable([2]),
-      "Invalid prop `testProp[0]` of type `number` supplied to " +
-          "`testComponent`, expected `string`."
-  )
-  typeCheckFail(
-      PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string),
-      [2],
-      "Invalid prop `testProp[0]` of type `number` supplied to " +
-          "`testComponent`, expected `string`."
-  )
-  typeCheckFail(
-      PropTypes.arrayOrObservableArrayOf({ foo: PropTypes.string }),
-      { foo: "bar" },
-      "Property `testProp` of component `testComponent` has invalid PropType notation."
-  )
+    typeCheckFail(
+        PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string),
+        2,
+        "Invalid prop `testProp` of type `number` supplied to " +
+            "`testComponent`, expected `mobx.ObservableArray` or javascript `array`."
+    )
+    typeCheckFail(
+        PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string),
+        observable([2]),
+        "Invalid prop `testProp[0]` of type `number` supplied to " +
+            "`testComponent`, expected `string`."
+    )
+    typeCheckFail(
+        PropTypes.arrayOrObservableArrayOf(ReactPropTypes.string),
+        [2],
+        "Invalid prop `testProp[0]` of type `number` supplied to " +
+            "`testComponent`, expected `string`."
+    )
+    typeCheckFail(
+        PropTypes.arrayOrObservableArrayOf({ foo: PropTypes.string }),
+        { foo: "bar" },
+        "Property `testProp` of component `testComponent` has invalid PropType notation."
+    )
 })
-
