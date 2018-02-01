@@ -12,7 +12,6 @@
 /index.min.js
 /index.d.ts
 /test/index.d.ts
-/.vscode
 /.idea
 /*.iml
 /*.ipr
