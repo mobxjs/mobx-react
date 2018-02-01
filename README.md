@@ -108,24 +108,23 @@ In case you are a fan of render props, you can use that instead of children. Be 
 Here goes example showing render prop only
 
 ```javascript
+class App extends React.Component {
+  render() {
+     return (
+         <div>
+            {this.props.person.name}
+            <Observer
+              render={(props) => <div>{props.person.name}</div>}
+            />
+        </div>
+     )
+  }
+}
 
-const Comp = () => (
-    <div>
-        <Observer
-            render={() => <span>hello world</span>}
-        />
-    </div>)
-/* or
-const Comp = () => (
-    <div>
-        <Observer>
-            {() => <span>hello world</span>}
-        </Observer>
-    </div>)
-*/
+const person = observable({ name: "John" })
 
-React.render(<Comp />, document.body)
-// will get the same result showing hello world in span tag
+React.render(<App person={person} />, document.body)
+person.name = "Mike" // will cause the Observer region to re-render
 ```
 
 Observer can also inject the stores simply by passing a selector function.
@@ -146,12 +145,6 @@ const UserNameDisplayer = ()=>(
         render={props => (<NameDisplayer name={props.user.name}/>)}
     />
 )
-/* or  
-    <Observer
-        inject={['user']}
-        render={props => (<NameDisplayer name={props.user.name}/>)}
-    />
-*/
 
 const App = () => (
     <Provider userStore={user}>
