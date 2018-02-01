@@ -2,12 +2,11 @@ import React, { createElement, Component } from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import ReactDOMServer from "react-dom/server"
-import TestUtils from 'react-dom/test-utils'
+import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, inject, onError, offError, useStaticRendering, Observer } from "../"
 import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 import ErrorCatcher from "./ErrorCatcher"
-
 
 /**
  *  some test suite is too tedious
@@ -17,9 +16,9 @@ const testRoot = createTestRoot()
 
 const getDNode = (obj, prop) => obj.$mobx.values[prop]
 
-const asyncRender = (element,root)=>{
-    return new Promise((resolve)=>{
-       ReactDOM.render(<element/>)
+const asyncRender = (element, root) => {
+    return new Promise(resolve => {
+        ReactDOM.render(<element />)
     })
 }
 
@@ -27,10 +26,10 @@ const asyncRender = (element,root)=>{
  use TestUtils.renderIntoDocument  will re-mounted the component  with with different props
  some misunderstanding will be cause？
 */
-describe("nestedRendering",async()=>{
+describe("nestedRendering", async () => {
     const testRoot = createTestRoot()
 
-    // init element 
+    // init element
     const store = mobx.observable({
         todos: [
             {
@@ -39,13 +38,13 @@ describe("nestedRendering",async()=>{
             }
         ]
     })
-    
+
     let todoItemRenderings = 0
     const TodoItem = observer(function TodoItem(props) {
         todoItemRenderings++
         return <li>|{props.todo.title}</li>
     })
-    
+
     let todoListRenderings = 0
     let todoListWillReactCount = 0
     const TodoList = observer(
@@ -66,15 +65,14 @@ describe("nestedRendering",async()=>{
             }
         })
     )
-   beforeAll(async(done)=>{
-       // the side-effect in  does not views alive when using static rendering test suite
-       useStaticRendering(false)
-       await asyncReactDOMRender(<TodoList/>, testRoot)
-       done()
-   })
-    
-   
-    test("first rendering",()=>{
+    beforeAll(async done => {
+        // the side-effect in  does not views alive when using static rendering test suite
+        useStaticRendering(false)
+        await asyncReactDOMRender(<TodoList />, testRoot)
+        done()
+    })
+
+    test("first rendering", () => {
         expect(todoListRenderings).toBe(1)
         expect(todoListWillReactCount).toBe(0)
         expect(testRoot.querySelectorAll("li").length).toBe(1)
@@ -82,7 +80,7 @@ describe("nestedRendering",async()=>{
         expect(todoItemRenderings).toBe(1)
     })
 
-    test("second rendering with inner store changed",()=>{
+    test("second rendering with inner store changed", () => {
         store.todos[0].title += "a"
         expect(todoListRenderings).toBe(1)
         expect(todoListWillReactCount).toBe(0)
@@ -91,21 +89,25 @@ describe("nestedRendering",async()=>{
         expect(getDNode(store.todos[0], "title").observers.length).toBe(1)
     })
 
-    test("rerendering with outer store added",()=>{
+    test("rerendering with outer store added", () => {
         store.todos.push({
             title: "b",
             completed: true
         })
         expect(testRoot.querySelectorAll("li").length).toBe(2)
-        expect(Array.from(testRoot.querySelectorAll("li")).map(e => e.innerHTML).sort()).toEqual(["|aa","|b"].sort())
+        expect(
+            Array.from(testRoot.querySelectorAll("li"))
+                .map(e => e.innerHTML)
+                .sort()
+        ).toEqual(["|aa", "|b"].sort())
         expect(todoListRenderings).toBe(2)
         expect(todoListWillReactCount).toBe(1)
         expect(todoItemRenderings).toBe(3)
         expect(getDNode(store.todos[1], "title").observers.length).toBe(1)
-        expect(getDNode(store.todos[1], "completed").observers.length).toBe(0)   
+        expect(getDNode(store.todos[1], "completed").observers.length).toBe(0)
     })
 
-    test("rerendering with outer store pop", ()=>{
+    test("rerendering with outer store pop", () => {
         const oldTodo = store.todos.pop()
         expect(todoListRenderings).toBe(3)
         expect(todoListWillReactCount).toBe(2)
@@ -116,20 +118,20 @@ describe("nestedRendering",async()=>{
     })
 })
 
-describe("isObjectShallowModified detects when React will update the component", ()=>{
+describe("isObjectShallowModified detects when React will update the component", () => {
     const store = mobx.observable({ count: 0 })
     let counterRenderings = 0
     const Counter = observer(function TodoItem() {
         counterRenderings++
         return <div>{store.count}</div>
     })
-    
-    beforeAll((done)=>{
+
+    beforeAll(done => {
         useStaticRendering(false)
         done()
     })
 
-    test("does not assume React will update due to NaN prop", async(done)=>{
+    test("does not assume React will update due to NaN prop", async done => {
         await asyncReactDOMRender(<Counter value={NaN} />, testRoot)
         store.count++
         expect(counterRenderings).toBe(2)
@@ -137,7 +139,7 @@ describe("isObjectShallowModified detects when React will update the component",
     })
 })
 
-describe("keep views alive",()=>{
+describe("keep views alive", () => {
     let yCalcCount = 0
     const data = mobx.observable({
         x: 3,
@@ -156,20 +158,20 @@ describe("keep views alive",()=>{
         )
     })
     const element = TestUtils.renderIntoDocument(<TestComponent />)
-    
-    test("init state",()=>{
+
+    test("init state", () => {
         expect(yCalcCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, 'div').innerHTML).toBe('hi6')
+        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi6")
     })
 
-    test("rerender should not need a recomputation of data.y",()=>{
+    test("rerender should not need a recomputation of data.y", () => {
         data.z = "hello"
         expect(yCalcCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, 'div').innerHTML).toBe('hello6')
+        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hello6")
     })
 })
 
-test("componentWillMount from mixin is run first",()=>{
+test("componentWillMount from mixin is run first", () => {
     const Comp = observer(
         createClass({
             componentWillMount: function() {
@@ -184,7 +186,7 @@ test("componentWillMount from mixin is run first",()=>{
     TestUtils.renderIntoDocument(<Comp />)
 })
 
-describe("does not views alive when using static rendering",()=>{
+describe("does not views alive when using static rendering", () => {
     useStaticRendering(true)
 
     let renderCount = 0
@@ -198,21 +200,21 @@ describe("does not views alive when using static rendering",()=>{
     })
     const element = TestUtils.renderIntoDocument(<TestComponent />)
 
-    test('init state is correct',()=>{
+    test("init state is correct", () => {
         expect(renderCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, 'div').innerHTML).toBe('hi')
+        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
     })
 
-    test('no re-rendering on static rendering',()=>{
+    test("no re-rendering on static rendering", () => {
         data.z = "hello"
-            expect(renderCount).toBe(1)
-            expect(TestUtils.findRenderedDOMComponentWithTag(element, 'div').innerHTML).toBe('hi')
-            expect(getDNode(data, "z").observers.length).toBe(0)
-            useStaticRendering(false)
+        expect(renderCount).toBe(1)
+        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
+        expect(getDNode(data, "z").observers.length).toBe(0)
+        useStaticRendering(false)
     })
 })
 
-describe("issue 12",()=>{
+describe("issue 12", () => {
     const data = mobx.observable({
         selected: "coffee",
         items: [
@@ -243,47 +245,52 @@ describe("issue 12",()=>{
     /** table stateles component */
     const Table = observer(function table() {
         return <div>{data.items.map(item => <Row key={item.name} item={item} />)}</div>
-    }) 
+    })
 
-    beforeAll(async(done)=>{
+    beforeAll(async done => {
         await asyncReactDOMRender(<Table />, testRoot)
         done()
     })
 
-    test("init state is correct",()=>{
-        expect([].map.call(testRoot.querySelectorAll('span'), (tag=>tag.innerHTML)).sort()).toEqual(['coffee!','tea'].sort())
+    test("init state is correct", () => {
+        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
+            ["coffee!", "tea"].sort()
+        )
     })
-    
-    test("run transaction",()=>{
+
+    test("run transaction", () => {
         mobx.transaction(() => {
             data.items[1].name = "boe"
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect([].map.call(testRoot.querySelectorAll('span'), (tag=>tag.innerHTML)).sort()).toEqual(["soup"])
-       
+        expect(
+            [].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()
+        ).toEqual(["soup"])
     })
 })
 
-test("changing state in render should fail",()=>{
+test("changing state in render should fail", () => {
     const data = mobx.observable(2)
     const Comp = observer(() => {
         if (data.get() === 3) {
             try {
                 data.set(4) // wouldn't throw first time for lack of observers.. (could we tighten this?)
             } catch (err) {
-                expect(/Side effects like changing state are not allowed at this point/.test(err)).toBeTruthy()
+                expect(
+                    /Side effects like changing state are not allowed at this point/.test(err)
+                ).toBeTruthy()
             }
         }
         return <div>{data.get()}</div>
     })
     TestUtils.renderIntoDocument(<Comp />)
-    
+
     data.set(3)
     mobx.extras.resetGlobalState()
 })
 
-test("component should not be inject", ()=>{
+test("component should not be inject", () => {
     const msg = []
     const baseWarn = console.warn
     console.warn = m => msg.push(m)
@@ -328,7 +335,7 @@ test("observer component can be injected", () => {
     console.warn = baseWarn
 })
 
-describe("124 - react to changes in this.props via computed",()=>{
+describe("124 - react to changes in this.props via computed", () => {
     const Comp = observer(
         createClass({
             componentWillMount() {
@@ -357,28 +364,25 @@ describe("124 - react to changes in this.props via computed",()=>{
         }
     })
 
-    beforeAll(async(done)=>{
-        await asyncReactDOMRender(<Parent />,testRoot)
+    beforeAll(async done => {
+        await asyncReactDOMRender(<Parent />, testRoot)
         done()
     })
 
-
-    test('init state is correct',()=>{
-        expect(testRoot.querySelector("span").innerHTML).toBe("x:1")  
+    test("init state is correct", () => {
+        expect(testRoot.querySelector("span").innerHTML).toBe("x:1")
     })
 
-    test('change after click',async()=>{
+    test("change after click", async () => {
         testRoot.querySelector("div").click()
         await sleepHelper(100)
-        expect(
-            testRoot.querySelector("span").innerHTML
-        ).toBe("x:2")  
+        expect(testRoot.querySelector("span").innerHTML).toBe("x:2")
     })
 })
 
-  // Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
-  //this test case should be deprecated?
-  test.skip("should stop updating if error was thrown in render (#134)", ()=>{
+// Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
+//this test case should be deprecated?
+test.skip("should stop updating if error was thrown in render (#134)", () => {
     const data = mobx.observable(0)
     let renderingsCount = 0
 
@@ -389,19 +393,19 @@ describe("124 - react to changes in this.props via computed",()=>{
         }
         return <div />
     })
-    
+
     TestUtils.renderIntoDocument(<Comp />)
     expect(data.observers.length).toBe(1)
-        data.set(1)
-        expect(data.set(2)).toThrow("Hello")
-        expect(data.observers.length).toBe(0)
-        data.set(3)
-        data.set(4)
-        data.set(5)
-        expect(renderingsCount).toBe(3)
+    data.set(1)
+    expect(data.set(2)).toThrow("Hello")
+    expect(data.observers.length).toBe(0)
+    data.set(3)
+    data.set(4)
+    data.set(5)
+    expect(renderingsCount).toBe(3)
 })
 
-describe("should render component even if setState called with exactly the same props",()=>{
+describe("should render component even if setState called with exactly the same props", () => {
     let renderCount = 0
     const Component = observer(
         createClass({
@@ -415,30 +419,29 @@ describe("should render component even if setState called with exactly the same 
         })
     )
 
-    beforeAll(async(done)=>{
-        await asyncReactDOMRender(<Component />,testRoot)
+    beforeAll(async done => {
+        await asyncReactDOMRender(<Component />, testRoot)
         done()
     })
 
-    test("renderCount === 1",()=>{
+    test("renderCount === 1", () => {
         expect(renderCount).toBe(1)
     })
-    
-    test("after click once renderCount === 2", async()=>{
-      testRoot.querySelector("#clickableDiv").click()
-      sleepHelper(10)
-      expect(renderCount).toBe(2)
-      
-   })
 
-   test("after click twice renderCount === 3", async()=>{
-      testRoot.querySelector("#clickableDiv").click()
-      sleepHelper(10)
-      expect(renderCount).toBe(3)
- })
+    test("after click once renderCount === 2", async () => {
+        testRoot.querySelector("#clickableDiv").click()
+        sleepHelper(10)
+        expect(renderCount).toBe(2)
+    })
+
+    test("after click twice renderCount === 3", async () => {
+        testRoot.querySelector("#clickableDiv").click()
+        sleepHelper(10)
+        expect(renderCount).toBe(3)
+    })
 })
 
-describe("it rerenders correctly if some props are non-observables - 1",()=>{
+describe("it rerenders correctly if some props are non-observables - 1", () => {
     let renderCount = 0
     let odata = mobx.observable({ x: 1 })
     let data = { y: 1 }
@@ -473,30 +476,30 @@ describe("it rerenders correctly if some props are non-observables - 1",()=>{
         data.y++
         odata.x++
     }
-    
-    beforeAll(async(done)=>{
+
+    beforeAll(async done => {
         await asyncReactDOMRender(<Parent odata={odata} data={data} />, testRoot)
         done()
     })
 
-    test("init renderCount === 1",()=>{
+    test("init renderCount === 1", () => {
         expect(testRoot.querySelector("span").innerHTML).toBe("1-1-1")
     })
 
-    test("after click renderCount === 2", async()=>{
+    test("after click renderCount === 2", async () => {
         testRoot.querySelector("span").click()
         await sleepHelper(10)
         expect(testRoot.querySelector("span").innerHTML).toBe("2-2-2")
     })
-    
-    test("after click twice renderCount === 3",async()=>{
+
+    test("after click twice renderCount === 3", async () => {
         testRoot.querySelector("span").click()
         await sleepHelper(10)
         expect(testRoot.querySelector("span").innerHTML).toBe("3-3-3")
     })
 })
 
-describe("it rerenders correctly if some props are non-observables - 2",()=>{
+describe("it rerenders correctly if some props are non-observables - 2", () => {
     let renderCount = 0
     let odata = mobx.observable({ x: 1 })
 
@@ -530,29 +533,28 @@ describe("it rerenders correctly if some props are non-observables - 2",()=>{
         odata.x++
     }
 
-    beforeAll(async(done)=>{
+    beforeAll(async done => {
         await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
         done()
     })
 
-    test("init renderCount === 1",()=>{
+    test("init renderCount === 1", () => {
         expect(renderCount).toBe(1)
         expect(testRoot.querySelector("span").innerHTML).toBe("1-1")
     })
 
-    test("after click renderCount === 2", async()=>{
+    test("after click renderCount === 2", async () => {
         testRoot.querySelector("span").click()
         await sleepHelper(10)
         expect(testRoot.querySelector("span").innerHTML).toBe("2-2")
     })
 
-    test("after click renderCount === 3", async()=>{
+    test("after click renderCount === 3", async () => {
         testRoot.querySelector("span").click()
         await sleepHelper(10)
         expect(testRoot.querySelector("span").innerHTML).toBe("3-3")
     })
 })
-
 
 describe("Observer regions should react", () => {
     const data = mobx.observable("hi")
@@ -562,26 +564,26 @@ describe("Observer regions should react", () => {
             <li>{data.get()}</li>
         </div>
     )
-        
-        beforeAll(async(done)=>{
-            await asyncReactDOMRender(<Comp />, testRoot)
-            done()
-        })
 
-        test('init state is correct', ()=>{
-            expect(testRoot.querySelector("span").innerHTML).toBe('hi')
-            expect(testRoot.querySelector("li").innerHTML).toBe('hi')
-        })
-       
-        test('set the data to hello',async()=>{
-            data.set("hello")
-            await sleepHelper(10)
-            expect(testRoot.querySelector("span").innerHTML).toBe('hello')
-            expect(testRoot.querySelector("li").innerHTML).toBe('hi')
-        })
+    beforeAll(async done => {
+        await asyncReactDOMRender(<Comp />, testRoot)
+        done()
+    })
+
+    test("init state is correct", () => {
+        expect(testRoot.querySelector("span").innerHTML).toBe("hi")
+        expect(testRoot.querySelector("li").innerHTML).toBe("hi")
+    })
+
+    test("set the data to hello", async () => {
+        data.set("hello")
+        await sleepHelper(10)
+        expect(testRoot.querySelector("span").innerHTML).toBe("hello")
+        expect(testRoot.querySelector("li").innerHTML).toBe("hi")
+    })
 })
 
-describe("Observer should not re-render on shallow equal new props",()=>{
+describe("Observer should not re-render on shallow equal new props", () => {
     let childRendering = 0
     let parentRendering = 0
     const data = { x: 1 }
@@ -597,17 +599,17 @@ describe("Observer should not re-render on shallow equal new props",()=>{
         return <Child data={data} />
     })
 
-    beforeAll(async()=>{
+    beforeAll(async () => {
         await asyncReactDOMRender(<Parent />, testRoot)
     })
 
-    test("init state is correct", ()=>{
+    test("init state is correct", () => {
         expect(parentRendering).toBe(1)
         expect(childRendering).toBe(1)
         expect(testRoot.querySelector("span").innerHTML).toBe("1")
     })
 
-    test("after odata change", async()=>{
+    test("after odata change", async () => {
         odata.y++
         sleepHelper(10)
         expect(parentRendering).toBe(2)
@@ -615,7 +617,6 @@ describe("Observer should not re-render on shallow equal new props",()=>{
         expect(testRoot.querySelector("span").innerHTML).toBe("1")
     })
 })
-
 
 test("parent / childs render in the right order", done => {
     // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
@@ -676,7 +677,7 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
 
     const emmitedErrors = []
     const disposeErrorsHandler = onError(error => emmitedErrors.push(error))
-    
+
     @observer
     class Child extends React.Component {
         render() {
@@ -686,24 +687,23 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
         }
     }
 
-    beforeAll(async(done)=>{
+    beforeAll(async done => {
         await asyncReactDOMRender(<Child />, testRoot)
         done()
     })
-    
-   
-    test('init renderCount should === 1',()=>{
+
+    test("init renderCount should === 1", () => {
         expect(renderCount).toBe(1)
     })
 
-    test('catch exception',()=>{
-        expect(()=>{
+    test("catch exception", () => {
+        expect(() => {
             data.x = 42
         }).toThrow(/Oops!/)
         expect(renderCount).toBe(2)
     })
-    
-    test('component recovers!',async()=>{
+
+    test("component recovers!", async () => {
         await sleepHelper(500)
         data.x = 3
         TestUtils.renderIntoDocument(<Child />)
@@ -712,7 +712,7 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
     })
 })
 
-test("195 - async componentWillMount does not work", async()=>{
+test("195 - async componentWillMount does not work", async () => {
     const renderedValues = []
 
     @observer
@@ -736,7 +736,7 @@ test("195 - async componentWillMount does not work", async()=>{
         }
     }
     TestUtils.renderIntoDocument(<WillMount />)
-    
+
     await sleepHelper(500)
     expect(renderedValues).toEqual([0, 1])
 })
@@ -752,5 +752,7 @@ test.skip("195 - should throw if trying to overwrite lifecycle methods", () => {
             return null
         }
     }
-    expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(/Cannot assign to read only property 'componentWillMount'/)
+    expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(
+        /Cannot assign to read only property 'componentWillMount'/
+    )
 })

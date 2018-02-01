@@ -6,7 +6,7 @@ import { mount } from "enzyme"
 import mobx, { action, observable, computed } from "mobx"
 import { observer, inject, Provider } from "../"
 import { createTestRoot } from "./index"
-import { sleepHelper } from './index'
+import { sleepHelper } from "./index"
 
 const testRoot = createTestRoot()
 
@@ -108,7 +108,9 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        expect(() => mount(<A />)).toThrow(/Store 'foo' is not available! Make sure it is provided by some Provider/)
+        expect(() => mount(<A />)).toThrow(
+            /Store 'foo' is not available! Make sure it is provided by some Provider/
+        )
     })
 
     test("store is not required if prop is available", () => {
@@ -173,23 +175,25 @@ describe("inject based context", () => {
         )
         const wrapper = mount(<A />)
 
-       expect(wrapper.find("span").text()).toBe("3")
-       expect(wrapper.find("div").text()).toBe("context:3")
+        expect(wrapper.find("span").text()).toBe("3")
+        expect(wrapper.find("div").text()).toBe("context:3")
 
         a.set(42)
 
-       expect(wrapper.find("span").text()).toBe("42")
-       expect(wrapper.find("div").text()).toBe("context:3")
-       expect(msg).toBe("MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children")
+        expect(wrapper.find("span").text()).toBe("42")
+        expect(wrapper.find("div").text()).toBe("context:3")
+        expect(msg).toBe(
+            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
+        )
 
         console.warn = baseWarn
     })
 
     test("custom storesToProps", () => {
         const C = inject((stores, props, context) => {
-           expect(context).toEqual({ mobxStores: { foo: "bar" } })
-           expect(stores).toEqual({ foo: "bar" })
-           expect(props).toEqual( { baz: 42 })
+            expect(context).toEqual({ mobxStores: { foo: "bar" } })
+            expect(stores).toEqual({ foo: "bar" })
+            expect(props).toEqual({ baz: 42 })
             return {
                 zoom: stores.foo,
                 baz: props.baz * 2
@@ -220,7 +224,7 @@ describe("inject based context", () => {
         expect(wrapper.find("div").text()).toBe("context:bar84")
     })
 
-    test("support static hoisting, wrappedComponent and wrappedInstance", async() => {
+    test("support static hoisting, wrappedComponent and wrappedInstance", async () => {
         class B extends React.Component {
             render() {
                 this.testField = 1
@@ -268,7 +272,9 @@ describe("inject based context", () => {
         )
         mount(<A />)
         expect(msg.length).toBe(1)
-        expect(msg[0]).toBe("Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`")
+        expect(msg[0]).toBe(
+            "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`"
+        )
 
         console.warn = baseWarn
     })
@@ -282,7 +288,7 @@ describe("inject based context", () => {
             createClass({
                 displayName: "C",
                 render() {
-                    expect(this.props.y).toEqual( 3)
+                    expect(this.props.y).toEqual(3)
                     expect(this.props.x).toBeUndefined()
                     return null
                 }
@@ -306,8 +312,12 @@ describe("inject based context", () => {
         )
         mount(<A />)
         expect(msg.length).toBe(2)
-        expect( msg[0].split("\n")[0]).toBe( "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`.")
-        expect(msg[1].split("\n")[0]).toBe("Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`.")
+        expect(msg[0].split("\n")[0]).toBe(
+            "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`."
+        )
+        expect(msg[1].split("\n")[0]).toBe(
+            "Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`."
+        )
         console.error = baseError
     })
 
@@ -435,21 +445,21 @@ describe("inject based context", () => {
                 <ListComponent items={items} />
             </Provider>,
             testRoot,
-            async() => {
-               expect(listRender).toBe(1)
-               expect(injectRender).toBe(6)
-               expect(itemRender).toBe(6)
+            async () => {
+                expect(listRender).toBe(1)
+                expect(injectRender).toBe(6)
+                expect(itemRender).toBe(6)
 
                 testRoot.querySelectorAll(".hl_ItemB").forEach(e => e.click())
                 await sleepHelper(20)
                 expect(listRender).toBe(1)
-                expect(injectRender).toBe(12)// ideally, 7
+                expect(injectRender).toBe(12) // ideally, 7
                 expect(itemRender).toBe(7)
 
                 testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click())
                 await sleepHelper(20)
                 expect(listRender).toBe(1)
-                expect(injectRender).toBe(18)// ideally, 9
+                expect(injectRender).toBe(18) // ideally, 9
                 expect(itemRender).toBe(9)
 
                 testRoot.parentNode.removeChild(testRoot)
