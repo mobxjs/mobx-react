@@ -2,7 +2,7 @@ import React, { createElement } from "react"
 import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import TestUtils from 'react-dom/test-utils'
+import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, propTypes } from "../"
 import { createTestRoot } from "./index"
@@ -18,23 +18,27 @@ stateLessComp.defaultProps = {
     testProp: "default value for prop testProp"
 }
 
-describe("stateless component with propTypes",()=>{
-  const StatelessCompObserver = observer(stateLessComp)
-  test("default property value should be propagated",()=>{
-    expect(StatelessCompObserver.defaultProps.testProp).toBe("default value for prop testProp")
-  })
-  const originalConsoleError = console.error
-  let beenWarned = false
-  console.error = () => (beenWarned = true)
-  const wrapper = <StatelessCompObserver testProp={10} />
-  console.error = originalConsoleError
-  test("an error should be logged with a property type warning", () => {
-    expect(beenWarned).toBeTruthy()
+describe("stateless component with propTypes", () => {
+    const StatelessCompObserver = observer(stateLessComp)
+    test("default property value should be propagated", () => {
+        expect(StatelessCompObserver.defaultProps.testProp).toBe("default value for prop testProp")
     })
-  test("render test correct",()=>{
-    const component = TestUtils.renderIntoDocument(<StatelessCompObserver testProp="hello world" />)
-    expect(TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML).toBe("result: hello world")
-  })
+    const originalConsoleError = console.error
+    let beenWarned = false
+    console.error = () => (beenWarned = true)
+    const wrapper = <StatelessCompObserver testProp={10} />
+    console.error = originalConsoleError
+    test("an error should be logged with a property type warning", () => {
+        expect(beenWarned).toBeTruthy()
+    })
+    test("render test correct", () => {
+        const component = TestUtils.renderIntoDocument(
+            <StatelessCompObserver testProp="hello world" />
+        )
+        expect(TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML).toBe(
+            "result: hello world"
+        )
+    })
 })
 
 test("stateless component with context support", () => {
@@ -48,8 +52,9 @@ test("stateless component with context support", () => {
         render: () => <StateLessCompWithContextObserver />
     })
     const component = TestUtils.renderIntoDocument(<ContextProvider />)
-    expect(TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML.replace(/\n/, ""))
-          .toBe("context: hello world")
+    expect(
+        TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML.replace(/\n/, "")
+    ).toBe("context: hello world")
 })
 
 test("component with observable propTypes", () => {

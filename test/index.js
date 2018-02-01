@@ -14,14 +14,14 @@ export function createTestRoot() {
     return testRoot
 }
 
-export function sleepHelper(time){
-   return new Promise((resolve)=>{
-       setTimeout(resolve, time);
-   })
+export function sleepHelper(time) {
+    return new Promise(resolve => {
+        setTimeout(resolve, time)
+    })
 }
 
-export function asyncReactDOMRender(Component,root){
-    return new Promise((resolve)=>{
+export function asyncReactDOMRender(Component, root) {
+    return new Promise(resolve => {
         ReactDOM.render(Component, root, resolve)
     })
 }

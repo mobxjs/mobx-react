@@ -2,19 +2,18 @@ import React from "react"
 import createClass from "create-react-class"
 import { mount } from "enzyme"
 import mobx from "mobx"
-import {shallow} from 'enzyme';
+import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
-import { Provider, observer} from '../'
-import { sleepHelper } from './'
-
+import { Provider, observer } from "../"
+import { sleepHelper } from "./"
 
 describe("observer based context", () => {
-    test("jest test",()=>{
+    test("jest test", () => {
         const sum = 1 + 2
         expect(sum).toBe(3)
     })
 
-    test("using observer to inject throws warning", (done) => {
+    test("using observer to inject throws warning", done => {
         const w = console.warn
         const warns = []
         console.warn = msg => warns.push(msg)
@@ -22,7 +21,9 @@ describe("observer based context", () => {
         observer(["test"], () => null)
 
         expect(warns.length).toBe(1)
-        expect(warns[0]).toBe( 'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`')
+        expect(warns[0]).toBe(
+            'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`'
+        )
 
         console.warn = w
         done()
@@ -67,7 +68,7 @@ describe("observer based context", () => {
         expect(wrapper.find("div").text()).toEqual("context:42")
         done()
     })
-    
+
     test("overriding stores is supported", done => {
         const C = observer(
             ["foo", "bar"],
@@ -103,9 +104,9 @@ describe("observer based context", () => {
         done()
     })
 
-     //FIXME: this test works correct, but since React in dev always rethrows exception, it is impossible to prevent tape-run from dying on the uncaught exception
+    //FIXME: this test works correct, but since React in dev always rethrows exception, it is impossible to prevent tape-run from dying on the uncaught exception
     // See: https://github.com/facebook/react/issues/10474#issuecomment-332810203
-    test("ErrorCatcher should work", async() => {
+    test("ErrorCatcher should work", async () => {
         const C = createClass({
             render() {
                 throw new Error("Oops")
@@ -202,7 +203,9 @@ describe("observer based context", () => {
         a.set(42)
         expect(wrapper.find("span").text()).toEqual("42")
         expect(wrapper.find("div").text()).toEqual("context:3")
-        expect(msg).toEqual("MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children")
+        expect(msg).toEqual(
+            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
+        )
         console.warn = baseWarn
         done()
     })
@@ -238,7 +241,7 @@ describe("observer based context", () => {
             })
         )
         const wrapper = mount(<A />)
-        expect(wrapper.find("span").text()).toEqual( "3")
+        expect(wrapper.find("span").text()).toEqual("3")
         expect(wrapper.find("div").text()).toEqual("context:3")
         a.set(42)
         expect(wrapper.find("span").text()).toEqual("42")

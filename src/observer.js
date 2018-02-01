@@ -114,8 +114,8 @@ const reactiveMixin = {
             (this.constructor && (this.constructor.displayName || this.constructor.name)) ||
             "<component>"
         const rootNodeID =
-            this._reactInternalInstance && this._reactInternalInstance._rootNodeID ||
-            this._reactInternalFiber && this._reactInternalFiber._debugID
+            (this._reactInternalInstance && this._reactInternalInstance._rootNodeID) ||
+            (this._reactInternalFiber && this._reactInternalFiber._debugID)
 
         /**
          * If props are shallowly modified, react will render anyway,

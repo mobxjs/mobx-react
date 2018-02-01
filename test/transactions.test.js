@@ -1,13 +1,12 @@
 import React from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import TestUtils from 'react-dom/test-utils'
+import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import * as mobxReact from "../"
 import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 
-
-test("mobx issue 50", async() => {
+test("mobx issue 50", async () => {
     const testRoot = createTestRoot()
     const foo = {
         a: mobx.observable(true),
@@ -32,14 +31,13 @@ test("mobx issue 50", async() => {
             render: () => <div id="x">{[foo.a.get(), foo.b.get(), foo.c.get()].join(",")}</div>
         })
     )
-    
 
-    await asyncReactDOMRender(<Test />,testRoot)
+    await asyncReactDOMRender(<Test />, testRoot)
 
     // In 3 seconds, flip a and b. This will change c.
     await sleepHelper(200)
     flipStuff()
-    
+
     await sleepHelper(400)
     expect(asText).toBe("false:true:true")
     console.log(document.getElementById("x").innerHTML)
@@ -47,7 +45,7 @@ test("mobx issue 50", async() => {
     expect(willReactCount).toBe(1)
 })
 
-test("React.render should respect transaction", async() => {
+test("React.render should respect transaction", async () => {
     const testRoot = createTestRoot()
     const a = mobx.observable(2)
     const loaded = mobx.observable(false)
@@ -58,22 +56,22 @@ test("React.render should respect transaction", async() => {
         if (loaded.get()) return <div>{a.get()}</div>
         else return <div>loading</div>
     })
-    
-    await asyncReactDOMRender(<Component />,testRoot)
+
+    await asyncReactDOMRender(<Component />, testRoot)
 
     mobx.transaction(() => {
         a.set(3)
         a.set(4)
         loaded.set(true)
     })
-    
+
     await sleepHelper(400)
     expect(testRoot.textContent.replace(/\s+/g, "")).toBe("4")
     expect(valuesSeen.sort()).toEqual([2, 4].sort())
     testRoot.parentNode.removeChild(testRoot)
 })
 
-test("React.render in transaction should succeed", async() => {
+test("React.render in transaction should succeed", async () => {
     const testRoot = createTestRoot()
     const a = mobx.observable(2)
     const loaded = mobx.observable(false)
@@ -90,7 +88,7 @@ test("React.render in transaction should succeed", async() => {
         a.set(4)
         loaded.set(true)
     })
-    
+
     await sleepHelper(400)
     expect(testRoot.textContent.replace(/\s+/g, "")).toBe("4")
     expect(valuesSeen.sort()).toEqual([3, 4].sort())
