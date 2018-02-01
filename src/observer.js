@@ -84,21 +84,30 @@ function patch(target, funcName, runMixinFirst = false) {
     target[funcName] = f
 }
 
-function isObjectShallowModified(prev, next) {
-    if (null == prev || null == next || typeof prev !== "object" || typeof next !== "object") {
-        return prev !== next
+function shallowEqual(objA, objB) {
+    //From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
+    if (is(objA, objB)) return true
+    if (typeof objA !== "object" || objA === null || typeof objB !== "object" || objB === null) {
+        return false
     }
-    const keys = Object.keys(prev)
-    if (keys.length !== Object.keys(next).length) {
-        return true
-    }
-    let key
-    for (let i = keys.length - 1; i >= 0, (key = keys[i]); i--) {
-        if (next[key] !== prev[key]) {
-            return true
+    const keysA = Object.keys(objA)
+    const keysB = Object.keys(objB)
+    if (keysA.length !== keysB.length) return false
+    for (let i = 0; i < keysA.length; i++) {
+        if (!hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
+            return false
         }
     }
-    return false
+    return true
+}
+
+function is(x, y) {
+    // From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
+    if (x === y) {
+        return x !== 0 || 1 / x === 1 / y
+    } else {
+        return x !== x && y !== y
+    }
 }
 
 /**
@@ -139,7 +148,7 @@ const reactiveMixin = {
                     return valueHolder
                 },
                 set: function set(v) {
-                    if (!isForcingUpdate && isObjectShallowModified(valueHolder, v)) {
+                    if (!isForcingUpdate && !shallowEqual(valueHolder, v)) {
                         valueHolder = v
                         skipRender = true
                         atom.reportChanged()
@@ -261,7 +270,7 @@ const reactiveMixin = {
         // we could return just 'false' here, and avoid the `skipRender` checks etc
         // however, it is nicer if lifecycle events are triggered like usually,
         // so we return true here if props are shallowly modified.
-        return isObjectShallowModified(this.props, nextProps)
+        return !shallowEqual(this.props, nextProps)
     }
 }
 
