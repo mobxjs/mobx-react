@@ -82,8 +82,6 @@ It takes as children a single, argumentless function which should return exactly
 The rendering in the function will be tracked and automatically re-rendered when needed.
 This can come in handy when needing to pass render function to external components (for example the React Native listview), or if you
 dislike the `observer` decorator / function.
-And it can work with `Provider` use inject  and render property / or just takes as children, detail in Example2.(PS:using children has a priority than render , so dont use at the same time)
-Example:
 
 ```javascript
 class App extends React.Component {
@@ -105,36 +103,61 @@ React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
-Example2:
+In case you are a fan of render props, you can use that instead of children. Be advised, that you cannot use both approaches at once, children have a precedence.
+
+Here goes example showing render prop only
 
 ```javascript
-class App extends React.Component {
-  render() {
-     return (
-          <Provider h="hello" w="world">
-            <Comp />
-        </Provider>
-     )
-  }
-}
+
 const Comp = () => (
     <div>
         <Observer
-            inject={store => ({ h: store.h, w: store.w })}
-            render={props => <span>{`${props.h} ${props.w}`}</span>}
+            render={() => <span>hello world</span>}
         />
     </div>)
 /* or
 const Comp = () => (
     <div>
-        <Observer inject={store => ({ h: store.h, w: store.w })}>
-            {props => <span>{`${props.h} ${props.w}`}</span>}
+        <Observer>
+            {() => <span>hello world</span>}
         </Observer>
     </div>)
 */
 
-React.render(<App />, document.body)
+React.render(<Comp />, document.body)
 // will get the same result showing hello world in span tag
+```
+
+Observer can also inject the stores simply by passing a selector function.
+
+Example with inject
+
+```javascript
+
+const NameDisplayer = ({ name }) => <h1>{name}</h1>
+
+const user = mobx.observable({
+    name: "Noa"
+})
+
+const UserNameDisplayer = ()=>(
+    <Observer
+        inject={(stores)=>({user:stores.user})}
+        render={props => (<NameDisplayer name={props.user.name}/>)}
+    />
+)
+/* or  
+    <Observer
+        inject={['user']}
+        render={props => (<NameDisplayer name={props.user.name}/>)}
+    />
+*/
+
+const App = () => (
+    <Provider userStore={user}>
+        <UserNameDisplayer />
+    </Provider>
+)
 ```
 
 ### Global error handler with `onError`
