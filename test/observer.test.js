@@ -188,7 +188,6 @@ test("componentWillMount from mixin is run first", () => {
 
 describe("does not views alive when using static rendering", () => {
     useStaticRendering(true)
-
     let renderCount = 0
     const data = mobx.observable({
         z: "hi"
@@ -200,17 +199,21 @@ describe("does not views alive when using static rendering", () => {
     })
     const element = TestUtils.renderIntoDocument(<TestComponent />)
 
+    afterAll(() => {
+        useStaticRendering(false)
+    })
+
     test("init state is correct", () => {
         expect(renderCount).toBe(1)
         expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
     })
 
     test("no re-rendering on static rendering", () => {
+        expect(renderCount).toBe(1)
         data.z = "hello"
         expect(renderCount).toBe(1)
         expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
         expect(getDNode(data, "z").observers.length).toBe(0)
-        useStaticRendering(false)
     })
 })
 
@@ -520,22 +523,19 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
         }
     }
 
-    const Parent = observer(
-        createClass({
-            render() {
-                let data = { y: this.props.odata.x }
-                return <Component data={data} odata={this.props.odata} />
-            }
-        })
-    )
+    const Parent = observer(props => {
+        let data = { y: props.odata.x }
+        return <Component data={data} odata={props.odata} />
+    })
 
     function stuff() {
         odata.x++
     }
 
-    beforeAll(async done => {
+    mobx.reaction(() => odata.x, v => console.log(v))
+
+    beforeAll(async () => {
         await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
-        done()
     })
 
     test("init renderCount === 1", () => {
@@ -545,13 +545,15 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
 
     test("after click renderCount === 2", async () => {
         testRoot.querySelector("span").click()
-        await sleepHelper(10)
+        await sleepHelper(100)
+        expect(renderCount).toBe(2)
         expect(testRoot.querySelector("span").innerHTML).toBe("2-2")
     })
 
     test("after click renderCount === 3", async () => {
         testRoot.querySelector("span").click()
         await sleepHelper(10)
+        expect(renderCount).toBe(3)
         expect(testRoot.querySelector("span").innerHTML).toBe("3-3")
     })
 })
@@ -635,7 +637,6 @@ test("parent / childs render in the right order", done => {
     }
 
     function tryLogout() {
-        console.log("Logging out...")
         try {
             // ReactDOM.unstable_batchedUpdates(() => {
             store.logout()
