@@ -82,7 +82,7 @@ It takes as children a single, argumentless function which should return exactly
 The rendering in the function will be tracked and automatically re-rendered when needed.
 This can come in handy when needing to pass render function to external components (for example the React Native listview), or if you
 dislike the `observer` decorator / function.
-
+And it can work with `Provider` use inject  and render property / or just takes as children, detail in Example2.(PS:using children has a priority than render , so dont use at the same time)
 Example:
 
 ```javascript
@@ -103,6 +103,38 @@ const person = observable({ name: "John" })
 
 React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
+```
+
+Example2:
+
+```javascript
+class App extends React.Component {
+  render() {
+     return (
+          <Provider h="hello" w="world">
+            <Comp />
+        </Provider>
+     )
+  }
+}
+const Comp = () => (
+    <div>
+        <Observer
+            inject={store => ({ h: store.h, w: store.w })}
+            render={props => <span>{`${props.h} ${props.w}`}</span>}
+        />
+    </div>)
+/* or
+const Comp = () => (
+    <div>
+        <Observer inject={store => ({ h: store.h, w: store.w })}>
+            {props => <span>{`${props.h} ${props.w}`}</span>}
+        </Observer>
+    </div>)
+*/
+
+React.render(<App />, document.body)
+// will get the same result showing hello world in span tag
 ```
 
 ### Global error handler with `onError`
@@ -438,3 +470,5 @@ Data will have one of the following formats:
 
 WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
 This map is only available after invoking `trackComponents`.
+
+
