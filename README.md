@@ -104,8 +104,7 @@ person.name = "Mike" // will cause the Observer region to re-render
 ```
 
 In case you are a fan of render props, you can use that instead of children. Be advised, that you cannot use both approaches at once, children have a precedence.
-
-Here goes example showing render prop only
+Example
 
 ```javascript
 class App extends React.Component {
@@ -126,9 +125,7 @@ const person = observable({ name: "John" })
 React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
-
 Observer can also inject the stores simply by passing a selector function.
-
 Example with inject
 
 ```javascript
