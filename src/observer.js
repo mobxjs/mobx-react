@@ -363,37 +363,28 @@ export const Observer = observer(({ children, inject: observerInject, render }) 
 
 Observer.displayName = "Observer"
 
-Observer.propTypes = {
-    render: (propValue, key, componentName, location, propFullName) => {
-        if (typeof propValue["children"] === "function") {
-            return
-        }
-        if (typeof propValue[key] !== "function")
-            return new Error(
-                "Invalid prop `" +
-                    propFullName +
-                    "` of type `" +
-                    typeof propValue[key] +
-                    "` supplied to" +
-                    " `" +
-                    componentName +
-                    "`, expected `function`."
-            )
-    },
-    children: (propValue, key, componentName, location, propFullName) => {
-        if (typeof propValue["render"] === "function") {
-            return
-        }
-        if (typeof propValue[key] !== "function")
-            return new Error(
-                "Invalid prop `" +
-                    propFullName +
-                    "` of type `" +
-                    typeof propValue[key] +
-                    "` supplied to" +
-                    " `" +
-                    componentName +
-                    "`, expected `function`."
-            )
+const ObserverPropsCheck = (props,key,componentName,location,propFullName)=>{
+    const extraKey = key === "children" ? "render" : "children"
+    if(typeof propValue[key] === "function" && typeof propValue[extraKey] === "function" ){
+            return new Error("Invalid prop,do not use children and render in the same time in`" + componentName )
     }
+    
+    if (typeof propValue[key] === "function" || typeof propValue[extraKey] === "function") {
+        return
+    }
+    return new Error(
+        "Invalid prop `" +
+            propFullName +
+            "` of type `" +
+            typeof propValue[key] +
+            "` supplied to" +
+            " `" +
+            componentName +
+            "`, expected `function`."
+    )
+}
+
+Observer.propTypes = {
+    render: ObserverPropsCheck,
+    children: ObserverPropsCheck,
 }
