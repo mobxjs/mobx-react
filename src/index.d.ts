@@ -69,6 +69,8 @@ export class Observer extends React.Component<{ children?: () => React.ReactNode
 
 export function useStaticRendering(value: boolean): void
 
+export function suppressChangedStoreWarning(value: boolean): void
+
 /**
  * Enable dev tool support, makes sure that renderReport emits events.
  */
