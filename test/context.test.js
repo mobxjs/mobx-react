@@ -1,4 +1,4 @@
-import React, { Children } from "react"
+import React from "react"
 import createClass from "create-react-class"
 import { mount } from "enzyme"
 import { isEqualWith } from "lodash"

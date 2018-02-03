@@ -1,5 +1,5 @@
 import { Children, Component } from "react"
-import { observable, autorun, computed, Atom } from "mobx"
+import { computed, Atom } from "mobx"
 import * as PropTypes from "./propTypes"
 import { shallowEqual } from "./utils/utils"
 
