@@ -18,7 +18,7 @@ export {
     useStaticRendering
 } from "./observer"
 
-export { default as Provider } from "./Provider"
+export { default as Provider, suppressChangedStoreWarning } from "./Provider"
 export { default as inject } from "./inject"
 
 import * as propTypes from "./propTypes"
