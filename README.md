@@ -138,7 +138,7 @@ const user = mobx.observable({
 
 const UserNameDisplayer = ()=>(
     <Observer
-        inject={(stores)=>({user:stores.user})}
+        inject={(stores)=>({user:stores.userStore})}
         render={props => (<NameDisplayer name={props.user.name}/>)}
     />
 )
