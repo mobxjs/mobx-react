@@ -113,7 +113,7 @@ class App extends React.Component {
          <div>
             {this.props.person.name}
             <Observer
-              render={(props) => <div>{props.person.name}</div>}
+              render= {() => <div>{this.props.person.name}</div>}
             />
         </div>
      )
