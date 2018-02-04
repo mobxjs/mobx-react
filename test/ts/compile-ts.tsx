@@ -191,6 +191,18 @@ class ObserverTest extends Component<any, any> {
 	}
 }
 
+class ObserverTest2 extends Component<any, any> {
+	render() {
+		return <Observer render={() => <div>test</div>} />;
+	}
+}
+
+class ObserverTest3 extends Component<any, any> {
+	render() {
+		return <Observer inject={["store"]} render={() => <div>test</div>} />;
+	}
+}
+
 @observer
 class ComponentWithoutPropsAndState extends Component<{}, {}> {
     componentDidUpdate() {

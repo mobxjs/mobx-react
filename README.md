@@ -83,8 +83,6 @@ The rendering in the function will be tracked and automatically re-rendered when
 This can come in handy when needing to pass render function to external components (for example the React Native listview), or if you
 dislike the `observer` decorator / function.
 
-Example:
-
 ```javascript
 class App extends React.Component {
   render() {
@@ -103,6 +101,53 @@ const person = observable({ name: "John" })
 
 React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
+```
+
+In case you are a fan of render props, you can use that instead of children. Be advised, that you cannot use both approaches at once, children have a precedence.
+Example
+
+```javascript
+class App extends React.Component {
+  render() {
+     return (
+         <div>
+            {this.props.person.name}
+            <Observer
+              render= {() => <div>{this.props.person.name}</div>}
+            />
+        </div>
+     )
+  }
+}
+
+const person = observable({ name: "John" })
+
+React.render(<App person={person} />, document.body)
+person.name = "Mike" // will cause the Observer region to re-render
+```
+Observer can also inject the stores simply by passing a selector function.
+Example with inject
+
+```javascript
+
+const NameDisplayer = ({ name }) => <h1>{name}</h1>
+
+const user = mobx.observable({
+    name: "Noa"
+})
+
+const UserNameDisplayer = ()=>(
+    <Observer
+        inject={(stores)=>({user:stores.user})}
+        render={props => (<NameDisplayer name={props.user.name}/>)}
+    />
+)
+
+const App = () => (
+    <Provider userStore={user}>
+        <UserNameDisplayer />
+    </Provider>
+)
 ```
 
 ### Global error handler with `onError`
@@ -438,3 +483,5 @@ Data will have one of the following formats:
 
 WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
 This map is only available after invoking `trackComponents`.
+
+

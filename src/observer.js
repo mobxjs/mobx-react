@@ -1,5 +1,5 @@
 import { Atom, Reaction, extras } from "mobx"
-import { Component } from "react"
+import React, { Component } from "react"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
@@ -349,22 +349,42 @@ function mixinLifecycleEvents(target) {
 }
 
 // TODO: support injection somehow as well?
-export const Observer = observer(({ children }) => children())
+export const Observer = observer(({ children, inject: observerInject, render }) => {
+    const component = children || render
+    if (typeof component === "undefined") {
+        return null
+    }
+    if (!observerInject) {
+        return component()
+    }
+    const InjectComponent = inject(observerInject)(component)
+    return <InjectComponent />
+})
 
 Observer.displayName = "Observer"
 
-Observer.propTypes = {
-    children: (propValue, key, componentName, location, propFullName) => {
-        if (typeof propValue[key] !== "function")
-            return new Error(
-                "Invalid prop `" +
-                    propFullName +
-                    "` of type `" +
-                    typeof propValue[key] +
-                    "` supplied to" +
-                    " `" +
-                    componentName +
-                    "`, expected `function`."
-            )
+const ObserverPropsCheck = (props,key,componentName,location,propFullName)=>{
+    const extraKey = key === "children" ? "render" : "children"
+    if(typeof propValue[key] === "function" && typeof propValue[extraKey] === "function" ){
+            return new Error("Invalid prop,do not use children and render in the same time in`" + componentName )
     }
+    
+    if (typeof propValue[key] === "function" || typeof propValue[extraKey] === "function") {
+        return
+    }
+    return new Error(
+        "Invalid prop `" +
+            propFullName +
+            "` of type `" +
+            typeof propValue[key] +
+            "` supplied to" +
+            " `" +
+            componentName +
+            "`, expected `function`."
+    )
+}
+
+Observer.propTypes = {
+    render: ObserverPropsCheck,
+    children: ObserverPropsCheck,
 }
