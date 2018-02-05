@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.4.1
+
+* Fixed syntax error in 4.4.0 that escaped
+
 ### 4.4.0
 
 * `Observer` now supports render props, `render` and `inject`. See the updated readme. By [ZiYingMai](https://github.com/Sunshine168) through [#403](https://github.com/mobxjs/mobx-react/pull/403)

@@ -363,20 +363,22 @@ export const Observer = observer(({ children, inject: observerInject, render }) 
 
 Observer.displayName = "Observer"
 
-const ObserverPropsCheck = (props,key,componentName,location,propFullName)=>{
+const ObserverPropsCheck = (props, key, componentName, location, propFullName) => {
     const extraKey = key === "children" ? "render" : "children"
-    if(typeof propValue[key] === "function" && typeof propValue[extraKey] === "function" ){
-            return new Error("Invalid prop,do not use children and render in the same time in`" + componentName )
+    if (typeof props[key] === "function" && typeof props[extraKey] === "function") {
+        return new Error(
+            "Invalid prop,do not use children and render in the same time in`" + componentName
+        )
     }
-    
-    if (typeof propValue[key] === "function" || typeof propValue[extraKey] === "function") {
+
+    if (typeof props[key] === "function" || typeof props[extraKey] === "function") {
         return
     }
     return new Error(
         "Invalid prop `" +
             propFullName +
             "` of type `" +
-            typeof propValue[key] +
+            typeof props[key] +
             "` supplied to" +
             " `" +
             componentName +
@@ -386,5 +388,5 @@ const ObserverPropsCheck = (props,key,componentName,location,propFullName)=>{
 
 Observer.propTypes = {
     render: ObserverPropsCheck,
-    children: ObserverPropsCheck,
+    children: ObserverPropsCheck
 }

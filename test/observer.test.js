@@ -526,7 +526,7 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
     }
 
     mobx.reaction(() => odata.x, v => console.log(v))
-    
+
     beforeAll(async done => {
         await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
         done()
