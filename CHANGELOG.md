@@ -1,5 +1,13 @@
 # MobX-React Changelog
 
+### 4.4.0
+
+* `Observer` now supports render props, `render` and `inject`. See the updated readme. By [ZiYingMai](https://github.com/Sunshine168) through [#403](https://github.com/mobxjs/mobx-react/pull/403)
+* Fixed: `NaN` is now considered to be equal to `NaN` when doing reconciliation. Fixes [#363](https://github.com/mobxjs/mobx-react/issues/363), by [Andrew Branch](https://github.com/andrewbranch) through [#402](https://github.com/mobxjs/mobx-react/pull/402)
+* Improved typings of `Observer` component, by [Rafał Filipek](https://github.com/RafalFilipek) through [#376](https://github.com/mobxjs/mobx-react/pull/376)
+* Fixed incorrect generation of component name, by [Andy Kogut](https://github.com/andykog) through [#368](https://github.com/mobxjs/mobx-react/pull/368)
+* Lot of internal repo upgrades: Test suite is now in Jest, Prettier is used etc.
+
 ### 4.3.5
 
 Fixed some issues with the typescript typings. See for example #353
