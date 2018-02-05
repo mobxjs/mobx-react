@@ -807,4 +807,20 @@ describe("use Observer inject and render sugar should work  ", () => {
         await asyncReactDOMRender(<A />, testRoot)
         expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
     })
+
+    test("show error when using children and render at same time ", async () => {
+        const msg = []
+        const baseError = console.error
+        console.error = m => msg.push(m)
+
+        const Comp = () => (
+            <div>
+                <Observer render={() => <span>{123}</span>}>{() => <span>{123}</span>}</Observer>
+            </div>
+        )
+
+        await asyncReactDOMRender(<Comp />, testRoot)
+        expect(msg.length).toBe(1)
+        console.error = baseError
+    })
 })
