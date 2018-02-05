@@ -1,4 +1,4 @@
-import { isObservableArray, isObservableObject, isObservableMap, untracked } from "mobx"
+import { isObservableArray, isObservableObject, isObservableMap, untracked, isComputed } from "mobx"
 
 // Copied from React.PropTypes
 function createChainableTypeChecker(validate) {
@@ -117,6 +117,9 @@ function createObservableTypeCheckerCreator(allowNativeType, mobxType) {
                 case "Map":
                     mobxChecker = isObservableMap
                     break
+                case "Computed":
+                    mobxChecker = isComputed
+                    break
                 default:
                     throw new Error(`Unexpected mobxType: ${mobxType}`)
             }
@@ -196,3 +199,4 @@ export const observableObject = createObservableTypeCheckerCreator(false, "Objec
 export const arrayOrObservableArray = createObservableTypeCheckerCreator(true, "Array")
 export const arrayOrObservableArrayOf = createObservableArrayOfTypeChecker.bind(null, true)
 export const objectOrObservableObject = createObservableTypeCheckerCreator(true, "Object")
+export const observableComputed = createObservableTypeCheckerCreator(false, "Computed")

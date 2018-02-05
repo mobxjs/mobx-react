@@ -1,10 +1,11 @@
 import React from "react"
 import createClass from "create-react-class"
 import { mount } from "enzyme"
-import mobx from "mobx"
+import { isEqualWith } from "lodash"
+import { observable, spy } from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
-import { Provider, observer } from "../"
+import { Provider, observer, inject } from "../"
 import { sleepHelper } from "./"
 
 describe("observer based context", () => {
@@ -167,18 +168,19 @@ describe("observer based context", () => {
         done()
     })
 
-    test("warning is printed when changing stores", done => {
+    test("warning is printed when changing stores, but injected component updated correctly", done => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return <div>context:{this.props.foo}</div>
-                }
-            })
+        const a = observable(3)
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return <div>context:{this.props.foo}</div>
+                    }
+                })
+            )
         )
         const B = observer(
             createClass({
@@ -202,52 +204,86 @@ describe("observer based context", () => {
         expect(wrapper.find("div").text()).toEqual("context:3")
         a.set(42)
         expect(wrapper.find("span").text()).toEqual("42")
-        expect(wrapper.find("div").text()).toEqual("context:3")
+        expect(wrapper.find("div").text()).toEqual("context:42")
         expect(msg).toEqual(
-            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
+            "MobX Provider: The set of provided stores has changed. Propagation to all children now in experimental support status"
         )
         console.warn = baseWarn
         done()
     })
 
-    test("warning is not printed when changing stores, but suppressed explicitly", done => {
-        let msg = null
-        const baseWarn = console.warn
-        console.warn = m => (msg = m)
-        const a = mobx.observable(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return <div>context:{this.props.foo}</div>
-                }
-            })
+    test("changing store worked through another Provider", done => {
+        let computeCount = 0
+        spy(event => {
+            if (event.type === "compute") {
+                computeCount++
+            }
+        })
+        const a = observable(3)
+        const b = observable(30)
+        const C = inject("foo", "bar")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:{this.props.foo}_{this.props.bar}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
-        const B = observer(
+        const NotUpdatable = observer(
             createClass({
-                render: () => <C />
+                shouldComponentUpdate(nextProps) {
+                    return !isEqualWith(this.props, nextProps, customEquality)
+                    function customEquality(objValue, othValue) {
+                        if (objValue.props || othValue.props) {
+                            return isEqualWith(objValue.props, othValue.props, customEquality)
+                        }
+                    }
+                },
+                render() {
+                    return this.props.children
+                }
             })
         )
         const A = observer(
             createClass({
                 render: () => (
                     <section>
-                        <span>{a.get()}</span>,
-                        <Provider foo={a.get()} suppressChangedStoreWarning>
-                            <B />
+                        <span>
+                            {a.get()}_{b.get()}
+                        </span>,
+                        <Provider foo={a.get()}>
+                            <NotUpdatable>
+                                <Provider bar={b.get()}>
+                                    <NotUpdatable>
+                                        <C />
+                                    </NotUpdatable>
+                                </Provider>
+                            </NotUpdatable>
                         </Provider>
                     </section>
                 )
             })
         )
         const wrapper = mount(<A />)
-        expect(wrapper.find("span").text()).toEqual("3")
-        expect(wrapper.find("div").text()).toEqual("context:3")
+        expect(computeCount).toBe(2)
+        expect(wrapper.find("span").text()).toEqual("3_30")
+        expect(wrapper.find("div").text()).toEqual("context:3_30")
+
         a.set(42)
-        expect(wrapper.find("span").text()).toEqual("42")
-        expect(wrapper.find("div").text()).toEqual("context:3")
-        expect(msg).toBeNull()
-        console.warn = baseWarn
+        expect(computeCount).toBe(4)
+        expect(wrapper.find("span").text()).toEqual("42_30")
+        expect(wrapper.find("div").text()).toEqual("context:42_30")
+
+        b.set(420)
+        expect(computeCount).toBe(5)
+        expect(wrapper.find("span").text()).toEqual("42_420")
+        expect(wrapper.find("div").text()).toEqual("context:42_420")
+
         done()
     })
 })

@@ -3,7 +3,7 @@ import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import { mount } from "enzyme"
-import mobx, { action, observable, computed } from "mobx"
+import { action, observable, computed } from "mobx"
 import { observer, inject, Provider } from "../"
 import { createTestRoot } from "./index"
 import { sleepHelper } from "./index"
@@ -147,14 +147,15 @@ describe("inject based context", () => {
         let msg
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return <div>context:{this.props.foo}</div>
-                }
-            })
+        const a = observable(3)
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return <div>context:{this.props.foo}</div>
+                    }
+                })
+            )
         )
         const B = observer(
             createClass({
@@ -181,9 +182,9 @@ describe("inject based context", () => {
         a.set(42)
 
         expect(wrapper.find("span").text()).toBe("42")
-        expect(wrapper.find("div").text()).toBe("context:3")
+        expect(wrapper.find("div").text()).toBe("context:42")
         expect(msg).toBe(
-            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
+            "MobX Provider: The set of provided stores has changed. Propagation to all children now in experimental support status"
         )
 
         console.warn = baseWarn
@@ -354,7 +355,7 @@ describe("inject based context", () => {
     })
 
     test("using a custom injector is reactive", () => {
-        const user = mobx.observable({ name: "Noa" })
+        const user = observable({ name: "Noa" })
         const mapper = stores => ({ name: stores.user.name })
         const DisplayName = props => <h1>{props.name}</h1>
         const User = inject(mapper)(DisplayName)

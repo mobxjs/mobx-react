@@ -5,7 +5,7 @@ import { observer } from "./observer"
 import { isStateless } from "./utils/utils"
 
 const injectorContextTypes = {
-    mobxStores: PropTypes.objectOrObservableObject
+    mobxStores: PropTypes.observableComputed
 }
 Object.seal(injectorContextTypes)
 
@@ -42,6 +42,8 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
             "Unknown")
     if (injectNames) displayName += "-with-" + injectNames
 
+    // mark the Injector as observer, to make it react to expressions in `grabStoresFn`, and `mobxStores` unboxing
+    @observer
     class Injector extends Component {
         static displayName = displayName
 
@@ -58,8 +60,9 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
                 if (this.props.hasOwnProperty(key)) {
                     newProps[key] = this.props[key]
                 }
-            var additionalProps =
-                grabStoresFn(this.context.mobxStores || {}, newProps, this.context) || {}
+            const mobxStores = (this.context.mobxStores && this.context.mobxStores.get()) || {}
+            const resolvedContext = Object.freeze(Object.assign({}, this.context, { mobxStores }))
+            const additionalProps = grabStoresFn(mobxStores, newProps, resolvedContext) || {}
             for (let key in additionalProps) {
                 newProps[key] = additionalProps[key]
             }
@@ -107,24 +110,15 @@ function grabStoresByName(storeNames) {
  * storesToProps(mobxStores, props, context) => newProps
  */
 export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
+    const storeNames = []
     let grabStoresFn
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]
-        return function(componentClass) {
-            let injected = createStoreInjector(grabStoresFn, componentClass)
-            injected.isMobxInjector = false // supress warning
-            // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
-            // see #111
-            injected = observer(injected)
-            injected.isMobxInjector = true // restore warning
-            return injected
-        }
     } else {
-        const storeNames = []
         for (let i = 0; i < arguments.length; i++) storeNames[i] = arguments[i]
         grabStoresFn = grabStoresByName(storeNames)
-        return function(componentClass) {
-            return createStoreInjector(grabStoresFn, componentClass, storeNames.join("-"))
-        }
+    }
+    return function(componentClass) {
+        return createStoreInjector(grabStoresFn, componentClass, storeNames.join("-"))
     }
 }
