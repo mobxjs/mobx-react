@@ -7,3 +7,4 @@ webpack.config.js
 *.html
 build-rollup.js
 .vscode
+.babelrc
