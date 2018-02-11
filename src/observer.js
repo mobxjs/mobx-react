@@ -348,7 +348,6 @@ function mixinLifecycleEvents(target) {
     }
 }
 
-// TODO: support injection somehow as well?
 export const Observer = observer(({ children, inject: observerInject, render }) => {
     const component = children || render
     if (typeof component === "undefined") {
@@ -357,7 +356,7 @@ export const Observer = observer(({ children, inject: observerInject, render }) 
     if (!observerInject) {
         return component()
     }
-    const InjectComponent = inject(observerInject)(component)
+    const InjectComponent = inject(observerInject)(observer(component))
     return <InjectComponent />
 })
 
