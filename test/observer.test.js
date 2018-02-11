@@ -4,7 +4,7 @@ import ReactDOM from "react-dom"
 import ReactDOMServer from "react-dom/server"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../"
+import { observer, inject, onError, offError, useStaticRendering, Provider,Observer } from "../"
 import { createTestRoot, sleepHelper, asyncReactDOMRender, asyncRender } from "./"
 import ErrorCatcher from "./ErrorCatcher"
 
@@ -774,38 +774,51 @@ describe("use Observer inject and render sugar should work  ", () => {
     })
 
     test("use render with inject should be correct", async () => {
+        const person  = mobx.observable({
+            first:'hello',
+            second:'world',
+        })
         const Comp = () => (
             <div>
                 <Observer
-                    inject={store => ({ h: store.h, w: store.w })}
-                    render={props => <span>{`${props.h} ${props.w}`}</span>}
+                    inject={['person']}
+                    render={props => <span>{`${props.person.first} ${props.person.second}`}</span>}
                 />
             </div>
         )
         const A = () => (
-            <Provider h="hello" w="world">
+            <Provider person={person}>
                 <Comp />
             </Provider>
         )
         await asyncReactDOMRender(<A />, testRoot)
         expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+        person.first = 'hi'
+        await sleepHelper(100)
+        expect(testRoot.querySelector("span").innerHTML).toBe("hi world")
     })
 
     test("use children with inject should be correct", async () => {
+        const person  = mobx.observable({
+            first:'hello',
+            second:'world',
+        })
         const Comp = () => (
             <div>
-                <Observer inject={store => ({ h: store.h, w: store.w })}>
-                    {props => <span>{`${props.h} ${props.w}`}</span>}
+                <Observer inject={store => ({ first: store.person.first, second: store.person.second })}>
+                    {props => <span>{`${props.first} ${props.second}`}</span>}
                 </Observer>
             </div>
         )
         const A = () => (
-            <Provider h="hello" w="world">
+            <Provider person={person}>
                 <Comp />
             </Provider>
         )
         await asyncReactDOMRender(<A />, testRoot)
         expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+        person.first = 'hi'
+        expect(testRoot.querySelector("span").innerHTML).toBe("hi world")
     })
 
     test("show error when using children and render at same time ", async () => {
