@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.4.2
+
+* Fixed issue with mobx-react not compiling on react-native due to the presence of a `.babelrc` file. Fixes [#415](https://github.com/mobxjs/mobx-react/issues/415) by [Ryan Rampersad](https://github.com/ryanmr) through [#416](https://github.com/mobxjs/mobx-react/pull/416)
+
 ### 4.4.1
 
 * Fixed syntax error in 4.4.0 that escaped
