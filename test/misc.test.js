@@ -11,7 +11,7 @@ const testRoot = createTestRoot()
 describe("custom shouldComponentUpdate is not respected for observable changes (#50)", () => {
     describe("(#50)-1", () => {
         let called = 0
-        const x = mobx.observable(3)
+        const x = mobx.observable.box(3)
         const C = observer(
             createClass({
                 render: () => <div>value:{x.get()}</div>,
@@ -33,7 +33,7 @@ describe("custom shouldComponentUpdate is not respected for observable changes (
     describe("(#50) - 2", () => {
         // TODO: shouldComponentUpdate is meaningless with observable props...., just show warning in component definition?
         let called = 0
-        const y = mobx.observable(5)
+        const y = mobx.observable.box(5)
         const C = observer(
             createClass({
                 render() {
@@ -113,7 +113,7 @@ test("issue mobx 405", () => {
 })
 
 test("#85 Should handle state changing in constructors", done => {
-    const a = mobx.observable(2)
+    const a = mobx.observable.box(2)
     const Child = observer(
         createClass({
             displayName: "Child",
@@ -168,12 +168,12 @@ test("testGetDNode", () => {
 
     const wrapper = mount(<C />)
     expect(wrapper.instance().render.$mobx).toBeTruthy()
-    expect(mobx.extras.getAtom(wrapper.instance().render)).toBeTruthy()
+    expect(mobx.getAtom(wrapper.instance().render)).toBeTruthy()
 
     mobx.extendObservable(wrapper.instance(), {
         x: 3
     })
-    expect(mobx.extras.getAtom(wrapper.instance(), "x")).not.toEqual(
-        mobx.extras.getAtom(wrapper.instance().render)
+    expect(mobx.getAtom(wrapper.instance(), "x")).not.toEqual(
+        mobx.getAtom(wrapper.instance().render)
     )
 })

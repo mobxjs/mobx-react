@@ -267,7 +267,7 @@ describe("issue 12", () => {
 })
 
 test("changing state in render should fail", () => {
-    const data = mobx.observable(2)
+    const data = mobx.observable.box(2)
     const Comp = observer(() => {
         if (data.get() === 3) {
             try {
@@ -283,7 +283,7 @@ test("changing state in render should fail", () => {
     TestUtils.renderIntoDocument(<Comp />)
 
     data.set(3)
-    mobx.extras.resetGlobalState()
+    mobx._resetGlobalState()
 })
 
 test("component should not be inject", () => {
@@ -379,7 +379,7 @@ describe("124 - react to changes in this.props via computed", () => {
 // Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
 //this test case should be deprecated?
 test.skip("should stop updating if error was thrown in render (#134)", () => {
-    const data = mobx.observable(0)
+    const data = mobx.observable.box(0)
     let renderingsCount = 0
 
     const Comp = observer(function() {
@@ -553,7 +553,7 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
 })
 
 describe("Observer regions should react", () => {
-    const data = mobx.observable("hi")
+    const data = mobx.observable.box("hi")
     const Comp = () => (
         <div>
             <Observer>{() => <span>{data.get()}</span>}</Observer>

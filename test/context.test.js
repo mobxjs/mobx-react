@@ -1,7 +1,7 @@
 import React from "react"
 import createClass from "create-react-class"
 import { mount } from "enzyme"
-import mobx from "mobx"
+import * as mobx from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
 import { Provider, observer } from "../"
@@ -171,7 +171,7 @@ describe("observer based context", () => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
+        const a = mobx.observable.box(3)
         const C = observer(
             ["foo"],
             createClass({
@@ -214,7 +214,7 @@ describe("observer based context", () => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
+        const a = mobx.observable.box(3)
         const C = observer(
             ["foo"],
             createClass({
