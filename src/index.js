@@ -1,4 +1,4 @@
-import { spy, _setReactionScheduler } from "mobx"
+import { spy, configure } from "mobx"
 import { Component } from "react"
 import { unstable_batchedUpdates as rdBatched } from "react-dom"
 import { unstable_batchedUpdates as rnBatched } from "react-native"
@@ -6,8 +6,8 @@ import { unstable_batchedUpdates as rnBatched } from "react-native"
 if (!Component) throw new Error("mobx-react requires React to be available")
 if (!spy) throw new Error("mobx-react requires mobx to be available")
 
-if (typeof rdBatched === "function") _setReactionScheduler(rdBatched)
-else if (typeof rnBatched === "function") _setReactionScheduler(rnBatched)
+if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
+else if (typeof rnBatched === "function") configure({ reactionScheduler: rnBatched })
 
 export {
     observer,
