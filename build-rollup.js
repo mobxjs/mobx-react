@@ -95,7 +95,7 @@ Promise.all([
     build("browser", "umd", "index.js"),
     build("browser", "umd.min", "index.min.js"),
     build("browser", "es", "index.module.js"),
-    build("native", "es", "native.js"),
+    build("native", "cjs", "native.js"),
     build("custom", "umd", "custom.js"),
     build("custom", "es", "custom.module.js")
 ])
