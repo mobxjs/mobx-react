@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 4.4.3
+
+* The exposed React Native build now uses commonjs, to prevent the need of further transpilation. Fixes [#428](428)
+
 ### 4.4.2
 
 * Fixed issue with mobx-react not compiling on react-native due to the presence of a `.babelrc` file. Fixes [#415](https://github.com/mobxjs/mobx-react/issues/415) by [Ryan Rampersad](https://github.com/ryanmr) through [#416](https://github.com/mobxjs/mobx-react/pull/416)
