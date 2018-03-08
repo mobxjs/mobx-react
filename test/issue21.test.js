@@ -311,6 +311,82 @@ test("verify props is reactive", async () => {
     )
 })
 
+test("verify change of non-accessed prop do not trigger reaction", async () => {
+    const computedCalls = []
+    const Component = observer(
+        class Component extends React.Component {
+            constructor() {
+                super()
+                this.computedWithProp1 = mobx.computed(() => {
+                    const prop1Value = this.props.prop1
+                    computedCalls.push("prop1: " + JSON.stringify(prop1Value))
+                    return prop1Value
+                })
+                this.computedWithProp2 = mobx.computed(() => {
+                    const prop2Value = this.props.prop2
+                    computedCalls.push("prop2: " + JSON.stringify(prop2Value))
+                    return prop2Value
+                })
+            }
+
+            render() {
+                this.computedWithProp1.get()
+                this.computedWithProp2.get()
+                return null
+            }
+        }
+    )
+
+    const Container = observer(
+        class Container extends React.Component {
+            render() {
+                return this.props.renderStore.get()()
+            }
+        }
+    )
+
+    const renderFnStore = mobx.observable.box(function() {
+        return null
+    })
+
+    await asyncReactDOMRender(<Container renderStore={renderFnStore} />, testRoot)
+    renderFnStore.set(function() {
+        return <Component prop1={1} />
+    })
+    expect(computedCalls).toEqual(["prop1: 1", "prop2: undefined"])
+    computedCalls.length = 0
+
+    // prop1 changed from 1 to 2, prop2 is untouched
+    renderFnStore.set(function() {
+        return <Component prop1={2} />
+    })
+    expect(computedCalls).toEqual(["prop1: 1"])
+    computedCalls.length = 0
+
+    // prop1 is untouched, prop2 appears
+    renderFnStore.set(function() {
+        return <Component prop1={2} prop2={1} />
+    })
+    // if new prop appears, all props-related computeds should be recalculated
+    expect(computedCalls).toEqual(["prop1: 2", "prop2: 1"])
+    computedCalls.length = 0
+
+    // prop1 is untouched, prop2 changes from 1 to 2
+    renderFnStore.set(function() {
+        return <Component prop1={2} prop2={2} />
+    })
+    expect(computedCalls).toEqual(["prop2: 2"])
+    computedCalls.length = 0
+
+    // prop1 disappear, prop2 is untouched
+    renderFnStore.set(function() {
+        return <Component prop2={2} />
+    })
+    // if prop disappears, then all props-related computeds should be recalculated
+    expect(computedCalls).toEqual(["prop1: undefined", "prop2: 2"])
+    computedCalls.length = 0
+})
+
 test("no re-render for shallow equal props", async () => {
     function createItem(subid, label) {
         const res = mobx.observable({
