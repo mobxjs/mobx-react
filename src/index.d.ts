@@ -1,4 +1,10 @@
 /**
+ *  Diff & Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
+ */
+type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T];
+type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>
+
+/**
  * Turns a React component or stateless render function into a reactive component.
  */
 import React = require("react")
@@ -40,9 +46,12 @@ export type IWrappedComponent<P> = {
 export function inject(
     ...stores: string[]
 ): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
-export function inject<S, P, I, C>(
+export function inject<S, P extends I, I>(
+    fn: IStoresToProps<S, P, I>
+): <T extends IReactComponent>(target: T) => IReactComponent<Omit<P, keyof I>> & IWrappedComponent<T>
+export function inject<S, P extends I, I, C>(
     fn: IStoresToProps<S, P, I, C>
-): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
+): <T extends IReactComponent>(target: T) => IReactComponent<Omit<P, keyof I>> & IWrappedComponent<T>
 
 // Ideal implemetnation:
 // export function inject
