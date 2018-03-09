@@ -110,8 +110,6 @@ function is(x, y) {
     }
 }
 
-const skipRenderKey = Symbol("skipRender")
-
 /**
  * ReactiveMixin
  */
