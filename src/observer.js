@@ -1,4 +1,4 @@
-import { Atom, Reaction, extras } from "mobx"
+import { Atom, Reaction, extras, runInAction } from "mobx"
 import React, { Component } from "react"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
@@ -110,6 +110,8 @@ function is(x, y) {
     }
 }
 
+const skipRenderKey = Symbol("skipRender")
+
 /**
  * ReactiveMixin
  */
@@ -138,26 +140,93 @@ const reactiveMixin = {
         let isForcingUpdate = false
 
         function makePropertyObservableReference(propName) {
-            let valueHolder = this[propName]
-            const atom = new Atom("reactive " + propName)
+            let currentValue = this[propName]
+            let currentValueKeys = null == currentValue ? [] : Object.keys(currentValue)
+            const keysAtom = new Atom("this." + propName + " keys")
+            const individualAtoms = {}
+            const individualValues = {}
+
+            /**
+             * In-place convert properties to getter+setter
+             */
+            function convertStorageToReactive(storage) {
+                if (null == storage) {
+                    return
+                }
+                Object.keys(storage).forEach(function(key) {
+                    if (!(key in individualAtoms)) {
+                        individualAtoms[key] = new Atom("this." + propName + "." + key)
+                    }
+                    const currentKeyValue = storage[key]
+                    delete storage[key]
+                    Object.defineProperty(storage, key, {
+                        configurable: true,
+                        enumerable: true,
+                        get: function get() {
+                            individualAtoms[key].reportObserved()
+                            return individualValues[key]
+                        },
+                        set: function set(v) {
+                            if (individualValues[key] !== v) {
+                                individualValues[key] = v
+                                individualAtoms[key].reportChanged()
+                            }
+                        }
+                    })
+                    storage[key] = currentKeyValue
+                })
+            }
+
+            /**
+             * In-place convert getter+setter to plain property
+             */
+            function convertStorageToPlain(storage) {
+                if (null == storage) {
+                    return
+                }
+                Object.keys(storage).forEach(function(key) {
+                    const currentKeyValue = storage[key]
+                    delete storage[key]
+                    storage[key] = currentKeyValue
+                })
+            }
             Object.defineProperty(this, propName, {
                 configurable: true,
                 enumerable: true,
                 get: function() {
-                    atom.reportObserved()
-                    return valueHolder
+                    keysAtom.reportObserved()
+                    return currentValue
                 },
-                set: function set(v) {
-                    if (!isForcingUpdate && !shallowEqual(valueHolder, v)) {
-                        valueHolder = v
-                        skipRender = true
-                        atom.reportChanged()
-                        skipRender = false
-                    } else {
-                        valueHolder = v
-                    }
+                set: function set(newValue) {
+                    skipRender = true
+                    runInAction(function() {
+                        const newKeys = newValue == null ? [] : Object.keys(newValue)
+                        // always re-create value
+                        convertStorageToPlain(currentValue)
+                        convertStorageToReactive(newValue)
+                        // update value holder with new inner value
+                        currentValue = newValue
+                        if (
+                            currentValueKeys.length !== newKeys.length ||
+                            newKeys.filter(key => currentValueKeys.indexOf(key) >= 0).length !==
+                                newKeys.length
+                        ) {
+                            keysAtom.reportChanged()
+                            // find removed old keys and delete atoms and value holders
+                            currentValueKeys
+                                .filter(key => newKeys.indexOf(key) < 0)
+                                .forEach(key => {
+                                    delete individualAtoms[key]
+                                    delete individualValues[key]
+                                })
+                        }
+                        currentValueKeys = newKeys
+                    })
+                    skipRender = false
                 }
             })
+            // trigger initial setter to initialize struct
+            convertStorageToReactive(currentValue)
         }
 
         // make this.props an observable reference, see #124
@@ -333,7 +402,17 @@ export function observer(arg1, arg2) {
     const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
-    return componentClass
+    function ObserverComponent(props) {
+        let childElement = React.createElement(componentClass, props)
+        if (Object.isFrozen && Object.isFrozen(childElement)) {
+            childElement = Object.assign({}, childElement, {
+                props: Object.assign({}, childElement.props)
+            })
+        }
+        return childElement
+    }
+    ObserverComponent.isMobXReactObserver = true
+    return ObserverComponent
 }
 
 function mixinLifecycleEvents(target) {

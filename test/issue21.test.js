@@ -360,7 +360,7 @@ test("verify change of non-accessed prop do not trigger reaction", async () => {
     renderFnStore.set(function() {
         return <Component prop1={2} />
     })
-    expect(computedCalls).toEqual(["prop1: 1"])
+    expect(computedCalls).toEqual(["prop1: 2"])
     computedCalls.length = 0
 
     // prop1 is untouched, prop2 appears
@@ -384,6 +384,14 @@ test("verify change of non-accessed prop do not trigger reaction", async () => {
     })
     // if prop disappears, then all props-related computeds should be recalculated
     expect(computedCalls).toEqual(["prop1: undefined", "prop2: 2"])
+    computedCalls.length = 0
+
+    // If we replace prop2 to prop1, both computeds should be recalculated
+    renderFnStore.set(function() {
+        return <Component prop1={2} />
+    })
+    // if prop disappears, then all props-related computeds should be recalculated
+    expect(computedCalls).toEqual(["prop1: 2", "prop2: undefined"])
     computedCalls.length = 0
 })
 
