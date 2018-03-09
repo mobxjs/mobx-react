@@ -378,11 +378,24 @@ test("verify change of non-accessed prop do not trigger reaction", async () => {
     expect(computedCalls).toEqual(["prop2: 2"])
     computedCalls.length = 0
 
+    // prop2 is untouched, prop1 changes from 2 to 1
+    renderFnStore.set(function() {
+        return <Component prop1={1} prop2={2} />
+    })
+    expect(computedCalls).toEqual(["prop1: 1"])
+    computedCalls.length = 0
+
+    // nothing changed - no recalc
+    renderFnStore.set(function() {
+        return <Component prop1={1} prop2={2} />
+    })
+    expect(computedCalls).toEqual([])
+    computedCalls.length = 0
+
     // prop1 disappear, prop2 is untouched
     renderFnStore.set(function() {
         return <Component prop2={2} />
     })
-    // if prop disappears, then all props-related computeds should be recalculated
     expect(computedCalls).toEqual(["prop1: undefined", "prop2: 2"])
     computedCalls.length = 0
 
@@ -390,8 +403,28 @@ test("verify change of non-accessed prop do not trigger reaction", async () => {
     renderFnStore.set(function() {
         return <Component prop1={2} />
     })
-    // if prop disappears, then all props-related computeds should be recalculated
     expect(computedCalls).toEqual(["prop1: 2", "prop2: undefined"])
+    computedCalls.length = 0
+
+    // remove prop1 should trigger both computed for now. It would be good to not to recalc prop2
+    renderFnStore.set(function() {
+        return <Component />
+    })
+    expect(computedCalls).toEqual(["prop1: undefined", "prop2: undefined"])
+    computedCalls.length = 0
+
+    // and correct catch prop appears after been disappeared
+    renderFnStore.set(function() {
+        return <Component prop1={2} />
+    })
+    expect(computedCalls).toEqual(["prop1: 2", "prop2: undefined"])
+    computedCalls.length = 0
+
+    // swap again - all recalculated
+    renderFnStore.set(function() {
+        return <Component prop2={2} />
+    })
+    expect(computedCalls).toEqual(["prop1: undefined", "prop2: 2"])
     computedCalls.length = 0
 })
 

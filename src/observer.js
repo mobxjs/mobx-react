@@ -140,7 +140,7 @@ const reactiveMixin = {
         function makePropertyObservableReference(propName) {
             let currentValue = this[propName]
             let currentValueKeys = null == currentValue ? [] : Object.keys(currentValue)
-            const keysAtom = new Atom("this." + propName + " keys")
+            const changeKeysAtom = new Atom("this." + propName + " [change keys]")
             const individualAtoms = {}
             const individualValues = {}
 
@@ -149,7 +149,14 @@ const reactiveMixin = {
              */
             function convertStorageToReactive(storage) {
                 if (null == storage) {
-                    return
+                    return storage
+                }
+                // props object is frozen, so we need to clone it
+                // we can do it safely inside componentWillMount (react won't warn us about it)
+                // btw, state object can not be cloned here, (react warns about direct state modification), however
+                // state object is not frozen, so we do not need to clone it to instrument
+                if (Object.isFrozen && Object.isFrozen(storage)) {
+                    storage = Object.assign({}, storage)
                 }
                 Object.keys(storage).forEach(function(key) {
                     if (!(key in individualAtoms)) {
@@ -173,12 +180,13 @@ const reactiveMixin = {
                     })
                     storage[key] = currentKeyValue
                 })
+                return storage
             }
 
             /**
              * In-place convert getter+setter to plain property
              */
-            function convertStorageToPlain(storage) {
+            function convertStorageToStatic(storage) {
                 if (null == storage) {
                     return
                 }
@@ -192,16 +200,19 @@ const reactiveMixin = {
                 configurable: true,
                 enumerable: true,
                 get: function() {
-                    keysAtom.reportObserved()
+                    changeKeysAtom.reportObserved()
                     return currentValue
                 },
                 set: function set(newValue) {
+                    if (newValue === currentValue) {
+                        return
+                    }
                     skipRender = true
                     runInAction(function() {
                         const newKeys = newValue == null ? [] : Object.keys(newValue)
                         // always re-create value
-                        convertStorageToPlain(currentValue)
-                        convertStorageToReactive(newValue)
+                        convertStorageToStatic(currentValue)
+                        newValue = convertStorageToReactive(newValue)
                         // update value holder with new inner value
                         currentValue = newValue
                         if (
@@ -209,7 +220,7 @@ const reactiveMixin = {
                             newKeys.filter(key => currentValueKeys.indexOf(key) >= 0).length !==
                                 newKeys.length
                         ) {
-                            keysAtom.reportChanged()
+                            changeKeysAtom.reportChanged()
                             // find removed old keys and delete atoms and value holders
                             currentValueKeys
                                 .filter(key => newKeys.indexOf(key) < 0)
@@ -224,7 +235,7 @@ const reactiveMixin = {
                 }
             })
             // trigger initial setter to initialize struct
-            convertStorageToReactive(currentValue)
+            currentValue = convertStorageToReactive(currentValue)
         }
 
         // make this.props an observable reference, see #124
@@ -400,17 +411,8 @@ export function observer(arg1, arg2) {
     const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
-    function ObserverComponent(props) {
-        let childElement = React.createElement(componentClass, props)
-        if (Object.isFrozen && Object.isFrozen(childElement)) {
-            childElement = Object.assign({}, childElement, {
-                props: Object.assign({}, childElement.props)
-            })
-        }
-        return childElement
-    }
-    ObserverComponent.isMobXReactObserver = true
-    return ObserverComponent
+
+    return componentClass
 }
 
 function mixinLifecycleEvents(target) {
