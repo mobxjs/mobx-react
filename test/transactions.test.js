@@ -9,8 +9,8 @@ import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 test("mobx issue 50", async () => {
     const testRoot = createTestRoot()
     const foo = {
-        a: mobx.observable(true),
-        b: mobx.observable(false),
+        a: mobx.observable.box(true),
+        b: mobx.observable.box(false),
         c: mobx.computed(function() {
             console.log("evaluate c")
             return foo.b.get()
@@ -47,8 +47,8 @@ test("mobx issue 50", async () => {
 
 test("React.render should respect transaction", async () => {
     const testRoot = createTestRoot()
-    const a = mobx.observable(2)
-    const loaded = mobx.observable(false)
+    const a = mobx.observable.box(2)
+    const loaded = mobx.observable.box(false)
     const valuesSeen = []
 
     const Component = mobxReact.observer(() => {
@@ -73,8 +73,8 @@ test("React.render should respect transaction", async () => {
 
 test("React.render in transaction should succeed", async () => {
     const testRoot = createTestRoot()
-    const a = mobx.observable(2)
-    const loaded = mobx.observable(false)
+    const a = mobx.observable.box(2)
+    const loaded = mobx.observable.box(false)
     const valuesSeen = []
     const Component = mobxReact.observer(() => {
         valuesSeen.push(a.get())

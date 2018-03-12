@@ -1,4 +1,4 @@
-import { Atom, Reaction, extras } from "mobx"
+import { createAtom, Reaction, _allowStateChanges } from "mobx"
 import React, { Component } from "react"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
@@ -139,7 +139,7 @@ const reactiveMixin = {
 
         function makePropertyObservableReference(propName) {
             let valueHolder = this[propName]
-            const atom = new Atom("reactive " + propName)
+            const atom = createAtom("reactive " + propName)
             Object.defineProperty(this, propName, {
                 configurable: true,
                 enumerable: true,
@@ -209,7 +209,7 @@ const reactiveMixin = {
                     this.__$mobRenderStart = Date.now()
                 }
                 try {
-                    rendering = extras.allowStateChanges(false, baseRender)
+                    rendering = _allowStateChanges(false, baseRender)
                 } catch (e) {
                     exception = e
                 }

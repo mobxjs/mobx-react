@@ -1,13 +1,13 @@
-import { extras, spy } from "mobx"
+import { spy, configure, getDebugName } from "mobx"
 import { Component } from "react"
 import { unstable_batchedUpdates as rdBatched } from "react-dom"
 import { unstable_batchedUpdates as rnBatched } from "react-native"
 
 if (!Component) throw new Error("mobx-react requires React to be available")
-if (!extras) throw new Error("mobx-react requires mobx to be available")
+if (!spy) throw new Error("mobx-react requires mobx to be available")
 
-if (typeof rdBatched === "function") extras.setReactionScheduler(rdBatched)
-else if (typeof rnBatched === "function") extras.setReactionScheduler(rnBatched)
+if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
+else if (typeof rnBatched === "function") configure({ reactionScheduler: rnBatched })
 
 export {
     observer,
@@ -33,7 +33,7 @@ export const onError = fn => errorsReporter.on(fn)
 
 import { renderReporter, componentByNodeRegistery, trackComponents } from "./observer"
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === "object") {
-    const mobx = { spy, extras }
+    const mobx = { spy, extras: { getDebugName } }
     const mobxReact = { renderReporter, componentByNodeRegistery, trackComponents }
     __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(mobxReact, mobx)
 }

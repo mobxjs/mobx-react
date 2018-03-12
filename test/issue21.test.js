@@ -9,39 +9,44 @@ import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 const testRoot = createTestRoot()
 let topRenderCount = 0
 
-const wizardModel = mobx.observable({
-    steps: [
-        {
-            title: "Size",
-            active: true
+const wizardModel = mobx.observable(
+    {
+        steps: [
+            {
+                title: "Size",
+                active: true
+            },
+            {
+                title: "Fabric",
+                active: false
+            },
+            {
+                title: "Finish",
+                active: false
+            }
+        ],
+        get activeStep() {
+            return _.find(this.steps, "active")
         },
-        {
-            title: "Fabric",
-            active: false
+        activateNextStep: function() {
+            const nextStep = this.steps[_.findIndex(this.steps, "active") + 1]
+            if (!nextStep) {
+                return false
+            }
+            this.setActiveStep(nextStep)
         },
-        {
-            title: "Finish",
-            active: false
+        setActiveStep(modeToActivate) {
+            const self = this
+            mobx.transaction(() => {
+                _.find(self.steps, "active").active = false
+                modeToActivate.active = true
+            })
         }
-    ],
-    get activeStep() {
-        return _.find(this.steps, "active")
     },
-    activateNextStep: mobx.observable.ref(function() {
-        const nextStep = this.steps[_.findIndex(this.steps, "active") + 1]
-        if (!nextStep) {
-            return false
-        }
-        this.setActiveStep(nextStep)
-    }),
-    setActiveStep(modeToActivate) {
-        const self = this
-        mobx.transaction(() => {
-            _.find(self.steps, "active").active = false
-            modeToActivate.active = true
-        })
+    {
+        activateNextStep: mobx.observable.ref
     }
-})
+)
 
 /** RENDERS **/
 
