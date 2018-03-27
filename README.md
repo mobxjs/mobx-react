@@ -156,6 +156,14 @@ If a component throws an error, this logs to the console but does not 'crash' th
 For this reason it is possible to attach a global error handler using `onError` to intercept any error thrown in the render of an `observer` component.
 This can be used to hook up any client side error collection system.
 
+```javascript
+import { onError } from "mobx-react";
+
+onError((error) => {
+    console.log(error);
+});
+```
+
 ### Server Side Rendering with `useStaticRendering`
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
