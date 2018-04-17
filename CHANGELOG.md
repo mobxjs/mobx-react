@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.0.0
+
+* Added compatibility with MobX 4.x. This version is not compatible with older Mobx versions
+
 ### 4.4.3
 
 * The exposed React Native build now uses commonjs, to prevent the need of further transpilation. Fixes [#428](428)
