@@ -260,9 +260,9 @@ describe("issue 12", () => {
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect(
-            [].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()
-        ).toEqual(["soup"])
+        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
+            ["soup"]
+        )
     })
 })
 
@@ -671,7 +671,9 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
     let renderCount = 0
 
     const emmitedErrors = []
-    const disposeErrorsHandler = onError(error => emmitedErrors.push(error))
+    const disposeErrorsHandler = onError(error => {
+        emmitedErrors.push(error)
+    })
 
     @observer
     class Child extends React.Component {
@@ -695,15 +697,15 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
         expect(() => {
             data.x = 42
         }).toThrow(/Oops!/)
-        expect(renderCount).toBe(2)
+        expect(renderCount).toBe(3) // React fiber will try to replay the rendering, so the exception gets thrown a second time
     })
 
     test("component recovers!", async () => {
         await sleepHelper(500)
         data.x = 3
         TestUtils.renderIntoDocument(<Child />)
-        expect(renderCount).toBe(3)
-        expect(emmitedErrors).toEqual([new Error("Oops!")])
+        expect(renderCount).toBe(4)
+        expect(emmitedErrors).toEqual([new Error("Oops!"), new Error("Oops!")]) // see above comment
     })
 })
 
