@@ -14,7 +14,7 @@ let isUsingStaticRendering = false
 let warnedAboutObserverInjectDeprecation = false
 
 // WeakMap<Node, Object>;
-export const componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
+export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
 function findDOMNode(component) {
@@ -33,7 +33,7 @@ function findDOMNode(component) {
 
 function reportRendering(component) {
     const node = findDOMNode(component)
-    if (node && componentByNodeRegistery) componentByNodeRegistery.set(node, component)
+    if (node && componentByNodeRegistry) componentByNodeRegistry.set(node, component)
 
     renderReporter.emit({
         event: "render",
@@ -70,14 +70,14 @@ function patch(target, funcName, runMixinFirst = false) {
     const f = !base
         ? mixinFunc
         : runMixinFirst === true
-          ? function() {
-                mixinFunc.apply(this, arguments)
-                base.apply(this, arguments)
-            }
-          : function() {
-                base.apply(this, arguments)
-                mixinFunc.apply(this, arguments)
-            }
+            ? function() {
+                  mixinFunc.apply(this, arguments)
+                  base.apply(this, arguments)
+              }
+            : function() {
+                  base.apply(this, arguments)
+                  mixinFunc.apply(this, arguments)
+              }
 
     // MWE: ideally we freeze here to protect against accidental overwrites in component instances, see #195
     // ...but that breaks react-hot-loader, see #231...
@@ -233,8 +233,8 @@ const reactiveMixin = {
         this.__$mobxIsUnmounted = true
         if (isDevtoolsEnabled) {
             const node = findDOMNode(this)
-            if (node && componentByNodeRegistery) {
-                componentByNodeRegistery.delete(node)
+            if (node && componentByNodeRegistry) {
+                componentByNodeRegistry.delete(node)
             }
             renderReporter.emit({
                 event: "destroy",

@@ -97,8 +97,13 @@ export interface IRenderEvent {
 
 /**
  * WeakMap DOMNode -> Component instance
+ * @deprecated
  */
 export const componentByNodeRegistery: any
+/**
+ * WeakMap DOMNode -> Component instance
+ */
+export const componentByNodeRegistry: any
 
 /**
  * @deprecated, use PropTypes instead
