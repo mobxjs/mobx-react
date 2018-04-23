@@ -69,7 +69,6 @@ export class Observer extends React.Component<
     {
         children?: () => React.ReactNode
         render?: () => React.ReactNode
-        inject?: IStoresToProps | string[]
     },
     {}
 > {}

@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+### 5.1.0
+
+* Misspelled export `componentByNodeRegistery` is now properly export as `componentByNodeRegistry` as well, please update consumers, the mispelled version will be dropped in the next major
+* Removed the (undocumented) support for the `inject` property of `Observer` entirely, it was fundamentally broken and should not be used. Use `inject` on the enclosing component instead and grab the necessary stores from the closure.
+
+
 ### 5.0.0
 
 * Added compatibility with MobX 4.x. This version is not compatible with older Mobx versions
