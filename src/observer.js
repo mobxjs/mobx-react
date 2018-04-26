@@ -1,5 +1,5 @@
 import { createAtom, Reaction, _allowStateChanges } from "mobx"
-import React, { Component } from "react"
+import { Component, PureComponent } from "react"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
@@ -301,6 +301,11 @@ export function observer(arg1, arg2) {
     if (componentClass.isMobxInjector === true) {
         console.warn(
             "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
+        )
+    }
+    if (componentClass instanceof PureComponent) {
+        console.warn(
+            "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
         )
     }
 

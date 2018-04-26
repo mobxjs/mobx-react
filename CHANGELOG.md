@@ -4,7 +4,7 @@
 
 * Misspelled export `componentByNodeRegistery` is now properly export as `componentByNodeRegistry` as well, please update consumers, the mispelled version will be dropped in the next major
 * Removed the (undocumented) support for the `inject` property of `Observer` entirely, it was fundamentally broken and should not be used. Use `inject` on the enclosing component instead and grab the necessary stores from the closure.
-
+* Added warning about using `observer` on a React.PureComponent, will become exception in the future
 
 ### 5.0.0
 
