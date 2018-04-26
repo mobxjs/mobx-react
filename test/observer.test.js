@@ -260,9 +260,9 @@ describe("issue 12", () => {
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
-            ["soup"]
-        )
+        expect(
+            [].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()
+        ).toEqual(["soup"])
     })
 })
 
@@ -773,41 +773,6 @@ describe("use Observer inject and render sugar should work  ", () => {
         )
         await asyncReactDOMRender(<Comp />, testRoot)
         expect(testRoot.querySelector("span").innerHTML).toBe("123")
-    })
-
-    test("use render with inject should be correct", async () => {
-        const Comp = () => (
-            <div>
-                <Observer
-                    inject={store => ({ h: store.h, w: store.w })}
-                    render={props => <span>{`${props.h} ${props.w}`}</span>}
-                />
-            </div>
-        )
-        const A = () => (
-            <Provider h="hello" w="world">
-                <Comp />
-            </Provider>
-        )
-        await asyncReactDOMRender(<A />, testRoot)
-        expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
-    })
-
-    test("use children with inject should be correct", async () => {
-        const Comp = () => (
-            <div>
-                <Observer inject={store => ({ h: store.h, w: store.w })}>
-                    {props => <span>{`${props.h} ${props.w}`}</span>}
-                </Observer>
-            </div>
-        )
-        const A = () => (
-            <Provider h="hello" w="world">
-                <Comp />
-            </Provider>
-        )
-        await asyncReactDOMRender(<A />, testRoot)
-        expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
     })
 
     test("show error when using children and render at same time ", async () => {
