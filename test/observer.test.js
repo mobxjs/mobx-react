@@ -798,3 +798,26 @@ describe("use Observer inject and render sugar should work  ", () => {
         console.error = baseError
     })
 })
+
+test("don't use PureComponent", () => {
+    const msg = []
+    const baseWarn = console.warn
+    console.warn = m => msg.push(m)
+
+    try {
+        debugger
+        observer(
+            class X extends React.PureComponent {
+                return() {
+                    return <div />
+                }
+            }
+        )
+
+        expect(msg).toEqual([
+            "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
+        ])
+    } finally {
+        console.warn = baseWarn
+    }
+})

@@ -303,7 +303,7 @@ export function observer(arg1, arg2) {
             "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
         )
     }
-    if (componentClass instanceof PureComponent) {
+    if (componentClass.__proto__ === PureComponent) {
         console.warn(
             "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
         )
