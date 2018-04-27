@@ -25,3 +25,17 @@ export function asyncReactDOMRender(Component, root) {
         ReactDOM.render(Component, root, resolve)
     })
 }
+
+export function noConsole(fn) {
+    const { warn, error, info } = global.console
+    try {
+        Object.assign(global.console, {
+            warn() {},
+            error() {},
+            info() {}
+        })
+        return fn()
+    } finally {
+        Object.assign(global.console, { warn, error, info })
+    }
+}

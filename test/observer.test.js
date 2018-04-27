@@ -5,7 +5,7 @@ import ReactDOMServer from "react-dom/server"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../"
-import { createTestRoot, sleepHelper, asyncReactDOMRender, asyncRender } from "./"
+import { noConsole, createTestRoot, sleepHelper, asyncReactDOMRender, asyncRender } from "./"
 import ErrorCatcher from "./ErrorCatcher"
 
 /**
@@ -525,7 +525,12 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
         odata.x++
     }
 
-    mobx.reaction(() => odata.x, v => console.log(v))
+    mobx.reaction(
+        () => odata.x,
+        v => {
+            // console.log(v)
+        }
+    )
 
     beforeAll(async done => {
         await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
@@ -695,7 +700,9 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
 
     test("catch exception", () => {
         expect(() => {
-            data.x = 42
+            noConsole(() => {
+                data.x = 42
+            })
         }).toThrow(/Oops!/)
         expect(renderCount).toBe(3) // React fiber will try to replay the rendering, so the exception gets thrown a second time
     })

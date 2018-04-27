@@ -100,7 +100,7 @@ const WizardStep = observer(
             this.renderCount = 0
         },
         componentWillUnmount() {
-            console.log("Unmounting!")
+            // console.log("Unmounting!")
         },
         render() {
             // weird test hack:

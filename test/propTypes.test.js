@@ -93,7 +93,7 @@ test("Valid values", () => {
     typeCheckPass(PropTypes.observableObject, observable({}))
     typeCheckPass(PropTypes.objectOrObservableObject, {})
     typeCheckPass(PropTypes.objectOrObservableObject, observable({}))
-    typeCheckPass(PropTypes.observableMap, observable(observable.shallowMap({})))
+    typeCheckPass(PropTypes.observableMap, observable(observable.map({}, { deep: false })))
 })
 
 test("should be implicitly optional and not warn", () => {

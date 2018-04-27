@@ -5,7 +5,7 @@ import * as mobx from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
 import { Provider, observer } from "../"
-import { sleepHelper } from "./"
+import { sleepHelper, noConsole } from "./"
 
 describe("observer based context", () => {
     test("jest test", () => {
@@ -117,9 +117,9 @@ describe("observer based context", () => {
                 <C />
             </ErrorCatcher>
         )
-        console.log("About to mount")
-        mount(<B />)
-        console.log("mounted")
+        noConsole(() => {
+            mount(<B />)
+        })
         await sleepHelper(10)
         expect(/Oops/.test(ErrorCatcher.getError())).toBeTruthy()
     })
@@ -143,7 +143,9 @@ describe("observer based context", () => {
                 <B />
             </Provider>
         )
-        mount(<A />)
+        noConsole(() => {
+            mount(<A />)
+        })
         expect(
             /Store 'foo' is not available! Make sure it is provided by some Provider/.test(
                 ErrorCatcher.getError()
