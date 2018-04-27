@@ -245,9 +245,9 @@ describe("issue 12", () => {
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect(
-            [].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()
-        ).toEqual(["soup"])
+        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
+            ["soup"]
+        )
     })
 })
 
