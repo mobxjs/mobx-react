@@ -4,7 +4,7 @@ import { mount } from "enzyme"
 import * as mobx from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
-import { Provider, observer } from "../"
+import { Provider, observer } from "../src"
 import { sleepHelper, noConsole } from "./"
 
 describe("observer based context", () => {

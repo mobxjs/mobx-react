@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Component} from 'react';
 import * as PropTypes from 'prop-types';
-import {observer, Provider, propTypes, inject, Observer} from '../../';
+import {observer, Provider, propTypes, inject, Observer} from '../../src';
 import * as createClass from "create-react-class";
 
 @observer
@@ -194,12 +194,6 @@ class ObserverTest extends Component<any, any> {
 class ObserverTest2 extends Component<any, any> {
 	render() {
 		return <Observer render={() => <div>test</div>} />;
-	}
-}
-
-class ObserverTest3 extends Component<any, any> {
-	render() {
-		return <Observer inject={["store"]} render={() => <div>test</div>} />;
 	}
 }
 

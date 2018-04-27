@@ -3,7 +3,7 @@ import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import * as mobxReact from "../"
+import * as mobxReact from "../src"
 import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 
 test("mobx issue 50", async () => {

@@ -1,6 +1,6 @@
 import React from "react"
 import * as ReactPropTypes from "prop-types"
-import { PropTypes } from "../"
+import { PropTypes } from "../src"
 import { observable } from "mobx"
 
 // Cause `checkPropTypes` caches errors and doesn't print them twice....

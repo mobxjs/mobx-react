@@ -4,7 +4,7 @@ import ReactDOM from "react-dom"
 import ReactDOMServer from "react-dom/server"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../"
+import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../src"
 import { noConsole, createTestRoot, sleepHelper, asyncReactDOMRender, asyncRender } from "./"
 import ErrorCatcher from "./ErrorCatcher"
 

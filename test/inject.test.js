@@ -5,7 +5,7 @@ import ReactDOM from "react-dom"
 import { mount } from "enzyme"
 import * as mobx from "mobx"
 import { action, observable, computed } from "mobx"
-import { observer, inject, Provider } from "../"
+import { observer, inject, Provider } from "../src"
 import { createTestRoot, sleepHelper, noConsole } from "./index"
 
 const testRoot = createTestRoot()

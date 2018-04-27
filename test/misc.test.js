@@ -3,7 +3,7 @@ import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import * as mobx from "mobx"
-import { observer } from "../"
+import { observer } from "../src"
 import { createTestRoot } from "./index"
 
 const testRoot = createTestRoot()
