@@ -286,9 +286,13 @@ test("no warnings in modern react", () => {
     }
 
     // Enzyme can't handle React.strictMode
-    const testRenderer = TestRenderer.create(<App />)
-    expect(testRenderer.toJSON()).toMatchSnapshot()
+    expect(
+        noConsole(() => {
+            const testRenderer = TestRenderer.create(<App />)
+            expect(testRenderer.toJSON()).toMatchSnapshot()
 
-    box.set(4)
-    expect(testRenderer.toJSON()).toMatchSnapshot()
+            box.set(4)
+            expect(testRenderer.toJSON()).toMatchSnapshot()
+        })
+    ).toEqual({ errors: [], infos: [], warnings: [] })
 })

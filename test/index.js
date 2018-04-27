@@ -28,13 +28,27 @@ export function asyncReactDOMRender(Component, root) {
 
 export function noConsole(fn) {
     const { warn, error, info } = global.console
+    const warnings = []
+    const errors = []
+    const infos = []
     try {
         Object.assign(global.console, {
-            warn() {},
-            error() {},
-            info() {}
+            warn() {
+                warnings.push([...arguments])
+            },
+            error() {
+                errors.push([...arguments])
+            },
+            info() {
+                infos.push([...arguments])
+            }
         })
-        return fn()
+        fn()
+        return {
+            warnings,
+            errors,
+            infos
+        }
     } finally {
         Object.assign(global.console, { warn, error, info })
     }
