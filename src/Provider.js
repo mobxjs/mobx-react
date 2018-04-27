@@ -1,9 +1,10 @@
 import { Children, Component } from "react"
+import { polyfill } from "react-lifecycles-compat"
 import * as PropTypes from "./propTypes"
 
 const specialReactKeys = { children: true, key: true, ref: true }
 
-export default class Provider extends Component {
+class Provider extends Component {
     static contextTypes = {
         mobxStores: PropTypes.objectOrObservableObject
     }
@@ -59,3 +60,7 @@ export default class Provider extends Component {
         return nextProps
     }
 }
+
+polyfill(Provider)
+
+export default Provider

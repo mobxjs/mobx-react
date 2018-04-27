@@ -74,7 +74,8 @@
     "typescript": "2.6"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^2.3.1"
+    "hoist-non-react-statics": "^2.3.1",
+    "react-lifecycles-compat": "^3.0.2"
   },
   "keywords": [
     "mobx",
@@ -90,6 +91,5 @@
       "git add"
     ]
   },
-  "jest": {
-  }
+  "jest": {}
 }
