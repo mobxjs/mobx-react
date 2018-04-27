@@ -110,123 +110,118 @@ function is(x, y) {
     }
 }
 
+function makeComponentReactive(render) {
+    if (isUsingStaticRendering === true) return render.call(this)
+
+    function makePropertyObservableReference(propName) {
+        let valueHolder = this[propName]
+        const atom = createAtom("reactive " + propName)
+        Object.defineProperty(this, propName, {
+            configurable: true,
+            enumerable: true,
+            get: function() {
+                atom.reportObserved()
+                return valueHolder
+            },
+            set: function set(v) {
+                if (!isForcingUpdate && !shallowEqual(valueHolder, v)) {
+                    valueHolder = v
+                    skipRender = true
+                    atom.reportChanged()
+                    skipRender = false
+                } else {
+                    valueHolder = v
+                }
+            }
+        })
+    }
+
+    function reactiveRender() {
+        isRenderingPending = false
+        let exception = undefined
+        let rendering = undefined
+        reaction.track(() => {
+            if (isDevtoolsEnabled) {
+                this.__$mobRenderStart = Date.now()
+            }
+            try {
+                rendering = _allowStateChanges(false, baseRender)
+            } catch (e) {
+                exception = e
+            }
+            if (isDevtoolsEnabled) {
+                this.__$mobRenderEnd = Date.now()
+            }
+        })
+        if (exception) {
+            errorsReporter.emit(exception)
+            throw exception
+        }
+        return rendering
+    }
+
+    // Generate friendly name for debugging
+    const initialName =
+        this.displayName ||
+        this.name ||
+        (this.constructor && (this.constructor.displayName || this.constructor.name)) ||
+        "<component>"
+    const rootNodeID =
+        (this._reactInternalInstance && this._reactInternalInstance._rootNodeID) ||
+        (this._reactInternalFiber && this._reactInternalFiber._debugID)
+    /**
+     * If props are shallowly modified, react will render anyway,
+     * so atom.reportChanged() should not result in yet another re-render
+     */
+    let skipRender = false
+    /**
+     * forceUpdate will re-assign this.props. We don't want that to cause a loop,
+     * so detect these changes
+     */
+    let isForcingUpdate = false
+
+    // make this.props an observable reference, see #124
+    makePropertyObservableReference.call(this, "props")
+    // make state an observable reference
+    makePropertyObservableReference.call(this, "state")
+
+    // wire up reactive render
+    const baseRender = render.bind(this)
+    let isRenderingPending = false
+
+    const reaction = new Reaction(`${initialName}#${rootNodeID}.render()`, () => {
+        if (!isRenderingPending) {
+            // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
+            // This unidiomatic React usage but React will correctly warn about this so we continue as usual
+            // See #85 / Pull #44
+            isRenderingPending = true
+            if (typeof this.componentWillReact === "function") this.componentWillReact() // TODO: wrap in action?
+            if (this.__$mobxIsUnmounted !== true) {
+                // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
+                // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
+                // However, people also claim this migth happen during unit tests..
+                let hasError = true
+                try {
+                    isForcingUpdate = true
+                    if (!skipRender) Component.prototype.forceUpdate.call(this)
+                    hasError = false
+                } finally {
+                    isForcingUpdate = false
+                    if (hasError) reaction.dispose()
+                }
+            }
+        }
+    })
+    reaction.reactComponent = this
+    reactiveRender.$mobx = reaction
+    this.render = reactiveRender
+    return reactiveRender()
+}
+
 /**
  * ReactiveMixin
  */
 const reactiveMixin = {
-    componentWillMount: function() {
-        if (isUsingStaticRendering === true) return
-        // Generate friendly name for debugging
-        const initialName =
-            this.displayName ||
-            this.name ||
-            (this.constructor && (this.constructor.displayName || this.constructor.name)) ||
-            "<component>"
-        const rootNodeID =
-            (this._reactInternalInstance && this._reactInternalInstance._rootNodeID) ||
-            (this._reactInternalFiber && this._reactInternalFiber._debugID)
-
-        /**
-         * If props are shallowly modified, react will render anyway,
-         * so atom.reportChanged() should not result in yet another re-render
-         */
-        let skipRender = false
-        /**
-         * forceUpdate will re-assign this.props. We don't want that to cause a loop,
-         * so detect these changes
-         */
-        let isForcingUpdate = false
-
-        function makePropertyObservableReference(propName) {
-            let valueHolder = this[propName]
-            const atom = createAtom("reactive " + propName)
-            Object.defineProperty(this, propName, {
-                configurable: true,
-                enumerable: true,
-                get: function() {
-                    atom.reportObserved()
-                    return valueHolder
-                },
-                set: function set(v) {
-                    if (!isForcingUpdate && !shallowEqual(valueHolder, v)) {
-                        valueHolder = v
-                        skipRender = true
-                        atom.reportChanged()
-                        skipRender = false
-                    } else {
-                        valueHolder = v
-                    }
-                }
-            })
-        }
-
-        // make this.props an observable reference, see #124
-        makePropertyObservableReference.call(this, "props")
-        // make state an observable reference
-        makePropertyObservableReference.call(this, "state")
-
-        // wire up reactive render
-        const baseRender = this.render.bind(this)
-        let reaction = null
-        let isRenderingPending = false
-
-        const initialRender = () => {
-            reaction = new Reaction(`${initialName}#${rootNodeID}.render()`, () => {
-                if (!isRenderingPending) {
-                    // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
-                    // This unidiomatic React usage but React will correctly warn about this so we continue as usual
-                    // See #85 / Pull #44
-                    isRenderingPending = true
-                    if (typeof this.componentWillReact === "function") this.componentWillReact() // TODO: wrap in action?
-                    if (this.__$mobxIsUnmounted !== true) {
-                        // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
-                        // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
-                        // However, people also claim this migth happen during unit tests..
-                        let hasError = true
-                        try {
-                            isForcingUpdate = true
-                            if (!skipRender) Component.prototype.forceUpdate.call(this)
-                            hasError = false
-                        } finally {
-                            isForcingUpdate = false
-                            if (hasError) reaction.dispose()
-                        }
-                    }
-                }
-            })
-            reaction.reactComponent = this
-            reactiveRender.$mobx = reaction
-            this.render = reactiveRender
-            return reactiveRender()
-        }
-
-        const reactiveRender = () => {
-            isRenderingPending = false
-            let exception = undefined
-            let rendering = undefined
-            reaction.track(() => {
-                if (isDevtoolsEnabled) {
-                    this.__$mobRenderStart = Date.now()
-                }
-                try {
-                    rendering = _allowStateChanges(false, baseRender)
-                } catch (e) {
-                    exception = e
-                }
-                if (isDevtoolsEnabled) {
-                    this.__$mobRenderEnd = Date.now()
-                }
-            })
-            if (exception) {
-                errorsReporter.emit(exception)
-                throw exception
-            }
-            return rendering
-        }
-
-        this.render = initialRender
-    },
-
     componentWillUnmount: function() {
         if (isUsingStaticRendering === true) return
         this.render.$mobx && this.render.$mobx.dispose()
@@ -338,11 +333,14 @@ export function observer(arg1, arg2) {
     const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
+    const baseRender = target.render
+    target.render = function() {
+        return makeComponentReactive.call(this, baseRender)
+    }
     return componentClass
 }
 
 function mixinLifecycleEvents(target) {
-    patch(target, "componentWillMount", true)
     ;["componentDidMount", "componentWillUnmount", "componentDidUpdate"].forEach(function(
         funcName
     ) {
@@ -353,7 +351,6 @@ function mixinLifecycleEvents(target) {
     }
 }
 
-// TODO: support injection somehow as well?
 export const Observer = observer(({ children, render }) => {
     const component = children || render
     if (typeof component === "undefined") {

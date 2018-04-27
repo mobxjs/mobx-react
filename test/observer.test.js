@@ -165,21 +165,6 @@ describe("keep views alive", () => {
     })
 })
 
-test("componentWillMount from mixin is run first", () => {
-    const Comp = observer(
-        createClass({
-            componentWillMount: function() {
-                // ugly check, but proofs that observer.willmount has run
-                expect(this.render.name).toBe("initialRender")
-            },
-            render() {
-                return null
-            }
-        })
-    )
-    TestUtils.renderIntoDocument(<Comp />)
-})
-
 describe("does not views alive when using static rendering", () => {
     useStaticRendering(true)
     let renderCount = 0
@@ -666,6 +651,7 @@ test("parent / childs render in the right order", done => {
 
     const container = TestUtils.renderIntoDocument(<Parent />)
 
+    debugger
     tryLogout()
     expect(events).toEqual(["parent", "child", "parent"])
     done()

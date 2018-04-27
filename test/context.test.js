@@ -4,7 +4,7 @@ import { mount } from "enzyme"
 import * as mobx from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
-import { Provider, observer } from "../src"
+import { Provider, observer, inject } from "../src"
 import { sleepHelper, noConsole } from "./"
 
 describe("observer based context", () => {
@@ -252,4 +252,40 @@ describe("observer based context", () => {
         console.warn = baseWarn
         done()
     })
+})
+
+test("no warnings in modern react", () => {
+    const box = mobx.observable.box(3)
+    const Child = inject("store")(
+        observer(
+            class Child extends React.Component {
+                render() {
+                    return (
+                        <div>
+                            {this.store} + {box.get()}
+                        </div>
+                    )
+                }
+            }
+        )
+    )
+
+    class App extends React.Component {
+        render() {
+            return (
+                <React.StrictMode>
+                    <Provider store="42">
+                        <Child />
+                    </Provider>
+                </React.StrictMode>
+            )
+        }
+    }
+
+    const wrapper = mount(<App />)
+    expect(wrapper).toMatchSnapshot()
+
+    box.set(4)
+
+    expect(wrapper).toMatchSnapshot()
 })
