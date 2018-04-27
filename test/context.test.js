@@ -6,6 +6,7 @@ import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
 import { Provider, observer, inject } from "../src"
 import { sleepHelper, noConsole } from "./"
+import TestRenderer from "react-test-renderer"
 
 describe("observer based context", () => {
     test("jest test", () => {
@@ -262,7 +263,7 @@ test("no warnings in modern react", () => {
                 render() {
                     return (
                         <div>
-                            {this.store} + {box.get()}
+                            {this.props.store} + {box.get()}
                         </div>
                     )
                 }
@@ -273,19 +274,21 @@ test("no warnings in modern react", () => {
     class App extends React.Component {
         render() {
             return (
-                <React.StrictMode>
-                    <Provider store="42">
-                        <Child />
-                    </Provider>
-                </React.StrictMode>
+                <div>
+                    <React.StrictMode>
+                        <Provider store="42">
+                            <Child />
+                        </Provider>
+                    </React.StrictMode>
+                </div>
             )
         }
     }
 
-    const wrapper = mount(<App />)
-    expect(wrapper).toMatchSnapshot()
+    // Enzyme can't handle React.strictMode
+    const testRenderer = TestRenderer.create(<App />)
+    expect(testRenderer.toJSON()).toMatchSnapshot()
 
     box.set(4)
-
-    expect(wrapper).toMatchSnapshot()
+    expect(testRenderer.toJSON()).toMatchSnapshot()
 })

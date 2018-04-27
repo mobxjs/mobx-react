@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`no warnings in modern react 1`] = `
+<div>
+  <div>
+    42
+     + 
+    3
+  </div>
+</div>
+`;
+
+exports[`no warnings in modern react 2`] = `
+<div>
+  <div>
+    42
+     + 
+    4
+  </div>
+</div>
+`;
