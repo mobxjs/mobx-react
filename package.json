@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "5.0.0",
+  "version": "5.1.0-rc.2",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "jsnext:main": "index.module.js",
@@ -75,7 +75,7 @@
     "typescript": "2.6"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^2.3.1",
+    "hoist-non-react-statics": "^2.5.0",
     "react-lifecycles-compat": "^3.0.2"
   },
   "keywords": [
