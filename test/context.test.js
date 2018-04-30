@@ -296,3 +296,38 @@ test("no warnings in modern react", () => {
         })
     ).toEqual({ errors: [], infos: [], warnings: [] })
 })
+
+test("getDerivedStateFromProps works #447", () => {
+    class Main extends React.Component {
+        static getDerivedStateFromProps(nextProps, prevState) {
+            return {
+                count: prevState.count + 1
+            }
+        }
+
+        state = {
+            count: 0
+        }
+
+        render() {
+            return (
+                <div>
+                    <h2>{`${this.state.count ? "One " : "No "}${this.props.thing}`}</h2>
+                </div>
+            )
+        }
+    }
+
+    const MainInjected = inject(({ store }) => ({ thing: store.thing }))(Main)
+
+    const store = { thing: 3 }
+
+    const App = () => (
+        <Provider store={store}>
+            <MainInjected />
+        </Provider>
+    )
+
+    const testRenderer = TestRenderer.create(<App />)
+    expect(testRenderer.toJSON()).toMatchSnapshot()
+})

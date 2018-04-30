@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getDerivedStateFromProps works #447 1`] = `
+<div>
+  <h2>
+    One 3
+  </h2>
+</div>
+`;
+
 exports[`no warnings in modern react 1`] = `
 <div>
   <div>
