@@ -8,6 +8,12 @@ exports[`getDerivedStateFromProps works #447 1`] = `
 </div>
 `;
 
+exports[`no double runs for getDerivedStateFromProps 1`] = `
+<div>
+  Test-content
+</div>
+`;
+
 exports[`no warnings in modern react 1`] = `
 <div>
   <div>

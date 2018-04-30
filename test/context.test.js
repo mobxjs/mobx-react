@@ -331,3 +331,52 @@ test("getDerivedStateFromProps works #447", () => {
     const testRenderer = TestRenderer.create(<App />)
     expect(testRenderer.toJSON()).toMatchSnapshot()
 })
+
+test("no double runs for getDerivedStateFromProps", () => {
+    let derived = 0
+    @observer
+    class Main extends React.Component {
+        state = {
+            activePropertyElementMap: {}
+        }
+
+        constructor(props) {
+            // console.log("CONSTRUCTOR")
+            super(props)
+        }
+
+        static getDerivedStateFromProps(nextProps, prevState) {
+            derived++
+            // console.log("PREVSTATE", nextProps)
+            return null
+        }
+
+        render() {
+            const { data, store } = this.props
+            return <div>Test-content</div>
+        }
+    }
+    // This results in
+    //PREVSTATE
+    //CONSTRUCTOR
+    //PREVSTATE
+    let MainInjected = inject(({ store }) => ({
+        componentProp: "def"
+    }))(Main)
+    // Uncomment the following line to see default behaviour (without inject)
+    //CONSTRUCTOR
+    //PREVSTATE
+    //MainInjected = Main;
+
+    const store = {}
+
+    const App = () => (
+        <Provider store={store}>
+            <MainInjected injectedProp={"abc"} />
+        </Provider>
+    )
+
+    const testRenderer = TestRenderer.create(<App />)
+    expect(testRenderer.toJSON()).toMatchSnapshot()
+    expect(derived).toBe(1)
+})

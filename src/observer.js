@@ -362,6 +362,10 @@ export const Observer = observer(({ children, render }) => {
 Observer.displayName = "Observer"
 
 const ObserverPropsCheck = (props, key, componentName, location, propFullName) => {
+    if (props["inject"])
+        return new Error(
+            "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead"
+        )
     const extraKey = key === "children" ? "render" : "children"
     if (typeof props[key] === "function" && typeof props[extraKey] === "function") {
         return new Error(
