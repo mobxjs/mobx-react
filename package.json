@@ -52,7 +52,7 @@
     "husky": "0.14.3",
     "jest": "^22.0.5",
     "jest-environment-jsdom": "^22.0.5",
-    "lint-staged": "^4.2.3",
+    "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
     "mobx": "^4.0.0",
     "nscript": "^0.1.10",
