@@ -4,79 +4,87 @@ import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { createTestRoot } from "./index"
+import { createTestRoot, noConsole } from "./index"
 
 const testRoot = createTestRoot()
 
 describe("custom shouldComponentUpdate is not respected for observable changes (#50)", () => {
     describe("(#50)-1", () => {
-        let called = 0
-        const x = mobx.observable.box(3)
-        const C = observer(
-            createClass({
-                render: () => <div>value:{x.get()}</div>,
-                shouldComponentUpdate: () => called++
+        expect(
+            noConsole(() => {
+                let called = 0
+                const x = mobx.observable.box(3)
+                const C = observer(
+                    createClass({
+                        render: () => <div>value:{x.get()}</div>,
+                        shouldComponentUpdate: () => called++
+                    })
+                )
+                const wrapper = mount(<C />)
+                test("init div context  === value:3 and shouldUpdate hook did not run ", () => {
+                    expect(wrapper.find("div").text()).toBe("value:3")
+                    expect(called).toBe(0)
+                })
+                test("update div context === value:42 and shouldUpdate hook did not run  ", () => {
+                    x.set(42)
+                    expect(wrapper.find("div").text()).toBe("value:42")
+                    expect(called).toBe(0)
+                })
             })
-        )
-        const wrapper = mount(<C />)
-        test("init div context  === value:3 and shouldUpdate hook did not run ", () => {
-            expect(wrapper.find("div").text()).toBe("value:3")
-            expect(called).toBe(0)
-        })
-        test("update div context === value:42 and shouldUpdate hook did not run  ", () => {
-            x.set(42)
-            expect(wrapper.find("div").text()).toBe("value:42")
-            expect(called).toBe(0)
-        })
+        ).toMatchSnapshot()
     })
 
     describe("(#50) - 2", () => {
-        // TODO: shouldComponentUpdate is meaningless with observable props...., just show warning in component definition?
-        let called = 0
-        const y = mobx.observable.box(5)
-        const C = observer(
-            createClass({
-                render() {
-                    return <div>value:{this.props.y}</div>
-                },
-                shouldComponentUpdate(nextProps) {
-                    called++
-                    return nextProps.y !== 42
-                }
-            })
-        )
-        const B = observer(
-            createClass({
-                render: () => (
-                    <span>
-                        <C y={y.get()} />
-                    </span>
+        expect(
+            noConsole(() => {
+                // shouldComponentUpdate is meaningless with observable props...., just show warning in component definition?
+                let called = 0
+                const y = mobx.observable.box(5)
+                const C = observer(
+                    createClass({
+                        render() {
+                            return <div>value:{this.props.y}</div>
+                        },
+                        shouldComponentUpdate(nextProps) {
+                            called++
+                            return nextProps.y !== 42
+                        }
+                    })
                 )
+                const B = observer(
+                    createClass({
+                        render: () => (
+                            <span>
+                                <C y={y.get()} />
+                            </span>
+                        )
+                    })
+                )
+                const wrapper = mount(<B />)
+                test("init div context === value:5", () => {
+                    expect(wrapper.find("div").text()).toBe("value:5")
+                    expect(called).toBe(0)
+                })
+
+                test("update div context === value:6 and shouldComponentUpdate hook run", () => {
+                    y.set(6)
+                    expect(wrapper.find("div").text()).toBe("value:6")
+                    expect(called).toBe(1)
+                })
+
+                test("update div context === value:6 and shouldComponentUpdate hook run 2", () => {
+                    y.set(42)
+                    // expect(wrapper.find('div').text()).toBe('value:6'); // not updated! TODO: fix
+                    expect(called).toBe(2)
+                })
+
+                test("update div context === value:7 and shouldComponentUpdate hook run 3", () => {
+                    y.set(7)
+                    expect(wrapper.find("div").text()).toBe("value:7")
+                    expect(called).toBe(3)
+                })
             })
-        )
-        const wrapper = mount(<B />)
-        test("init div context === value:5", () => {
-            expect(wrapper.find("div").text()).toBe("value:5")
-            expect(called).toBe(0)
-        })
-
-        test("update div context === value:6 and shouldComponentUpdate hook run", () => {
-            y.set(6)
-            expect(wrapper.find("div").text()).toBe("value:6")
-            expect(called).toBe(1)
-        })
-
-        test("update div context === value:6 and shouldComponentUpdate hook run 2", () => {
-            y.set(42)
-            // expect(wrapper.find('div').text()).toBe('value:6'); // not updated! TODO: fix
-            expect(called).toBe(2)
-        })
-
-        test("update div context === value:7 and shouldComponentUpdate hook run 3", () => {
-            y.set(7)
-            expect(wrapper.find("div").text()).toBe("value:7")
-            expect(called).toBe(3)
-        })
+        ).toMatchSnapshot()
     })
 })
 

@@ -348,6 +348,10 @@ function mixinLifecycleEvents(target) {
     })
     if (!target.shouldComponentUpdate) {
         target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate
+    } else {
+        console.warn(
+            "Use `shouldComponentUpdate` in an `observer` based component breaks the behavior of `observer` and might lead to unexpected results. Manually implementing `sCU` should not be needed when using mobx-react."
+        )
     }
 }
 
