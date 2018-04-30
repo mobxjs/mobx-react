@@ -161,11 +161,10 @@ TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, 
 
 ### About `shouldComponentUpdate`
 
-It is possible to set a custom `shouldComponentUpdate`, but in general this should be avoided as MobX will by default provide a highly optimized `shouldComponentUpdate` implementation, based on `PureRenderMixin`.
-If a custom `shouldComponentUpdate` is provided, it is consulted when the props changes (because the parent passes new props) or the state changes (as a result of calling `setState`),
-but if an observable used by the rendering is changed, the component will be re-rendered and `shouldComponentUpdate` is not consulted.
+When using `@observer` on a component, don't implement `shouldComponentUpdate`, as it will override the default implementation that MobX provides.
+When using mobx-react, you should in general not need to write an `sCU` (in our entire Mendix code base we have none). If you really need to implement `sCU`, split the component into two, a reactive and non-reactive (with the `sCU`) part, or use `<Observer>` sections instead of `observer` on the entire component.
 
-Since version 4, `mobx-react` will no longer trigger a re-rendering for non-observable objects that have been deeply changed.
+Similarly, `PureComponent` should not be combined with `observer`. As pure components are supposed to be dumb and never update themselves automatically, but only by getting passed in new props from the parent. `observer` is the opposite, it makes components smart and dependency aware, allowing them to update without the parents even needing to be aware of the change.
 
 ### `componentWillReact` (lifecycle hook)
 
