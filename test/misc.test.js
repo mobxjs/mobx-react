@@ -4,14 +4,14 @@ import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { createTestRoot, noConsole } from "./index"
+import { createTestRoot, withConsole } from "./index"
 
 const testRoot = createTestRoot()
 
 describe("custom shouldComponentUpdate is not respected for observable changes (#50)", () => {
     describe("(#50)-1", () => {
         expect(
-            noConsole(() => {
+            withConsole(() => {
                 let called = 0
                 const x = mobx.observable.box(3)
                 const C = observer(
@@ -36,7 +36,7 @@ describe("custom shouldComponentUpdate is not respected for observable changes (
 
     describe("(#50) - 2", () => {
         expect(
-            noConsole(() => {
+            withConsole(() => {
                 // shouldComponentUpdate is meaningless with observable props...., just show warning in component definition?
                 let called = 0
                 const y = mobx.observable.box(5)

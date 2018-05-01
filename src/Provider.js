@@ -61,6 +61,7 @@ class Provider extends Component {
     }
 }
 
+// TODO: kill in next major
 polyfill(Provider)
 
 export default Provider

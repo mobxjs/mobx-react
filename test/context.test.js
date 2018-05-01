@@ -5,7 +5,7 @@ import * as mobx from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
 import { Provider, observer, inject } from "../src"
-import { sleepHelper, noConsole } from "./"
+import { sleepHelper, withConsole } from "./"
 import TestRenderer from "react-test-renderer"
 
 describe("observer based context", () => {
@@ -118,7 +118,7 @@ describe("observer based context", () => {
                 <C />
             </ErrorCatcher>
         )
-        noConsole(() => {
+        withConsole(() => {
             mount(<B />)
         })
         await sleepHelper(10)
@@ -144,7 +144,7 @@ describe("observer based context", () => {
                 <B />
             </Provider>
         )
-        noConsole(() => {
+        withConsole(() => {
             mount(<A />)
         })
         expect(
@@ -287,7 +287,7 @@ test("no warnings in modern react", () => {
 
     // Enzyme can't handle React.strictMode
     expect(
-        noConsole(() => {
+        withConsole(() => {
             const testRenderer = TestRenderer.create(<App />)
             expect(testRenderer.toJSON()).toMatchSnapshot()
 

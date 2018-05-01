@@ -5,7 +5,14 @@ import ReactDOMServer from "react-dom/server"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../src"
-import { noConsole, createTestRoot, sleepHelper, asyncReactDOMRender, asyncRender } from "./"
+import {
+    withConsole,
+    withAsyncConsole,
+    createTestRoot,
+    sleepHelper,
+    asyncReactDOMRender,
+    asyncRender
+} from "./"
 import ErrorCatcher from "./ErrorCatcher"
 
 /**
@@ -686,7 +693,7 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
 
     test("catch exception", () => {
         expect(() => {
-            noConsole(() => {
+            withConsole(() => {
                 data.x = 42
             })
         }).toThrow(/Oops!/)
@@ -768,6 +775,50 @@ describe("use Observer inject and render sugar should work  ", () => {
         expect(testRoot.querySelector("span").innerHTML).toBe("123")
     })
 
+    test("use render with inject should be correct", async () => {
+        const Comp = () => (
+            <div>
+                <Observer
+                    inject={store => ({ h: store.h, w: store.w })}
+                    render={props => <span>{`${props.h} ${props.w}`}</span>}
+                />
+            </div>
+        )
+        const A = () => (
+            <Provider h="hello" w="world">
+                <Comp />
+            </Provider>
+        )
+
+        expect(
+            await withAsyncConsole(async () => {
+                await asyncReactDOMRender(<A />, testRoot)
+                expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+            })
+        ).toMatchSnapshot()
+    })
+
+    test("use children with inject should be correct", async () => {
+        const Comp = () => (
+            <div>
+                <Observer inject={store => ({ h: store.h, w: store.w })}>
+                    {props => <span>{`${props.h} ${props.w}`}</span>}
+                </Observer>
+            </div>
+        )
+        const A = () => (
+            <Provider h="hello" w="world">
+                <Comp />
+            </Provider>
+        )
+        expect(
+            await withAsyncConsole(async () => {
+                await asyncReactDOMRender(<A />, testRoot)
+                expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+            })
+        ).toMatchSnapshot()
+    })
+
     test("show error when using children and render at same time ", async () => {
         const msg = []
         const baseError = console.error
@@ -806,4 +857,13 @@ test("don't use PureComponent", () => {
     } finally {
         console.warn = baseWarn
     }
+})
+
+test("static on function components are hoisted", () => {
+    const Comp = () => <div />
+    Comp.foo = 3
+
+    const Comp2 = observer(Comp)
+
+    expect(Comp2.foo).toBe(3)
 })

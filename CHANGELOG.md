@@ -2,10 +2,12 @@
 
 ### 5.1.0
 
-*   Misspelled export `componentByNodeRegistery` is now properly export as `componentByNodeRegistry` as well, please update consumers, the mispelled version will be dropped in the next major
-*   Removed the (undocumented) support for the `inject` property of `Observer` entirely, it was fundamentally broken and should not be used. Use `inject` on the enclosing component instead and grab the necessary stores from the closure. Fixes #423
-*   Added warning about using `observer` on a React.PureComponent, will become exception in the future. Fixes #309
-*   Mobx-react will now print a warning when combining `observer` with a custom `shouldComponentUpdate` implementation. Fixes #427
+*   Added support for React 16.3, including support for the `getDerivedStateFromProps` life-cycle hook. MobX will no longer use `componentWillMount` hook internally, so that it can be used in `StrictMode` react as well. Fixes [#447](https://github.com/mobx/mobx-react/447)
+*   Static properties of a function component are now automatically hoisted when the component is wrapped by `observer`. Implements [#427](https://github.com/mobx/mobx-react/427)
+*   Misspelled export `componentByNodeRegistery` is now properly export as `componentByNodeRegistry` as well, please update consumers, the mispelled version will be dropped in the next major. Fixes [#421](https://github.com/mobx/mobx-react/421)
+*   Deprecated the support for the `inject` property on `Observer`, it is fundamentally broken and should not be used. Use `inject` on the enclosing component instead and grab the necessary stores from the closure. Fixes [#423](https://github.com/mobx/mobx-react/423)
+*   Added warning about using `observer` on a React.PureComponent, this will become an exception in the next major. Fixes [#309](https://github.com/mobx/mobx-react/309)
+*   Mobx-react will now print a warning when combining `observer` with a custom `shouldComponentUpdate` implementation. Fixes [#417](https://github.com/mobx/mobx-react/417)
 
 ### 5.0.0
 

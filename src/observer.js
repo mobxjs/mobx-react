@@ -1,5 +1,6 @@
+import React, { Component, PureComponent } from "react"
+import hoistStatics from "hoist-non-react-statics"
 import { createAtom, Reaction, _allowStateChanges } from "mobx"
-import { Component, PureComponent } from "react"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
@@ -277,6 +278,7 @@ export function observer(arg1, arg2) {
         throw new Error("Store names should be provided as array")
     }
     if (Array.isArray(arg1)) {
+        // TODO: remove in next major
         // component needs stores
         if (!warnedAboutObserverInjectDeprecation) {
             warnedAboutObserverInjectDeprecation = true
@@ -313,7 +315,7 @@ export function observer(arg1, arg2) {
         !componentClass.isReactClass &&
         !Component.isPrototypeOf(componentClass)
     ) {
-        return observer(
+        const observerComponent = observer(
             class extends Component {
                 static displayName = componentClass.displayName || componentClass.name
                 static contextTypes = componentClass.contextTypes
@@ -324,6 +326,8 @@ export function observer(arg1, arg2) {
                 }
             }
         )
+        hoistStatics(observerComponent, componentClass)
+        return observerComponent
     }
 
     if (!componentClass) {
@@ -349,27 +353,32 @@ function mixinLifecycleEvents(target) {
     if (!target.shouldComponentUpdate) {
         target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate
     } else {
+        // TODO: make throw in next major
         console.warn(
             "Use `shouldComponentUpdate` in an `observer` based component breaks the behavior of `observer` and might lead to unexpected results. Manually implementing `sCU` should not be needed when using mobx-react."
         )
     }
 }
 
-export const Observer = observer(({ children, render }) => {
+export const Observer = observer(({ children, inject: observerInject, render }) => {
     const component = children || render
     if (typeof component === "undefined") {
         return null
     }
-    return component()
+    if (!observerInject) {
+        return component()
+    }
+    // TODO: remove in next major
+    console.warn(
+        "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead"
+    )
+    const InjectComponent = inject(observerInject)(component)
+    return <InjectComponent />
 })
 
 Observer.displayName = "Observer"
 
 const ObserverPropsCheck = (props, key, componentName, location, propFullName) => {
-    if (props["inject"])
-        return new Error(
-            "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead"
-        )
     const extraKey = key === "children" ? "render" : "children"
     if (typeof props[key] === "function" && typeof props[extraKey] === "function") {
         return new Error(

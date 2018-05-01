@@ -6,7 +6,7 @@ import { mount } from "enzyme"
 import * as mobx from "mobx"
 import { action, observable, computed } from "mobx"
 import { observer, inject, Provider } from "../src"
-import { createTestRoot, sleepHelper, noConsole } from "./index"
+import { createTestRoot, sleepHelper, withConsole } from "./index"
 
 const testRoot = createTestRoot()
 
@@ -108,7 +108,7 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        noConsole(() => {
+        withConsole(() => {
             expect(() => mount(<A />)).toThrow(
                 /Store 'foo' is not available! Make sure it is provided by some Provider/
             )

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use Observer inject and render sugar should work   use children with inject should be correct 1`] = `
+Object {
+  "errors": Array [],
+  "infos": Array [],
+  "warnings": Array [
+    Array [
+      "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead",
+    ],
+  ],
+}
+`;
+
+exports[`use Observer inject and render sugar should work   use render with inject should be correct 1`] = `
+Object {
+  "errors": Array [],
+  "infos": Array [],
+  "warnings": Array [
+    Array [
+      "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead",
+    ],
+  ],
+}
+`;
