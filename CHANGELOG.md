@@ -1,6 +1,6 @@
 # MobX-React Changelog
 
-### 5.1.1
+### 5.1.2
 
 *   Fixed regression bug in integration with devtools. Fixed through [#465](https://github.com/mobxjs/mobx-react/pull/465) by @le0nik
 
