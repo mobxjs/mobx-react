@@ -216,7 +216,7 @@ function makeComponentReactive(render) {
     reaction.reactComponent = this
     reactiveRender.$mobx = reaction
     this.render = reactiveRender
-    return reactiveRender()
+    return reactiveRender.call(this)
 }
 
 /**
