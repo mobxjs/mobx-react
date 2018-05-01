@@ -7,7 +7,8 @@
 		"jsx": "react",
 		"noEmit": true,
 		"rootDir": "../../",
-		"module": "commonjs"
+		"module": "commonjs",
+		"lib": ["es5", "dom"]
 	},
 	"exclude": [
 

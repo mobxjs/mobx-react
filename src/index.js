@@ -13,7 +13,8 @@ export {
     observer,
     Observer,
     renderReporter,
-    componentByNodeRegistery,
+    componentByNodeRegistry as componentByNodeRegistery,
+    componentByNodeRegistry,
     trackComponents,
     useStaticRendering
 } from "./observer"
@@ -31,9 +32,14 @@ export const onError = fn => errorsReporter.on(fn)
 /* DevTool support */
 // See: https://github.com/andykog/mobx-devtools/blob/d8976c24b8cb727ed59f9a0bc905a009df79e221/src/backend/installGlobalHook.js
 
-import { renderReporter, componentByNodeRegistery, trackComponents } from "./observer"
+import { renderReporter, componentByNodeRegistry, trackComponents } from "./observer"
 if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === "object") {
     const mobx = { spy, extras: { getDebugName } }
-    const mobxReact = { renderReporter, componentByNodeRegistery, trackComponents }
+    const mobxReact = {
+        renderReporter,
+        componentByNodeRegistry,
+        componentByNodeRegistery: componentByNodeRegistry,
+        trackComponents
+    }
     __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(mobxReact, mobx)
 }

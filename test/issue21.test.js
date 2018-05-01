@@ -2,7 +2,7 @@ import React, { createElement } from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import * as mobx from "mobx"
-import { observer } from "../"
+import { observer } from "../src"
 import _ from "lodash"
 import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 
@@ -100,7 +100,7 @@ const WizardStep = observer(
             this.renderCount = 0
         },
         componentWillUnmount() {
-            console.log("Unmounting!")
+            // console.log("Unmounting!")
         },
         render() {
             // weird test hack:

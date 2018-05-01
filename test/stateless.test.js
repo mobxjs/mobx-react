@@ -4,7 +4,7 @@ import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, propTypes } from "../"
+import { observer, propTypes } from "../src"
 import { createTestRoot } from "./index"
 
 const testRoot = createTestRoot()

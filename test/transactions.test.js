@@ -3,7 +3,7 @@ import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import * as mobxReact from "../"
+import * as mobxReact from "../src"
 import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
 
 test("mobx issue 50", async () => {
@@ -12,7 +12,7 @@ test("mobx issue 50", async () => {
         a: mobx.observable.box(true),
         b: mobx.observable.box(false),
         c: mobx.computed(function() {
-            console.log("evaluate c")
+            // console.log("evaluate c")
             return foo.b.get()
         })
     }
@@ -40,7 +40,7 @@ test("mobx issue 50", async () => {
 
     await sleepHelper(400)
     expect(asText).toBe("false:true:true")
-    console.log(document.getElementById("x").innerHTML)
+    // console.log(document.getElementById("x").innerHTML)
     expect(document.getElementById("x").innerHTML).toBe("false,true,true")
     expect(willReactCount).toBe(1)
 })

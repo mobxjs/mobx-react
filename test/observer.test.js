@@ -4,8 +4,15 @@ import ReactDOM from "react-dom"
 import ReactDOMServer from "react-dom/server"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../"
-import { createTestRoot, sleepHelper, asyncReactDOMRender, asyncRender } from "./"
+import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../src"
+import {
+    withConsole,
+    withAsyncConsole,
+    createTestRoot,
+    sleepHelper,
+    asyncReactDOMRender,
+    asyncRender
+} from "./"
 import ErrorCatcher from "./ErrorCatcher"
 
 /**
@@ -165,21 +172,6 @@ describe("keep views alive", () => {
     })
 })
 
-test("componentWillMount from mixin is run first", () => {
-    const Comp = observer(
-        createClass({
-            componentWillMount: function() {
-                // ugly check, but proofs that observer.willmount has run
-                expect(this.render.name).toBe("initialRender")
-            },
-            render() {
-                return null
-            }
-        })
-    )
-    TestUtils.renderIntoDocument(<Comp />)
-})
-
 describe("does not views alive when using static rendering", () => {
     useStaticRendering(true)
     let renderCount = 0
@@ -260,9 +252,9 @@ describe("issue 12", () => {
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect(
-            [].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()
-        ).toEqual(["soup"])
+        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
+            ["soup"]
+        )
     })
 })
 
@@ -525,7 +517,12 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
         odata.x++
     }
 
-    mobx.reaction(() => odata.x, v => console.log(v))
+    mobx.reaction(
+        () => odata.x,
+        v => {
+            // console.log(v)
+        }
+    )
 
     beforeAll(async done => {
         await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
@@ -661,6 +658,7 @@ test("parent / childs render in the right order", done => {
 
     const container = TestUtils.renderIntoDocument(<Parent />)
 
+    debugger
     tryLogout()
     expect(events).toEqual(["parent", "child", "parent"])
     done()
@@ -671,7 +669,9 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
     let renderCount = 0
 
     const emmitedErrors = []
-    const disposeErrorsHandler = onError(error => emmitedErrors.push(error))
+    const disposeErrorsHandler = onError(error => {
+        emmitedErrors.push(error)
+    })
 
     @observer
     class Child extends React.Component {
@@ -693,17 +693,19 @@ describe("206 - @observer should produce usefull errors if it throws", () => {
 
     test("catch exception", () => {
         expect(() => {
-            data.x = 42
+            withConsole(() => {
+                data.x = 42
+            })
         }).toThrow(/Oops!/)
-        expect(renderCount).toBe(2)
+        expect(renderCount).toBe(3) // React fiber will try to replay the rendering, so the exception gets thrown a second time
     })
 
     test("component recovers!", async () => {
         await sleepHelper(500)
         data.x = 3
         TestUtils.renderIntoDocument(<Child />)
-        expect(renderCount).toBe(3)
-        expect(emmitedErrors).toEqual([new Error("Oops!")])
+        expect(renderCount).toBe(4)
+        expect(emmitedErrors).toEqual([new Error("Oops!"), new Error("Oops!")]) // see above comment
     })
 })
 
@@ -787,8 +789,13 @@ describe("use Observer inject and render sugar should work  ", () => {
                 <Comp />
             </Provider>
         )
-        await asyncReactDOMRender(<A />, testRoot)
-        expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+
+        expect(
+            await withAsyncConsole(async () => {
+                await asyncReactDOMRender(<A />, testRoot)
+                expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+            })
+        ).toMatchSnapshot()
     })
 
     test("use children with inject should be correct", async () => {
@@ -804,8 +811,12 @@ describe("use Observer inject and render sugar should work  ", () => {
                 <Comp />
             </Provider>
         )
-        await asyncReactDOMRender(<A />, testRoot)
-        expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+        expect(
+            await withAsyncConsole(async () => {
+                await asyncReactDOMRender(<A />, testRoot)
+                expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
+            })
+        ).toMatchSnapshot()
     })
 
     test("show error when using children and render at same time ", async () => {
@@ -823,4 +834,36 @@ describe("use Observer inject and render sugar should work  ", () => {
         expect(msg.length).toBe(1)
         console.error = baseError
     })
+})
+
+test("don't use PureComponent", () => {
+    const msg = []
+    const baseWarn = console.warn
+    console.warn = m => msg.push(m)
+
+    try {
+        debugger
+        observer(
+            class X extends React.PureComponent {
+                return() {
+                    return <div />
+                }
+            }
+        )
+
+        expect(msg).toEqual([
+            "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
+        ])
+    } finally {
+        console.warn = baseWarn
+    }
+})
+
+test("static on function components are hoisted", () => {
+    const Comp = () => <div />
+    Comp.foo = 3
+
+    const Comp2 = observer(Comp)
+
+    expect(Comp2.foo).toBe(3)
 })
