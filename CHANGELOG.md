@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.1.1
+
+*   Fixed regression bug in integration with devtools. Fixed through [#465](https://github.com/mobxjs/mobx-react/pull/465) by @le0nik
+
 ### 5.1.0
 
 *   Added support for React 16.3, including support for the `getDerivedStateFromProps` life-cycle hook. MobX will no longer use `componentWillMount` hook internally, so that it can be used in `StrictMode` react as well. Fixes [#447](https://github.com/mobx/mobx-react/447)
