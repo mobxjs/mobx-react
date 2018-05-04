@@ -1,6 +1,6 @@
 import React, { Component, PureComponent } from "react"
 import hoistStatics from "hoist-non-react-statics"
-import { createAtom, Reaction, _allowStateChanges, runInAction } from "mobx"
+import { createAtom, Reaction, _allowStateChanges, runInAction, observable } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
@@ -118,14 +118,13 @@ function makeComponentReactive(render) {
         let currentValue = this[propName]
         let currentValueKeys = null == currentValue ? [] : Object.keys(currentValue)
         const changeKeysAtom = createAtom("this. " + propName + " [change keys]")
-        const individualAtoms = {}
-        const individualValues = {}
+        const propBoxes = {}
 
         /**
          * In-place convert properties to getter+setter
          */
         function convertStorageToReactive(storage) {
-            if (null == storage) {
+            if (!storage) {
                 return storage
             }
             // props object is frozen, so we need to clone it
@@ -136,22 +135,22 @@ function makeComponentReactive(render) {
                 storage = Object.assign({}, storage)
             }
             Object.keys(storage).forEach(function(key) {
-                if (!(key in individualAtoms)) {
-                    individualAtoms[key] = createAtom("this." + propName + "." + key)
+                if (!(key in propBoxes)) {
+                    propBoxes[key] = observable.box(void 0, {
+                        deep: false,
+                        name: "this." + propName + "." + key
+                    })
                 }
                 const currentKeyValue = storage[key]
-                delete storage[key]
                 Object.defineProperty(storage, key, {
                     configurable: true,
                     enumerable: true,
                     get: function get() {
-                        individualAtoms[key].reportObserved()
-                        return individualValues[key]
+                        return propBoxes[key].get()
                     },
                     set: function set(v) {
-                        if (individualValues[key] !== v) {
-                            individualValues[key] = v
-                            individualAtoms[key].reportChanged()
+                        if (propBoxes[key].get() !== v) {
+                            propBoxes[key].set(v)
                         }
                     }
                 })
@@ -164,12 +163,12 @@ function makeComponentReactive(render) {
          * In-place convert getter+setter to plain property
          */
         function convertStorageToStatic(storage) {
-            if (null == storage) {
+            if (!storage) {
                 return
             }
             Object.keys(storage).forEach(function(key) {
                 const currentKeyValue = storage[key]
-                delete storage[key]
+                delete storage[key] // delete defined property with getter and setter
                 storage[key] = currentKeyValue
             })
         }
@@ -192,15 +191,10 @@ function makeComponentReactive(render) {
                     newValue = convertStorageToReactive(newValue)
                     // update value holder with new inner value
                     currentValue = newValue
-                    if (
-                        currentValueKeys.length !== newKeys.length ||
-                        newKeys.filter(key => currentValueKeys.indexOf(key) >= 0).length !==
-                            newKeys.length
-                    ) {
+                    if (!shallowEqual(currentValueKeys, newKeys)) {
                         changeKeysAtom.reportChanged() // find removed old keys and delete atoms and value holders
                         currentValueKeys.filter(key => newKeys.indexOf(key) < 0).forEach(key => {
-                            delete individualAtoms[key]
-                            delete individualValues[key]
+                            delete propBoxes[key]
                         })
                     }
                     currentValueKeys = newKeys
