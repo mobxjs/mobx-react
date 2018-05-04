@@ -1,6 +1,6 @@
 import React, { Component, PureComponent } from "react"
 import hoistStatics from "hoist-non-react-statics"
-import { createAtom, Reaction, _allowStateChanges } from "mobx"
+import { createAtom, Reaction, _allowStateChanges, runInAction } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
@@ -71,14 +71,14 @@ function patch(target, funcName, runMixinFirst = false) {
     const f = !base
         ? mixinFunc
         : runMixinFirst === true
-          ? function() {
-                mixinFunc.apply(this, arguments)
-                base.apply(this, arguments)
-            }
-          : function() {
-                base.apply(this, arguments)
-                mixinFunc.apply(this, arguments)
-            }
+            ? function() {
+                  mixinFunc.apply(this, arguments)
+                  base.apply(this, arguments)
+              }
+            : function() {
+                  base.apply(this, arguments)
+                  mixinFunc.apply(this, arguments)
+              }
 
     // MWE: ideally we freeze here to protect against accidental overwrites in component instances, see #195
     // ...but that breaks react-hot-loader, see #231...
@@ -122,8 +122,8 @@ function makeComponentReactive(render) {
         const individualValues = {}
 
         /**
-             * In-place convert properties to getter+setter
-             */
+         * In-place convert properties to getter+setter
+         */
         function convertStorageToReactive(storage) {
             if (null == storage) {
                 return storage
@@ -137,7 +137,7 @@ function makeComponentReactive(render) {
             }
             Object.keys(storage).forEach(function(key) {
                 if (!(key in individualAtoms)) {
-                    individualAtoms[key] = new Atom("this." + propName + "." + key)
+                    individualAtoms[key] = createAtom("this." + propName + "." + key)
                 }
                 const currentKeyValue = storage[key]
                 delete storage[key]
@@ -161,8 +161,8 @@ function makeComponentReactive(render) {
         }
 
         /**
-             * In-place convert getter+setter to plain property
-             */
+         * In-place convert getter+setter to plain property
+         */
         function convertStorageToStatic(storage) {
             if (null == storage) {
                 return
