@@ -15,7 +15,8 @@
             "args": ["--verbose", "--testRegex",".*", "-i", "${file}"],
             "runtimeArgs": [
                 "--nolazy"
-            ]
+            ],
+            "sourceMaps": true
         }
     ]
 }

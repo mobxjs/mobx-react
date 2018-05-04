@@ -1,24 +1,41 @@
 # MobX-React Changelog
 
+### 5.1.2
+
+*   Fixed regression bug in integration with devtools. Fixed through [#465](https://github.com/mobxjs/mobx-react/pull/465) by @le0nik
+
+### 5.1.0
+
+*   Added support for React 16.3, including support for the `getDerivedStateFromProps` life-cycle hook. MobX will no longer use `componentWillMount` hook internally, so that it can be used in `StrictMode` react as well. Fixes [#447](https://github.com/mobx/mobx-react/447)
+*   Static properties of a function component are now automatically hoisted when the component is wrapped by `observer`. Implements [#427](https://github.com/mobx/mobx-react/427)
+*   Misspelled export `componentByNodeRegistery` is now properly export as `componentByNodeRegistry` as well, please update consumers, the mispelled version will be dropped in the next major. Fixes [#421](https://github.com/mobx/mobx-react/421)
+*   Deprecated the support for the `inject` property on `Observer`, it is fundamentally broken and should not be used. Use `inject` on the enclosing component instead and grab the necessary stores from the closure. Fixes [#423](https://github.com/mobx/mobx-react/423)
+*   Added warning about using `observer` on a React.PureComponent, this will become an exception in the next major. Fixes [#309](https://github.com/mobx/mobx-react/309)
+*   Mobx-react will now print a warning when combining `observer` with a custom `shouldComponentUpdate` implementation. Fixes [#417](https://github.com/mobx/mobx-react/417)
+
+### 5.0.0
+
+*   Added compatibility with MobX 4.x. This version is not compatible with older Mobx versions
+
 ### 4.4.3
 
-* The exposed React Native build now uses commonjs, to prevent the need of further transpilation. Fixes [#428](428)
+*   The exposed React Native build now uses commonjs, to prevent the need of further transpilation. Fixes [#428](428)
 
 ### 4.4.2
 
-* Fixed issue with mobx-react not compiling on react-native due to the presence of a `.babelrc` file. Fixes [#415](https://github.com/mobxjs/mobx-react/issues/415) by [Ryan Rampersad](https://github.com/ryanmr) through [#416](https://github.com/mobxjs/mobx-react/pull/416)
+*   Fixed issue with mobx-react not compiling on react-native due to the presence of a `.babelrc` file. Fixes [#415](https://github.com/mobxjs/mobx-react/issues/415) by [Ryan Rampersad](https://github.com/ryanmr) through [#416](https://github.com/mobxjs/mobx-react/pull/416)
 
 ### 4.4.1
 
-* Fixed syntax error in 4.4.0 that escaped
+*   Fixed syntax error in 4.4.0 that escaped
 
 ### 4.4.0
 
-* `Observer` now supports render props, `render` and `inject`. See the updated readme. By [ZiYingMai](https://github.com/Sunshine168) through [#403](https://github.com/mobxjs/mobx-react/pull/403)
-* Fixed: `NaN` is now considered to be equal to `NaN` when doing reconciliation. Fixes [#363](https://github.com/mobxjs/mobx-react/issues/363), by [Andrew Branch](https://github.com/andrewbranch) through [#402](https://github.com/mobxjs/mobx-react/pull/402)
-* Improved typings of `Observer` component, by [Rafał Filipek](https://github.com/RafalFilipek) through [#376](https://github.com/mobxjs/mobx-react/pull/376)
-* Fixed incorrect generation of component name, by [Andy Kogut](https://github.com/andykog) through [#368](https://github.com/mobxjs/mobx-react/pull/368)
-* Lot of internal repo upgrades: Test suite is now in Jest, Prettier is used etc.
+*   `Observer` now supports render props, `render` and `inject`. See the updated readme. By [ZiYingMai](https://github.com/Sunshine168) through [#403](https://github.com/mobxjs/mobx-react/pull/403)
+*   Fixed: `NaN` is now considered to be equal to `NaN` when doing reconciliation. Fixes [#363](https://github.com/mobxjs/mobx-react/issues/363), by [Andrew Branch](https://github.com/andrewbranch) through [#402](https://github.com/mobxjs/mobx-react/pull/402)
+*   Improved typings of `Observer` component, by [Rafał Filipek](https://github.com/RafalFilipek) through [#376](https://github.com/mobxjs/mobx-react/pull/376)
+*   Fixed incorrect generation of component name, by [Andy Kogut](https://github.com/andykog) through [#368](https://github.com/mobxjs/mobx-react/pull/368)
+*   Lot of internal repo upgrades: Test suite is now in Jest, Prettier is used etc.
 
 ### 4.3.5
 
@@ -39,77 +56,78 @@ Killed accidentally exposed default exports.
 If you are still using `import mobxReact from "mobx-react"`, use `import * as mobxReact from "mobx-react"`, or better `import { whatYouNeed } from "mobx-react"` instead.
 
 ### 4.3.1
+
 ### 4.3.0 (unpublished)
 
 Improved module rollup setup, enabling better tree shaking. See #324 / #328
 
 ### 4.2.2
 
-* Fixed check for stateless components, by @leader22, see #280
+*   Fixed check for stateless components, by @leader22, see #280
 
 ### 4.2.1
 
 _Note: Due to pull / rebase issue the release commit is incorrect. This is the released [commit](https://github.com/mobxjs/mobx-react/commit/f1b3eefc5239cb451b317204fa8aad94b4dcfc2f)_
 
-* Reduced module size by 31% (switched to rollup.js). See #244 by @rossipedia
-* Skip creation of `.wrappedInstance` reference for stateless components. See #254 by @farwayer
-* Introduced global `onError` handler hook to be notified on errors thrown by `@observer` components. See #262 by @andykog
-* Improved typescript typings of the exposed `propTypes`, See #263 by @panjiesw
+*   Reduced module size by 31% (switched to rollup.js). See #244 by @rossipedia
+*   Skip creation of `.wrappedInstance` reference for stateless components. See #254 by @farwayer
+*   Introduced global `onError` handler hook to be notified on errors thrown by `@observer` components. See #262 by @andykog
+*   Improved typescript typings of the exposed `propTypes`, See #263 by @panjiesw
 
 ### 4.2.0
 
-* Same as 4.2.1, but contained build issue and is unpublished
+*   Same as 4.2.1, but contained build issue and is unpublished
 
 ### 4.1.8
 
-* Undid change introduced in 4.1.4 where the lifecycle hooks were protected, as this breaks react-hot-loader.... Fixes #231
+*   Undid change introduced in 4.1.4 where the lifecycle hooks were protected, as this breaks react-hot-loader.... Fixes #231
 
 ### 4.1.7
 
-* Added support for React 15.5 (no deprecation warnings) and 16.0 (no proptypes / createClass), by @andykog, see #238. Fixes #233, #237
+*   Added support for React 15.5 (no deprecation warnings) and 16.0 (no proptypes / createClass), by @andykog, see #238. Fixes #233, #237
 
 ### 4.1.5
 
-* Improved typescript typings, fixes #223
+*   Improved typescript typings, fixes #223
 
 ### 4.1.4
 
-* Made lifecycle hooks used by mobx-react read-only to make sure they are not accidentally overwritten in component instances. Fixes, #195, #202. Note that they can still be defined, just make sure to define them on the prototype (`componentWillMount() {}`) instead of the instance (`componentWillMount = () => {}`). Which is best practice anyway.
+*   Made lifecycle hooks used by mobx-react read-only to make sure they are not accidentally overwritten in component instances. Fixes, #195, #202. Note that they can still be defined, just make sure to define them on the prototype (`componentWillMount() {}`) instead of the instance (`componentWillMount = () => {}`). Which is best practice anyway.
 
 ### 4.1.3
 
-* Fixed `ReactDOM.findDOMNode` exception when using react-test-runner, #216
+*   Fixed `ReactDOM.findDOMNode` exception when using react-test-runner, #216
 
 ### 4.1.2
 
-* Exceptions caught during render are now rethrown with proper stack, fixes #206
+*   Exceptions caught during render are now rethrown with proper stack, fixes #206
 
 ### 4.1.1
 
-* Exposed `wrappedInstance` and `wrappedComponent` in typings
-* Fixed accidental use of `default` import from `mobx` package.
+*   Exposed `wrappedInstance` and `wrappedComponent` in typings
+*   Fixed accidental use of `default` import from `mobx` package.
 
 ### 4.1.0
 
-* Added support for MobX3. Note that using MobX3 changes the error semantics. If an `observer` component throws, it will no longer crash the app, but just log the exceptions instead.
+*   Added support for MobX3. Note that using MobX3 changes the error semantics. If an `observer` component throws, it will no longer crash the app, but just log the exceptions instead.
 
 ### 4.0.4
 
-* Introduced `suppressChangedStoreWarning` to optionally supresss change store warnings, by @dropfen, see #182, #183
+*   Introduced `suppressChangedStoreWarning` to optionally supresss change store warnings, by @dropfen, see #182, #183
 
 ### 4.0.3
 
-* Fixed issue where userland componentWilMount was run before observer componentWillMount
+*   Fixed issue where userland componentWilMount was run before observer componentWillMount
 
 ### 4.0.2
 
-* Fixed order of `inject` overloads, see #169
-* Fixed import of `mobx` when using Webpack without commonjs plugin, see: #168
+*   Fixed order of `inject` overloads, see #169
+*   Fixed import of `mobx` when using Webpack without commonjs plugin, see: #168
 
 ### 4.0.1
 
-* Improved typings, by @timmolendijk, fixes #164, #166
-* Fixed `inject` signature in readme, by @farwayer
+*   Improved typings, by @timmolendijk, fixes #164, #166
+*   Fixed `inject` signature in readme, by @farwayer
 
 ### 4.0.0
 
@@ -125,8 +143,8 @@ In general this should cause no trouble, as typically mutable data in mobx based
 
 If you need to pass in a deeply modified object and still want to make sure to cause a re-render, either
 
- * make sure the object / array is an observable
- * do not decorate your component with `observer`, but use `Observer` regions instead (see below)
+*   make sure the object / array is an observable
+*   do not decorate your component with `observer`, but use `Observer` regions instead (see below)
 
 See [#160](https://github.com/mobxjs/mobx-react/issues/160) for more details.
 
@@ -137,11 +155,9 @@ See [#160](https://github.com/mobxjs/mobx-react/issues/160) for more details.
 ```javascript
 const NameDisplayer = ({ name }) => <h1>{name}</h1>
 
-const UserNameDisplayer = inject(
-    stores => ({
-        name: stores.userStore.name
-    })
-)(NameDisplayer)
+const UserNameDisplayer = inject(stores => ({
+    name: stores.userStore.name
+}))(NameDisplayer)
 
 const user = mobx.observable({
     name: "Noa"
@@ -195,11 +211,7 @@ See the Readme / [#138](https://github.com/mobxjs/mobx-react/issues/138)
 Example:
 
 ```javascript
-const UserNameDisplayer = ({ user }) => (
-    <Observer>
-        {() => <div>{user.name}</div>}
-    </Observer>
-)
+const UserNameDisplayer = ({ user }) => <Observer>{() => <div>{user.name}</div>}</Observer>
 ```
 
 #### Using `observer` to inject stores is deprecated
@@ -223,89 +235,89 @@ For more info see the related [discussion](https://github.com/mobxjs/mobx-react/
 
 #### Other improvements
 
-* If `mobx` and `mobx-react` are used in combination, all reactions are run as part of React's batched updates. This minimizes the work of the reconciler, guarantees optimal rendering order of components (if the rendering was not triggered from within a React event). Tnx @gkaemmer for the suggestion.
-* It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
-* Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
-* export `PropTypes` as well in typescript typings, fixes #153
-* Add react as a peer dependency
-* Added minified browser build: `index.min.js`, fixes #147
-* Generate better component names when using `inject`
+*   If `mobx` and `mobx-react` are used in combination, all reactions are run as part of React's batched updates. This minimizes the work of the reconciler, guarantees optimal rendering order of components (if the rendering was not triggered from within a React event). Tnx @gkaemmer for the suggestion.
+*   It is now possible to directly define `propTypes` and `defaultProps` on components wrapped with `inject` (or `observer(["stores"])`) again, see #120, #142. Removed the warnings for this, and instead improved the docs.
+*   Clean up data subscriptions if an error is thrown by an `observer` component, see [#134](https://github.com/mobxjs/mobx-react/pull/134) by @andykog
+*   export `PropTypes` as well in typescript typings, fixes #153
+*   Add react as a peer dependency
+*   Added minified browser build: `index.min.js`, fixes #147
+*   Generate better component names when using `inject`
 
 ---
 
 ### 3.5.9
 
-* Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
+*   Print warning when `inject` and `observer` are used in the wrong order, see #146, by @delaetthomas
 
 ### 3.5.8
 
-* Fixed issue where `props` where not passed properly to components in very rare cases. Also fixed #115
+*   Fixed issue where `props` where not passed properly to components in very rare cases. Also fixed #115
 
 ### 3.5.7
 
-* Bundles are no longer minified, fixes #127
+*   Bundles are no longer minified, fixes #127
 
 ### 3.5.6
 
-* Export `propTypes` as `PropTypes`, like React (@andykog, ##117)
+*   Export `propTypes` as `PropTypes`, like React (@andykog, ##117)
 
 ### 3.5.5
 
-* Removed `experimental` status of `inject` / `Provider`. Official feature now.
-* Fixed hot-reloading issue, #101
+*   Removed `experimental` status of `inject` / `Provider`. Official feature now.
+*   Fixed hot-reloading issue, #101
 
 ### 3.5.4
 
-* Introduced `wrappedInstance` by @rossipedia on `inject` decorated HOC's, see https://github.com/mobxjs/mobx-react/pull/90/
-* print warnings when assign values to `propTypes`, `defaultProps`, or `contextTypes` of a HOC. (by @jtraub, see https://github.com/mobxjs/mobx-react/pull/88/)
-* Static properties are now hoisted to HoC components when, #92
-* If `inject` is used incombination with a function, the object return from the function will now be merged into the `nextProps` instead of replacing them, #80
-* Always do propType checking untracked, partially fixes #56, #305
+*   Introduced `wrappedInstance` by @rossipedia on `inject` decorated HOC's, see https://github.com/mobxjs/mobx-react/pull/90/
+*   print warnings when assign values to `propTypes`, `defaultProps`, or `contextTypes` of a HOC. (by @jtraub, see https://github.com/mobxjs/mobx-react/pull/88/)
+*   Static properties are now hoisted to HoC components when, #92
+*   If `inject` is used incombination with a function, the object return from the function will now be merged into the `nextProps` instead of replacing them, #80
+*   Always do propType checking untracked, partially fixes #56, #305
 
 ### 3.5.3
 
-* Fixed error `Cannot read property 'renderReporter' of undefined` (#96)
+*   Fixed error `Cannot read property 'renderReporter' of undefined` (#96)
 
 ### 3.5.2
 
-* Added propTypes.observableArrayOf and propTypes.arrayOrObservableArrayOf (#91)
+*   Added propTypes.observableArrayOf and propTypes.arrayOrObservableArrayOf (#91)
 
 ### 3.5.1
 
-* Fixed regression #85, changes caused by the constructor results in inconsistent rendering (N.B.: that is un-idiomatic React usage and React will warn about this!)
+*   Fixed regression #85, changes caused by the constructor results in inconsistent rendering (N.B.: that is un-idiomatic React usage and React will warn about this!)
 
 ### 3.5.0
 
-* Introduced `inject("store1", "store2")(component)` as alternative syntax to inject stores. Should address #77, #70
-* Introduced the `wrappedComponent` property on injected higher order components, addresses #70, #72
-* Fixed #76: error when no stores are provided through context
-* Added typings for devTools related features (@benjamingr).
-* Added MobX specific propTypes (@mattruby)
-* Merged #44, fixes #73: don't re-render if component was somehow unmounted
+*   Introduced `inject("store1", "store2")(component)` as alternative syntax to inject stores. Should address #77, #70
+*   Introduced the `wrappedComponent` property on injected higher order components, addresses #70, #72
+*   Fixed #76: error when no stores are provided through context
+*   Added typings for devTools related features (@benjamingr).
+*   Added MobX specific propTypes (@mattruby)
+*   Merged #44, fixes #73: don't re-render if component was somehow unmounted
 
 ### 3.4.0
 
-* Introduced `Provider` / context support (#53 / MobX #300)
-* Fixed issues when using devtools with IE. #66 (By @pvasek)
+*   Introduced `Provider` / context support (#53 / MobX #300)
+*   Fixed issues when using devtools with IE. #66 (By @pvasek)
 
 ### 3.3.1
 
-* Added typescript typings form `mobx-react/native` and `mobx-react/custom`
-* Fixed #63: error when using stateless function components when using babel and typescript
+*   Added typescript typings form `mobx-react/native` and `mobx-react/custom`
+*   Fixed #63: error when using stateless function components when using babel and typescript
 
 ### 3.3.0
 
-* Upgraded to MobX 2.2.0
+*   Upgraded to MobX 2.2.0
 
 ### 3.2.0
 
-* Added support for react-native 0.25 and higher. By @danieldunderfelt.
+*   Added support for react-native 0.25 and higher. By @danieldunderfelt.
 
 ### 3.1.0
 
-* Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
-* Fixed some issues with rollup #43
-* Minor optimization
+*   Added support for custom renderers (without DOM), use: `mobx-react/custom` as import fixes #42
+*   Fixed some issues with rollup #43
+*   Minor optimization
 
 ### 3.0.5
 
@@ -318,7 +330,7 @@ The debug name stateless function components of babel transpiled jsx are now pro
 ```javascript
 const MyComponent = () => <span>hi</span>
 
-export default observer(MyComponent);
+export default observer(MyComponent)
 ```
 
 ### 3.0.3
@@ -362,19 +374,19 @@ Upped dependency of mobx to 1.1.1.
 It is now possible to define `propTypes` and `getDefaultProps` on a stateless component:
 
 ```javascript
-const myComponent = (props) => {
+const myComponent = props => {
     // render
-};
+}
 
 myComponent.propTypes = {
     name: React.PropTypes.string
-};
+}
 
 myComponent.defaultProps = {
     name: "World"
-};
+}
 
-export default observer(myComponent);
+export default observer(myComponent)
 ```
 
 All credits to Jiri Spac for this contribution!
@@ -417,9 +429,9 @@ Fixed issue where Babel generated component classes where not properly picked up
 
 ```javascript
 var TodoItem = observer(function TodoItem(props) {
-    var todo = props.todo;
-    return <li>{todo.task}</li>;
-});
+    var todo = props.todo
+    return <li>{todo.task}</li>
+})
 ```
 
 ### 0.1.5

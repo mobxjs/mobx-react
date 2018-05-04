@@ -1,11 +1,12 @@
 import React from "react"
 import createClass from "create-react-class"
 import { mount } from "enzyme"
-import mobx from "mobx"
+import * as mobx from "mobx"
 import { shallow } from "enzyme"
 import ErrorCatcher from "./ErrorCatcher"
-import { Provider, observer } from "../"
-import { sleepHelper } from "./"
+import { Provider, observer, inject } from "../src"
+import { sleepHelper, withConsole } from "./"
+import TestRenderer from "react-test-renderer"
 
 describe("observer based context", () => {
     test("jest test", () => {
@@ -117,9 +118,9 @@ describe("observer based context", () => {
                 <C />
             </ErrorCatcher>
         )
-        console.log("About to mount")
-        mount(<B />)
-        console.log("mounted")
+        withConsole(() => {
+            mount(<B />)
+        })
         await sleepHelper(10)
         expect(/Oops/.test(ErrorCatcher.getError())).toBeTruthy()
     })
@@ -143,7 +144,9 @@ describe("observer based context", () => {
                 <B />
             </Provider>
         )
-        mount(<A />)
+        withConsole(() => {
+            mount(<A />)
+        })
         expect(
             /Store 'foo' is not available! Make sure it is provided by some Provider/.test(
                 ErrorCatcher.getError()
@@ -171,7 +174,7 @@ describe("observer based context", () => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
+        const a = mobx.observable.box(3)
         const C = observer(
             ["foo"],
             createClass({
@@ -214,7 +217,7 @@ describe("observer based context", () => {
         let msg = null
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
+        const a = mobx.observable.box(3)
         const C = observer(
             ["foo"],
             createClass({
@@ -250,4 +253,130 @@ describe("observer based context", () => {
         console.warn = baseWarn
         done()
     })
+})
+
+test("no warnings in modern react", () => {
+    const box = mobx.observable.box(3)
+    const Child = inject("store")(
+        observer(
+            class Child extends React.Component {
+                render() {
+                    return (
+                        <div>
+                            {this.props.store} + {box.get()}
+                        </div>
+                    )
+                }
+            }
+        )
+    )
+
+    class App extends React.Component {
+        render() {
+            return (
+                <div>
+                    <React.StrictMode>
+                        <Provider store="42">
+                            <Child />
+                        </Provider>
+                    </React.StrictMode>
+                </div>
+            )
+        }
+    }
+
+    // Enzyme can't handle React.strictMode
+    expect(
+        withConsole(() => {
+            const testRenderer = TestRenderer.create(<App />)
+            expect(testRenderer.toJSON()).toMatchSnapshot()
+
+            box.set(4)
+            expect(testRenderer.toJSON()).toMatchSnapshot()
+        })
+    ).toEqual({ errors: [], infos: [], warnings: [] })
+})
+
+test("getDerivedStateFromProps works #447", () => {
+    class Main extends React.Component {
+        static getDerivedStateFromProps(nextProps, prevState) {
+            return {
+                count: prevState.count + 1
+            }
+        }
+
+        state = {
+            count: 0
+        }
+
+        render() {
+            return (
+                <div>
+                    <h2>{`${this.state.count ? "One " : "No "}${this.props.thing}`}</h2>
+                </div>
+            )
+        }
+    }
+
+    const MainInjected = inject(({ store }) => ({ thing: store.thing }))(Main)
+
+    const store = { thing: 3 }
+
+    const App = () => (
+        <Provider store={store}>
+            <MainInjected />
+        </Provider>
+    )
+
+    const testRenderer = TestRenderer.create(<App />)
+    expect(testRenderer.toJSON()).toMatchSnapshot()
+})
+
+test("no double runs for getDerivedStateFromProps", () => {
+    let derived = 0
+    @observer
+    class Main extends React.Component {
+        state = {
+            activePropertyElementMap: {}
+        }
+
+        constructor(props) {
+            // console.log("CONSTRUCTOR")
+            super(props)
+        }
+
+        static getDerivedStateFromProps(nextProps, prevState) {
+            derived++
+            // console.log("PREVSTATE", nextProps)
+            return null
+        }
+
+        render() {
+            const { data, store } = this.props
+            return <div>Test-content</div>
+        }
+    }
+    // This results in
+    //PREVSTATE
+    //CONSTRUCTOR
+    //PREVSTATE
+    let MainInjected = inject(({ store }) => ({
+        componentProp: "def"
+    }))(Main)
+    // Uncomment the following line to see default behaviour (without inject)
+    //CONSTRUCTOR
+    //PREVSTATE
+    //MainInjected = Main;
+
+    const store = {}
+
+    const App = () => (
+        <Provider store={store}>
+            <MainInjected injectedProp={"abc"} />
+        </Provider>
+    )
+
+    const testRenderer = TestRenderer.create(<App />)
+    expect(testRenderer.toJSON()).toMatchSnapshot()
+    expect(derived).toBe(1)
 })

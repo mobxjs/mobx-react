@@ -69,7 +69,6 @@ export class Observer extends React.Component<
     {
         children?: () => React.ReactNode
         render?: () => React.ReactNode
-        inject?: IStoresToProps | string[]
     },
     {}
 > {}
@@ -97,8 +96,13 @@ export interface IRenderEvent {
 
 /**
  * WeakMap DOMNode -> Component instance
+ * @deprecated
  */
 export const componentByNodeRegistery: any
+/**
+ * WeakMap DOMNode -> Component instance
+ */
+export const componentByNodeRegistry: any
 
 /**
  * @deprecated, use PropTypes instead

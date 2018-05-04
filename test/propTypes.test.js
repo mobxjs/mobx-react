@@ -1,6 +1,6 @@
 import React from "react"
 import * as ReactPropTypes from "prop-types"
-import { PropTypes } from "../"
+import { PropTypes } from "../src"
 import { observable } from "mobx"
 
 // Cause `checkPropTypes` caches errors and doesn't print them twice....
@@ -93,7 +93,7 @@ test("Valid values", () => {
     typeCheckPass(PropTypes.observableObject, observable({}))
     typeCheckPass(PropTypes.objectOrObservableObject, {})
     typeCheckPass(PropTypes.objectOrObservableObject, observable({}))
-    typeCheckPass(PropTypes.observableMap, observable(observable.shallowMap({})))
+    typeCheckPass(PropTypes.observableMap, observable(observable.map({}, { deep: false })))
 })
 
 test("should be implicitly optional and not warn", () => {

@@ -3,10 +3,10 @@ import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import { mount } from "enzyme"
-import mobx, { action, observable, computed } from "mobx"
-import { observer, inject, Provider } from "../"
-import { createTestRoot } from "./index"
-import { sleepHelper } from "./index"
+import * as mobx from "mobx"
+import { action, observable, computed } from "mobx"
+import { observer, inject, Provider } from "../src"
+import { createTestRoot, sleepHelper, withConsole } from "./index"
 
 const testRoot = createTestRoot()
 
@@ -108,9 +108,11 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        expect(() => mount(<A />)).toThrow(
-            /Store 'foo' is not available! Make sure it is provided by some Provider/
-        )
+        withConsole(() => {
+            expect(() => mount(<A />)).toThrow(
+                /Store 'foo' is not available! Make sure it is provided by some Provider/
+            )
+        })
     })
 
     test("store is not required if prop is available", () => {
@@ -147,7 +149,7 @@ describe("inject based context", () => {
         let msg
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const a = mobx.observable(3)
+        const a = mobx.observable.box(3)
         const C = observer(
             ["foo"],
             createClass({

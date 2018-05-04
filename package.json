@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "4.4.3",
+  "version": "5.1.2",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "jsnext:main": "index.module.js",
@@ -13,13 +13,12 @@
   },
   "scripts": {
     "prettier": "prettier --write \"**/*.js\" \"**/*.ts\"",
-    "test": "npm run build && npm run jest && npm run test:ts",
+    "test": "jest && npm run test:ts",
     "test:ts": "tsc -p test/ts",
-    "test:travis": "npm run build && npm run jest && npm run test:ts",
+    "test:travis": "npm run build && jest && npm run test:ts",
     "build": "node build-rollup.js && cp src/index.d.ts index.d.ts && cp src/index.d.ts native.d.ts && cp src/index.d.ts custom.d.ts",
     "precommit": "lint-staged",
-    "jest": "jest",
-    "test:jest": "npm run build && npm run jest"
+    "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -28,11 +27,12 @@
   },
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobx": "^2.6.3 || ^3.0.0",
+    "mobx": "^4.0.0",
     "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
     "@types/create-react-class": "^15.6.0",
+    "@types/node": "^9.0.0",
     "@types/prop-types": "^15.5.2",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
@@ -52,9 +52,9 @@
     "husky": "0.14.3",
     "jest": "^22.0.5",
     "jest-environment-jsdom": "^22.0.5",
-    "lint-staged": "^4.2.3",
+    "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
-    "mobx": "^3.3.0",
+    "mobx": "^4.0.0",
     "nscript": "^0.1.10",
     "opn-cli": "^3.1.0",
     "prettier": "^1.7.2",
@@ -75,7 +75,8 @@
     "typescript": "2.6"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^2.3.1"
+    "hoist-non-react-statics": "^2.5.0",
+    "react-lifecycles-compat": "^3.0.2"
   },
   "keywords": [
     "mobx",
@@ -91,10 +92,8 @@
       "git add"
     ]
   },
-  "jest": {
-    "moduleDirectories": [
-      "node_modules",
-      "src"
-    ]
+  "jest": {},
+  "resolutions": {
+    "@types/node": "9.6.7"
   }
 }
