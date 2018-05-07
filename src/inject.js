@@ -34,13 +34,14 @@ const proxiedInjectorProps = {
  * Store Injection
  */
 function createStoreInjector(grabStoresFn, component, injectNames) {
-    let displayName =
-        "inject-" +
-        (component.displayName ||
-            component.name ||
-            (component.constructor && component.constructor.name) ||
-            "Unknown")
-    if (injectNames) displayName += "-with-" + injectNames
+    let displayName
+    const componentName =
+        component.displayName ||
+        component.name ||
+        (component.constructor && component.constructor.name) ||
+        "Component"
+    if (injectNames) displayName = "inject-with-" + injectNames + "(" + componentName + ")"
+    else displayName = "inject(" + componentName + ")"
 
     class Injector extends Component {
         static displayName = displayName

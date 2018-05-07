@@ -14,6 +14,7 @@ import {
     asyncRender
 } from "./"
 import ErrorCatcher from "./ErrorCatcher"
+import { mount } from "enzyme"
 
 /**
  *  some test suite is too tedious
@@ -321,6 +322,20 @@ test("observer component can be injected", () => {
 
     expect(msg.length).toBe(0)
     console.warn = baseWarn
+})
+
+test("correctly wraps display name of child component", () => {
+    const A = observer(
+        createClass({
+            displayName: "ObserverClass",
+            render: () => null
+        })
+    )
+    const B = observer(function StatelessObserver() {
+        return null
+    })
+    expect(mount(<A />).get(0).type.displayName).toEqual("observer(ObserverClass)")
+    expect(mount(<B />).get(0).type.displayName).toEqual("observer(StatelessObserver)")
 })
 
 describe("124 - react to changes in this.props via computed", () => {

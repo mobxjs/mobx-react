@@ -317,7 +317,9 @@ export function observer(arg1, arg2) {
     ) {
         const observerComponent = observer(
             class extends Component {
-                static displayName = componentClass.displayName || componentClass.name
+                static displayName = "observer(" +
+                (componentClass.displayName || componentClass.name) +
+                ")"
                 static contextTypes = componentClass.contextTypes
                 static propTypes = componentClass.propTypes
                 static defaultProps = componentClass.defaultProps
@@ -335,6 +337,10 @@ export function observer(arg1, arg2) {
     }
 
     const target = componentClass.prototype || componentClass
+    if (!componentClass.displayName || !componentClass.displayName.match(/observer\(/)) {
+        componentClass.displayName =
+            "observer(" + (componentClass.displayName || componentClass.name) + ")"
+    }
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
     const baseRender = target.render

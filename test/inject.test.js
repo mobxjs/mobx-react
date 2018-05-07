@@ -51,6 +51,60 @@ describe("inject based context", () => {
         expect(wrapper.find("div").text()).toEqual("context:42")
     })
 
+    test("wraps displayName of original component", () => {
+        const A = inject("foo")(
+            createClass({
+                displayName: "ComponentA",
+                render() {
+                    return <div>context:{this.props.foo}</div>
+                }
+            })
+        )
+        const B = inject()(
+            createClass({
+                displayName: "ComponentB",
+                render() {
+                    return <div>context:{this.props.foo}</div>
+                }
+            })
+        )
+        const C = inject(() => ({}))(
+            createClass({
+                displayName: "ComponentC",
+                render() {
+                    return <div>context:{this.props.foo}</div>
+                }
+            })
+        )
+        expect(
+            mount(
+                <Provider foo="foo">
+                    <A />
+                </Provider>
+            )
+                .children()
+                .get(0).type.displayName
+        ).toEqual("inject-with-foo(ComponentA)")
+        expect(
+            mount(
+                <Provider>
+                    <B />
+                </Provider>
+            )
+                .children()
+                .get(0).type.displayName
+        ).toEqual("inject(ComponentB)")
+        expect(
+            mount(
+                <Provider>
+                    <C />
+                </Provider>
+            )
+                .children()
+                .get(0).type.displayName
+        ).toEqual("observer(inject(ComponentC))")
+    })
+
     test("overriding stores is supported", () => {
         const C = inject("foo", "bar")(
             observer(
@@ -315,7 +369,7 @@ describe("inject based context", () => {
         mount(<A />)
         expect(msg.length).toBe(2)
         expect(msg[0].split("\n")[0]).toBe(
-            "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`."
+            "Warning: Failed prop type: The prop `x` is marked as required in `inject-with-foo(C)`, but its value is `undefined`."
         )
         expect(msg[1].split("\n")[0]).toBe(
             "Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`."
