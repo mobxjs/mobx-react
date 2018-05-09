@@ -143,7 +143,15 @@ onError(error => {
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
 Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
-To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. This makes sure the component won't try to react to any future data changes.
+To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. 
+
+```javascript
+import { useStaticRendering } from "mobx-react"
+
+useStaticRendering(true);
+```
+
+This makes sure the component won't try to react to any future data changes.
 
 ### Which components should be marked with `observer`?
 
