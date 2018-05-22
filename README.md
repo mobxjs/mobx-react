@@ -417,10 +417,11 @@ the more you use `observer`, the better the performance become.
 The overhead of `observer` itself is neglectable.
 See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/issues/101)
 
-**I'm using a `React.Component` class decorated with `observer` and I included a reaction that uses its props/state inside the constructor. Why isn't it reacting?**
+**I'm using a `React.Component` class decorated with `observer` and I included a reaction that uses its props/state inside the constructor/componentWillMount. Why isn't it reacting?**
 
-While `observer` converts both props and state into observable objects, this is only done *after* the constructor is finished.
-In this case it is better to put such reactions inside other lifecycle methods such as componentWillMount.
+While `observer` converts both props and state into observable objects, this is only done *after* the first rendering is finished.
+In this case it is better to put such reactions inside other post-render lifecycle methods such as componentDidMount.
+Note that this restriction only applies to props/state, not to observable values.
 
 **I see React warnings about `forceUpdate` / `setState` from React**
 
