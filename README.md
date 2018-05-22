@@ -421,7 +421,7 @@ See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/
 
 While `observer` converts both props and state into observable objects, this is only done *after* the first rendering is finished.
 In this case it is better to put such reactions inside other post-render lifecycle methods such as componentDidMount.
-Note that this restriction only applies to props/state, not to observable values.
+Note that this restriction only applies to props/state, not to other observable values.
 
 **I see React warnings about `forceUpdate` / `setState` from React**
 
