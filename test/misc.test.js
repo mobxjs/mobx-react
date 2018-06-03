@@ -185,3 +185,25 @@ test("testGetDNode", () => {
         mobx.getAtom(wrapper.instance().render)
     )
 })
+
+test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {
+    expect(
+        withConsole(() => {
+            const A = observer(
+                class A extends React.Component {
+                    render() {
+                        return null
+                    }
+                }
+            )
+
+            observer(
+                class B extends A {
+                    render() {
+                        return null
+                    }
+                }
+            )
+        })
+    ).toMatchSnapshot()
+})
