@@ -15,13 +15,15 @@ import {
 } from "./"
 import ErrorCatcher from "./ErrorCatcher"
 
+const mobxAdminProperty = mobx.$mobx || "$mobx"
+
 /**
  *  some test suite is too tedious
  */
 
 const testRoot = createTestRoot()
 
-const getDNode = (obj, prop) => obj.$mobx.values[prop]
+const getDNode = (obj, prop) => mobx._getAdministration(obj, prop)
 
 /*
  use TestUtils.renderIntoDocument  will re-mounted the component  with with different props
@@ -86,8 +88,8 @@ describe("nestedRendering", async () => {
         expect(todoListRenderings).toBe(1)
         expect(todoListWillReactCount).toBe(0)
         expect(todoItemRenderings).toBe(2)
-        expect(getDNode(store, "todos").observers.length).toBe(1)
-        expect(getDNode(store.todos[0], "title").observers.length).toBe(1)
+        expect(getDNode(store, "todos").observers.size).toBe(1)
+        expect(getDNode(store.todos[0], "title").observers.size).toBe(1)
     })
 
     test("rerendering with outer store added", () => {
@@ -104,8 +106,8 @@ describe("nestedRendering", async () => {
         expect(todoListRenderings).toBe(2)
         expect(todoListWillReactCount).toBe(1)
         expect(todoItemRenderings).toBe(3)
-        expect(getDNode(store.todos[1], "title").observers.length).toBe(1)
-        expect(getDNode(store.todos[1], "completed").observers.length).toBe(0)
+        expect(getDNode(store.todos[1], "title").observers.size).toBe(1)
+        expect(getDNode(store.todos[1], "completed").observers.size).toBe(0)
     })
 
     test("rerendering with outer store pop", () => {
@@ -114,8 +116,8 @@ describe("nestedRendering", async () => {
         expect(todoListWillReactCount).toBe(2)
         expect(todoItemRenderings).toBe(3)
         expect(testRoot.querySelectorAll("li").length).toBe(1)
-        expect(getDNode(oldTodo, "title").observers.length).toBe(0)
-        expect(getDNode(oldTodo, "completed").observers.length).toBe(0)
+        expect(getDNode(oldTodo, "title").observers.size).toBe(0)
+        expect(getDNode(oldTodo, "completed").observers.size).toBe(0)
     })
 })
 
@@ -198,7 +200,7 @@ describe("does not views alive when using static rendering", () => {
         data.z = "hello"
         expect(renderCount).toBe(1)
         expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
-        expect(getDNode(data, "z").observers.length).toBe(0)
+        expect(getDNode(data, "z").observers.size).toBe(0)
     })
 })
 
@@ -383,10 +385,10 @@ test.skip("should stop updating if error was thrown in render (#134)", () => {
     })
 
     TestUtils.renderIntoDocument(<Comp />)
-    expect(data.observers.length).toBe(1)
+    expect(data.observers.size).toBe(1)
     data.set(1)
     expect(data.set(2)).toThrow("Hello")
-    expect(data.observers.length).toBe(0)
+    expect(data.observers.size).toBe(0)
     data.set(3)
     data.set(4)
     data.set(5)

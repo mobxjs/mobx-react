@@ -1,9 +1,11 @@
 import React, { Component, PureComponent } from "react"
 import hoistStatics from "hoist-non-react-statics"
-import { createAtom, Reaction, _allowStateChanges } from "mobx"
+import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
+
+const mobxAdminProperty = $mobx || "$mobx"
 
 /**
  * dev tool support
@@ -215,7 +217,7 @@ function makeComponentReactive(render) {
         }
     })
     reaction.reactComponent = this
-    reactiveRender.$mobx = reaction
+    reactiveRender[mobxAdminProperty] = reaction
     this.render = reactiveRender
     return reactiveRender.call(this)
 }
@@ -226,7 +228,7 @@ function makeComponentReactive(render) {
 const reactiveMixin = {
     componentWillUnmount: function() {
         if (isUsingStaticRendering === true) return
-        this.render.$mobx && this.render.$mobx.dispose()
+        this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
         this.__$mobxIsUnmounted = true
         if (isDevtoolsEnabled) {
             const node = findDOMNode(this)

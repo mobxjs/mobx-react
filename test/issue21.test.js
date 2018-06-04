@@ -142,16 +142,26 @@ test("verify issue 21", async () => {
 
 test("verify prop changes are picked up", async () => {
     function createItem(subid, label) {
-        const res = mobx.observable({
-            id: 1,
-            label: label,
-            get text() {
-                events.push(["compute", this.subid])
-                return (
-                    this.id + "." + this.subid + "." + this.label + "." + data.items.indexOf(this)
-                )
-            }
-        })
+        const res = mobx.observable(
+            {
+                id: 1,
+                label: label,
+                get text() {
+                    events.push(["compute", this.subid])
+                    return (
+                        this.id +
+                        "." +
+                        this.subid +
+                        "." +
+                        this.label +
+                        "." +
+                        data.items.indexOf(this)
+                    )
+                }
+            },
+            {},
+            { proxy: false }
+        )
         res.subid = subid // non reactive
         return res
     }
@@ -218,16 +228,26 @@ test("verify prop changes are picked up", async () => {
 
 test("verify props is reactive", async () => {
     function createItem(subid, label) {
-        const res = mobx.observable({
-            id: 1,
-            label: label,
-            get text() {
-                events.push(["compute", this.subid])
-                return (
-                    this.id + "." + this.subid + "." + this.label + "." + data.items.indexOf(this)
-                )
-            }
-        })
+        const res = mobx.observable(
+            {
+                id: 1,
+                label: label,
+                get text() {
+                    events.push(["compute", this.subid])
+                    return (
+                        this.id +
+                        "." +
+                        this.subid +
+                        "." +
+                        this.label +
+                        "." +
+                        data.items.indexOf(this)
+                    )
+                }
+            },
+            {},
+            { proxy: false }
+        )
         res.subid = subid // non reactive
         return res
     }

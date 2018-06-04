@@ -6,6 +6,8 @@ import * as mobx from "mobx"
 import { observer } from "../src"
 import { createTestRoot, withConsole } from "./index"
 
+const mobxAdminProperty = mobx.$mobx || "$mobx"
+
 const testRoot = createTestRoot()
 
 describe("custom shouldComponentUpdate is not respected for observable changes (#50)", () => {
@@ -175,7 +177,7 @@ test("testGetDNode", () => {
     const C = observer(() => null)
 
     const wrapper = mount(<C />)
-    expect(wrapper.instance().render.$mobx).toBeTruthy()
+    expect(wrapper.instance().render[mobxAdminProperty]).toBeTruthy()
     expect(mobx.getAtom(wrapper.instance().render)).toBeTruthy()
 
     mobx.extendObservable(wrapper.instance(), {
