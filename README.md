@@ -469,3 +469,7 @@ Data will have one of the following formats:
 
 WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
 This map is only available after invoking `trackComponents`.
+
+### Debugging reactions with trace
+
+Using Mobx.trace() inside a React render function will print out the observable that triggered the change. See [the mobx trace docs](https://mobx.js.org/best/trace.html) for more information.
