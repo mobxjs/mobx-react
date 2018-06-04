@@ -169,6 +169,7 @@ function makeComponentReactive(render) {
         "<component>"
     const rootNodeID =
         (this._reactInternalInstance && this._reactInternalInstance._rootNodeID) ||
+        (this._reactInternalInstance && this._reactInternalInstance._debugID) ||
         (this._reactInternalFiber && this._reactInternalFiber._debugID)
     /**
      * If props are shallowly modified, react will render anyway,
