@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+### 5.2.0
+
+* Added backward compatible support for MobX 5.
+* Fixed components sometimes being displayed as `undefined` in mobx-devtools. See [#470](https://github.com/mobxjs/mobx-react/pull/470) by [@MauricioAndrades](https://github.com/MauricioAndrades)
+* Removed unnecessary warning `@observer` was used both on a sub and super class. See [#492](https://github.com/mobxjs/mobx-react/pull/476) by [@skiritsis](https://github.com/skiritsis). _N.B. putting `@observer` on a super and subclass is still not an supported pattern, use @observer on subclasses only!_
+
 ### 5.1.2
 
 *   Fixed regression bug in integration with devtools. Fixed through [#465](https://github.com/mobxjs/mobx-react/pull/465) by @le0nik
