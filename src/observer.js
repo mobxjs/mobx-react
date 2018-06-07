@@ -20,6 +20,9 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
+const skipRenderKey = Symbol("skipRender")
+const isForcingUpdateKey = Symbol("isForcingUpdate")
+
 function findDOMNode(component) {
     if (baseFindDOMNode) {
         try {
@@ -116,29 +119,6 @@ function is(x, y) {
 function makeComponentReactive(render) {
     if (isUsingStaticRendering === true) return render.call(this)
 
-    function makePropertyObservableReference(propName) {
-        let valueHolder = this[propName]
-        const atom = createAtom("reactive " + propName)
-        Object.defineProperty(this, propName, {
-            configurable: true,
-            enumerable: true,
-            get: function() {
-                atom.reportObserved()
-                return valueHolder
-            },
-            set: function set(v) {
-                if (!isForcingUpdate && !shallowEqual(valueHolder, v)) {
-                    valueHolder = v
-                    skipRender = true
-                    atom.reportChanged()
-                    skipRender = false
-                } else {
-                    valueHolder = v
-                }
-            }
-        })
-    }
-
     function reactiveRender() {
         isRenderingPending = false
         let exception = undefined
@@ -177,17 +157,12 @@ function makeComponentReactive(render) {
      * If props are shallowly modified, react will render anyway,
      * so atom.reportChanged() should not result in yet another re-render
      */
-    let skipRender = false
+    this[skipRenderKey] = false
     /**
      * forceUpdate will re-assign this.props. We don't want that to cause a loop,
      * so detect these changes
      */
-    let isForcingUpdate = false
-
-    // make this.props an observable reference, see #124
-    makePropertyObservableReference.call(this, "props")
-    // make state an observable reference
-    makePropertyObservableReference.call(this, "state")
+    this[isForcingUpdateKey] = false
 
     // wire up reactive render
     const baseRender = render.bind(this)
@@ -206,11 +181,11 @@ function makeComponentReactive(render) {
                 // However, people also claim this migth happen during unit tests..
                 let hasError = true
                 try {
-                    isForcingUpdate = true
-                    if (!skipRender) Component.prototype.forceUpdate.call(this)
+                    this[isForcingUpdateKey] = true
+                    if (!this[skipRenderKey]) Component.prototype.forceUpdate.call(this)
                     hasError = false
                 } finally {
-                    isForcingUpdate = false
+                    this[isForcingUpdateKey] = false
                     if (hasError) reaction.dispose()
                 }
             }
@@ -271,6 +246,32 @@ const reactiveMixin = {
         // so we return true here if props are shallowly modified.
         return !shallowEqual(this.props, nextProps)
     }
+}
+
+function makeObservableProp(target, propName) {
+    const valueHolderKey = Symbol(propName + " value holder")
+    const atomHolderKey = Symbol(propName + " atom holder")
+    function getAtom() {
+        return this[atomHolderKey] || (this[atomHolderKey] = createAtom("reactive " + propName))
+    }
+    Object.defineProperty(target, propName, {
+        configurable: true,
+        enumerable: true,
+        get: function() {
+            getAtom.call(this).reportObserved()
+            return this[valueHolderKey]
+        },
+        set: function set(v) {
+            if (!this[isForcingUpdateKey] && !shallowEqual(this[valueHolderKey], v)) {
+                this[valueHolderKey] = v
+                this[skipRenderKey] = true
+                getAtom.call(this).reportChanged()
+                this[skipRenderKey] = false
+            } else {
+                this[valueHolderKey] = v
+            }
+        }
+    })
 }
 
 /**
@@ -340,6 +341,8 @@ export function observer(arg1, arg2) {
     const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
+    makeObservableProp(target, "props")
+    makeObservableProp(target, "state")
     const baseRender = target.render
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
