@@ -20,8 +20,36 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
+const knownNonEnumerablePropsKey = Symbol("knownNonEnumerableProps")
 const skipRenderKey = Symbol("skipRender")
 const isForcingUpdateKey = Symbol("isForcingUpdate")
+
+/**
+ * Helper to set `prop` to `this` as non-enumerable (hidden prop)
+ * @param prop
+ * @param value
+ */
+function setHiddenProp(target, prop, value) {
+    if (!target[knownNonEnumerablePropsKey]) {
+        Object.defineProperty(target, knownNonEnumerablePropsKey, {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: {}
+        })
+    }
+    if (!target[knownNonEnumerablePropsKey][prop]) {
+        Object.defineProperty(target, prop, {
+            enumerable: false,
+            configurable: false,
+            writable: true,
+            value: value
+        })
+        target[knownNonEnumerablePropsKey][prop] = true
+    } else {
+        target[prop] = value
+    }
+}
 
 function findDOMNode(component) {
     if (baseFindDOMNode) {
@@ -157,12 +185,12 @@ function makeComponentReactive(render) {
      * If props are shallowly modified, react will render anyway,
      * so atom.reportChanged() should not result in yet another re-render
      */
-    this[skipRenderKey] = false
+    setHiddenProp(this, skipRenderKey, false)
     /**
      * forceUpdate will re-assign this.props. We don't want that to cause a loop,
      * so detect these changes
      */
-    this[isForcingUpdateKey] = false
+    setHiddenProp(this, isForcingUpdateKey, false)
 
     // wire up reactive render
     const baseRender = render.bind(this)
@@ -181,11 +209,11 @@ function makeComponentReactive(render) {
                 // However, people also claim this migth happen during unit tests..
                 let hasError = true
                 try {
-                    this[isForcingUpdateKey] = true
+                    setHiddenProp(this, isForcingUpdateKey, true)
                     if (!this[skipRenderKey]) Component.prototype.forceUpdate.call(this)
                     hasError = false
                 } finally {
-                    this[isForcingUpdateKey] = false
+                    setHiddenProp(this, isForcingUpdateKey, false)
                     if (hasError) reaction.dispose()
                 }
             }
@@ -252,7 +280,10 @@ function makeObservableProp(target, propName) {
     const valueHolderKey = Symbol(propName + " value holder")
     const atomHolderKey = Symbol(propName + " atom holder")
     function getAtom() {
-        return this[atomHolderKey] || (this[atomHolderKey] = createAtom("reactive " + propName))
+        if (!this[atomHolderKey]) {
+            setHiddenProp(this, atomHolderKey, createAtom("reactive " + propName))
+        }
+        return this[atomHolderKey]
     }
     Object.defineProperty(target, propName, {
         configurable: true,
@@ -263,12 +294,12 @@ function makeObservableProp(target, propName) {
         },
         set: function set(v) {
             if (!this[isForcingUpdateKey] && !shallowEqual(this[valueHolderKey], v)) {
-                this[valueHolderKey] = v
-                this[skipRenderKey] = true
+                setHiddenProp(this, valueHolderKey, v)
+                setHiddenProp(this, skipRenderKey, true)
                 getAtom.call(this).reportChanged()
-                this[skipRenderKey] = false
+                setHiddenProp(this, skipRenderKey, false)
             } else {
-                this[valueHolderKey] = v
+                setHiddenProp(this, valueHolderKey, v)
             }
         }
     })
