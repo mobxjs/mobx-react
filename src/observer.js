@@ -20,8 +20,16 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
-const skipRenderKey = Symbol("mobxReact-skipRender")
-const isForcingUpdateKey = Symbol("mobxReact-isForcingUpdate")
+function createSymbol(name) {
+    if (global.Symbol) {
+        return Symbol(name)
+    } else {
+        return `$mobxReactProp$${name}${Math.random()}`
+    }
+}
+
+const skipRenderKey = createSymbol("mobxReact-skipRender")
+const isForcingUpdateKey = createSymbol("mobxReact-isForcingUpdate")
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
@@ -267,8 +275,8 @@ const reactiveMixin = {
 }
 
 function makeObservableProp(target, propName) {
-    const valueHolderKey = Symbol(propName + " value holder")
-    const atomHolderKey = Symbol(propName + " atom holder")
+    const valueHolderKey = createSymbol(propName + " value holder")
+    const atomHolderKey = createSymbol(propName + " atom holder")
     function getAtom() {
         if (!this[atomHolderKey]) {
             setHiddenProp(this, atomHolderKey, createAtom("reactive " + propName))

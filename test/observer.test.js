@@ -869,3 +869,21 @@ test("static on function components are hoisted", () => {
 
     expect(Comp2.foo).toBe(3)
 })
+
+test("work without Symbol", async () => {
+    const originalSymbol = global.Symbol
+    try {
+        delete global.Symbol
+        const Symbol = void 0
+        const Component1 = observer(
+            class extends Component {
+                render() {
+                    return null
+                }
+            }
+        )
+        await asyncReactDOMRender(<Component1 />, testRoot)
+    } finally {
+        global.Symbol = originalSymbol
+    }
+})
