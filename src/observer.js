@@ -20,6 +20,37 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
+const knownNonEnumerablePropsKey = Symbol("knownNonEnumerableProps")
+const skipRenderKey = Symbol("skipRender")
+const isForcingUpdateKey = Symbol("isForcingUpdate")
+
+/**
+ * Helper to set `prop` to `this` as non-enumerable (hidden prop)
+ * @param prop
+ * @param value
+ */
+function setHiddenProp(target, prop, value) {
+    if (!target[knownNonEnumerablePropsKey]) {
+        Object.defineProperty(target, knownNonEnumerablePropsKey, {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: {}
+        })
+    }
+    if (!target[knownNonEnumerablePropsKey][prop]) {
+        Object.defineProperty(target, prop, {
+            enumerable: false,
+            configurable: false,
+            writable: true,
+            value: value
+        })
+        target[knownNonEnumerablePropsKey][prop] = true
+    } else {
+        target[prop] = value
+    }
+}
+
 function findDOMNode(component) {
     if (baseFindDOMNode) {
         try {
@@ -116,29 +147,6 @@ function is(x, y) {
 function makeComponentReactive(render) {
     if (isUsingStaticRendering === true) return render.call(this)
 
-    function makePropertyObservableReference(propName) {
-        let valueHolder = this[propName]
-        const atom = createAtom("reactive " + propName)
-        Object.defineProperty(this, propName, {
-            configurable: true,
-            enumerable: true,
-            get: function() {
-                atom.reportObserved()
-                return valueHolder
-            },
-            set: function set(v) {
-                if (!isForcingUpdate && !shallowEqual(valueHolder, v)) {
-                    valueHolder = v
-                    skipRender = true
-                    atom.reportChanged()
-                    skipRender = false
-                } else {
-                    valueHolder = v
-                }
-            }
-        })
-    }
-
     function reactiveRender() {
         isRenderingPending = false
         let exception = undefined
@@ -177,17 +185,12 @@ function makeComponentReactive(render) {
      * If props are shallowly modified, react will render anyway,
      * so atom.reportChanged() should not result in yet another re-render
      */
-    let skipRender = false
+    setHiddenProp(this, skipRenderKey, false)
     /**
      * forceUpdate will re-assign this.props. We don't want that to cause a loop,
      * so detect these changes
      */
-    let isForcingUpdate = false
-
-    // make this.props an observable reference, see #124
-    makePropertyObservableReference.call(this, "props")
-    // make state an observable reference
-    makePropertyObservableReference.call(this, "state")
+    setHiddenProp(this, isForcingUpdateKey, false)
 
     // wire up reactive render
     const baseRender = render.bind(this)
@@ -206,11 +209,11 @@ function makeComponentReactive(render) {
                 // However, people also claim this migth happen during unit tests..
                 let hasError = true
                 try {
-                    isForcingUpdate = true
-                    if (!skipRender) Component.prototype.forceUpdate.call(this)
+                    setHiddenProp(this, isForcingUpdateKey, true)
+                    if (!this[skipRenderKey]) Component.prototype.forceUpdate.call(this)
                     hasError = false
                 } finally {
-                    isForcingUpdate = false
+                    setHiddenProp(this, isForcingUpdateKey, false)
                     if (hasError) reaction.dispose()
                 }
             }
@@ -271,6 +274,35 @@ const reactiveMixin = {
         // so we return true here if props are shallowly modified.
         return !shallowEqual(this.props, nextProps)
     }
+}
+
+function makeObservableProp(target, propName) {
+    const valueHolderKey = Symbol(propName + " value holder")
+    const atomHolderKey = Symbol(propName + " atom holder")
+    function getAtom() {
+        if (!this[atomHolderKey]) {
+            setHiddenProp(this, atomHolderKey, createAtom("reactive " + propName))
+        }
+        return this[atomHolderKey]
+    }
+    Object.defineProperty(target, propName, {
+        configurable: true,
+        enumerable: true,
+        get: function() {
+            getAtom.call(this).reportObserved()
+            return this[valueHolderKey]
+        },
+        set: function set(v) {
+            if (!this[isForcingUpdateKey] && !shallowEqual(this[valueHolderKey], v)) {
+                setHiddenProp(this, valueHolderKey, v)
+                setHiddenProp(this, skipRenderKey, true)
+                getAtom.call(this).reportChanged()
+                setHiddenProp(this, skipRenderKey, false)
+            } else {
+                setHiddenProp(this, valueHolderKey, v)
+            }
+        }
+    })
 }
 
 /**
@@ -340,6 +372,8 @@ export function observer(arg1, arg2) {
     const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
+    makeObservableProp(target, "props")
+    makeObservableProp(target, "state")
     const baseRender = target.render
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
