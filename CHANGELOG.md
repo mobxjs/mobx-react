@@ -2,7 +2,7 @@
 
 ### 5.2.1
 
-* Component `props` and `state` properties are now made observable during the instance creation. This restores the behavior from before 5.1.0 where `props` and `state` could safely be observed during mount. Actually it is now possible to do similar things in constructors as well. Fixes [#478](https://github.com/mobxjs/mobx-react/issues/478), [#477](https://github.com/mobxjs/mobx-react/issues/477) and [#425](https://github.com/mobxjs/mobx-react/issues/425). Thanks [@Strate](https://github.com/Strate) for the idea and PR! [#496](https://github.com/mobxjs/mobx-react/pull/496).
+* Component `props` and `state` properties are now made observable during the instance creation. This restores the behavior from before 5.1.0 where `props` and `state` could safely be observed during mount. Actually it is now possible to do similar things in constructors as well. Fixes [#478](https://github.com/mobxjs/mobx-react/issues/478). Thanks [@Strate](https://github.com/Strate) for the idea and PR! [#496](https://github.com/mobxjs/mobx-react/pull/496).
 
 ### 5.2.0
 
