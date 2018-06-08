@@ -20,9 +20,8 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
-const knownNonEnumerablePropsKey = Symbol("knownNonEnumerableProps")
-const skipRenderKey = Symbol("skipRender")
-const isForcingUpdateKey = Symbol("isForcingUpdate")
+const skipRenderKey = Symbol("mobxReact-skipRender")
+const isForcingUpdateKey = Symbol("mobxReact-isForcingUpdate")
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
@@ -30,22 +29,13 @@ const isForcingUpdateKey = Symbol("isForcingUpdate")
  * @param value
  */
 function setHiddenProp(target, prop, value) {
-    if (!target[knownNonEnumerablePropsKey]) {
-        Object.defineProperty(target, knownNonEnumerablePropsKey, {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value: {}
-        })
-    }
-    if (!target[knownNonEnumerablePropsKey][prop]) {
+    if (!Object.hasOwnProperty(target, prop)) {
         Object.defineProperty(target, prop, {
             enumerable: false,
-            configurable: false,
-            writable: true,
-            value: value
+            configurable: true,
+            writeable: true,
+            value
         })
-        target[knownNonEnumerablePropsKey][prop] = true
     } else {
         target[prop] = value
     }
