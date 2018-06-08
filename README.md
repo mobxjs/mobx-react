@@ -143,7 +143,15 @@ onError(error => {
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
 Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
-To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. This makes sure the component won't try to react to any future data changes.
+To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. 
+
+```javascript
+import { useStaticRendering } from "mobx-react"
+
+useStaticRendering(true);
+```
+
+This makes sure the component won't try to react to any future data changes.
 
 ### Which components should be marked with `observer`?
 
@@ -417,6 +425,12 @@ the more you use `observer`, the better the performance become.
 The overhead of `observer` itself is neglectable.
 See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/issues/101)
 
+**I'm using a `React.Component` class decorated with `observer` and I included a reaction that uses its props/state inside the constructor/componentWillMount. Why isn't it reacting?**
+
+While `observer` converts both props and state into observable objects, this is only done *after* the first rendering is finished.
+In this case it is better to put such reactions inside other post-render lifecycle methods such as componentDidMount.
+Note that this restriction only applies to props/state, not to other observable values.
+
 **I see React warnings about `forceUpdate` / `setState` from React**
 
 The following warning will appear if you trigger a re-rendering between instantiating and rendering a component:
@@ -469,3 +483,7 @@ Data will have one of the following formats:
 
 WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
 This map is only available after invoking `trackComponents`.
+
+### Debugging reactions with trace
+
+Using Mobx.trace() inside a React render function will print out the observable that triggered the change. See [the mobx trace docs](https://mobx.js.org/best/trace.html) for more information.

@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "5.1.2",
+  "version": "5.2.0",
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "jsnext:main": "index.module.js",
@@ -27,7 +27,7 @@
   },
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
-    "mobx": "^4.0.0",
+    "mobx": "^4.0.0 || ^5.0.0",
     "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
@@ -54,7 +54,7 @@
     "jest-environment-jsdom": "^22.0.5",
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
-    "mobx": "^4.0.0",
+    "mobx": "5.0.0-beta.5",
     "nscript": "^0.1.10",
     "opn-cli": "^3.1.0",
     "prettier": "^1.7.2",

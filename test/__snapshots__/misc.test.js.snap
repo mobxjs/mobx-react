@@ -23,3 +23,11 @@ Object {
   ],
 }
 `;
+
+exports[`Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin 1`] = `
+Object {
+  "errors": Array [],
+  "infos": Array [],
+  "warnings": Array [],
+}
+`;

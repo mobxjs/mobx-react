@@ -1,9 +1,11 @@
 import React, { Component, PureComponent } from "react"
 import hoistStatics from "hoist-non-react-statics"
-import { createAtom, Reaction, _allowStateChanges, runInAction, observable } from "mobx"
+import { createAtom, Reaction, _allowStateChanges, $mobx, runInAction, observable } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
+
+const mobxAdminProperty = $mobx || "$mobx"
 
 /**
  * dev tool support
@@ -17,6 +19,38 @@ let warnedAboutObserverInjectDeprecation = false
 // WeakMap<Node, Object>;
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
+
+const knownNonEnumerablePropsKey = Symbol("knownNonEnumerableProps")
+const skipRenderKey = Symbol("skipRender")
+const isForcingUpdateKey = Symbol("isForcingUpdate")
+
+/**
+ * Helper to set `prop` to `this` as non-enumerable (hidden prop)
+ * @param target
+ * @param prop
+ * @param value
+ */
+function setHiddenProp(target, prop, value) {
+    if (!target[knownNonEnumerablePropsKey]) {
+        Object.defineProperty(target, knownNonEnumerablePropsKey, {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: {}
+        })
+    }
+    if (!target[knownNonEnumerablePropsKey][prop]) {
+        Object.defineProperty(target, prop, {
+            enumerable: false,
+            configurable: false,
+            writable: true,
+            value: value
+        })
+        target[knownNonEnumerablePropsKey][prop] = true
+    } else {
+        target[prop] = value
+    }
+}
 
 function findDOMNode(component) {
     if (baseFindDOMNode) {
@@ -114,98 +148,6 @@ function is(x, y) {
 function makeComponentReactive(render) {
     if (isUsingStaticRendering === true) return render.call(this)
 
-    function makePropertyObservableReference(propName) {
-        let currentValue = this[propName]
-        let currentValueKeys = null == currentValue ? [] : Object.keys(currentValue)
-        const changeKeysAtom = createAtom("this. " + propName + " [change keys]")
-        const propBoxes = {}
-
-        /**
-         * In-place convert properties to getter+setter
-         */
-        function convertStorageToReactive(storage) {
-            if (!storage) {
-                return storage
-            }
-            // props object is frozen, so we need to clone it
-            // we can do it safely inside componentWillMount (react won't warn us about it)
-            // btw, state object can not be cloned here, (react warns about direct state modification), however
-            // state object is not frozen, so we do not need to clone it to instrument
-            if (Object.isFrozen && Object.isFrozen(storage)) {
-                storage = Object.assign({}, storage)
-            }
-            Object.keys(storage).forEach(function(key) {
-                if (!(key in propBoxes)) {
-                    propBoxes[key] = observable.box(void 0, {
-                        deep: false,
-                        name: "this." + propName + "." + key
-                    })
-                }
-                const currentKeyValue = storage[key]
-                Object.defineProperty(storage, key, {
-                    configurable: true,
-                    enumerable: true,
-                    get: function get() {
-                        return propBoxes[key].get()
-                    },
-                    set: function set(v) {
-                        if (propBoxes[key].get() !== v) {
-                            propBoxes[key].set(v)
-                        }
-                    }
-                })
-                storage[key] = currentKeyValue
-            })
-            return storage
-        }
-
-        /**
-         * In-place convert getter+setter to plain property
-         */
-        function convertStorageToStatic(storage) {
-            if (!storage) {
-                return
-            }
-            Object.keys(storage).forEach(function(key) {
-                const currentKeyValue = storage[key]
-                delete storage[key] // delete defined property with getter and setter
-                storage[key] = currentKeyValue
-            })
-        }
-        Object.defineProperty(this, propName, {
-            configurable: true,
-            enumerable: true,
-            get: function() {
-                changeKeysAtom.reportObserved()
-                return currentValue
-            },
-            set: function set(newValue) {
-                if (newValue === currentValue) {
-                    return
-                }
-                skipRender = true
-                runInAction(function() {
-                    const newKeys = newValue == null ? [] : Object.keys(newValue)
-                    // always re-create value
-                    convertStorageToStatic(currentValue)
-                    newValue = convertStorageToReactive(newValue)
-                    // update value holder with new inner value
-                    currentValue = newValue
-                    if (!shallowEqual(currentValueKeys, newKeys)) {
-                        changeKeysAtom.reportChanged() // find removed old keys and delete atoms and value holders
-                        currentValueKeys.filter(key => newKeys.indexOf(key) < 0).forEach(key => {
-                            delete propBoxes[key]
-                        })
-                    }
-                    currentValueKeys = newKeys
-                })
-                skipRender = false
-            }
-        })
-        // trigger initial setter to initialize struct
-        currentValue = convertStorageToReactive(currentValue)
-    }
-
     function reactiveRender() {
         isRenderingPending = false
         let exception = undefined
@@ -238,22 +180,18 @@ function makeComponentReactive(render) {
         "<component>"
     const rootNodeID =
         (this._reactInternalInstance && this._reactInternalInstance._rootNodeID) ||
+        (this._reactInternalInstance && this._reactInternalInstance._debugID) ||
         (this._reactInternalFiber && this._reactInternalFiber._debugID)
     /**
      * If props are shallowly modified, react will render anyway,
      * so atom.reportChanged() should not result in yet another re-render
      */
-    let skipRender = false
+    setHiddenProp(this, skipRenderKey, false)
     /**
      * forceUpdate will re-assign this.props. We don't want that to cause a loop,
      * so detect these changes
      */
-    let isForcingUpdate = false
-
-    // make this.props an observable reference, see #124
-    makePropertyObservableReference.call(this, "props")
-    // make state an observable reference
-    makePropertyObservableReference.call(this, "state")
+    setHiddenProp(this, isForcingUpdateKey, false)
 
     // wire up reactive render
     const baseRender = render.bind(this)
@@ -272,18 +210,18 @@ function makeComponentReactive(render) {
                 // However, people also claim this migth happen during unit tests..
                 let hasError = true
                 try {
-                    isForcingUpdate = true
-                    if (!skipRender) Component.prototype.forceUpdate.call(this)
+                    setHiddenProp(this, isForcingUpdateKey, true)
+                    if (!this[skipRenderKey]) Component.prototype.forceUpdate.call(this)
                     hasError = false
                 } finally {
-                    isForcingUpdate = false
+                    setHiddenProp(this, isForcingUpdateKey, false)
                     if (hasError) reaction.dispose()
                 }
             }
         }
     })
     reaction.reactComponent = this
-    reactiveRender.$mobx = reaction
+    reactiveRender[mobxAdminProperty] = reaction
     this.render = reactiveRender
     return reactiveRender.call(this)
 }
@@ -294,7 +232,7 @@ function makeComponentReactive(render) {
 const reactiveMixin = {
     componentWillUnmount: function() {
         if (isUsingStaticRendering === true) return
-        this.render.$mobx && this.render.$mobx.dispose()
+        this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
         this.__$mobxIsUnmounted = true
         if (isDevtoolsEnabled) {
             const node = findDOMNode(this)
@@ -337,6 +275,119 @@ const reactiveMixin = {
         // so we return true here if props are shallowly modified.
         return !shallowEqual(this.props, nextProps)
     }
+}
+
+function makePropertyObservableReference(target, propName) {
+    const currentValueProp = Symbol(propName + " current value")
+    const currentValueKeysProp = Symbol(propName + " current value keys")
+    const changeKeysAtomProp = Symbol(propName + " change keys atom")
+    const propBoxesProp = Symbol(propName + " prop boxes")
+
+    function getPropBoxes(target) {
+        if (!target[propBoxesProp]) {
+            setHiddenProp(target, propBoxesProp, {})
+        }
+        return target[propBoxesProp]
+    }
+
+    function getChangeKeysAtom(target) {
+        if (!target[changeKeysAtomProp]) {
+            setHiddenProp(
+                target,
+                changeKeysAtomProp,
+                createAtom("this. " + propName + " [change keys]")
+            )
+        }
+        return target[changeKeysAtomProp]
+    }
+
+    /**
+     * In-place convert properties to getter+setter
+     */
+    function convertStorageToReactive(storage, propBoxes) {
+        if (!storage) {
+            return storage
+        }
+        // props object is frozen, so we need to clone it
+        // we can do it safely inside componentWillMount (react won't warn us about it)
+        // btw, state object can not be cloned here, (react warns about direct state modification), however
+        // state object is not frozen, so we do not need to clone it to instrument
+        if (Object.isFrozen && Object.isFrozen(storage)) {
+            storage = Object.assign({}, storage)
+        }
+        Object.keys(storage).forEach(function(key) {
+            if (!(key in propBoxes)) {
+                propBoxes[key] = observable.box(void 0, {
+                    deep: false,
+                    name: "this." + propName + "." + key
+                })
+            }
+            const currentKeyValue = storage[key]
+            Object.defineProperty(storage, key, {
+                configurable: true,
+                enumerable: true,
+                get: function get() {
+                    return propBoxes[key].get()
+                },
+                set: function set(v) {
+                    if (propBoxes[key].get() !== v) {
+                        propBoxes[key].set(v)
+                    }
+                }
+            })
+            storage[key] = currentKeyValue
+        })
+        return storage
+    }
+
+    /**
+     * In-place convert getter+setter to plain property
+     */
+    function convertStorageToStatic(storage) {
+        if (!storage) {
+            return
+        }
+        Object.keys(storage).forEach(function(key) {
+            const currentKeyValue = storage[key]
+            delete storage[key] // delete defined property with getter and setter
+            storage[key] = currentKeyValue
+        })
+    }
+    Object.defineProperty(target, propName, {
+        configurable: true,
+        enumerable: true,
+        get: function() {
+            getChangeKeysAtom(this).reportObserved()
+            return this[currentValueProp]
+        },
+        set: function set(newValue) {
+            if (newValue === this[currentValueProp]) {
+                return
+            }
+            setHiddenProp(this, skipRenderKey, true)
+            runInAction(() => {
+                const propBoxes = getPropBoxes(this)
+                const newKeys = newValue == null ? [] : Object.keys(newValue)
+                // always re-create value
+                convertStorageToStatic(this[currentValueProp])
+                newValue = convertStorageToReactive(newValue, propBoxes)
+                // update value holder with new inner value
+                setHiddenProp(this, currentValueProp, newValue)
+                if (!shallowEqual(this[currentValueKeysProp], newKeys)) {
+                    getChangeKeysAtom(this).reportChanged() // find removed old keys and delete atoms and value holders
+                    if (this[currentValueKeysProp]) {
+                        this[currentValueKeysProp]
+                            .filter(key => newKeys.indexOf(key) < 0)
+                            .forEach(key => {
+                                delete propBoxes[key]
+                            })
+                    }
+                }
+                setHiddenProp(this, currentValueKeysProp, newKeys)
+            })
+            setHiddenProp(this, skipRenderKey, false)
+        }
+    })
 }
 
 /**
@@ -406,6 +457,8 @@ export function observer(arg1, arg2) {
     const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
+    makePropertyObservableReference(target, "props")
+    makePropertyObservableReference(target, "state")
     const baseRender = target.render
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
@@ -422,10 +475,12 @@ function mixinLifecycleEvents(target) {
     if (!target.shouldComponentUpdate) {
         target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate
     } else {
-        // TODO: make throw in next major
-        console.warn(
-            "Use `shouldComponentUpdate` in an `observer` based component breaks the behavior of `observer` and might lead to unexpected results. Manually implementing `sCU` should not be needed when using mobx-react."
-        )
+        if (target.shouldComponentUpdate !== reactiveMixin.shouldComponentUpdate) {
+            // TODO: make throw in next major
+            console.warn(
+                "Use `shouldComponentUpdate` in an `observer` based component breaks the behavior of `observer` and might lead to unexpected results. Manually implementing `sCU` should not be needed when using mobx-react."
+            )
+        }
     }
 }
 

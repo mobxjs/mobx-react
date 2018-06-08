@@ -142,16 +142,26 @@ test("verify issue 21", async () => {
 
 test("verify prop changes are picked up", async () => {
     function createItem(subid, label) {
-        const res = mobx.observable({
-            id: 1,
-            label: label,
-            get text() {
-                events.push(["compute", this.subid])
-                return (
-                    this.id + "." + this.subid + "." + this.label + "." + data.items.indexOf(this)
-                )
-            }
-        })
+        const res = mobx.observable(
+            {
+                id: 1,
+                label: label,
+                get text() {
+                    events.push(["compute", this.subid])
+                    return (
+                        this.id +
+                        "." +
+                        this.subid +
+                        "." +
+                        this.label +
+                        "." +
+                        data.items.indexOf(this)
+                    )
+                }
+            },
+            {},
+            { proxy: false }
+        )
         res.subid = subid // non reactive
         return res
     }
@@ -218,16 +228,26 @@ test("verify prop changes are picked up", async () => {
 
 test("verify props is reactive", async () => {
     function createItem(subid, label) {
-        const res = mobx.observable({
-            id: 1,
-            label: label,
-            get text() {
-                events.push(["compute", this.subid])
-                return (
-                    this.id + "." + this.subid + "." + this.label + "." + data.items.indexOf(this)
-                )
-            }
-        })
+        const res = mobx.observable(
+            {
+                id: 1,
+                label: label,
+                get text() {
+                    events.push(["compute", this.subid])
+                    return (
+                        this.id +
+                        "." +
+                        this.subid +
+                        "." +
+                        this.label +
+                        "." +
+                        data.items.indexOf(this)
+                    )
+                }
+            },
+            {},
+            { proxy: false }
+        )
         res.subid = subid // non reactive
         return res
     }
@@ -545,4 +565,56 @@ test("lifecycle callbacks called with correct arguments", async () => {
     })
     await asyncReactDOMRender(<Root />, testRoot)
     testRoot.querySelector("#testButton").click()
+})
+
+test("verify props are reactive in componentWillMount and constructor", async () => {
+    const prop1Values = []
+    const prop2Values = []
+    let componentWillMountCallsCount = 0
+    let constructorCallsCount = 0
+
+    const Component = observer(
+        class Component extends React.Component {
+            constructor(props, context) {
+                super(props, context)
+                constructorCallsCount++
+                this.disposer1 = mobx.reaction(
+                    () => this.props.prop1,
+                    prop => prop1Values.push(prop),
+                    {
+                        fireImmediately: true
+                    }
+                )
+            }
+
+            componentWillMount() {
+                componentWillMountCallsCount++
+                this.disposer2 = mobx.reaction(
+                    () => this.props.prop2,
+                    prop => prop2Values.push(prop),
+                    {
+                        fireImmediately: true
+                    }
+                )
+            }
+
+            componentWillUnmount() {
+                this.disposer1()
+                this.disposer2()
+            }
+
+            render() {
+                return <div />
+            }
+        }
+    )
+
+    await asyncReactDOMRender(<Component prop1="1" prop2="4" />, testRoot)
+    await asyncReactDOMRender(<Component prop1="2" prop2="3" />, testRoot)
+    await asyncReactDOMRender(<Component prop1="3" prop2="2" />, testRoot)
+    await asyncReactDOMRender(<Component prop1="4" prop2="1" />, testRoot)
+    expect(constructorCallsCount).toEqual(1)
+    expect(componentWillMountCallsCount).toEqual(1)
+    expect(prop1Values).toEqual(["1", "2", "3", "4"])
+    expect(prop2Values).toEqual(["4", "3", "2", "1"])
 })
