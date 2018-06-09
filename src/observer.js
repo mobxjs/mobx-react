@@ -28,7 +28,7 @@ function createSymbol(name) {
 }
 
 const skipRenderKey = createSymbol("skipRender")
-const isForcingUpdateKey = createSymbol("sForcingUpdate")
+const isForcingUpdateKey = createSymbol("isForcingUpdate")
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
