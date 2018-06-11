@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.2.3
+
+* Fixed problem with `Symbol` feature detection. By [@Strate](https://github.com/Strate) through [#501](https://github.com/mobxjs/mobx-react/pull/501). Fixes [#498](https://github.com/mobxjs/mobx-react/issues/498) and [#503](https://github.com/mobxjs/mobx-react/issues/503).
+
 ### 5.2.2
 
 * Polyfill `Symbol` if it doesn't exist. By [@Strate](https://github.com/Strate) through [#499](https://github.com/mobxjs/mobx-react/pull/499).
