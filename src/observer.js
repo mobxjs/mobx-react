@@ -21,18 +21,18 @@ export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new Weak
 export const renderReporter = new EventEmitter()
 
 function createSymbol(name) {
-    if (global.Symbol) {
+    if (typeof Symbol === "function") {
         return Symbol(name)
-    } else {
-        return `$mobxReactProp$${name}${Math.random()}`
     }
+    return `$mobxReactProp$${name}${Math.random()}`
 }
 
-const skipRenderKey = createSymbol("mobxReact-skipRender")
-const isForcingUpdateKey = createSymbol("mobxReact-isForcingUpdate")
+const skipRenderKey = createSymbol("skipRender")
+const isForcingUpdateKey = createSymbol("isForcingUpdate")
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
+ * @param target
  * @param prop
  * @param value
  */
