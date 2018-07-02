@@ -34,15 +34,38 @@ export type IWrappedComponent<P> = {
     wrappedInstance: React.ReactInstance | undefined
 }
 
-// Ideally we would want to return React.ComponentClass<Partial<P>>,
-// but TS doesn't allow such things in decorators, like we do in the non-decorator version
-// See also #256
 export function inject(
     ...stores: string[]
 ): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
+/**
+ * Use case
+ * interface TodoListViewProps {
+ *   todoList: TodoList
+ * }
+ *
+ * interface InjectedProps {
+ *   todos: Todo[]
+ * }
+ *
+ * @observer
+ * class TodoListViewComponent extends React.Component<TodoListViewProps & InjectedProps, {}> {
+ *   public render() {
+ *     return <>
+ *       {this.props.todoList.todos.map(todo => <TodoView key={todo.id} todo={todo}/>)}
+ *       {this.props.todos}
+ *     </>;
+ *   }
+ * }
+ *
+ * export const TodoListView = inject<typeof rootStore, TodoListViewProps, InjectedProps, {}>((stores: typeof rootStore) => {
+ *   return {
+ *     todos: stores.todoList.todos,
+ *   };
+ * })(TodoListViewComponent);
+ */
 export function inject<S, P, I, C>(
-    fn: IStoresToProps<S, P, I, C>
-): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
+    fn: IStoresToProps<S, P, I, C>,
+): (target: IReactComponent) => IReactComponent<P> & IWrappedComponent<IReactComponent<P>>
 
 // Ideal implemetnation:
 // export function inject
