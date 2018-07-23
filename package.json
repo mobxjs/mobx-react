@@ -28,7 +28,8 @@
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
     "mobx": "^4.0.0 || ^5.0.0",
-    "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0"
+    "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0",
+    "react-dom": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
     "@types/create-react-class": "^15.6.0",
