@@ -20,11 +20,20 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
-function createSymbol(name) {
+const createdSymbols = {}
+
+function createRealSymbol(name) {
     if (typeof Symbol === "function") {
         return Symbol(name)
     }
     return `$mobxReactProp$${name}${Math.random()}`
+}
+
+function createSymbol(name) {
+    if (!createdSymbols[name]) {
+        createdSymbols[name] = createRealSymbol(name)
+    }
+    return createdSymbols[name]
 }
 
 const skipRenderKey = createSymbol("skipRender")
