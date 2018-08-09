@@ -37,7 +37,7 @@
 
 ### 4.4.3
 
-*   The exposed React Native build now uses commonjs, to prevent the need of further transpilation. Fixes [#428](428)
+*   The exposed React Native build now uses commonjs, to prevent the need of further transpilation. Fixes [#428](https://github.com/mobxjs/mobx-react/issues/428)
 
 ### 4.4.2
 
