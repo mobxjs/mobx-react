@@ -39,7 +39,7 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
 
-Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all of their changes.
+Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all changes in props and state that are  used by `render`.
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
