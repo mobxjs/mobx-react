@@ -1,6 +1,6 @@
 # MobX-React Changelog
 
-### 5.2.4
+### 5.2.4 / 5.2.5
 
 * Improved compatibility with React-Hot-Loader, see [#522](https://github.com/mobxjs/mobx-react/pull/522) by [theKashey](https://github.com/theKashey). Fixes [#500](https://github.com/mobxjs/mobx-react/issues/500)
 
