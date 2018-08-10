@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.2.4
+
+* Improved compatibility with React-Hot-Loader, see [#522](https://github.com/mobxjs/mobx-react/pull/522) by [theKashey](https://github.com/theKashey). Fixes [#500](https://github.com/mobxjs/mobx-react/issues/500)
+
 ### 5.2.3
 
 * Fixed problem with `Symbol` feature detection. By [@Strate](https://github.com/Strate) through [#501](https://github.com/mobxjs/mobx-react/pull/501). Fixes [#498](https://github.com/mobxjs/mobx-react/issues/498) and [#503](https://github.com/mobxjs/mobx-react/issues/503).
