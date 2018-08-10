@@ -38,6 +38,9 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 ### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
+
+Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all of their changes.
+
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
 ```javascript
@@ -143,7 +146,7 @@ onError(error => {
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
 Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
-To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering. 
+To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering.
 
 ```javascript
 import { useStaticRendering } from "mobx-react"
