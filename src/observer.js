@@ -151,7 +151,13 @@ function is(x, y) {
     }
 }
 
-function makeComponentReactive(render) {
+const run = f => f()
+
+function createSchedulerFromOptions(opts) {
+    return opts.scheduler ? opts.scheduler : opts.delay ? f => setTimeout(f, opts.delay) : run
+}
+
+function makeComponentReactive(render, opts = opts || {}) {
     if (isUsingStaticRendering === true) return render.call(this)
 
     function reactiveRender() {
@@ -203,7 +209,8 @@ function makeComponentReactive(render) {
     const baseRender = render.bind(this)
     let isRenderingPending = false
 
-    const reaction = new Reaction(`${initialName}#${rootNodeID}.render()`, () => {
+    const reactionRunner = () => {
+        isScheduled = false
         if (!isRenderingPending) {
             // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
             // This unidiomatic React usage but React will correctly warn about this so we continue as usual
@@ -224,6 +231,16 @@ function makeComponentReactive(render) {
                     if (hasError) reaction.dispose()
                 }
             }
+        }
+    }
+
+    const scheduler = createSchedulerFromOptions(opts)
+    // debounced autorun
+    let isScheduled = false
+    const reaction = new Reaction(`${initialName}#${rootNodeID}.render()`, () => {
+        if (!isScheduled) {
+            isScheduled = true
+            scheduler(reactionRunner)
         }
     })
     reaction.reactComponent = this
@@ -315,77 +332,59 @@ function makeObservableProp(target, propName) {
 /**
  * Observer function / decorator
  */
-export function observer(arg1, arg2) {
-    if (typeof arg1 === "string") {
-        throw new Error("Store names should be provided as array")
-    }
-    if (Array.isArray(arg1)) {
-        // TODO: remove in next major
-        // component needs stores
-        if (!warnedAboutObserverInjectDeprecation) {
-            warnedAboutObserverInjectDeprecation = true
+// NOTE: force to use observer()() or @observer() for a while
+export function observer(opts) {
+    return componentClass => {
+        if (componentClass.isMobxInjector === true) {
             console.warn(
-                'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`'
+                "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
             )
         }
-        if (!arg2) {
-            // invoked as decorator
-            return componentClass => observer(arg1, componentClass)
-        } else {
-            return inject.apply(null, arg1)(observer(arg2))
+        if (componentClass.__proto__ === PureComponent) {
+            console.warn(
+                "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
+            )
         }
-    }
-    const componentClass = arg1
 
-    if (componentClass.isMobxInjector === true) {
-        console.warn(
-            "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
-        )
-    }
-    if (componentClass.__proto__ === PureComponent) {
-        console.warn(
-            "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
-        )
-    }
-
-    // Stateless function component:
-    // If it is function but doesn't seem to be a react class constructor,
-    // wrap it to a react class automatically
-    if (
-        typeof componentClass === "function" &&
-        (!componentClass.prototype || !componentClass.prototype.render) &&
-        !componentClass.isReactClass &&
-        !Component.isPrototypeOf(componentClass)
-    ) {
-        const observerComponent = observer(
-            class extends Component {
-                static displayName = componentClass.displayName || componentClass.name
-                static contextTypes = componentClass.contextTypes
-                static propTypes = componentClass.propTypes
-                static defaultProps = componentClass.defaultProps
-                render() {
-                    return componentClass.call(this, this.props, this.context)
+        // Stateless function component:
+        // If it is function but doesn't seem to be a react class constructor,
+        // wrap it to a react class automatically
+        if (
+            typeof componentClass === "function" &&
+            (!componentClass.prototype || !componentClass.prototype.render) &&
+            !componentClass.isReactClass &&
+            !Component.isPrototypeOf(componentClass)
+        ) {
+            const observerComponent = observer(
+                class extends Component {
+                    static displayName = componentClass.displayName || componentClass.name
+                    static contextTypes = componentClass.contextTypes
+                    static propTypes = componentClass.propTypes
+                    static defaultProps = componentClass.defaultProps
+                    render() {
+                        return componentClass.call(this, this.props, this.context)
+                    }
                 }
-            }
-        )
-        hoistStatics(observerComponent, componentClass)
-        return observerComponent
-    }
+            )
+            hoistStatics(observerComponent, componentClass)
+            return observerComponent
+        }
 
-    if (!componentClass) {
-        throw new Error("Please pass a valid component to 'observer'")
-    }
+        if (!componentClass) {
+            throw new Error("Please pass a valid component to 'observer'")
+        }
 
-    const target = componentClass.prototype || componentClass
-    mixinLifecycleEvents(target)
-    componentClass.isMobXReactObserver = true
-    makeObservableProp(target, "props")
-    makeObservableProp(target, "state")
-    const baseRender = target.render
-    target.render = function() {
-        return makeComponentReactive.call(this, baseRender)
+        const target = componentClass.prototype || componentClass
+        mixinLifecycleEvents(target)
+        componentClass.isMobXReactObserver = true
+        makeObservableProp(target, "props")
+        makeObservableProp(target, "state")
+        const baseRender = target.render
+        target.render = function() {
+            return makeComponentReactive.call(this, baseRender, opts)
+        }
+        return componentClass
     }
-    return componentClass
 }
 
 function mixinLifecycleEvents(target) {

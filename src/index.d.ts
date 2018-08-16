@@ -12,11 +12,18 @@ export type IReactComponent<P = any> =
  * Observer
  */
 
+export interface IObserverOptions {
+    delay?: number
+    name?: string
+    scheduler?: (callback: () => void) => any
+    onError?: (error: any) => void
+}
+
 // Deprecated: observer with with stores (as decorator)
-export function observer(stores: string[]): <T extends IReactComponent>(clazz: T) => void
+// export function observer(stores: string[]): <T extends IReactComponent>(clazz: T) => void
 // Deprecated: observer with with stores
-export function observer<T extends IReactComponent>(stores: string[], clazz: T): T
-export function observer<T extends IReactComponent>(target: T): T
+// export function observer<T extends IReactComponent>(stores: string[], clazz: T): T
+export function observer(opt: IObserverOptions): <T extends IReactComponent>(clazz: T) => void
 
 /**
  * Inject
