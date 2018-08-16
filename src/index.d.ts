@@ -23,7 +23,7 @@ export interface IObserverOptions {
 // export function observer(stores: string[]): <T extends IReactComponent>(clazz: T) => void
 // Deprecated: observer with with stores
 // export function observer<T extends IReactComponent>(stores: string[], clazz: T): T
-export function observer(opt: IObserverOptions): <T extends IReactComponent>(clazz: T) => void
+export function observer(opt?: IObserverOptions): <T extends IReactComponent>(clazz: T) => void
 
 /**
  * Inject
