@@ -368,6 +368,7 @@ export function observer(arg1, arg2) {
     }
 
     const targetClass = class targetClassName extends componentClass {}
+    targetClass.displayName = componentClass.displayName || componentClass.name
     const target = targetClass.prototype || targetClass
     mixinLifecycleEvents(target)
     targetClass.isMobXReactObserver = true
