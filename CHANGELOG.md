@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.2.6
+
+* Fixed bug in defining properties (although the bug had no known observable effect). Fixes [#540](https://github.com/mobxjs/mobx-react/issues/540)
+
 ### 5.2.4 / 5.2.5
 
 * Improved compatibility with React-Hot-Loader, see [#522](https://github.com/mobxjs/mobx-react/pull/522) by [theKashey](https://github.com/theKashey). Fixes [#500](https://github.com/mobxjs/mobx-react/issues/500)

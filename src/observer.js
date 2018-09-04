@@ -46,11 +46,11 @@ const isForcingUpdateKey = createSymbol("isForcingUpdate")
  * @param value
  */
 function setHiddenProp(target, prop, value) {
-    if (!Object.hasOwnProperty(target, prop)) {
+    if (!Object.hasOwnProperty.call(target, prop)) {
         Object.defineProperty(target, prop, {
             enumerable: false,
             configurable: true,
-            writeable: true,
+            writable: true,
             value
         })
     } else {
