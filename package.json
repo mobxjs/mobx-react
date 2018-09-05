@@ -1,6 +1,7 @@
 {
   "name": "mobx-react",
-  "version": "5.2.5",
+  "version": "5.2.5-beta.1",
+
   "description": "React bindings for MobX. Create fully reactive components.",
   "main": "index.js",
   "jsnext:main": "index.module.js",
