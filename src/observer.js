@@ -355,7 +355,7 @@ export function observer(opts) {
             !componentClass.isReactClass &&
             !Component.isPrototypeOf(componentClass)
         ) {
-            const observerComponent = observer(
+            const observerComponent = observer(opts)(
                 class extends Component {
                     static displayName = componentClass.displayName || componentClass.name
                     static contextTypes = componentClass.contextTypes
@@ -405,7 +405,8 @@ function mixinLifecycleEvents(target) {
     }
 }
 
-export const Observer = observer(({ children, inject: observerInject, render }) => {
+// TODO: provide some ways to pass arguments
+export const Observer = observer()(({ children, inject: observerInject, render }) => {
     const component = children || render
     if (typeof component === "undefined") {
         return null
