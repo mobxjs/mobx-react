@@ -15,7 +15,8 @@ class Provider extends Component {
 
     constructor(props, context) {
         super(props, context)
-        this.state = Object.assign({}, props)
+        this.state = {}
+        copyStores(props, this.state)
     }
 
     render() {
@@ -25,15 +26,9 @@ class Provider extends Component {
     getChildContext() {
         const stores = {}
         // inherit stores
-        const baseStores = this.context.mobxStores
-        if (baseStores)
-            for (let key in baseStores) {
-                stores[key] = baseStores[key]
-            }
+        copyStores(this.context.mobxStores, stores)
         // add own stores
-        for (let key in this.props)
-            if (!specialReactKeys[key] && key !== "suppressChangedStoreWarning")
-                stores[key] = this.props[key]
+        copyStores(this.props, stores)
         return {
             mobxStores: stores
         }
@@ -44,13 +39,16 @@ class Provider extends Component {
         if (!prevState) return nextProps
 
         // Maybe this warning is too aggressive?
-        if (Object.keys(nextProps).length !== Object.keys(prevState).length)
+        if (
+            Object.keys(nextProps).filter(validStoreName).length !==
+            Object.keys(prevState).filter(validStoreName).length
+        )
             console.warn(
                 "MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
             )
         if (!nextProps.suppressChangedStoreWarning)
             for (let key in nextProps)
-                if (!specialReactKeys[key] && prevState[key] !== nextProps[key])
+                if (validStoreName(key) && prevState[key] !== nextProps[key])
                     console.warn(
                         "MobX Provider: Provided store '" +
                             key +
@@ -59,6 +57,15 @@ class Provider extends Component {
 
         return nextProps
     }
+}
+
+function copyStores(from, to) {
+    if (!from) return
+    for (let key in from) if (validStoreName(key)) to[key] = from[key]
+}
+
+function validStoreName(key) {
+    return !specialReactKeys[key] && key !== "suppressChangedStoreWarning"
 }
 
 // TODO: kill in next major

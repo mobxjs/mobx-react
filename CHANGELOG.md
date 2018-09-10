@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.2.8
+
+* Make sure `mobx-react` doesn't require `Object.assign` polyfill
+
 ### 5.2.7
 
 * Fixed issue where React 16.5 printed a warning when using `Provider`, fixes [#545](https://github.com/mobxjs/mobx-react/issues/545)
