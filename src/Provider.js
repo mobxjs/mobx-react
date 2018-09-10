@@ -15,7 +15,7 @@ class Provider extends Component {
 
     constructor(props, context) {
         super(props, context)
-        this.state = { ...props }
+        this.state = Object.assign({}, props)
     }
 
     render() {
