@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.2.7
+
+* Fixed issue where React 16.5 printed a warning when using `Provider`, fixes [#545](https://github.com/mobxjs/mobx-react/issues/545)
+
 ### 5.2.6
 
 * Fixed bug in defining properties (although the bug had no known observable effect). Fixes [#540](https://github.com/mobxjs/mobx-react/issues/540)

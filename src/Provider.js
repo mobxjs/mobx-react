@@ -15,7 +15,7 @@ class Provider extends Component {
 
     constructor(props, context) {
         super(props, context)
-        this.state = props || {}
+        this.state = { ...props }
     }
 
     render() {
@@ -31,7 +31,7 @@ class Provider extends Component {
                 stores[key] = baseStores[key]
             }
         // add own stores
-        for (let key in this.state)
+        for (let key in this.props)
             if (!specialReactKeys[key] && key !== "suppressChangedStoreWarning")
                 stores[key] = this.props[key]
         return {
