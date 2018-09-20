@@ -376,18 +376,16 @@ export function observer(arg1, arg2) {
         throw new Error("Please pass a valid component to 'observer'")
     }
 
-    const targetClass = class targetClassName extends componentClass {}
-    targetClass.displayName = componentClass.displayName || componentClass.name
-    const target = targetClass.prototype || targetClass
+    const target = componentClass.prototype || componentClass
     mixinLifecycleEvents(target)
-    targetClass.isMobXReactObserver = true
+    componentClass.isMobXReactObserver = true
     makeObservableProp(target, "props")
     makeObservableProp(target, "state")
     const baseRender = target.render
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
     }
-    return targetClass
+    return componentClass
 }
 
 function mixinLifecycleEvents(target) {
