@@ -44,7 +44,7 @@ export function inject<S, P, I, C>(
     fn: IStoresToProps<S, P, I, C>
 ): <T extends IReactComponent>(target: T) => T & IWrappedComponent<T>
 
-// Ideal implemetnation:
+// Ideal implementation:
 // export function inject
 // (
 // fn: IStoresToProps
