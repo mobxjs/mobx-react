@@ -42,9 +42,7 @@ function build(target, mode, filename) {
     var plugins = [
         alias(getAliases(target)),
         babel({
-            exclude: "node_modules/**",
-            presets: ["es2015-rollup", "react"],
-            plugins: ["transform-decorators-legacy", "transform-class-properties"]
+            exclude: "node_modules/**"
         }),
         resolve({
             module: true,
