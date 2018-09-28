@@ -1,4 +1,5 @@
 import * as React from "react"
+import { patch } from "./utils/utils"
 
 const storeKey = "__$mobxDisposeOnUnmount"
 
@@ -38,22 +39,7 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
 
     // tweak the component class componentWillUnmount if not done already
     if (!componentWasAlreadyModified) {
-        let oldComponentWillUnmount = target.componentWillUnmount
-
-        Object.defineProperty(target, "componentWillUnmount", {
-            get: () => {
-                return function(...args) {
-                    if (oldComponentWillUnmount) {
-                        oldComponentWillUnmount.apply(this, args)
-                    }
-
-                    customComponentWillUnmount.call(this)
-                }
-            },
-            set: value => {
-                oldComponentWillUnmount = value
-            }
-        })
+        patch(target, "componentWillUnmount", customComponentWillUnmount, false)
     }
 
     // return the disposer as is if invoked as a non decorator
