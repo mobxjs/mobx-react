@@ -1,7 +1,7 @@
 /**
  * Turns a React component or stateless render function into a reactive component.
  */
-import React = require("react")
+import * as React from "react"
 
 export type IReactComponent<P = any> =
     | React.StatelessComponent<P>
@@ -57,6 +57,12 @@ export function inject<S, P, I, C>(
 // fn: IStoresToProps<any, P, I>
 // ):
 // <T extends IReactComponent<P & S>(target: T) => IReactComponent<P> & IWrappedComponent<T>
+
+/**
+ * disposeOnUnmount
+ */
+export function disposeOnUnmount(target: React.Component, propertyKey: string): void
+export function disposeOnUnmount<TF extends Function>(target: React.Component, fn: TF): TF
 
 /**
  * Utilities
