@@ -276,4 +276,5 @@ class DOU extends Component {
     @disposeOnUnmount methodA = () => {}
 
     methodB = disposeOnUnmount(this, () => {})
+    manyMethods = disposeOnUnmount(this, [() => {}, () => {}])
 }

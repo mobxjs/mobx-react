@@ -20,6 +20,10 @@ function customComponentWillUnmount() {
 }
 
 export function disposeOnUnmount(target, propertyKeyOrFunction) {
+    if (Array.isArray(propertyKeyOrFunction)) {
+        return propertyKeyOrFunction.map(fn => disposeOnUnmount(target, fn))
+    }
+
     if (!target instanceof React.Component) {
         throw new Error("[mobx-react] disposeOnUnmount only works on class based React components.")
     }

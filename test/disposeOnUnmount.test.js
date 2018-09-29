@@ -27,10 +27,14 @@ async function testComponent(C, afterMount, afterUnmount) {
 describe("without observer", () => {
     test("class without componentWillUnmount", async () => {
         class C extends React.Component {
-            @disposeOnUnmount methodA = jest.fn()
-            @disposeOnUnmount methodB = jest.fn()
-            @disposeOnUnmount methodC = null
-            @disposeOnUnmount methodD = undefined
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
 
             render() {
                 return null
@@ -44,10 +48,14 @@ describe("without observer", () => {
         let called = 0
 
         class C extends React.Component {
-            @disposeOnUnmount methodA = jest.fn()
-            @disposeOnUnmount methodB = jest.fn()
-            @disposeOnUnmount methodC = null
-            @disposeOnUnmount methodD = undefined
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
 
             render() {
                 return null
@@ -73,10 +81,14 @@ describe("without observer", () => {
         let called = 0
 
         class C extends React.Component {
-            @disposeOnUnmount methodA = jest.fn()
-            @disposeOnUnmount methodB = jest.fn()
-            @disposeOnUnmount methodC = null
-            @disposeOnUnmount methodD = undefined
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
 
             render() {
                 return null
@@ -99,8 +111,8 @@ describe("without observer", () => {
     })
 
     test("class without componentWillUnmount using non decorator version", async () => {
-        let methodA = jest.fn()
-        let methodB = jest.fn()
+        let methodC = jest.fn()
+        let methodD = jest.fn()
         class C extends React.Component {
             render() {
                 return null
@@ -111,12 +123,21 @@ describe("without observer", () => {
 
             constructor(props) {
                 super(props)
-                disposeOnUnmount(this, methodA)
-                disposeOnUnmount(this, methodB)
+                disposeOnUnmount(this, [methodC, methodD])
             }
         }
 
-        await testComponent(C)
+        await testComponent(
+            C,
+            () => {
+                expect(methodC).not.toHaveBeenCalled()
+                expect(methodD).not.toHaveBeenCalled()
+            },
+            () => {
+                expect(methodC).toHaveBeenCalled()
+                expect(methodD).toHaveBeenCalled()
+            }
+        )
     })
 })
 
@@ -124,10 +145,14 @@ describe("with observer", () => {
     test("class without componentWillUnmount", async () => {
         @observer
         class C extends React.Component {
-            @disposeOnUnmount methodA = jest.fn()
-            @disposeOnUnmount methodB = jest.fn()
-            @disposeOnUnmount methodC = null
-            @disposeOnUnmount methodD = undefined
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
 
             render() {
                 return null
@@ -142,10 +167,14 @@ describe("with observer", () => {
 
         @observer
         class C extends React.Component {
-            @disposeOnUnmount methodA = jest.fn()
-            @disposeOnUnmount methodB = jest.fn()
-            @disposeOnUnmount methodC = null
-            @disposeOnUnmount methodD = undefined
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
 
             render() {
                 return null
@@ -172,10 +201,14 @@ describe("with observer", () => {
 
         @observer
         class C extends React.Component {
-            @disposeOnUnmount methodA = jest.fn()
-            @disposeOnUnmount methodB = jest.fn()
-            @disposeOnUnmount methodC = null
-            @disposeOnUnmount methodD = undefined
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
 
             render() {
                 return null
@@ -198,8 +231,8 @@ describe("with observer", () => {
     })
 
     test("class without componentWillUnmount using non decorator version", async () => {
-        let methodA = jest.fn()
-        let methodB = jest.fn()
+        let methodC = jest.fn()
+        let methodD = jest.fn()
 
         @observer
         class C extends React.Component {
@@ -212,11 +245,20 @@ describe("with observer", () => {
 
             constructor(props) {
                 super(props)
-                disposeOnUnmount(this, methodA)
-                disposeOnUnmount(this, methodB)
+                disposeOnUnmount(this, [methodC, methodD])
             }
         }
 
-        await testComponent(C)
+        await testComponent(
+            C,
+            () => {
+                expect(methodC).not.toHaveBeenCalled()
+                expect(methodD).not.toHaveBeenCalled()
+            },
+            () => {
+                expect(methodC).toHaveBeenCalled()
+                expect(methodD).toHaveBeenCalled()
+            }
+        )
     })
 })

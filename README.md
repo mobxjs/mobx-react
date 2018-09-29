@@ -418,6 +418,34 @@ const mountedComponent = mount(
 Bear in mind that using shallow rendering won't provide any useful results when testing injected components; only the injector will be rendered.
 To test with shallow rendering, instantiate the `wrappedComponent` instead: `shallow(<Person.wrappedComponent />)`
 
+### disposeOnUnmount(componentInstance, propertyKey | function | function[])
+
+Function (and decorator) that makes sure a function (usually a disposer such as the ones returned by `reaction`, `autorun`, etc.) is automatically executed as part of the componentWillUnmount lifecycle event.
+
+```javascript
+import { disposeOnUnmount } from "mobx-react"
+
+class SomeComponent extends React.Component {
+    // decorator version
+    @disposeOnUnmount
+    someReactionDisposer = reaction(...)
+
+    // function version over properties
+    someReactionDisposer = disposeOnUnmount(this, reaction(...))
+
+    // function version inside methods
+    componentDidMount() {
+        // single function
+        disposeOnUmmount(this, reaction(...))
+        
+        // or function array
+        disposeOnUmount(this, [
+            reaction(...),
+            reaction(...)
+        ])
+    }
+}
+
 ## FAQ
 
 **Should I use `observer` for each component?**
