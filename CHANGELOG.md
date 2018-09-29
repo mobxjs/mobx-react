@@ -1,5 +1,10 @@
 # MobX-React Changelog
 
+### next
+
+* Added `disposeOnUmount` decorator to call disposable properties (reaction, autorun, etc) automatically on `componentWillUnmount`
+* Introduced new method to patch lifecycle methods which should be more compatible.
+
 ### 5.2.8
 
 * Make sure `mobx-react` doesn't require `Object.assign` polyfill

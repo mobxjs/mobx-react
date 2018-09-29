@@ -49,7 +49,7 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
         set: value => {
             realMethod = value
         },
-        configurable: true
+        configurable: false
     }
 
     const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)

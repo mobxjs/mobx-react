@@ -1,21 +1,9 @@
-import React, { createElement, Component } from "react"
 import createClass from "create-react-class"
-import ReactDOM from "react-dom"
-import ReactDOMServer from "react-dom/server"
-import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, inject, onError, offError, useStaticRendering, Observer, Provider } from "../src"
-import {
-    withConsole,
-    withAsyncConsole,
-    createTestRoot,
-    sleepHelper,
-    asyncReactDOMRender,
-    asyncRender
-} from "./"
-import ErrorCatcher from "./ErrorCatcher"
-
-const mobxAdminProperty = mobx.$mobx || "$mobx"
+import React, { Component } from "react"
+import TestUtils from "react-dom/test-utils"
+import { inject, observer, Observer, onError, Provider, useStaticRendering } from "../src"
+import { asyncReactDOMRender, createTestRoot, sleepHelper, withAsyncConsole, withConsole } from "./"
 
 /**
  *  some test suite is too tedious
@@ -62,7 +50,9 @@ describe("nestedRendering", async () => {
                 return (
                     <div>
                         <span>{todos.length}</span>
-                        {todos.map((todo, idx) => <TodoItem key={idx} todo={todo} />)}
+                        {todos.map((todo, idx) => (
+                            <TodoItem key={idx} todo={todo} />
+                        ))}
                     </div>
                 )
             }
@@ -234,7 +224,13 @@ describe("issue 12", () => {
     }
     /** table stateles component */
     const Table = observer(function table() {
-        return <div>{data.items.map(item => <Row key={item.name} item={item} />)}</div>
+        return (
+            <div>
+                {data.items.map(item => (
+                    <Row key={item.name} item={item} />
+                ))}
+            </div>
+        )
     })
 
     beforeAll(async done => {
@@ -289,7 +285,12 @@ test("component should not be inject", () => {
         inject("foo")(
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -336,7 +337,12 @@ describe("124 - react to changes in this.props via computed", () => {
                 })
             },
             render() {
-                return <span>x:{this.computedProp}</span>
+                return (
+                    <span>
+                        x:
+                        {this.computedProp}
+                    </span>
+                )
             }
         })
     )
@@ -618,11 +624,13 @@ test("parent / childs render in the right order", done => {
     let events = []
 
     class User {
-        @mobx.observable name = "User's name"
+        @mobx.observable
+        name = "User's name"
     }
 
     class Store {
-        @mobx.observable user = new User()
+        @mobx.observable
+        user = new User()
         @mobx.action
         logout() {
             this.user = null
@@ -716,9 +724,11 @@ test("195 - async componentWillMount does not work", async () => {
 
     @observer
     class WillMount extends React.Component {
-        @mobx.observable counter = 0
+        @mobx.observable
+        counter = 0
 
-        @mobx.action inc = () => this.counter++
+        @mobx.action
+        inc = () => this.counter++
 
         componentWillMount() {
             setTimeout(() => this.inc(), 300)
@@ -868,22 +878,4 @@ test("static on function components are hoisted", () => {
     const Comp2 = observer(Comp)
 
     expect(Comp2.foo).toBe(3)
-})
-
-test("work without Symbol", async () => {
-    const originalSymbol = global.Symbol
-    try {
-        delete global.Symbol
-        const Symbol = void 0
-        const Component1 = observer(
-            class extends Component {
-                render() {
-                    return null
-                }
-            }
-        )
-        await asyncReactDOMRender(<Component1 />, testRoot)
-    } finally {
-        global.Symbol = originalSymbol
-    }
 })
