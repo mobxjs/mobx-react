@@ -30,17 +30,17 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
     function getFunction(...args) {
         const mixins = getMixins(this, methodName)
 
-        for (const pre of mixins.pre) {
+        mixins.pre.forEach(pre => {
             pre.apply(this, args)
-        }
+        })
 
         if (realMethod !== undefined && realMethod !== null) {
             realMethod.apply(this, args)
         }
 
-        for (const post of mixins.post) {
+        mixins.post.forEach(post => {
             post.apply(this, args)
-        }
+        })
     }
     getFunction["__$mobxMixin"] = true
 

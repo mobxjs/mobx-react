@@ -4,7 +4,7 @@ import { patch } from "./utils/utils"
 const storeKey = "__$mobxDisposeOnUnmount"
 
 function customComponentWillUnmount() {
-    for (const propKeyOrFunction of this[storeKey]) {
+    this[storeKey].forEach(propKeyOrFunction => {
         const prop =
             typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
         if (prop !== undefined && prop !== null) {
@@ -15,7 +15,7 @@ function customComponentWillUnmount() {
             }
             prop()
         }
-    }
+    })
     this[storeKey] = []
 }
 
