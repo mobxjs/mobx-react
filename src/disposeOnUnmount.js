@@ -36,8 +36,7 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
 
     // add property key / function we want run (disposed) to the store
     const componentWasAlreadyModified = !!target[storeKey]
-    target[storeKey] = target[storeKey] || []
-    const store = target[storeKey]
+    const store = target[storeKey] || (target[storeKey] = [])
 
     store.push(propertyKeyOrFunction)
 

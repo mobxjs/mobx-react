@@ -283,11 +283,21 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
 
 {
     // just to make sure it compiles
-    class DOU extends Component {
+    class DisposeOnUnmountComponent extends Component<{}> {
         @disposeOnUnmount
         methodA = () => {}
 
         methodB = disposeOnUnmount(this, () => {})
         manyMethods = disposeOnUnmount(this, [() => {}, () => {}])
     }
+
+    // manual tests: this should not compile when the decorator is not applied over a react component class
+    /*
+    class DisposeOnUnmountNotAComponent {
+        @disposeOnUnmount
+        methodA = () => {}
+
+        methodB = disposeOnUnmount(this, () => {})
+    }
+    */
 }
