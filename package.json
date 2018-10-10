@@ -36,7 +36,7 @@
     "@babel/plugin-transform-react-jsx": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
     "@types/create-react-class": "^15.6.0",
-    "@types/node": "^9.0.0",
+    "@types/node": "^10.0.0",
     "@types/prop-types": "^15.5.2",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
