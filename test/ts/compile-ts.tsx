@@ -232,3 +232,14 @@ class InjectSomeStores extends Component<{ x: any }, {}> {
 inject(({ x }) => ({ x }))(InjectSomeStores)
 
 // TODO: not possible: App2.wrappedComponent
+
+{
+	class T extends Component<{x: number}> {
+		render() {
+			return <div/>
+		}
+	}
+
+	const Injected = inject("test")(T);
+	<Injected.wrappedComponent x={3} />
+}
