@@ -270,11 +270,24 @@ class InjectSomeStores extends Component<{ x: any }, {}> {
 inject(({ x }) => ({ x }))(InjectSomeStores)
 
 // TODO: not possible: App2.wrappedComponent
+{
+    class T extends Component<{ x: number }> {
+        render() {
+            return <div />
+        }
+    }
 
-// just to make sure it compiles
-class DOU extends Component {
-    @disposeOnUnmount methodA = () => {}
+    const Injected = inject("test")(T)
+    ;<Injected.wrappedComponent x={3} />
+}
 
-    methodB = disposeOnUnmount(this, () => {})
-    manyMethods = disposeOnUnmount(this, [() => {}, () => {}])
+{
+    // just to make sure it compiles
+    class DOU extends Component {
+        @disposeOnUnmount
+        methodA = () => {}
+
+        methodB = disposeOnUnmount(this, () => {})
+        manyMethods = disposeOnUnmount(this, [() => {}, () => {}])
+    }
 }
