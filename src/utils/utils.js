@@ -11,7 +11,7 @@ export function newSymbol(name) {
 const mobxMixins = newSymbol("Mixins")
 const mobxMixin = newSymbol("Mixin")
 
-function getMixins(target, methodName) {
+function getCreateMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
     const methodMixins = (mixins[methodName] = mixins[methodName] || {})
     methodMixins.pre = methodMixins.pre || []
@@ -19,23 +19,22 @@ function getMixins(target, methodName) {
     return methodMixins
 }
 
-export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
-    const mixins = getMixins(target, methodName)
+function getMixins(target, methodName) {
+    return target[mobxMixins][methodName]
+}
 
-    if (runMixinFirst) {
-        mixins.pre.unshift(mixinMethod)
-    } else {
-        mixins.post.push(mixinMethod)
+const cachedDefinitions = {}
+
+function createOrGetCachedDefinition(methodName, enumerable) {
+    const cacheKey = `${methodName}+${enumerable}`
+    const cached = cachedDefinitions[cacheKey]
+    if (cached) {
+        return cached
     }
 
-    let realMethod = target[methodName]
-    if (typeof realMethod === "function" && realMethod[mobxMixin]) {
-        // already patched, do not repatch
-        return
-    }
-
-    function getFunction(...args) {
+    const getFunction = function getFunction(...args) {
         const mixins = getMixins(this, methodName)
+        const realMethod = mixins.real
 
         mixins.pre.forEach(pre => {
             pre.apply(this, args)
@@ -51,18 +50,45 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
     }
     getFunction[mobxMixin] = true
 
-    const newDefinition = {
-        get: () => getFunction,
-        set: value => {
-            realMethod = value
-        },
-        configurable: true
+    const setFunction = function setFunction(value) {
+        const mixins = getMixins(this, methodName)
+        mixins.real = value
     }
 
-    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
-    if (oldDefinition) {
-        newDefinition.enumerable = oldDefinition.enumerable
+    const newDefinition = {
+        get: () => getFunction,
+        set: setFunction,
+        configurable: true,
+        enumerable: enumerable
     }
+
+    cachedDefinitions[cacheKey] = newDefinition
+
+    return newDefinition
+}
+
+export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
+    const mixins = getCreateMixins(target, methodName)
+
+    if (runMixinFirst) {
+        mixins.pre.unshift(mixinMethod)
+    } else {
+        mixins.post.push(mixinMethod)
+    }
+
+    const realMethod = target[methodName]
+    if (typeof realMethod === "function" && realMethod[mobxMixin]) {
+        // already patched, do not repatch
+        return
+    }
+
+    mixins.real = realMethod
+
+    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
+    const newDefinition = createOrGetCachedDefinition(
+        methodName,
+        oldDefinition ? oldDefinition.enumerable : undefined
+    )
 
     Object.defineProperty(target, methodName, newDefinition)
 }
