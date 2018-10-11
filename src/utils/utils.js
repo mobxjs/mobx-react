@@ -4,12 +4,18 @@ export function isStateless(component) {
     return !(component.prototype && component.prototype.render)
 }
 
+let symbolId = 0
 export function newSymbol(name) {
-    return typeof Symbol === "function" ? Symbol(name) : "__$mobx" + name
+    if (typeof Symbol === "function") {
+        return Symbol(name)
+    }
+    const symbol = `__$mobx-react ${name} (${symbolId})`
+    symbolId++
+    return symbol
 }
 
-const mobxMixins = newSymbol("Mixins")
-const mobxMixin = newSymbol("Mixin")
+const mobxMixins = newSymbol("patchMixins")
+const mobxMixin = newSymbol("patchMixin")
 
 function getCreateMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})

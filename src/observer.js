@@ -7,7 +7,7 @@ import inject from "./inject"
 import { patch as newPatch, newSymbol } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
-const mobxIsUnmounted = newSymbol("IsUnmounted")
+const mobxIsUnmounted = newSymbol("isUnmounted")
 
 /**
  * dev tool support
@@ -22,21 +22,8 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
-const createdSymbols = {}
-
-function createRealSymbol(name) {
-    return newSymbol(`ReactProp$${name}${Math.random()}`)
-}
-
-function createSymbol(name) {
-    if (!createdSymbols[name]) {
-        createdSymbols[name] = createRealSymbol(name)
-    }
-    return createdSymbols[name]
-}
-
-const skipRenderKey = createSymbol("skipRender")
-const isForcingUpdateKey = createSymbol("isForcingUpdate")
+const skipRenderKey = newSymbol("skipRender")
+const isForcingUpdateKey = newSymbol("isForcingUpdate")
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
@@ -267,8 +254,8 @@ const reactiveMixin = {
 }
 
 function makeObservableProp(target, propName) {
-    const valueHolderKey = createSymbol(propName + " value holder")
-    const atomHolderKey = createSymbol(propName + " atom holder")
+    const valueHolderKey = newSymbol(`reactProp_${propName}_valueHolder`)
+    const atomHolderKey = newSymbol(`reactProp_${propName}_atomHolder`)
     function getAtom() {
         if (!this[atomHolderKey]) {
             setHiddenProp(this, atomHolderKey, createAtom("reactive " + propName))

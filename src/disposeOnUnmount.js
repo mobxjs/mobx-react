@@ -1,7 +1,7 @@
 import * as React from "react"
 import { patch, newSymbol } from "./utils/utils"
 
-const storeKey = newSymbol("DisposeOnUnmount")
+const storeKey = newSymbol("disposeOnUnmount")
 
 function runDisposersOnWillUnmount() {
     this[storeKey].forEach(propKeyOrFunction => {
