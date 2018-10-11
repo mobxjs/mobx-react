@@ -4,9 +4,10 @@ import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
-import { patch as newPatch } from "./utils/utils"
+import { patch as newPatch, newSymbol } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
+const mobxIsUnmounted = newSymbol("IsUnmounted")
 
 /**
  * dev tool support
@@ -24,10 +25,7 @@ export const renderReporter = new EventEmitter()
 const createdSymbols = {}
 
 function createRealSymbol(name) {
-    if (typeof Symbol === "function") {
-        return Symbol(name)
-    }
-    return `$mobxReactProp$${name}${Math.random()}`
+    return newSymbol(`ReactProp$${name}${Math.random()}`)
 }
 
 function createSymbol(name) {
@@ -195,7 +193,7 @@ function makeComponentReactive(render) {
             // See #85 / Pull #44
             isRenderingPending = true
             if (typeof this.componentWillReact === "function") this.componentWillReact() // TODO: wrap in action?
-            if (this.__$mobxIsUnmounted !== true) {
+            if (this[mobxIsUnmounted] !== true) {
                 // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
                 // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
                 // However, people also claim this migth happen during unit tests..
@@ -224,7 +222,7 @@ const reactiveMixin = {
     componentWillUnmount: function() {
         if (isUsingStaticRendering === true) return
         this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
-        this.__$mobxIsUnmounted = true
+        this[mobxIsUnmounted] = true
         if (isDevtoolsEnabled) {
             const node = findDOMNode(this)
             if (node && componentByNodeRegistry) {

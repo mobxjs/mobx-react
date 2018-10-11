@@ -1,9 +1,9 @@
 import * as React from "react"
-import { patch } from "./utils/utils"
+import { patch, newSymbol } from "./utils/utils"
 
-const storeKey = "__$mobxDisposeOnUnmount"
+const storeKey = newSymbol("DisposeOnUnmount")
 
-function customComponentWillUnmount() {
+function runDisposersOnWillUnmount() {
     this[storeKey].forEach(propKeyOrFunction => {
         const prop =
             typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
@@ -42,7 +42,7 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
 
     // tweak the component class componentWillUnmount if not done already
     if (!componentWasAlreadyModified) {
-        patch(target, "componentWillUnmount", customComponentWillUnmount, false)
+        patch(target, "componentWillUnmount", runDisposersOnWillUnmount, false)
     }
 
     // return the disposer as is if invoked as a non decorator

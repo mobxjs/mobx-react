@@ -4,8 +4,15 @@ export function isStateless(component) {
     return !(component.prototype && component.prototype.render)
 }
 
+export function newSymbol(name) {
+    return typeof Symbol === "function" ? Symbol(name) : "__$mobx" + name
+}
+
+const mobxMixins = newSymbol("Mixins")
+const mobxMixin = newSymbol("Mixin")
+
 function getMixins(target, methodName) {
-    const mixins = (target["__$mobxMixins"] = target["__$mobxMixins"] || {})
+    const mixins = (target[mobxMixins] = target[mobxMixins] || {})
     const methodMixins = (mixins[methodName] = mixins[methodName] || {})
     methodMixins.pre = methodMixins.pre || []
     methodMixins.post = methodMixins.post || []
@@ -22,7 +29,7 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
     }
 
     let realMethod = target[methodName]
-    if (typeof realMethod === "function" && realMethod["__$mobxMixin"]) {
+    if (typeof realMethod === "function" && realMethod[mobxMixin]) {
         // already patched, do not repatch
         return
     }
@@ -42,14 +49,14 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
             post.apply(this, args)
         })
     }
-    getFunction["__$mobxMixin"] = true
+    getFunction[mobxMixin] = true
 
     const newDefinition = {
         get: () => getFunction,
         set: value => {
             realMethod = value
         },
-        configurable: false
+        configurable: true
     }
 
     const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
