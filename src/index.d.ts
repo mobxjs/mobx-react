@@ -64,9 +64,9 @@ export function inject<S, P, I, C>(
  * disposeOnUnmount
  */
 type Disposer = () => void
-export function disposeOnUnmount(target: React.Component<any, any, any>, propertyKey: string): void
+export function disposeOnUnmount(target: React.Component<any, any>, propertyKey: string): void
 export function disposeOnUnmount<TF extends Disposer | Disposer[]>(
-    target: React.Component<any, any, any>,
+    target: React.Component<any, any>,
     fn: TF
 ): TF
 
