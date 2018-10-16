@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /* Publish.js, publish a new version of the npm package as found in the current directory */
 /* Run this file from the root of the repository */
 
@@ -35,7 +36,7 @@ async function prompt(question, defaultValue) {
 
 async function main() {
     // build
-    run("npm run small-build")
+    run("npm run build")
 
     const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"))
 
