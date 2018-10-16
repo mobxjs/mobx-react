@@ -437,7 +437,7 @@ class SomeComponent extends React.Component {
     componentDidMount() {
         // single function
         disposeOnUmmount(this, reaction(...))
-        
+
         // or function array
         disposeOnUmount(this, [
             reaction(...),
@@ -445,6 +445,7 @@ class SomeComponent extends React.Component {
         ])
     }
 }
+```
 
 ## FAQ
 
