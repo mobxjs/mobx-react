@@ -4,7 +4,7 @@
 
 _5.3.0 was retracted as files were not generated correctly during publish_
 
-* Added `disposeOnUmount` utility / decorator to call disposable properties (reaction, autorun, etc) automatically on `componentWillUnmount`
+* Added `disposeOnUnmount` utility / decorator to call disposable properties (reaction, autorun, etc) automatically on `componentWillUnmount`
 * Introduced new method to patch lifecycle methods which should be more compatible with for example arrow functions.
 
 
