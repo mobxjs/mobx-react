@@ -454,7 +454,7 @@ class SomeComponent extends React.Component {
 You should use `observer` on every component that displays observable data.
 Even the small ones. `observer` allows components to render independently from their parent and in general this means that
 the more you use `observer`, the better the performance become.
-The overhead of `observer` itself is neglectable.
+The overhead of `observer` itself is negligible.
 See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/issues/101)
 
 **I see React warnings about `forceUpdate` / `setState` from React**
