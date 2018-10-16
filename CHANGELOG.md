@@ -1,9 +1,9 @@
 # MobX-React Changelog
 
-### next
+### 5.3.0
 
-* Added `disposeOnUmount` decorator to call disposable properties (reaction, autorun, etc) automatically on `componentWillUnmount`
-* Introduced new method to patch lifecycle methods which should be more compatible.
+* Added `disposeOnUmount` utility / decorator to call disposable properties (reaction, autorun, etc) automatically on `componentWillUnmount`
+* Introduced new method to patch lifecycle methods which should be more compatible with for example arrow functions.
 
 ### 5.2.8
 

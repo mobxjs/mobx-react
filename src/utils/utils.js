@@ -38,7 +38,7 @@ function createOrGetCachedDefinition(methodName, enumerable) {
         return cached
     }
 
-    const getFunction = function getFunction(...args) {
+    const wrapperMethod = function wrapperMethod(...args) {
         const mixins = getMixins(this, methodName)
         const realMethod = mixins.real
 
@@ -54,16 +54,16 @@ function createOrGetCachedDefinition(methodName, enumerable) {
             post.apply(this, args)
         })
     }
-    getFunction[mobxMixin] = true
-
-    const setFunction = function setFunction(value) {
-        const mixins = getMixins(this, methodName)
-        mixins.real = value
-    }
+    wrapperMethod[mobxMixin] = true
 
     const newDefinition = {
-        get: () => getFunction,
-        set: setFunction,
+        get() {
+            return wrapperMethod
+        },
+        set(value) {
+            const mixins = getMixins(this, methodName)
+            mixins.real = value
+        },
         configurable: true,
         enumerable: enumerable
     }
