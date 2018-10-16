@@ -436,7 +436,7 @@ class SomeComponent extends React.Component {
     // function version inside methods
     componentDidMount() {
         // single function
-        disposeOnUmmount(this, reaction(...))
+        disposeOnUnmount(this, reaction(...))
 
         // or function array
         disposeOnUmount(this, [
