@@ -78,7 +78,7 @@ function build(target, mode, filename) {
                 exports: "named"
             }
 
-            return bundle.generate(options)
+            return bundle.write(options)
         })
         .catch(function(reason) {
             console.error(reason)
