@@ -1,8 +1,9 @@
 language: node_js
-script: npm run test:travis
+cache: yarn
+install:
+    - yarn install
+script: CI=true yarn test:travis
 after_success:
-  - cat ./coverage/lcov.info|./node_modules/coveralls/bin/coveralls.js
-after_failure:
-  - cat ./npm-debug.log
+    - cat ./coverage/lcov.info|./node_modules/coveralls/bin/coveralls.js
 node_js:
-  - "6.9.0"
+    - "node"

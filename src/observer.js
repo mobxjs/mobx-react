@@ -4,8 +4,10 @@ import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
+import { patch as newPatch, newSymbol } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
+const mobxIsUnmounted = newSymbol("isUnmounted")
 
 /**
  * dev tool support
@@ -20,24 +22,8 @@ let warnedAboutObserverInjectDeprecation = false
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
 export const renderReporter = new EventEmitter()
 
-const createdSymbols = {}
-
-function createRealSymbol(name) {
-    if (typeof Symbol === "function") {
-        return Symbol(name)
-    }
-    return `$mobxReactProp$${name}${Math.random()}`
-}
-
-function createSymbol(name) {
-    if (!createdSymbols[name]) {
-        createdSymbols[name] = createRealSymbol(name)
-    }
-    return createdSymbols[name]
-}
-
-const skipRenderKey = createSymbol("skipRender")
-const isForcingUpdateKey = createSymbol("isForcingUpdate")
+const skipRenderKey = newSymbol("skipRender")
+const isForcingUpdateKey = newSymbol("isForcingUpdate")
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
@@ -106,23 +92,7 @@ export const errorsReporter = new EventEmitter()
  */
 
 function patch(target, funcName, runMixinFirst = false) {
-    const base = target[funcName]
-    const mixinFunc = reactiveMixin[funcName]
-    const f = !base
-        ? mixinFunc
-        : runMixinFirst === true
-            ? function() {
-                  mixinFunc.apply(this, arguments)
-                  base.apply(this, arguments)
-              }
-            : function() {
-                  base.apply(this, arguments)
-                  mixinFunc.apply(this, arguments)
-              }
-
-    // MWE: ideally we freeze here to protect against accidental overwrites in component instances, see #195
-    // ...but that breaks react-hot-loader, see #231...
-    target[funcName] = f
+    newPatch(target, funcName, reactiveMixin[funcName], runMixinFirst)
 }
 
 function shallowEqual(objA, objB) {
@@ -210,7 +180,7 @@ function makeComponentReactive(render) {
             // See #85 / Pull #44
             isRenderingPending = true
             if (typeof this.componentWillReact === "function") this.componentWillReact() // TODO: wrap in action?
-            if (this.__$mobxIsUnmounted !== true) {
+            if (this[mobxIsUnmounted] !== true) {
                 // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
                 // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
                 // However, people also claim this migth happen during unit tests..
@@ -239,7 +209,7 @@ const reactiveMixin = {
     componentWillUnmount: function() {
         if (isUsingStaticRendering === true) return
         this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
-        this.__$mobxIsUnmounted = true
+        this[mobxIsUnmounted] = true
         if (isDevtoolsEnabled) {
             const node = findDOMNode(this)
             if (node && componentByNodeRegistry) {
@@ -284,8 +254,8 @@ const reactiveMixin = {
 }
 
 function makeObservableProp(target, propName) {
-    const valueHolderKey = createSymbol(propName + " value holder")
-    const atomHolderKey = createSymbol(propName + " atom holder")
+    const valueHolderKey = newSymbol(`reactProp_${propName}_valueHolder`)
+    const atomHolderKey = newSymbol(`reactProp_${propName}_atomHolder`)
     function getAtom() {
         if (!this[atomHolderKey]) {
             setHiddenProp(this, atomHolderKey, createAtom("reactive " + propName))

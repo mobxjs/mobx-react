@@ -17,7 +17,6 @@
     "test:ts": "tsc -p test/ts",
     "test:travis": "npm run build && jest && npm run test:ts",
     "build": "node build-rollup.js && shx cp src/index.d.ts index.d.ts && shx cp src/index.d.ts native.d.ts && shx cp src/index.d.ts custom.d.ts",
-    "precommit": "lint-staged",
     "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
@@ -37,7 +36,7 @@
     "@babel/plugin-transform-react-jsx": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
     "@types/create-react-class": "^15.6.0",
-    "@types/node": "^9.0.0",
+    "@types/node": "^10.0.0",
     "@types/prop-types": "^15.5.2",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
@@ -46,12 +45,12 @@
     "create-react-class": "^15.6.2",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.0.0",
-    "husky": "0.14.3",
+    "husky": "^1.0.0",
     "jest": "^23.6.0",
     "jest-environment-jsdom": "^23.4.0",
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
-    "mobx": "5.0.0",
+    "mobx": "^5.0.0",
     "opn-cli": "^3.1.0",
     "prettier": "^1.7.2",
     "prop-types": "^15.6.0",
@@ -60,20 +59,19 @@
     "react-test-renderer": "^16.0.0",
     "regenerator-runtime": "^0.12.1",
     "request": "^2.83.0",
-    "rollup": "^0.50.0",
+    "rollup": "^0.66.2",
     "rollup-plugin-alias": "^1.3.0",
     "rollup-plugin-babel": "^4.0.3",
-    "rollup-plugin-commonjs": "^8.2.1",
-    "rollup-plugin-filesize": "^1.2.1",
+    "rollup-plugin-commonjs": "^9.0.0",
+    "rollup-plugin-filesize": "^4.0.0",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-uglify": "^2.0.1",
-    "serve": "^7.0.0",
+    "rollup-plugin-uglify": "^6.0.0",
     "shelljs": "^0.8.2",
     "shx": "^0.3.2",
-    "typescript": "2.6"
+    "typescript": "^2.6.0"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^2.5.0",
+    "hoist-non-react-statics": "^3.0.0",
     "react-lifecycles-compat": "^3.0.2"
   },
   "keywords": [
@@ -91,7 +89,9 @@
     ]
   },
   "jest": {},
-  "resolutions": {
-    "@types/node": "9.6.7"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

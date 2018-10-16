@@ -21,6 +21,7 @@ export {
 
 export { default as Provider } from "./Provider"
 export { default as inject } from "./inject"
+export { disposeOnUnmount } from "./disposeOnUnmount"
 
 import * as propTypes from "./propTypes"
 export { propTypes }

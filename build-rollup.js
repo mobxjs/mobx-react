@@ -5,7 +5,7 @@ var babel = require("rollup-plugin-babel")
 var commonjs = require("rollup-plugin-commonjs")
 var resolve = require("rollup-plugin-node-resolve")
 
-var uglify = require("rollup-plugin-uglify")
+var uglify = require("rollup-plugin-uglify").uglify
 var alias = require("rollup-plugin-alias")
 
 var { rollup } = require("rollup")
@@ -36,9 +36,6 @@ function getAliases(target) {
 }
 
 function build(target, mode, filename) {
-    let externals
-    let aliases
-
     var plugins = [
         alias(getAliases(target)),
         babel({
@@ -71,17 +68,17 @@ function build(target, mode, filename) {
             var options = {
                 file: path.resolve(__dirname, filename),
                 format: mode.endsWith(".min") ? mode.slice(0, -".min".length) : mode,
-                name: "mobxReact",
-                exports: "named",
                 globals: {
                     react: "React",
                     "react-dom": "ReactDOM",
                     "react-native": "ReactNative",
                     mobx: "mobx"
-                }
+                },
+                name: "mobxReact",
+                exports: "named"
             }
 
-            return bundle.write(options)
+            return bundle.generate(options)
         })
         .catch(function(reason) {
             console.error(reason)
