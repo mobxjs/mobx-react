@@ -4,6 +4,10 @@ import { patch, newSymbol } from "./utils/utils"
 const storeKey = newSymbol("disposeOnUnmount")
 
 function runDisposersOnWillUnmount() {
+    if (!this[storeKey]) {
+        // when disposeOnUnmount is only set to some instances of a component it will still patch the prototype
+        return;
+    }
     this[storeKey].forEach(propKeyOrFunction => {
         const prop =
             typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
