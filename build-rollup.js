@@ -1,16 +1,14 @@
 var path = require("path")
 var filesize = require("rollup-plugin-filesize")
 var babel = require("rollup-plugin-babel")
-
 var commonjs = require("rollup-plugin-commonjs")
 var resolve = require("rollup-plugin-node-resolve")
-
 var uglify = require("rollup-plugin-uglify").uglify
 var alias = require("rollup-plugin-alias")
+var replace = require("rollup-plugin-replace")
 
 var { rollup } = require("rollup")
 
-var reactDomModulePath = require.resolve("react-dom")
 var emptyModulePath = path.resolve(__dirname, "empty.js")
 
 function getExternals(target) {
@@ -37,6 +35,10 @@ function getAliases(target) {
 
 function build(target, mode, filename) {
     var plugins = [
+        replace({
+            // for depencencies such as react-is
+            "process.env.NODE_ENV": JSON.stringify("production")
+        }),
         alias(getAliases(target)),
         babel({
             exclude: "node_modules/**"
