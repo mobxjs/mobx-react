@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.3.2
+
+* Fixed: "process not defined", [#574](https://github.com/mobxjs/mobx-react/pull/574/) through [#576](https://github.com/mobxjs/mobx-react/pull/576/) by [@xaviergonz](https://github.com/xaviergonz)
+
 ### 5.3.0 / 5.3.1
 
 _5.3.0 was retracted as files were not generated correctly during publish_
