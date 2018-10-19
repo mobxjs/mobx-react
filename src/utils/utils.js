@@ -20,62 +20,55 @@ const mobxMixin = newSymbol("patchMixin")
 function getMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
     const methodMixins = (mixins[methodName] = mixins[methodName] || {})
-    methodMixins.pre = methodMixins.pre || []
-    methodMixins.post = methodMixins.post || []
+    methodMixins.locks = methodMixins.locks || 0
+    methodMixins.methods = methodMixins.methods || []
     return methodMixins
 }
 
-export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
-    const mixins = getMixins(target, methodName)
-
-    if (runMixinFirst) {
-        mixins.pre.unshift(mixinMethod)
-    } else {
-        mixins.post.push(mixinMethod)
-    }
-
-    let realMethod = target[methodName]
-    if (typeof realMethod === "function" && realMethod[mobxMixin]) {
-        // already patched, do not repatch
-        return
-    }
-
-    let realRunning = false
-
-    function getFunction(...args) {
-        // avoid recursive calls
-        if (realRunning) {
-            return
-        }
-
-        realRunning = true
-
-        let retVal
+function wrapFunction(realMethod, mixins) {
+    const fn = function(...args) {
+        // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
+        mixins.locks++
 
         try {
-            mixins.pre.forEach(pre => {
-                pre.apply(this, args)
-            })
-
+            let retVal
             if (realMethod !== undefined && realMethod !== null) {
                 retVal = realMethod.apply(this, args)
             }
 
-            mixins.post.forEach(post => {
-                post.apply(this, args)
-            })
-
             return retVal
         } finally {
-            realRunning = false
+            mixins.locks--
+            if (mixins.locks === 0) {
+                mixins.methods.forEach(mx => {
+                    mx.apply(this, args)
+                })
+            }
         }
     }
-    getFunction[mobxMixin] = true
+    fn[mobxMixin] = true
+    return fn
+}
+
+export function patch(target, methodName, mixinMethod) {
+    const mixins = getMixins(target, methodName)
+
+    mixins.methods.push(mixinMethod)
+
+    const originalMethod = target[methodName]
+    if (typeof originalMethod === "function" && originalMethod[mobxMixin]) {
+        // already patched, do not repatch
+        return
+    }
+
+    let actualValue = wrapFunction(originalMethod, mixins)
 
     const newDefinition = {
-        get: () => getFunction,
-        set: value => {
-            realMethod = value
+        get: function() {
+            return actualValue
+        },
+        set: function(value) {
+            actualValue = wrapFunction(value, mixins)
         },
         configurable: true
     }

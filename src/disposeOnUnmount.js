@@ -6,7 +6,7 @@ const storeKey = newSymbol("disposeOnUnmount")
 function runDisposersOnWillUnmount() {
     if (!this[storeKey]) {
         // when disposeOnUnmount is only set to some instances of a component it will still patch the prototype
-        return;
+        return
     }
     this[storeKey].forEach(propKeyOrFunction => {
         const prop =
@@ -20,7 +20,7 @@ function runDisposersOnWillUnmount() {
             prop()
         }
     })
-    this[storeKey] = []
+    // this[storeKey] = []
 }
 
 export function disposeOnUnmount(target, propertyKeyOrFunction) {
@@ -46,7 +46,7 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
 
     // tweak the component class componentWillUnmount if not done already
     if (!componentWasAlreadyModified) {
-        patch(target, "componentWillUnmount", runDisposersOnWillUnmount, false)
+        patch(target, "componentWillUnmount", runDisposersOnWillUnmount)
     }
 
     // return the disposer as is if invoked as a non decorator

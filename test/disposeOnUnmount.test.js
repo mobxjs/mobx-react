@@ -351,7 +351,12 @@ describe("super calls should work", async () => {
     async function test(baseObserver, cObserver) {
         const events = []
 
+        const sharedMethod = jest.fn()
+
         class BaseComponent extends React.Component {
+            @disposeOnUnmount
+            method0 = sharedMethod
+
             @disposeOnUnmount
             methodA = jest.fn()
 
@@ -365,6 +370,9 @@ describe("super calls should work", async () => {
         }
 
         class C extends BaseComponent {
+            @disposeOnUnmount
+            method0 = sharedMethod
+
             @disposeOnUnmount
             methodB = jest.fn()
 
@@ -394,6 +402,7 @@ describe("super calls should work", async () => {
             C,
             ref => {
                 expect(events).toEqual(["baseDidMount", "CDidMount"])
+                expect(sharedMethod).toHaveBeenCalledTimes(0)
             },
             ref => {
                 expect(events).toEqual([
@@ -402,6 +411,7 @@ describe("super calls should work", async () => {
                     "baseWillUnmount",
                     "CWillUnmount"
                 ])
+                expect(sharedMethod).toHaveBeenCalledTimes(2)
             }
         )
     }
