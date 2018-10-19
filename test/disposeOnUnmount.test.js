@@ -17,8 +17,8 @@ async function testComponent(C, afterMount, afterUnmount) {
 
     await asyncReactDOMRender(null, testRoot)
 
-    expect(cref.methodA).toHaveBeenCalled()
-    expect(cref.methodB).toHaveBeenCalled()
+    expect(cref.methodA).toHaveBeenCalledTimes(1)
+    expect(cref.methodB).toHaveBeenCalledTimes(1)
     if (afterUnmount) {
         afterUnmount(cref)
     }
@@ -134,8 +134,8 @@ describe("without observer", () => {
                 expect(methodD).not.toHaveBeenCalled()
             },
             () => {
-                expect(methodC).toHaveBeenCalled()
-                expect(methodD).toHaveBeenCalled()
+                expect(methodC).toHaveBeenCalledTimes(1)
+                expect(methodD).toHaveBeenCalledTimes(1)
             }
         )
     })
@@ -256,8 +256,8 @@ describe("with observer", () => {
                 expect(methodD).not.toHaveBeenCalled()
             },
             () => {
-                expect(methodC).toHaveBeenCalled()
-                expect(methodD).toHaveBeenCalled()
+                expect(methodC).toHaveBeenCalledTimes(1)
+                expect(methodD).toHaveBeenCalledTimes(1)
             }
         )
     })
@@ -352,6 +352,9 @@ describe("super calls should work", async () => {
         const events = []
 
         class BaseComponent extends React.Component {
+            @disposeOnUnmount
+            methodA = jest.fn()
+
             componentDidMount() {
                 events.push("baseDidMount")
             }
@@ -362,6 +365,9 @@ describe("super calls should work", async () => {
         }
 
         class C extends BaseComponent {
+            @disposeOnUnmount
+            methodB = jest.fn()
+
             componentDidMount() {
                 super.componentDidMount()
                 events.push("CDidMount")
@@ -371,15 +377,6 @@ describe("super calls should work", async () => {
                 super.componentWillUnmount()
                 events.push("CWillUnmount")
             }
-
-            @disposeOnUnmount
-            methodA = jest.fn()
-            @disposeOnUnmount
-            methodB = jest.fn()
-            @disposeOnUnmount
-            methodC = null
-            @disposeOnUnmount
-            methodD = undefined
 
             render() {
                 return null
