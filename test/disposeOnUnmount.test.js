@@ -347,6 +347,82 @@ test("custom patching should work", async () => {
     )
 })
 
+describe("super calls should work", async () => {
+    async function test(baseObserver, cObserver) {
+        const events = []
+
+        class BaseComponent extends React.Component {
+            componentDidMount() {
+                events.push("baseDidMount")
+            }
+
+            componentWillUnmount() {
+                events.push("baseWillUnmount")
+            }
+        }
+
+        class C extends BaseComponent {
+            componentDidMount() {
+                super.componentDidMount()
+                events.push("CDidMount")
+            }
+
+            componentWillUnmount() {
+                super.componentWillUnmount()
+                events.push("CWillUnmount")
+            }
+
+            @disposeOnUnmount
+            methodA = jest.fn()
+            @disposeOnUnmount
+            methodB = jest.fn()
+            @disposeOnUnmount
+            methodC = null
+            @disposeOnUnmount
+            methodD = undefined
+
+            render() {
+                return null
+            }
+        }
+
+        if (baseObserver) {
+            BaseComponent = observer(BaseComponent)
+        }
+        if (cObserver) {
+            C = observer(C)
+        }
+
+        await testComponent(
+            C,
+            ref => {
+                expect(events).toEqual(["baseDidMount", "CDidMount"])
+            },
+            ref => {
+                expect(events).toEqual([
+                    "baseDidMount",
+                    "CDidMount",
+                    "baseWillUnmount",
+                    "CWillUnmount"
+                ])
+            }
+        )
+    }
+
+    it("none is observer", async () => {
+        await test(false, false)
+    })
+    it("base is observer", async () => {
+        await test(true, false)
+    })
+    it("C is observer", async () => {
+        await test(false, true)
+    })
+    it("both observers", async () => {
+        await test(true, true)
+    })
+})
+
 it("componentDidMount should be different between components", async () => {
     async function test(withObserver) {
         const events = []
