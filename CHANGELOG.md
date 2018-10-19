@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.3.3
+
+* Fixed `Cannot read property 'forEach' of undefined` exception if `disposeOnUnmount` was called conditionally. [#578](https://github.com/mobxjs/mobx-react/pull/578) by [Jef Hellemans](https://github.com/JefHellemans)
+
 ### 5.3.2
 
 * Fixed: "process not defined", [#574](https://github.com/mobxjs/mobx-react/pull/574/) through [#576](https://github.com/mobxjs/mobx-react/pull/576/) by [@xaviergonz](https://github.com/xaviergonz)
