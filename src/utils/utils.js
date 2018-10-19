@@ -14,8 +14,8 @@ export function newSymbol(name) {
     return symbol
 }
 
-const mobxMixins = newSymbol("Mixins")
-const mobxMixin = newSymbol("Mixin")
+const mobxMixins = newSymbol("patchMixins")
+const mobxMixin = newSymbol("patchMixin")
 
 function getMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
