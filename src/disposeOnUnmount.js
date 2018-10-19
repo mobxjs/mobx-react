@@ -46,7 +46,7 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
 
     // tweak the component class componentWillUnmount if not done already
     if (!componentWasAlreadyModified) {
-        patch(target, "componentWillUnmount", runDisposersOnWillUnmount)
+        patch(target, "componentWillUnmount", false, runDisposersOnWillUnmount)
     }
 
     // return the disposer as is if invoked as a non decorator

@@ -50,25 +50,42 @@ function wrapFunction(realMethod, mixins) {
     return fn
 }
 
-export function patch(target, methodName, mixinMethod) {
+export function patch(target, methodName, forcePatch, ...mixinMethods) {
     const mixins = getMixins(target, methodName)
 
-    mixins.methods.push(mixinMethod)
-
-    const originalMethod = target[methodName]
-    if (typeof originalMethod === "function" && originalMethod[mobxMixin]) {
-        // already patched, do not repatch
-        return
+    for (const mixinMethod of mixinMethods) {
+        if (mixins.methods.indexOf(mixinMethod) < 0) {
+            mixins.methods.push(mixinMethod)
+        }
     }
 
-    let actualValue = wrapFunction(originalMethod, mixins)
+    let actualValue
+    const originalMethod = target[methodName]
+    if (typeof originalMethod === "function" && originalMethod[mobxMixin]) {
+        if (forcePatch) {
+            // we can reuse the wrapper method
+            actualValue = originalMethod
+        } else {
+            // already patched, do not repatch
+            return
+        }
+    } else {
+        actualValue = wrapFunction(originalMethod, mixins)
+    }
 
     const newDefinition = {
         get: function() {
             return actualValue
         },
         set: function(value) {
-            actualValue = wrapFunction(value, mixins)
+            // when it is an instance of the prototype/a child prototype patch that particular case again separately
+            if (this !== target) {
+                // we don't need to pass any mixin functions since the structure is shared
+                patch(this, methodName, true)
+                this[methodName] = value
+            } else {
+                actualValue = wrapFunction(value, mixins)
+            }
         },
         configurable: true
     }

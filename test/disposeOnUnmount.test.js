@@ -348,7 +348,7 @@ test("custom patching should work", async () => {
 })
 
 describe("super calls should work", async () => {
-    async function test(baseObserver, cObserver) {
+    async function doTest(baseObserver, cObserver) {
         const events = []
 
         const sharedMethod = jest.fn()
@@ -417,21 +417,21 @@ describe("super calls should work", async () => {
     }
 
     it("none is observer", async () => {
-        await test(false, false)
+        await doTest(false, false)
     })
     it("base is observer", async () => {
-        await test(true, false)
+        await doTest(true, false)
     })
     it("C is observer", async () => {
-        await test(false, true)
+        await doTest(false, true)
     })
     it("both observers", async () => {
-        await test(true, true)
+        await doTest(true, true)
     })
 })
 
 it("componentDidMount should be different between components", async () => {
-    async function test(withObserver) {
+    async function doTest(withObserver) {
         const events = []
 
         class A extends React.Component {
@@ -500,6 +500,6 @@ it("componentDidMount should be different between components", async () => {
         expect(events).toEqual(["mountA", "unmountA", "mountB", "unmountB"])
     }
 
-    await test(true)
-    await test(false)
+    await doTest(true)
+    await doTest(false)
 })
