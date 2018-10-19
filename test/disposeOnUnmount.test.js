@@ -262,3 +262,87 @@ describe("with observer", () => {
         )
     })
 })
+
+test("custom patching should work", async () => {
+    class BaseComponent extends React.Component {
+        constructor(props, context) {
+            super(props, context)
+
+            _makeAllSafe(this, BaseComponent.prototype, [
+                "componentWillMount",
+                "componentDidMount",
+                "shouldComponentUpdate",
+                "componentWillUpdate",
+                "componentWillReceiveProps",
+                "render",
+                "componentDidUpdate",
+                "componentWillUnmount"
+            ])
+        }
+
+        componentDidMount() {
+            this.didMountCalled = true
+        }
+
+        componentWillUnmount() {
+            this.willUnmountCalled = true
+        }
+    }
+
+    function _makeAllSafe(obj, prototype, methodNames) {
+        for (let i = 0, len = methodNames.length; i < len; i++) {
+            _makeSafe(obj, prototype, methodNames[i])
+        }
+    }
+
+    function _makeSafe(obj, prototype, methodName) {
+        let classMethod = obj[methodName]
+        let prototypeMethod = prototype[methodName]
+
+        if (classMethod || prototypeMethod) {
+            obj[methodName] = function() {
+                this.patchRunFor = this.patchRunFor || []
+                this.patchRunFor.push(methodName)
+
+                let retVal
+
+                if (prototypeMethod) {
+                    retVal = prototypeMethod.apply(this, arguments)
+                }
+                if (classMethod !== prototypeMethod) {
+                    retVal = classMethod.apply(this, arguments)
+                }
+
+                return retVal
+            }
+        }
+    }
+
+    @observer
+    class C extends BaseComponent {
+        @disposeOnUnmount
+        methodA = jest.fn()
+        @disposeOnUnmount
+        methodB = jest.fn()
+        @disposeOnUnmount
+        methodC = null
+        @disposeOnUnmount
+        methodD = undefined
+
+        render() {
+            return null
+        }
+    }
+
+    await testComponent(
+        C,
+        ref => {
+            expect(ref.patchRunFor).toEqual(["render", "componentDidMount"])
+            expect(ref.didMountCalled).toBeTruthy()
+        },
+        ref => {
+            expect(ref.patchRunFor).toEqual(["render", "componentDidMount", "componentWillUnmount"])
+            expect(ref.willUnmountCalled).toBeTruthy()
+        }
+    )
+})

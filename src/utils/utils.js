@@ -40,19 +40,30 @@ function createOrGetCachedDefinition(methodName, enumerable) {
 
     const wrapperMethod = function wrapperMethod(...args) {
         const mixins = getMixins(this, methodName)
+
+        // avoid possible recursive calls by custom patches
+        if (mixins.realRunning) {
+            return
+        }
+        mixins.realRunning = true
+
         const realMethod = mixins.real
 
-        mixins.pre.forEach(pre => {
-            pre.apply(this, args)
-        })
+        try {
+            mixins.pre.forEach(pre => {
+                pre.apply(this, args)
+            })
 
-        if (realMethod !== undefined && realMethod !== null) {
-            realMethod.apply(this, args)
+            if (realMethod !== undefined && realMethod !== null) {
+                realMethod.apply(this, args)
+            }
+
+            mixins.post.forEach(post => {
+                post.apply(this, args)
+            })
+        } finally {
+            mixins.realRunning = false
         }
-
-        mixins.post.forEach(post => {
-            post.apply(this, args)
-        })
     }
     wrapperMethod[mobxMixin] = true
 
