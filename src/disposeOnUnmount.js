@@ -20,7 +20,7 @@ function runDisposersOnWillUnmount() {
             prop()
         }
     })
-    // this[storeKey] = []
+    this[storeKey] = []
 }
 
 export function disposeOnUnmount(target, propertyKeyOrFunction) {
