@@ -262,3 +262,161 @@ describe("with observer", () => {
         )
     })
 })
+
+test("custom patching should work", async () => {
+    class BaseComponent extends React.Component {
+        constructor(props, context) {
+            super(props, context)
+
+            _makeAllSafe(this, BaseComponent.prototype, [
+                "componentWillMount",
+                "componentDidMount",
+                "shouldComponentUpdate",
+                "componentWillUpdate",
+                "componentWillReceiveProps",
+                "render",
+                "componentDidUpdate",
+                "componentWillUnmount"
+            ])
+        }
+
+        componentDidMount() {
+            this.didMountCalled = true
+        }
+
+        componentWillUnmount() {
+            this.willUnmountCalled = true
+        }
+    }
+
+    function _makeAllSafe(obj, prototype, methodNames) {
+        for (let i = 0, len = methodNames.length; i < len; i++) {
+            _makeSafe(obj, prototype, methodNames[i])
+        }
+    }
+
+    function _makeSafe(obj, prototype, methodName) {
+        let classMethod = obj[methodName]
+        let prototypeMethod = prototype[methodName]
+
+        if (classMethod || prototypeMethod) {
+            obj[methodName] = function() {
+                this.patchRunFor = this.patchRunFor || []
+                this.patchRunFor.push(methodName)
+
+                let retVal
+
+                if (prototypeMethod) {
+                    retVal = prototypeMethod.apply(this, arguments)
+                }
+                if (classMethod !== prototypeMethod) {
+                    retVal = classMethod.apply(this, arguments)
+                }
+
+                return retVal
+            }
+        }
+    }
+
+    @observer
+    class C extends BaseComponent {
+        @disposeOnUnmount
+        methodA = jest.fn()
+        @disposeOnUnmount
+        methodB = jest.fn()
+        @disposeOnUnmount
+        methodC = null
+        @disposeOnUnmount
+        methodD = undefined
+
+        render() {
+            return null
+        }
+    }
+
+    await testComponent(
+        C,
+        ref => {
+            expect(ref.patchRunFor).toEqual(["render", "componentDidMount"])
+            expect(ref.didMountCalled).toBeTruthy()
+        },
+        ref => {
+            expect(ref.patchRunFor).toEqual(["render", "componentDidMount", "componentWillUnmount"])
+            expect(ref.willUnmountCalled).toBeTruthy()
+        }
+    )
+})
+
+it("componentDidMount should be different between components", async () => {
+    async function test(withObserver) {
+        const events = []
+
+        class A extends React.Component {
+            componentDidMount() {
+                this.didMount = "A"
+                events.push("mountA")
+            }
+
+            componentWillUnmount() {
+                this.willUnmount = "A"
+                events.push("unmountA")
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        class B extends React.Component {
+            componentDidMount() {
+                this.didMount = "B"
+                events.push("mountB")
+            }
+
+            componentWillUnmount() {
+                this.willUnmount = "B"
+                events.push("unmountB")
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        if (withObserver) {
+            A = observer(A)
+            B = observer(B)
+        }
+
+        const aRef = React.createRef()
+        await asyncReactDOMRender(<A ref={aRef} />, testRoot)
+        const caRef = aRef.current
+
+        expect(caRef.didMount).toBe("A")
+        expect(caRef.willUnmount).toBeUndefined()
+        expect(events).toEqual(["mountA"])
+
+        const bRef = React.createRef()
+        await asyncReactDOMRender(<B ref={bRef} />, testRoot)
+        const cbRef = bRef.current
+
+        expect(caRef.didMount).toBe("A")
+        expect(caRef.willUnmount).toBe("A")
+
+        expect(cbRef.didMount).toBe("B")
+        expect(cbRef.willUnmount).toBeUndefined()
+        expect(events).toEqual(["mountA", "unmountA", "mountB"])
+
+        await asyncReactDOMRender(null, testRoot)
+
+        expect(caRef.didMount).toBe("A")
+        expect(caRef.willUnmount).toBe("A")
+
+        expect(cbRef.didMount).toBe("B")
+        expect(cbRef.willUnmount).toBe("B")
+        expect(events).toEqual(["mountA", "unmountA", "mountB", "unmountB"])
+    }
+
+    await test(true)
+    await test(false)
+})
