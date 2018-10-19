@@ -50,18 +50,22 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
 
         realRunning = true
 
+        let retVal
+
         try {
             mixins.pre.forEach(pre => {
                 pre.apply(this, args)
             })
 
             if (realMethod !== undefined && realMethod !== null) {
-                realMethod.apply(this, args)
+                retVal = realMethod.apply(this, args)
             }
 
             mixins.post.forEach(post => {
                 post.apply(this, args)
             })
+
+            return retVal
         } finally {
             realRunning = false
         }
