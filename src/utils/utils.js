@@ -51,8 +51,6 @@ export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
         realRunning = true
 
         try {
-            const mixins = getMixins(this, methodName)
-
             mixins.pre.forEach(pre => {
                 pre.apply(this, args)
             })
