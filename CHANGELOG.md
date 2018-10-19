@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.3.4
+
+* Fixed unending recursing as a result of lifecylce patching. Fixes [#579](https://github.com/mobxjs/mobx-react/issues/579) through [#582](https://github.com/mobxjs/mobx-react/pull/582) by [@xaviergonz](https://github.com/xaviergonz)
+
 ### 5.3.3
 
 * Fixed `Cannot read property 'forEach' of undefined` exception if `disposeOnUnmount` was called conditionally. [#578](https://github.com/mobxjs/mobx-react/pull/578) by [Jef Hellemans](https://github.com/JefHellemans)
