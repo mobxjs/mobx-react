@@ -48,6 +48,7 @@ function createOrGetCachedDefinition(methodName, enumerable) {
         mixins.realRunning = true
 
         const realMethod = mixins.real
+        let retVal
 
         try {
             mixins.pre.forEach(pre => {
@@ -55,12 +56,14 @@ function createOrGetCachedDefinition(methodName, enumerable) {
             })
 
             if (realMethod !== undefined && realMethod !== null) {
-                realMethod.apply(this, args)
+                retVal = realMethod.apply(this, args)
             }
 
             mixins.post.forEach(post => {
                 post.apply(this, args)
             })
+
+            return retVal
         } finally {
             mixins.realRunning = false
         }
