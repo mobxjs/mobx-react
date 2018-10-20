@@ -15,7 +15,7 @@ export function newSymbol(name) {
 }
 
 const mobxMixins = newSymbol("patchMixins")
-const mobxMixin = newSymbol("patchMixin")
+const mobxPatchedDefinition = newSymbol("patchedDefinition")
 const mobxRealMethod = newSymbol("patchRealMethod")
 
 function getMixins(target, methodName) {
@@ -51,7 +51,6 @@ function wrapFunction(mixins) {
     const fn = function(...args) {
         wrapper.call(this, fn[mobxRealMethod], mixins, ...args)
     }
-    fn[mobxMixin] = true
     return fn
 }
 
@@ -64,36 +63,40 @@ export function patch(target, methodName, forcePatch, ...mixinMethods) {
         }
     }
 
-    const originalMethod = target[methodName]
-    if (!forcePatch && typeof originalMethod === "function" && originalMethod[mobxMixin]) {
-        // already patched, do not repatch
+    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
+    if (!forcePatch && oldDefinition && oldDefinition[mobxPatchedDefinition]) {
+        // already patched definition, do not repatch
         return
     }
 
-    const wrappedFunc = wrapFunction(mixins)
-    wrappedFunc[mobxRealMethod] = originalMethod
-
-    const newDefinition = {
-        get: function() {
-            return wrappedFunc
-        },
-        set: function(value) {
-            if (this === target) {
-                wrappedFunc[mobxRealMethod] = value
-            } else {
-                // when it is an instance of the prototype/a child prototype patch that particular case again separately
-                // we don't need to pass any mixin functions since the structure is shared
-                patch(this, methodName, true)
-                this[methodName] = value
-            }
-        },
-        configurable: true
-    }
-
-    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
-    if (oldDefinition) {
-        newDefinition.enumerable = oldDefinition.enumerable
-    }
+    const newDefinition = createDefinition(target, methodName, oldDefinition, mixins)
 
     Object.defineProperty(target, methodName, newDefinition)
 }
+
+function createDefinition(target, methodName, oldDefinition, mixins) {
+    const originalMethod = target[methodName]
+    const wrappedFunc = wrapFunction(mixins)
+    wrappedFunc[mobxRealMethod] = originalMethod
+
+    return new PatchedDefinition(target, methodName, wrappedFunc, oldDefinition)
+}
+
+function PatchedDefinition(target, methodName, wrappedFunc, oldDefinition) {
+    this.get = function() {
+        return wrappedFunc
+    }
+    this.set = function(value) {
+        if (this === target) {
+            wrappedFunc[mobxRealMethod] = value
+        } else {
+            // when it is an instance of the prototype/a child prototype patch that particular case again separately
+            // we don't need to pass any mixin functions since the structure is shared
+            patch(this, methodName, true)
+            this[methodName] = value
+        }
+    }
+    this.enumerable = oldDefinition ? oldDefinition.enumerable : undefined
+}
+PatchedDefinition.prototype[mobxPatchedDefinition] = true
+PatchedDefinition.prototype.configurable = true
