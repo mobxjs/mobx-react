@@ -16,6 +16,7 @@ export function newSymbol(name) {
 
 const mobxMixins = newSymbol("patchMixins")
 const mobxMixin = newSymbol("patchMixin")
+const mobxRealMethod = newSymbol("patchRealMethod")
 
 function getMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
@@ -25,26 +26,30 @@ function getMixins(target, methodName) {
     return methodMixins
 }
 
-function wrapFunction(realMethod, mixins) {
-    const fn = function(...args) {
-        // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
-        mixins.locks++
+function wrapper(realMethod, mixins, ...args) {
+    // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
+    mixins.locks++
 
-        try {
-            let retVal
-            if (realMethod !== undefined && realMethod !== null) {
-                retVal = realMethod.apply(this, args)
-            }
-
-            return retVal
-        } finally {
-            mixins.locks--
-            if (mixins.locks === 0) {
-                mixins.methods.forEach(mx => {
-                    mx.apply(this, args)
-                })
-            }
+    try {
+        let retVal
+        if (realMethod !== undefined && realMethod !== null) {
+            retVal = realMethod.apply(this, args)
         }
+
+        return retVal
+    } finally {
+        mixins.locks--
+        if (mixins.locks === 0) {
+            mixins.methods.forEach(mx => {
+                mx.apply(this, args)
+            })
+        }
+    }
+}
+
+function wrapFunction(mixins) {
+    const fn = function(...args) {
+        wrapper.call(this, fn[mobxRealMethod], mixins, ...args)
     }
     fn[mobxMixin] = true
     return fn
@@ -59,27 +64,22 @@ export function patch(target, methodName, forcePatch, ...mixinMethods) {
         }
     }
 
-    let actualValue
     const originalMethod = target[methodName]
-    if (typeof originalMethod === "function" && originalMethod[mobxMixin]) {
-        if (forcePatch) {
-            // we can reuse the wrapper method
-            actualValue = originalMethod
-        } else {
-            // already patched, do not repatch
-            return
-        }
-    } else {
-        actualValue = wrapFunction(originalMethod, mixins)
+    if (!forcePatch && typeof originalMethod === "function" && originalMethod[mobxMixin]) {
+        // already patched, do not repatch
+        return
     }
+
+    const wrappedFunc = wrapFunction(mixins)
+    wrappedFunc[mobxRealMethod] = originalMethod
 
     const newDefinition = {
         get: function() {
-            return actualValue
+            return wrappedFunc
         },
         set: function(value) {
             if (this === target) {
-                actualValue = wrapFunction(value, mixins)
+                wrappedFunc[mobxRealMethod] = value
             } else {
                 // when it is an instance of the prototype/a child prototype patch that particular case again separately
                 // we don't need to pass any mixin functions since the structure is shared
