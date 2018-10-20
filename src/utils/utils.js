@@ -54,7 +54,7 @@ function wrapFunction(mixins) {
     return fn
 }
 
-export function patch(target, methodName, forcePatch, ...mixinMethods) {
+export function patch(target, methodName, ...mixinMethods) {
     const mixins = getMixins(target, methodName)
 
     for (const mixinMethod of mixinMethods) {
@@ -64,18 +64,24 @@ export function patch(target, methodName, forcePatch, ...mixinMethods) {
     }
 
     const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
-    if (!forcePatch && oldDefinition && oldDefinition[mobxPatchedDefinition]) {
+    if (oldDefinition && oldDefinition[mobxPatchedDefinition]) {
         // already patched definition, do not repatch
         return
     }
 
-    const newDefinition = createDefinition(target, methodName, oldDefinition, mixins)
+    const originalMethod = target[methodName]
+    const newDefinition = createDefinition(
+        target,
+        methodName,
+        oldDefinition ? oldDefinition.enumerable : undefined,
+        mixins,
+        originalMethod
+    )
 
     Object.defineProperty(target, methodName, newDefinition)
 }
 
-function createDefinition(target, methodName, oldDefinition, mixins) {
-    const originalMethod = target[methodName]
+function createDefinition(target, methodName, enumerable, mixins, originalMethod) {
     const wrappedFunc = wrapFunction(mixins)
     wrappedFunc[mobxRealMethod] = originalMethod
 
@@ -89,12 +95,14 @@ function createDefinition(target, methodName, oldDefinition, mixins) {
                 wrappedFunc[mobxRealMethod] = value
             } else {
                 // when it is an instance of the prototype/a child prototype patch that particular case again separately
-                // we don't need to pass any mixin functions since the structure is shared
-                patch(this, methodName, true)
-                this[methodName] = value
+                // since we need to store separate values depending on wether it is the actual instance, the prototype, etc
+                // e.g. the method for super might not be the same as the method for the prototype which might be not the same
+                // as the method for the instance
+                const newDefinition = createDefinition(this, methodName, enumerable, mixins, value)
+                Object.defineProperty(this, methodName, newDefinition)
             }
         },
         configurable: true,
-        enumerable: oldDefinition ? oldDefinition.enumerable : undefined
+        enumerable: enumerable
     }
 }

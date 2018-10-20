@@ -33,8 +33,8 @@ test("no overrides", async () => {
             return null
         }
     }
-    patch(C.prototype, "componentDidMount", false, cdm)
-    patch(C.prototype, "componentWillUnmount", false, cwu)
+    patch(C.prototype, "componentDidMount", cdm)
+    patch(C.prototype, "componentWillUnmount", cwu)
 
     await testComponent(C, cdm, cwu)
 })
@@ -55,8 +55,8 @@ test("prototype overrides", async () => {
             return null
         }
     }
-    patch(C.prototype, "componentDidMount", false, cdm)
-    patch(C.prototype, "componentWillUnmount", false, cwu)
+    patch(C.prototype, "componentDidMount", cdm)
+    patch(C.prototype, "componentWillUnmount", cwu)
 
     await testComponent(C, cdm, cwu)
     expect(cdmCalls).toBe(1)
@@ -79,8 +79,8 @@ test("arrow function overrides", async () => {
             return null
         }
     }
-    patch(C.prototype, "componentDidMount", false, cdm)
-    patch(C.prototype, "componentWillUnmount", false, cwu)
+    patch(C.prototype, "componentDidMount", cdm)
+    patch(C.prototype, "componentWillUnmount", cwu)
 
     await testComponent(C, cdm, cwu)
     expect(cdmCalls).toBe(1)
@@ -109,8 +109,8 @@ test("recursive calls", async () => {
             return null
         }
     }
-    patch(C.prototype, "componentDidMount", false, cdm)
-    patch(C.prototype, "componentWillUnmount", false, cwu)
+    patch(C.prototype, "componentDidMount", cdm)
+    patch(C.prototype, "componentWillUnmount", cwu)
 
     await testComponent(C, cdm, cwu)
     expect(cdmCalls).toBe(10)
@@ -142,8 +142,8 @@ test("prototype + arrow function overrides", async () => {
             }
         }
     }
-    patch(C.prototype, "componentDidMount", false, cdm)
-    patch(C.prototype, "componentWillUnmount", false, cwu)
+    patch(C.prototype, "componentDidMount", cdm)
+    patch(C.prototype, "componentWillUnmount", cwu)
 
     await testComponent(C, cdm, cwu)
     expect(cdmCalls).toBe(1)
@@ -185,12 +185,12 @@ describe("inheritance with prototype methods", async () => {
         }
 
         if (patchBase) {
-            patch(B.prototype, "componentDidMount", false, cdm)
-            patch(B.prototype, "componentWillUnmount", false, cwu)
+            patch(B.prototype, "componentDidMount", cdm)
+            patch(B.prototype, "componentWillUnmount", cwu)
         }
         if (patchOther) {
-            patch(C.prototype, "componentDidMount", false, cdm)
-            patch(C.prototype, "componentWillUnmount", false, cwu)
+            patch(C.prototype, "componentDidMount", cdm)
+            patch(C.prototype, "componentWillUnmount", cwu)
         }
 
         await testComponent(C, cdm, cwu, patchBase || patchOther)
@@ -252,12 +252,12 @@ describe("inheritance with arrow functions", async () => {
         }
 
         if (patchBase) {
-            patch(B.prototype, "componentDidMount", false, cdm)
-            patch(B.prototype, "componentWillUnmount", false, cwu)
+            patch(B.prototype, "componentDidMount", cdm)
+            patch(B.prototype, "componentWillUnmount", cwu)
         }
         if (patchOther) {
-            patch(C.prototype, "componentDidMount", false, cdm)
-            patch(C.prototype, "componentWillUnmount", false, cwu)
+            patch(C.prototype, "componentDidMount", cdm)
+            patch(C.prototype, "componentWillUnmount", cwu)
         }
 
         await testComponent(C, cdm, cwu, patchBase || patchOther)

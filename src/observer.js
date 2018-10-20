@@ -92,7 +92,7 @@ export const errorsReporter = new EventEmitter()
  */
 
 function patch(target, funcName) {
-    newPatch(target, funcName, false, reactiveMixin[funcName])
+    newPatch(target, funcName, reactiveMixin[funcName])
 }
 
 function shallowEqual(objA, objB) {
