@@ -78,13 +78,13 @@ export function patch(target, methodName, forcePatch, ...mixinMethods) {
             return actualValue
         },
         set: function(value) {
-            // when it is an instance of the prototype/a child prototype patch that particular case again separately
-            if (this !== target) {
+            if (this === target) {
+                actualValue = wrapFunction(value, mixins)
+            } else {
+                // when it is an instance of the prototype/a child prototype patch that particular case again separately
                 // we don't need to pass any mixin functions since the structure is shared
                 patch(this, methodName, true)
                 this[methodName] = value
-            } else {
-                actualValue = wrapFunction(value, mixins)
             }
         },
         configurable: true

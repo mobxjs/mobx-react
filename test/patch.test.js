@@ -203,7 +203,7 @@ describe("inheritance with prototype methods", async () => {
             for (const callSuper of [false, true]) {
                 test(`base: ${base}, other: ${other}, callSuper: ${callSuper}`, async () => {
                     if (base && !other && !callSuper) {
-                        // this one is expected to fail, since we are patching only the base and the other one totally overrides the base method
+                        // this one is expected to fail, since we are patching only the base and the other one totally ignores the base method
                         try {
                             await doTest(base, other, callSuper)
                             fail("should have failed")
