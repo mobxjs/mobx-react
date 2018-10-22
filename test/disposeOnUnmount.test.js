@@ -17,8 +17,8 @@ async function testComponent(C, afterMount, afterUnmount) {
 
     await asyncReactDOMRender(null, testRoot)
 
-    expect(cref.methodA).toHaveBeenCalled()
-    expect(cref.methodB).toHaveBeenCalled()
+    expect(cref.methodA).toHaveBeenCalledTimes(1)
+    expect(cref.methodB).toHaveBeenCalledTimes(1)
     if (afterUnmount) {
         afterUnmount(cref)
     }
@@ -134,8 +134,8 @@ describe("without observer", () => {
                 expect(methodD).not.toHaveBeenCalled()
             },
             () => {
-                expect(methodC).toHaveBeenCalled()
-                expect(methodD).toHaveBeenCalled()
+                expect(methodC).toHaveBeenCalledTimes(1)
+                expect(methodD).toHaveBeenCalledTimes(1)
             }
         )
     })
@@ -256,8 +256,8 @@ describe("with observer", () => {
                 expect(methodD).not.toHaveBeenCalled()
             },
             () => {
-                expect(methodC).toHaveBeenCalled()
-                expect(methodD).toHaveBeenCalled()
+                expect(methodC).toHaveBeenCalledTimes(1)
+                expect(methodD).toHaveBeenCalledTimes(1)
             }
         )
     })
@@ -347,8 +347,91 @@ test("custom patching should work", async () => {
     )
 })
 
+describe("super calls should work", async () => {
+    async function doTest(baseObserver, cObserver) {
+        const events = []
+
+        const sharedMethod = jest.fn()
+
+        class BaseComponent extends React.Component {
+            @disposeOnUnmount
+            method0 = sharedMethod
+
+            @disposeOnUnmount
+            methodA = jest.fn()
+
+            componentDidMount() {
+                events.push("baseDidMount")
+            }
+
+            componentWillUnmount() {
+                events.push("baseWillUnmount")
+            }
+        }
+
+        class C extends BaseComponent {
+            @disposeOnUnmount
+            method0 = sharedMethod
+
+            @disposeOnUnmount
+            methodB = jest.fn()
+
+            componentDidMount() {
+                super.componentDidMount()
+                events.push("CDidMount")
+            }
+
+            componentWillUnmount() {
+                super.componentWillUnmount()
+                events.push("CWillUnmount")
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        if (baseObserver) {
+            BaseComponent = observer(BaseComponent)
+        }
+        if (cObserver) {
+            C = observer(C)
+        }
+
+        await testComponent(
+            C,
+            ref => {
+                expect(events).toEqual(["baseDidMount", "CDidMount"])
+                expect(sharedMethod).toHaveBeenCalledTimes(0)
+            },
+            ref => {
+                expect(events).toEqual([
+                    "baseDidMount",
+                    "CDidMount",
+                    "baseWillUnmount",
+                    "CWillUnmount"
+                ])
+                expect(sharedMethod).toHaveBeenCalledTimes(2)
+            }
+        )
+    }
+
+    it("none is observer", async () => {
+        await doTest(false, false)
+    })
+    it("base is observer", async () => {
+        await doTest(true, false)
+    })
+    it("C is observer", async () => {
+        await doTest(false, true)
+    })
+    it("both observers", async () => {
+        await doTest(true, true)
+    })
+})
+
 it("componentDidMount should be different between components", async () => {
-    async function test(withObserver) {
+    async function doTest(withObserver) {
         const events = []
 
         class A extends React.Component {
@@ -417,6 +500,6 @@ it("componentDidMount should be different between components", async () => {
         expect(events).toEqual(["mountA", "unmountA", "mountB", "unmountB"])
     }
 
-    await test(true)
-    await test(false)
+    await doTest(true)
+    await doTest(false)
 })

@@ -15,100 +15,94 @@ export function newSymbol(name) {
 }
 
 const mobxMixins = newSymbol("patchMixins")
-const mobxMixin = newSymbol("patchMixin")
+const mobxPatchedDefinition = newSymbol("patchedDefinition")
+const mobxRealMethod = newSymbol("patchRealMethod")
 
-function getCreateMixins(target, methodName) {
+function getMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
     const methodMixins = (mixins[methodName] = mixins[methodName] || {})
-    methodMixins.pre = methodMixins.pre || []
-    methodMixins.post = methodMixins.post || []
+    methodMixins.locks = methodMixins.locks || 0
+    methodMixins.methods = methodMixins.methods || []
     return methodMixins
 }
 
-function getMixins(target, methodName) {
-    return target[mobxMixins][methodName]
+function wrapper(realMethod, mixins, ...args) {
+    // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
+    mixins.locks++
+
+    try {
+        let retVal
+        if (realMethod !== undefined && realMethod !== null) {
+            retVal = realMethod.apply(this, args)
+        }
+
+        return retVal
+    } finally {
+        mixins.locks--
+        if (mixins.locks === 0) {
+            mixins.methods.forEach(mx => {
+                mx.apply(this, args)
+            })
+        }
+    }
 }
 
-const cachedDefinitions = {}
-
-function createOrGetCachedDefinition(methodName, enumerable) {
-    const cacheKey = `${methodName}+${enumerable}`
-    const cached = cachedDefinitions[cacheKey]
-    if (cached) {
-        return cached
+function wrapFunction(mixins) {
+    const fn = function(...args) {
+        wrapper.call(this, fn[mobxRealMethod], mixins, ...args)
     }
+    return fn
+}
 
-    const wrapperMethod = function wrapperMethod(...args) {
-        const mixins = getMixins(this, methodName)
+export function patch(target, methodName, ...mixinMethods) {
+    const mixins = getMixins(target, methodName)
 
-        // avoid possible recursive calls by custom patches
-        if (mixins.realRunning) {
-            return
-        }
-        mixins.realRunning = true
-
-        const realMethod = mixins.real
-        let retVal
-
-        try {
-            mixins.pre.forEach(pre => {
-                pre.apply(this, args)
-            })
-
-            if (realMethod !== undefined && realMethod !== null) {
-                retVal = realMethod.apply(this, args)
-            }
-
-            mixins.post.forEach(post => {
-                post.apply(this, args)
-            })
-
-            return retVal
-        } finally {
-            mixins.realRunning = false
+    for (const mixinMethod of mixinMethods) {
+        if (mixins.methods.indexOf(mixinMethod) < 0) {
+            mixins.methods.push(mixinMethod)
         }
     }
-    wrapperMethod[mobxMixin] = true
 
-    const newDefinition = {
-        get() {
-            return wrapperMethod
+    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
+    if (oldDefinition && oldDefinition[mobxPatchedDefinition]) {
+        // already patched definition, do not repatch
+        return
+    }
+
+    const originalMethod = target[methodName]
+    const newDefinition = createDefinition(
+        target,
+        methodName,
+        oldDefinition ? oldDefinition.enumerable : undefined,
+        mixins,
+        originalMethod
+    )
+
+    Object.defineProperty(target, methodName, newDefinition)
+}
+
+function createDefinition(target, methodName, enumerable, mixins, originalMethod) {
+    const wrappedFunc = wrapFunction(mixins)
+    wrappedFunc[mobxRealMethod] = originalMethod
+
+    return {
+        [mobxPatchedDefinition]: true,
+        get: function() {
+            return wrappedFunc
         },
-        set(value) {
-            const mixins = getMixins(this, methodName)
-            mixins.real = value
+        set: function(value) {
+            if (this === target) {
+                wrappedFunc[mobxRealMethod] = value
+            } else {
+                // when it is an instance of the prototype/a child prototype patch that particular case again separately
+                // since we need to store separate values depending on wether it is the actual instance, the prototype, etc
+                // e.g. the method for super might not be the same as the method for the prototype which might be not the same
+                // as the method for the instance
+                const newDefinition = createDefinition(this, methodName, enumerable, mixins, value)
+                Object.defineProperty(this, methodName, newDefinition)
+            }
         },
         configurable: true,
         enumerable: enumerable
     }
-
-    cachedDefinitions[cacheKey] = newDefinition
-
-    return newDefinition
-}
-
-export function patch(target, methodName, mixinMethod, runMixinFirst = false) {
-    const mixins = getCreateMixins(target, methodName)
-
-    if (runMixinFirst) {
-        mixins.pre.unshift(mixinMethod)
-    } else {
-        mixins.post.push(mixinMethod)
-    }
-
-    const realMethod = target[methodName]
-    if (typeof realMethod === "function" && realMethod[mobxMixin]) {
-        // already patched, do not repatch
-        return
-    }
-
-    mixins.real = realMethod
-
-    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
-    const newDefinition = createOrGetCachedDefinition(
-        methodName,
-        oldDefinition ? oldDefinition.enumerable : undefined
-    )
-
-    Object.defineProperty(target, methodName, newDefinition)
 }

@@ -91,8 +91,8 @@ export const errorsReporter = new EventEmitter()
  * Utilities
  */
 
-function patch(target, funcName, runMixinFirst = false) {
-    newPatch(target, funcName, reactiveMixin[funcName], runMixinFirst)
+function patch(target, funcName) {
+    newPatch(target, funcName, reactiveMixin[funcName])
 }
 
 function shallowEqual(objA, objB) {
