@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.3.5
+
+* Fixed some additional issues around life-cycle patching, see [#538](https://github.com/mobxjs/mobx-react/pull/583) by [@xaviergonz](https://github.com/xaviergonz). Fixed [#581](https://github.com/mobxjs/mobx-react/issues/581)
+
 ### 5.3.4
 
 * Fixed unending recursing as a result of lifecylce patching. Fixes [#579](https://github.com/mobxjs/mobx-react/issues/579) through [#582](https://github.com/mobxjs/mobx-react/pull/582) by [@xaviergonz](https://github.com/xaviergonz)
