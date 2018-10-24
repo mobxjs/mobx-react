@@ -278,6 +278,9 @@ describe("inheritance with arrow functions", async () => {
 
 test("custom decorator #579", async () => {
     async function doTest(customFirst) {
+        const customDidMount = jest.fn()
+        const customConstruct = jest.fn()
+
         function logMountingPerformance() {
             return target => {
                 var original = target
@@ -290,7 +293,8 @@ test("custom decorator #579", async () => {
                     }
                     c.prototype = oldConstructor.prototype
                     instance = new c()
-                    // logComponentConstructionTime()
+
+                    customConstruct()
                     return instance
                 }
 
@@ -308,7 +312,7 @@ test("custom decorator #579", async () => {
                     if (originalComponentDidMount) {
                         returnValue = originalComponentDidMount.apply(instance)
                     }
-                    // logComponentMountingTime();
+                    customDidMount()
                     return returnValue
                 }
 
@@ -342,9 +346,15 @@ test("custom decorator #579", async () => {
             C = logMountingPerformance()(C)
         }
 
+        expect(customConstruct).toHaveBeenCalledTimes(0)
+        expect(customDidMount).toHaveBeenCalledTimes(0)
+
         await testComponent(C, cdm, cwu)
         expect(cdmCalls).toBe(1)
         expect(cwuCalls).toBe(1)
+
+        expect(customConstruct).toHaveBeenCalledTimes(1)
+        expect(customDidMount).toHaveBeenCalledTimes(1)
     }
 
     await doTest(true)
