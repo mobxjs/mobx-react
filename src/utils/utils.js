@@ -16,7 +16,6 @@ export function newSymbol(name) {
 
 const mobxMixins = newSymbol("patchMixins")
 const mobxPatchedDefinition = newSymbol("patchedDefinition")
-const mobxRealMethod = newSymbol("patchRealMethod")
 
 function getMixins(target, methodName) {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
@@ -47,9 +46,9 @@ function wrapper(realMethod, mixins, ...args) {
     }
 }
 
-function wrapFunction(mixins) {
+function wrapFunction(realMethod, mixins) {
     const fn = function(...args) {
-        wrapper.call(this, fn[mobxRealMethod], mixins, ...args)
+        wrapper.call(this, realMethod, mixins, ...args)
     }
     return fn
 }
@@ -82,8 +81,7 @@ export function patch(target, methodName, ...mixinMethods) {
 }
 
 function createDefinition(target, methodName, enumerable, mixins, originalMethod) {
-    const wrappedFunc = wrapFunction(mixins)
-    wrappedFunc[mobxRealMethod] = originalMethod
+    let wrappedFunc = wrapFunction(originalMethod, mixins)
 
     return {
         [mobxPatchedDefinition]: true,
@@ -92,7 +90,7 @@ function createDefinition(target, methodName, enumerable, mixins, originalMethod
         },
         set: function(value) {
             if (this === target) {
-                wrappedFunc[mobxRealMethod] = value
+                wrappedFunc = wrapFunction(value, mixins)
             } else {
                 // when it is an instance of the prototype/a child prototype patch that particular case again separately
                 // since we need to store separate values depending on wether it is the actual instance, the prototype, etc

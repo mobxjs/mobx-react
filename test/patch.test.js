@@ -275,3 +275,78 @@ describe("inheritance with arrow functions", async () => {
         }
     }
 })
+
+test("custom decorator #579", async () => {
+    async function doTest(customFirst) {
+        function logMountingPerformance() {
+            return target => {
+                var original = target
+                var instance
+
+                // a utility function to generate instances of a class
+                function construct(oldConstructor, args) {
+                    var c = function() {
+                        return oldConstructor.apply(this, args)
+                    }
+                    c.prototype = oldConstructor.prototype
+                    instance = new c()
+                    // logComponentConstructionTime()
+                    return instance
+                }
+
+                // the new constructor behaviour
+                var f = function(...args) {
+                    return construct(original, args)
+                }
+
+                var originalComponentDidMount = original.prototype.componentDidMount
+                // copy prototype so intanceof operator still works
+                f.prototype = original.prototype
+
+                f.prototype.componentDidMount = function() {
+                    var returnValue
+                    if (originalComponentDidMount) {
+                        returnValue = originalComponentDidMount.apply(instance)
+                    }
+                    // logComponentMountingTime();
+                    return returnValue
+                }
+
+                // return new constructor (will override original)
+                return f
+            }
+        }
+
+        const cdm = jest.fn()
+        const cwu = jest.fn()
+        let cdmCalls = 0
+        let cwuCalls = 0
+
+        class C extends React.Component {
+            componentDidMount() {
+                cdmCalls++
+            }
+            componentWillUnmount() {
+                cwuCalls++
+            }
+            render() {
+                return null
+            }
+        }
+        if (customFirst) {
+            C = logMountingPerformance()(C)
+        }
+        patch(C.prototype, "componentDidMount", cdm)
+        patch(C.prototype, "componentWillUnmount", cwu)
+        if (!customFirst) {
+            C = logMountingPerformance()(C)
+        }
+
+        await testComponent(C, cdm, cwu)
+        expect(cdmCalls).toBe(1)
+        expect(cwuCalls).toBe(1)
+    }
+
+    await doTest(true)
+    await doTest(false)
+})
