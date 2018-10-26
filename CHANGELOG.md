@@ -1,8 +1,12 @@
 # MobX-React Changelog
+### 5.3.6
+
+* Fixed some additional issues around life-cycle patching, take 3. See [#536](https://github.com/mobxjs/mobx-react/pull/586) by [@xaviergonz](https://github.com/xaviergonz). Fixed [#579](https://github.com/mobxjs/mobx-react/issues/579)
+
 
 ### 5.3.5
 
-* Fixed some additional issues around life-cycle patching, see [#538](https://github.com/mobxjs/mobx-react/pull/583) by [@xaviergonz](https://github.com/xaviergonz). Fixed [#581](https://github.com/mobxjs/mobx-react/issues/581)
+* Fixed some additional issues around life-cycle patching, see [#583](https://github.com/mobxjs/mobx-react/pull/583) by [@xaviergonz](https://github.com/xaviergonz). Fixed [#581](https://github.com/mobxjs/mobx-react/issues/581)
 
 ### 5.3.4
 
