@@ -19,6 +19,8 @@ export {
     useStaticRendering
 } from "./observer"
 
+export { observableProps } from "./observableProps"
+
 export { default as Provider } from "./Provider"
 export { default as inject } from "./inject"
 export { disposeOnUnmount } from "./disposeOnUnmount"

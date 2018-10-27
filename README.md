@@ -26,12 +26,12 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 
 ## Boilerplate projects that use mobx-react
 
-*   Minimal MobX, React, ES6, JSX, Hot reloading: [MobX-React-Boilerplate](https://github.com/mobxjs/mobx-react-boilerplate)
-*   TodoMVC MobX, React, ES6, JSX, Hot reloading: [MobX-React-TodoMVC](https://github.com/mobxjs/mobx-react-todomvc)
-*   Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript-Boilerplate](https://github.com/mobxjs/mobx-react-typescript-boilerplate)
-*   Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
+-   Minimal MobX, React, ES6, JSX, Hot reloading: [MobX-React-Boilerplate](https://github.com/mobxjs/mobx-react-boilerplate)
+-   TodoMVC MobX, React, ES6, JSX, Hot reloading: [MobX-React-TodoMVC](https://github.com/mobxjs/mobx-react-todomvc)
+-   Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript-Boilerplate](https://github.com/mobxjs/mobx-react-typescript-boilerplate)
+-   Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
     [jspm-react](https://github.com/capaj/jspm-react)
-*   React Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
+-   React Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
 
 ## API documentation
 
@@ -39,7 +39,7 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
 
-Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all changes in props and state that are  used by `render`.
+Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all changes in props and state that are used by `render`.
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
@@ -151,7 +151,7 @@ To avoid leaking memory, call `useStaticRendering(true)` when using server side 
 ```javascript
 import { useStaticRendering } from "mobx-react"
 
-useStaticRendering(true);
+useStaticRendering(true)
 ```
 
 This makes sure the component won't try to react to any future data changes.
@@ -198,20 +198,20 @@ class TodoView extends React.Component {
 }
 ```
 
-*   `componentWillReact` doesn't take arguments
-*   `componentWillReact` won't fire before the initial render (use use `componentDidMount` or `constructor` instead)
+-   `componentWillReact` doesn't take arguments
+-   `componentWillReact` won't fire before the initial render (use use `componentDidMount` or `constructor` instead)
 
 ### `PropTypes`
 
 MobX-react provides the following additional `PropTypes` which can be used to validate against MobX structures:
 
-*   `observableArray`
-*   `observableArrayOf(React.PropTypes.number)`
-*   `observableMap`
-*   `observableObject`
-*   `arrayOrObservableArray`
-*   `arrayOrObservableArrayOf(React.PropTypes.number)`
-*   `objectOrObservableObject`
+-   `observableArray`
+-   `observableArrayOf(React.PropTypes.number)`
+-   `observableMap`
+-   `observableObject`
+-   `arrayOrObservableArray`
+-   `arrayOrObservableArrayOf(React.PropTypes.number)`
+-   `objectOrObservableObject`
 
 Use `import { PropTypes } from "mobx-react"` to import them, then use for example `PropTypes.observableArray`
 
@@ -257,12 +257,12 @@ class MessageList extends React.Component {
 
 Notes:
 
-*   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
-*   If updates to an observable store are not triggering `render()`, make sure you are using Class methods for React lifecycle hooks such as `componentWillMount() {}`, using `componentWillMount = () => {}` will create a property on the instance and cause conflicts with mobx-react.
-*   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
-*   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
-*   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
-*   For mounted component instances, the wrapped component instance is available through the `wrappedInstance` property (except for stateless components).
+-   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
+-   If updates to an observable store are not triggering `render()`, make sure you are using Class methods for React lifecycle hooks such as `componentWillMount() {}`, using `componentWillMount = () => {}` will create a property on the instance and cause conflicts with mobx-react.
+-   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
+-   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
+-   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
+-   For mounted component instances, the wrapped component instance is available through the `wrappedInstance` property (except for stateless components).
 
 #### Inject as function
 
@@ -443,6 +443,30 @@ class SomeComponent extends React.Component {
             reaction(...),
             reaction(...)
         ])
+    }
+}
+```
+
+### observableProps(componentInstance) _[Requires MobX >= 5]_
+
+Function that converts your props into fully reactive (observable) props.
+This allows you to, for example, create reactions/autorun/computed over individual props rather than the whole props object.
+
+```javascript
+import { observer, observableProps } from "mobx-react"
+
+<NameAndAge first="Mary" last="Poppins" age={30} />
+
+@observer
+class NameAndAge extends React.Component {
+    obsProps = observableProps(this)
+
+    @computed
+    get fullName() {
+        // this computed will only recompute when any of these props change
+        // if we were using props instead it would also recompute if age
+        // (or any other property) changed
+        return this.obsProps.first + " " + this.obsProps.last;
     }
 }
 ```

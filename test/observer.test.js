@@ -668,7 +668,6 @@ test("parent / childs render in the right order", done => {
 
     const container = TestUtils.renderIntoDocument(<Parent />)
 
-    debugger
     tryLogout()
     expect(events).toEqual(["parent", "child", "parent"])
     done()
@@ -854,7 +853,6 @@ test("don't use PureComponent", () => {
     console.warn = m => msg.push(m)
 
     try {
-        debugger
         observer(
             class X extends React.PureComponent {
                 return() {

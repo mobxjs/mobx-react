@@ -8,6 +8,7 @@ import { patch as newPatch, newSymbol } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
+const mobxIsObserver = newSymbol("isObserver")
 
 /**
  * dev tool support
@@ -347,6 +348,7 @@ export function observer(arg1, arg2) {
     }
 
     const target = componentClass.prototype || componentClass
+    target[mobxIsObserver] = true
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
     makeObservableProp(target, "props")
@@ -420,4 +422,8 @@ const ObserverPropsCheck = (props, key, componentName, location, propFullName) =
 Observer.propTypes = {
     render: ObserverPropsCheck,
     children: ObserverPropsCheck
+}
+
+export function isObserverComponent(component) {
+    return component instanceof React.Component && component[mobxIsObserver]
 }
