@@ -37,6 +37,10 @@ function observableProperty(methodName, component, componentPropName, options) {
         throw new Error(`[mobx-react] ${methodName} only works on observer components`)
     }
 
+    if (component[mobxObservablePropsOptions]) {
+        throw new Error(`[mobx-react] ${methodName} was already used on this component`)
+    }
+
     component[mobxObservablePropsOptions] = options
 
     // to properly use "deep" properties the passed object should be observable
