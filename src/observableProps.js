@@ -1,7 +1,9 @@
 import { observable, reaction, set, remove } from "mobx"
 import { disposeOnUnmount } from "./disposeOnUnmount"
-import { isObserverComponent } from "./observer"
+import { isObserverComponent, mobxObservablePropsOptions } from "./observer"
 import { getMobxCapabilities } from "./utils/mobxCapabilities"
+
+const EMPTY_OBJECT = {}
 
 function updateObservableObject(oldObj, newObj) {
     // add/update props
@@ -21,7 +23,12 @@ function updateObservableObject(oldObj, newObj) {
     })
 }
 
-function observableProperty(methodName, component, componentPropName) {
+function observableProperty(methodName, component, componentPropName, options) {
+    options = {
+        rerenderOnPropsChange: true,
+        ...options
+    }
+
     if (!getMobxCapabilities().canDetectNewProperties) {
         throw new Error(`[mobx-react] ${methodName} requires mobx 5 or higher`)
     }
@@ -29,6 +36,8 @@ function observableProperty(methodName, component, componentPropName) {
     if (!isObserverComponent(component)) {
         throw new Error(`[mobx-react] ${methodName} only works on observer components`)
     }
+
+    component[mobxObservablePropsOptions] = options
 
     // to properly use "deep" properties the passed object should be observable
     // or else react won't trigger a re-render by itself since the object ref will be the same
@@ -39,14 +48,7 @@ function observableProperty(methodName, component, componentPropName) {
         reaction(
             () => component[componentPropName],
             unobserved => {
-                if (unobserved) {
-                    updateObservableObject(observed, unobserved)
-                } else {
-                    // remove all props if props is null (sometimes it happens)
-                    Object.keys(observed).forEach(propName => {
-                        remove(observed, propName)
-                    })
-                }
+                updateObservableObject(observed, unobserved || EMPTY_OBJECT)
             },
             { fireImmediately: true }
         )
@@ -55,6 +57,6 @@ function observableProperty(methodName, component, componentPropName) {
     return observed
 }
 
-export function observableProps(component) {
-    return observableProperty("observableProps", component, "props")
+export function observableProps(component, options) {
+    return observableProperty("observableProps", component, "props", options)
 }
