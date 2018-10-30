@@ -483,10 +483,10 @@ import { observer, observableProps } from "mobx-react"
 
 @observer
 class NameAndAge extends React.Component {
-    obsProps = observableProps(this)
+    obsProps = observableProps(this, { renderOnPropsChange: false })
 
     render() {
-        // render will only trigger when either first or last change,
+        // render will only trigger when either first or last properties change,
         // but not when age changes, since it is unused by the render method
         return (<div>${this.obsProps.first + " " + this.obsProps.last}</div>);
     }
