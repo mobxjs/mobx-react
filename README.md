@@ -447,7 +447,7 @@ class SomeComponent extends React.Component {
 }
 ```
 
-### observableProps(componentInstance, options?: { rerenderOnPropsChange: boolean /_ true by default _/ }) _[Requires MobX >= 5]_
+### observableProps(componentInstance, options?: { rerenderOnPropsChange: boolean (true by default) }) _[Requires MobX >= 5]_
 
 Function that converts your props into fully reactive (observable) props.
 This allows you to, for example, create reactions/autorun/computed over individual props rather than the whole props object.
@@ -471,7 +471,7 @@ class NameAndAge extends React.Component {
 }
 ```
 
-Additionally, if `renderOnPropsChange` is set to `false` as part of the options then mobx-react will enter into an optimize re-render
+Additionally, if `renderOnPropsChange` is set to `false` (`true` by default) as part of the options object then mobx-react will enter into an optimize re-render
 mode where the component will only re-render when any of the actual properties used by the last render have changed, rather than any time they change.
 This has the benefit that re-renders will trigger less often (only when actually required), but the requirement for this to work is to totally avoid using
 `this.props` inside the component and use the observable properties (e.g. `this.obsProps` in the example above) instead and exclusively.
