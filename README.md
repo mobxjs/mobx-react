@@ -476,6 +476,23 @@ mode where the component will only re-render when any of the actual properties u
 This has the benefit that re-renders will trigger less often (only when actually required), but the requirement for this to work is to totally avoid using
 `this.props` inside the component and use the observable properties (e.g. `this.obsProps` in the example above) instead and exclusively.
 
+```javascript
+import { observer, observableProps } from "mobx-react"
+
+<NameAndAge first="Mary" last="Poppins" age={30} />
+
+@observer
+class NameAndAge extends React.Component {
+    obsProps = observableProps(this)
+
+    render() {
+        // render will only trigger when either first or last change,
+        // but not when age changes, since it is unused by the render method
+        return (<div>${this.obsProps.first + " " + this.obsProps.last}</div>);
+    }
+}
+```
+
 ## FAQ
 
 **Should I use `observer` for each component?**
