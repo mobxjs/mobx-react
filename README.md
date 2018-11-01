@@ -457,7 +457,7 @@ This allows you to, for example, create reactions/autorun/computed over individu
 Using observable props also means it will make your wrapped component use an optimized re-render
 mode where the component will only re-render when any of the actual properties used by the last render have changed, rather than any time they change.
 
-The only requirement to use is feature is that your wrapped component must access the properties from the object in `this.props.obs`.
+**The only requirement to use is feature is that your wrapped component must access the properties from `this.props.obs` rather than `this.props`.**
 
 By default individual props are turned into shallow observables (unless they were already observables in themselves, then they are unaffected),
 but this can be changed with the `deepProps` option:
