@@ -8,7 +8,6 @@ import { patch as newPatch, newSymbol } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
-const mobxIsObserver = newSymbol("isObserver")
 
 /**
  * dev tool support
@@ -125,10 +124,6 @@ function is(x, y) {
 function makeComponentReactive(render) {
     if (isUsingStaticRendering === true) return render.call(this)
 
-    // wire up reactive render
-    const baseRender = render.bind(this)
-    let isRenderingPending = false
-
     function reactiveRender() {
         isRenderingPending = false
         let exception = undefined
@@ -163,18 +158,20 @@ function makeComponentReactive(render) {
         (this._reactInternalInstance && this._reactInternalInstance._rootNodeID) ||
         (this._reactInternalInstance && this._reactInternalInstance._debugID) ||
         (this._reactInternalFiber && this._reactInternalFiber._debugID)
-
     /**
      * If props are shallowly modified, react will render anyway,
      * so atom.reportChanged() should not result in yet another re-render
      */
     setHiddenProp(this, skipRenderKey, false)
-
     /**
      * forceUpdate will re-assign this.props. We don't want that to cause a loop,
      * so detect these changes
      */
     setHiddenProp(this, isForcingUpdateKey, false)
+
+    // wire up reactive render
+    const baseRender = render.bind(this)
+    let isRenderingPending = false
 
     const reaction = new Reaction(`${initialName}#${rootNodeID}.render()`, () => {
         if (!isRenderingPending) {
@@ -182,19 +179,15 @@ function makeComponentReactive(render) {
             // This unidiomatic React usage but React will correctly warn about this so we continue as usual
             // See #85 / Pull #44
             isRenderingPending = true
-
             if (typeof this.componentWillReact === "function") this.componentWillReact() // TODO: wrap in action?
-
             if (this[mobxIsUnmounted] !== true) {
                 // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
                 // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
-                // However, people also claim this migth happen during unit tests..
+                // However, people also claim this might happen during unit tests..
                 let hasError = true
                 try {
                     setHiddenProp(this, isForcingUpdateKey, true)
-                    if (!this[skipRenderKey]) {
-                        Component.prototype.forceUpdate.call(this)
-                    }
+                    if (!this[skipRenderKey]) Component.prototype.forceUpdate.call(this)
                     hasError = false
                 } finally {
                     setHiddenProp(this, isForcingUpdateKey, false)
@@ -252,7 +245,6 @@ const reactiveMixin = {
         if (this.state !== nextState) {
             return true
         }
-
         // update if props are shallowly not equal, inspired by PureRenderMixin
         // we could return just 'false' here, and avoid the `skipRender` checks etc
         // however, it is nicer if lifecycle events are triggered like usually,
@@ -355,7 +347,6 @@ export function observer(arg1, arg2) {
     }
 
     const target = componentClass.prototype || componentClass
-    target[mobxIsObserver] = true
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
     makeObservableProp(target, "props")
@@ -429,8 +420,4 @@ const ObserverPropsCheck = (props, key, componentName, location, propFullName) =
 Observer.propTypes = {
     render: ObserverPropsCheck,
     children: ObserverPropsCheck
-}
-
-export function isObserverComponent(component) {
-    return component instanceof React.Component && component[mobxIsObserver]
 }
