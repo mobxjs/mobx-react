@@ -87,10 +87,17 @@ export class Observer extends React.Component<
 
 export function useStaticRendering(value: boolean): void
 
-export function observableProps<P>(
-    target: React.Component<P, any>,
-    options?: { rerenderOnPropsChange: boolean }
-): P
+/**
+ * withObservableProps
+ */
+
+export type ObservablePropsToProps<P> = P extends { obs: infer OP } ? OP : never
+export type PropsToObservableProps<P> = { obs: P }
+
+export function withObservableProps<ObsProps>(
+    target: React.ComponentType<{ obs: ObsProps }>,
+    options?: { deepProps?: Array<keyof ObsProps> | boolean }
+): React.ComponentType<ObsProps>
 
 /**
  * Enable dev tool support, makes sure that renderReport emits events.

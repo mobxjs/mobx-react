@@ -9,7 +9,6 @@ import { patch as newPatch, newSymbol } from "./utils/utils"
 const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const mobxIsObserver = newSymbol("isObserver")
-export const mobxObservablePropsOptions = newSymbol("observablePropsOptions")
 
 /**
  * dev tool support
@@ -193,8 +192,7 @@ function makeComponentReactive(render) {
                 let hasError = true
                 try {
                     setHiddenProp(this, isForcingUpdateKey, true)
-                    // when rerender on props changed is disabled we can never skip renders since that's our only way to get a render
-                    if (!rerenderOnPropsChange(this) || !this[skipRenderKey]) {
+                    if (!this[skipRenderKey]) {
                         Component.prototype.forceUpdate.call(this)
                     }
                     hasError = false
@@ -253,11 +251,6 @@ const reactiveMixin = {
         // update on any state changes (as is the default)
         if (this.state !== nextState) {
             return true
-        }
-
-        if (!rerenderOnPropsChange(this)) {
-            // props changed re-rendering disabled, the user will use their own observable props to trigger optimized re-renderings
-            return false
         }
 
         // update if props are shallowly not equal, inspired by PureRenderMixin
@@ -440,11 +433,4 @@ Observer.propTypes = {
 
 export function isObserverComponent(component) {
     return component instanceof React.Component && component[mobxIsObserver]
-}
-
-function rerenderOnPropsChange(target) {
-    return (
-        !target[mobxObservablePropsOptions] ||
-        target[mobxObservablePropsOptions].rerenderOnPropsChange
-    )
 }

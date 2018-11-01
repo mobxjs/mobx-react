@@ -9,7 +9,7 @@ import {
     inject,
     Observer,
     disposeOnUnmount,
-    observableProps
+    withObservableProps
 } from "../../src"
 import * as createClass from "create-react-class"
 
@@ -311,11 +311,45 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
 }
 
 {
-    class C extends Component<{ x: number }, { y: string }> {
-        obsProps = observableProps(this)
-
+    @observer
+    class C extends Component<{ obs: { x: number } }, { y: string }> {
         m() {
-            const x: number = this.obsProps.x
+            const x: number = this.props.obs.x
         }
     }
+    const el = (
+        <C obs={{ x: 5 }}>
+            <div />
+        </C>
+    )
+    const CC = withObservableProps(C)
+    const el2 = (
+        <CC x={5}>
+            <div />
+        </CC>
+    )
+}
+
+{
+    @observer
+    class C extends Component<{ obs: { x: number; children?: undefined } }, { y: string }> {
+        m() {
+            const x: number = this.props.obs.x
+        }
+    }
+    // manual test: bottom should not compile
+
+    const el = (
+        <C obs={{ x: 5 }}>
+            <div />
+        </C>
+    )
+    const CC = withObservableProps(C)
+    /*
+    const el2 = (
+        <CC x={5}>
+            <div />
+        </CC>
+    )
+    */
 }

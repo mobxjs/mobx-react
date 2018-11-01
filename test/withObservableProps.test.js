@@ -1,41 +1,30 @@
 import * as React from "react"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { observableProps } from "../src/observableProps"
+import { withObservableProps } from "../src/withObservableProps"
 import { createTestRoot, asyncReactDOMRender } from "./index"
 import { getMobxCapabilities } from "../src/utils/mobxCapabilities"
 
 const testRoot = createTestRoot()
 
 if (!getMobxCapabilities().canDetectNewProperties) {
-    it("observableProps should throw when using mobx4", async () => {
-        let errorThrown
-
-        const C = observer(
-            class C extends React.Component {
-                constructor(props) {
-                    super(props)
-                    try {
-                        this.oProps = observableProps(this)
-                    } catch (e) {
-                        errorThrown = e
+    it("should throw when using mobx4", async () => {
+        expect(() => {
+            withObservableProps(
+                observer(
+                    class C extends React.Component {
+                        render() {
+                            return null
+                        }
                     }
-                }
-
-                render() {
-                    return null
-                }
-            }
-        )
-
-        await asyncReactDOMRender(<C />, testRoot)
-        expect(errorThrown).toBeTruthy()
-        expect(errorThrown.message).toMatch("observableProps requires mobx 5 or higher")
+                )
+            )
+        }).toThrow("withObservableProps requires mobx 5 or higher")
     })
 } else {
     function doTest(options) {
-        describe(`observableProps - options: ${JSON.stringify(options)}`, async () => {
-            const { rerenderOnPropsChange } = options
+        describe(`options: ${JSON.stringify(options)}`, async () => {
+            const shallow = !options.deepProps
 
             let computedCalls = []
             let renders = 0
@@ -45,58 +34,60 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                 renders = 0
             })
 
-            const Component = observer(
+            function toJson(val) {
+                if (val instanceof Map) {
+                    return JSON.stringify([...val])
+                }
+                return JSON.stringify(val)
+            }
+
+            const Component = withObservableProps(
                 class Component extends React.Component {
                     constructor(props) {
                         super(props)
 
-                        this.oProps = observableProps(this, options)
-
                         this.computedWithProp1 = mobx.computed(() => {
-                            const prop1Value = this.oProps.prop1
-                            computedCalls.push("prop1: " + JSON.stringify(prop1Value))
+                            const prop1Value = this.props.obs.prop1
+                            computedCalls.push("prop1: " + toJson(prop1Value))
                             return prop1Value
                         })
 
                         this.computedWithProp2 = mobx.computed(() => {
-                            const prop2Value = this.oProps.prop2
-                            computedCalls.push("prop2: " + JSON.stringify(prop2Value))
+                            const prop2Value = this.props.obs.prop2
+                            computedCalls.push("prop2: " + toJson(prop2Value))
                             return prop2Value
                         })
 
                         this.deepComputed = mobx.computed(() => {
-                            const prop3Value = this.oProps.prop3 && this.oProps.prop3.x
-                            computedCalls.push("prop3.x: " + JSON.stringify(prop3Value))
+                            const prop3Value = this.props.obs.prop3 && this.props.obs.prop3.x
+                            computedCalls.push("prop3.x: " + toJson(prop3Value))
                             return prop3Value
                         })
 
                         this.computedComponent = mobx.computed(() => {
-                            const value = this.oProps.componentProp
-                            computedCalls.push("componentProp: " + JSON.stringify(!!value))
+                            const value = this.props.obs.componentProp
+                            computedCalls.push("componentProp: " + toJson(!!value))
                             return value
                         })
                     }
 
                     render() {
-                        this.computedWithProp1.get()
+                        const p1 = this.computedWithProp1.get()
+                        toJson(p1) // just to deeply read it
                         this.computedWithProp2.get()
                         this.deepComputed.get()
-                        this.computedComponent.get()
+
                         renders++
-                        return null
+                        return this.computedComponent.get() || this.props.obs.children || null
                     }
-                }
+                },
+                options
             )
 
             const Container = observer(
                 class Container extends React.Component {
-                    constructor(props) {
-                        super(props)
-                        this.oProps = observableProps(this)
-                    }
-
                     render() {
-                        return this.oProps.renderStore.get()()
+                        return this.props.renderStore.get()()
                     }
                 }
             )
@@ -132,7 +123,7 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                     return <Component prop1={2} unused={10} />
                 })
                 expect(computedCalls).toEqual([])
-                expect(renders).toBe(rerenderOnPropsChange ? 1 : 0)
+                expect(renders).toBe(0)
             })
 
             it("props untouched, unobserved property removed", async () => {
@@ -140,7 +131,7 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                     return <Component prop1={2} />
                 })
                 expect(computedCalls).toEqual([])
-                expect(renders).toBe(rerenderOnPropsChange ? 1 : 0)
+                expect(renders).toBe(0)
             })
 
             it("prop1 is untouched, prop2 appears", async () => {
@@ -223,6 +214,7 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                 expect(renders).toBe(1)
             })
 
+            // already observable objects
             let dp = mobx.observable({})
 
             it("(obs object) deep prop with empty object", async () => {
@@ -230,7 +222,7 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                     return <Component prop3={dp} />
                 })
                 expect(computedCalls).toEqual(["prop3.x: undefined"])
-                expect(renders).toBe(rerenderOnPropsChange ? 1 : 0)
+                expect(renders).toBe(0)
             })
 
             it("(obs object) deep prop with value set", async () => {
@@ -251,20 +243,29 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                 expect(renders).toBe(1)
             })
 
+            // non observable objects
             it("(new obj) deep prop with empty object", async () => {
                 renderFnStore.set(function() {
                     return <Component prop3={{}} />
                 })
                 expect(computedCalls).toEqual(["prop3.x: undefined"])
-                expect(renders).toBe(rerenderOnPropsChange ? 1 : 0)
+                expect(renders).toBe(0)
             })
 
             it("(new obj) deep prop with value set", async () => {
                 renderFnStore.set(function() {
-                    return <Component prop3={{ x: 5 }} />
+                    return <Component prop3={{ x: 5, y: { z: [6] }, m: new Map([[1, 2]]) }} />
                 })
                 expect(computedCalls).toEqual(["prop3.x: 5"])
                 expect(renders).toBe(1)
+            })
+
+            it("(new obj) deep prop with value set to the same one as before", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop3={{ x: 5, y: { z: [6] }, m: new Map([[1, 2]]) }} />
+                })
+                expect(computedCalls).toEqual(shallow ? ["prop3.x: 5"] : [])
+                expect(renders).toBe(0)
             })
 
             it("(new obj) deep prop with value removed", async () => {
@@ -275,16 +276,131 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                 expect(renders).toBe(1)
             })
 
+            // component and children
             it("passing a component works", async () => {
+                let innerRenders = 0
+                function InnerC() {
+                    innerRenders++
+                    return null
+                }
                 renderFnStore.set(function() {
-                    return <Component componentProp={<div>hi</div>} />
+                    return <Component componentProp={<InnerC />} />
                 })
+                expect(innerRenders).toBe(1)
                 expect(computedCalls).toEqual(["prop3.x: undefined", "componentProp: true"])
+                expect(renders).toBe(1)
+            })
+
+            it("passing a children component works", async () => {
+                let innerRenders = 0
+                function InnerC() {
+                    innerRenders++
+                    return null
+                }
+                renderFnStore.set(function() {
+                    return (
+                        <Component>
+                            <InnerC />
+                        </Component>
+                    )
+                })
+                expect(innerRenders).toBe(1)
+                expect(computedCalls).toEqual(["componentProp: false"])
+                expect(renders).toBe(1)
+            })
+
+            // array
+            it("array", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={[1, 2]} />
+                })
+                expect(computedCalls).toEqual(["prop1: [1,2]"])
+                expect(renders).toBe(1)
+            })
+
+            it("array (same)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={[1, 2]} />
+                })
+                expect(computedCalls).toEqual(shallow ? ["prop1: [1,2]"] : [])
+                expect(renders).toBe(shallow ? 1 : 0)
+            })
+
+            it("array (mutate)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={[1, 3]} />
+                })
+                expect(computedCalls).toEqual(["prop1: [1,3]"])
+                expect(renders).toBe(1)
+            })
+
+            it("array (add item)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={[1, 2, 3]} />
+                })
+                expect(computedCalls).toEqual(["prop1: [1,2,3]"])
+                expect(renders).toBe(1)
+            })
+
+            it("array (remove item)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={[1, 2]} />
+                })
+                expect(computedCalls).toEqual(["prop1: [1,2]"])
+                expect(renders).toBe(1)
+            })
+
+            // map
+            it("map", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={new Map([[1, 1], [2, 2]])} />
+                })
+                expect(computedCalls).toEqual(
+                    shallow ? ["prop1: [[1,1],[2,2]]"] : ['prop1: {"1":1,"2":2}']
+                )
+                expect(renders).toBe(1)
+            })
+
+            it("map (same)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={new Map([[1, 1], [2, 2]])} />
+                })
+                expect(computedCalls).toEqual(shallow ? ["prop1: [[1,1],[2,2]]"] : [])
+                expect(renders).toBe(shallow ? 1 : 0)
+            })
+
+            it("map (mutate)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={new Map([[1, 1], [3, 3]])} />
+                })
+                expect(computedCalls).toEqual(
+                    shallow ? ["prop1: [[1,1],[3,3]]"] : ['prop1: {"1":1,"3":3}']
+                )
+                expect(renders).toBe(1)
+            })
+
+            it("map (add item)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={new Map([[1, 1], [2, 2], [3, 3]])} />
+                })
+                expect(computedCalls).toEqual(
+                    shallow ? ["prop1: [[1,1],[2,2],[3,3]]"] : ['prop1: {"1":1,"2":2,"3":3}']
+                )
+                expect(renders).toBe(1)
+            })
+
+            it("map (remove item)", async () => {
+                renderFnStore.set(function() {
+                    return <Component prop1={new Map([[1, 1], [2, 2]])} />
+                })
+                expect(computedCalls).toEqual(
+                    shallow ? ["prop1: [[1,1],[2,2]]"] : ['prop1: {"1":1,"2":2}']
+                )
                 expect(renders).toBe(1)
             })
         })
     }
 
-    doTest({ rerenderOnPropsChange: true })
-    doTest({ rerenderOnPropsChange: false })
+    doTest({ deepProps: false })
+    doTest({ deepProps: true })
 }

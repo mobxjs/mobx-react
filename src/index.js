@@ -19,7 +19,7 @@ export {
     useStaticRendering
 } from "./observer"
 
-export { observableProps } from "./observableProps"
+export { withObservableProps } from "./withObservableProps"
 
 export { default as Provider } from "./Provider"
 export { default as inject } from "./inject"

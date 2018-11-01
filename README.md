@@ -447,50 +447,89 @@ class SomeComponent extends React.Component {
 }
 ```
 
-### observableProps(componentInstance, options?: { rerenderOnPropsChange: boolean (true by default) }) _[Requires MobX >= 5]_
+### withObservableProps(component, options?: { deepProps: boolean | string[] })
 
-Function that converts your props into fully reactive (observable) props.
+_[Requires MobX >= 5]_
+
+High order components that converts your props into fully reactive (observable) props.
+
 This allows you to, for example, create reactions/autorun/computed over individual props rather than the whole props object.
+Using observable props also means it will make your wrapped component use an optimized re-render
+mode where the component will only re-render when any of the actual properties used by the last render have changed, rather than any time they change.
 
-```javascript
-import { observer, observableProps } from "mobx-react"
+The only requirement to use is feature is that your wrapped component must access the properties from the object in `this.props.obs`.
 
-<NameAndAge first="Mary" last="Poppins" age={30} />
+By default individual props are turned into shallow observables (unless they were already observables in themselves, then they are unaffected),
+but this can be changed with the `deepProps` option:
 
-@observer
-class NameAndAge extends React.Component {
-    obsProps = observableProps(this)
+-   `false` (default): all properties are turned into shallow observables.
+-   `true`: all properties are turned into deep observables (plain objects, arrays and maps are supported).
+-   `string[]`: array with the name of the properties to make deep observables, all others will be kept shallow observables.
 
-    @computed
-    get fullName() {
-        // this computed will only recompute when any of these props change
-        // if we were using props instead it would also recompute if age
-        // (or any other property) changed
-        return this.obsProps.first + " " + this.obsProps.last;
+Example (Javascript):
+
+```js
+import { computed } from "mobx"
+import { withObservableProps } from "mobx-react"
+
+const NameAndAge = withObservableProps(
+    class extends React.Component {
+        @computed
+        get fullName() {
+            // this computed will only recompute when any of these props change
+            // if we were using props instead it would also recompute if age
+            // (or any other property) changed
+            // not how this.props.obs is used rather than this.props
+            return this.props.obs.first + " " + this.props.obs.last;
+        }
+
+        render() {
+            // render will only trigger when either first or last properties change,
+            // but not when age changes, since it is unused by the render method
+            return (<div>${this.fullName}</div>);
+        }
     }
-}
+)
+
+// note how even though inside the wrapper component props must be
+// accessed through this.props.obs, here they are just plain properties
+<NameAndAge first="Mary" last="Poppins" age={30} />
 ```
 
-Additionally, if `renderOnPropsChange` is set to `false` (`true` by default) as part of the options object then mobx-react will enter into an optimize re-render
-mode where the component will only re-render when any of the actual properties used by the last render have changed, rather than any time they change.
-This has the benefit that re-renders will trigger less often (only when actually required), but the requirement for this to work is to totally avoid using
-`this.props` inside the component and use the observable properties (e.g. `this.obsProps` in the example above) instead and exclusively.
+Example (TypeScript):
 
-```javascript
-import { observer, observableProps } from "mobx-react"
+```typescript
+import { computed } from "mobx"
+import { withObservableProps, PropsToObservableProps } from "mobx-react"
 
-<NameAndAge first="Mary" last="Poppins" age={30} />
-
-@observer
-class NameAndAge extends React.Component {
-    obsProps = observableProps(this, { renderOnPropsChange: false })
-
-    render() {
-        // render will only trigger when either first or last properties change,
-        // but not when age changes, since it is unused by the render method
-        return (<div>${this.obsProps.first + " " + this.obsProps.last}</div>);
-    }
+interface NameAndAgeProps {
+    first: string;
+    last: string;
+    age: number;
 }
+
+const NameAndAge = withObservableProps(
+    class extends React.Component<PropsToObservableProps<NameAndAgeProps>> {
+        @computed
+        get fullName() {
+            // this computed will only recompute when any of these props change
+            // if we were using props instead it would also recompute if age
+            // (or any other property) changed
+            // not how this.props.obs is used rather than this.props
+            return this.props.obs.first + " " + this.props.obs.last;
+        }
+
+        render() {
+            // render will only trigger when either first or last properties change,
+            // but not when age changes, since it is unused by the render method
+            return (<div>${this.fullName}</div>);
+        }
+    }
+)
+
+// note how even though inside the wrapper component props must be
+// accessed through this.props.obs, here they are just plain properties
+<NameAndAge first="Mary" last="Poppins" age={30} />
 ```
 
 ## FAQ
