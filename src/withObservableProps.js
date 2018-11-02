@@ -13,9 +13,6 @@ import { observer } from "./observer"
 import { disposeOnUnmount } from "./disposeOnUnmount"
 import { getMobxCapabilities } from "./utils/mobxCapabilities"
 
-// makes sure observable objects were created by us and not passed along
-let ownObserved
-
 const EMPTY_OBJECT = {}
 
 let prechecksPassed = false
@@ -26,12 +23,10 @@ export function withObservableProps(C, options) {
             throw new Error(`[mobx-react] withObservableProps requires mobx 5 or higher`)
         }
 
-        if (!ownObserved) {
-            if (typeof WeakMap === "undefined") {
-                throw new Error(`[mobx-react] withObservableProps requires WeakMap`)
-            }
-            ownObserved = new WeakMap()
+        if (typeof WeakMap === "undefined") {
+            throw new Error(`[mobx-react] withObservableProps requires WeakMap`)
         }
+
         prechecksPassed = true
     }
 
@@ -51,26 +46,26 @@ export function withObservableProps(C, options) {
     )
 }
 
-function updateObservableValue(oldV, newV) {
+function updateObservableValue(oldV, newV, localObservables) {
     if (isObservable(newV)) {
         return newV
     }
     if (Array.isArray(newV)) {
-        return updateObservableArray(oldV, newV)
+        return updateObservableArray(oldV, newV, localObservables)
     }
     if (isPlainObject(newV)) {
-        return updateObservableObject(oldV, newV, undefined)
+        return updateObservableObject(oldV, newV, undefined, localObservables)
     }
     if (newV instanceof Map) {
-        return updateObservableMap(oldV, newV)
+        return updateObservableMap(oldV, newV, localObservables)
     }
     return newV
 }
 
-function updateObservableArray(oldArr, newArr) {
-    if (!isObservableArray(oldArr) || !ownObserved.has(oldArr)) {
+function updateObservableArray(oldArr, newArr, localObservables) {
+    if (!isObservableArray(oldArr) || !localObservables.has(oldArr)) {
         oldArr = observable.array([], { deep: false })
-        ownObserved.set(oldArr, true)
+        localObservables.set(oldArr, true)
     }
 
     // add/update items
@@ -82,16 +77,16 @@ function updateObservableArray(oldArr, newArr) {
 
         // it is ok to call set even if the value doesn't change
         // since internally it won't trigger a change if the value is the same
-        set(oldArr, i, updateObservableValue(oldV, newV))
+        set(oldArr, i, updateObservableValue(oldV, newV, localObservables))
     }
 
     return oldArr
 }
 
-function updateObservableMap(oldMap, newMap) {
-    if (!isObservableMap(oldMap) || !ownObserved.has(oldMap)) {
+function updateObservableMap(oldMap, newMap, localObservables) {
+    if (!isObservableMap(oldMap) || !localObservables.has(oldMap)) {
         oldMap = observable.map({}, { deep: false })
-        ownObserved.set(oldMap, true)
+        localObservables.set(oldMap, true)
     }
 
     // add/update props
@@ -100,7 +95,7 @@ function updateObservableMap(oldMap, newMap) {
 
         // it is ok to call set even if the value doesn't change
         // since internally it won't trigger a change if the value is the same
-        set(oldMap, propName, updateObservableValue(oldValue, value))
+        set(oldMap, propName, updateObservableValue(oldValue, value, localObservables))
     })
 
     // remove removed props
@@ -113,10 +108,10 @@ function updateObservableMap(oldMap, newMap) {
     return oldMap
 }
 
-function updateObservableObject(oldObj, newObj, isDeepProp) {
-    if (!isObservableObject(oldObj) || !ownObserved.has(oldObj)) {
+function updateObservableObject(oldObj, newObj, isDeepProp, localObservables) {
+    if (!isObservableObject(oldObj) || !localObservables.has(oldObj)) {
         oldObj = observable.object({}, undefined, { deep: false })
-        ownObserved.set(oldObj, true)
+        localObservables.set(oldObj, true)
     }
 
     // add/update props
@@ -126,7 +121,7 @@ function updateObservableObject(oldObj, newObj, isDeepProp) {
         const newValue =
             isDeepProp && !isDeepProp(propName)
                 ? value
-                : updateObservableValue(oldObj[propName], value)
+                : updateObservableValue(oldObj[propName], value, localObservables)
 
         // it is ok to call set even if the value doesn't change
         // since internally it won't trigger a change if the value is the same
@@ -164,15 +159,23 @@ function observableProps(component, options) {
         isDeepProp = propName => deepProps[propName]
     }
 
+    // keeps track of which observable comes from props and which were generated locally
+    const localObservables = new WeakMap()
+
     const observed = observable.object({}, undefined, { deep: false })
-    ownObserved.set(observed, true)
+    localObservables.set(observed, true)
 
     disposeOnUnmount(
         component,
         reaction(
             () => component.props,
             unobserved => {
-                updateObservableObject(observed, unobserved || EMPTY_OBJECT, isDeepProp)
+                updateObservableObject(
+                    observed,
+                    unobserved || EMPTY_OBJECT,
+                    isDeepProp,
+                    localObservables
+                )
             },
             { fireImmediately: true }
         )
