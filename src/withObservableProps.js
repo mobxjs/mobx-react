@@ -72,12 +72,12 @@ function updateObservableArray(oldArr, newArr, localObservables) {
     const len = newArr.length
     oldArr.length = len
     for (let i = 0; i < len; i++) {
-        const oldV = oldArr[i]
-        const newV = newArr[i]
+        const oldValue = oldArr[i]
+        const newValue = newArr[i]
 
-        // it is ok to call set even if the value doesn't change
-        // since internally it won't trigger a change if the value is the same
-        set(oldArr, i, updateObservableValue(oldV, newV, localObservables))
+        if (oldValue !== newValue) {
+            set(oldArr, i, updateObservableValue(oldValue, newValue, localObservables))
+        }
     }
 
     return oldArr
@@ -92,13 +92,13 @@ function updateObservableMap(oldMap, newMap, localObservables) {
     const oldMapKeysToRemove = new Set(oldMap.keys())
 
     // add/update props
-    newMap.forEach((value, propName) => {
+    newMap.forEach((newValue, propName) => {
         oldMapKeysToRemove.delete(propName)
         const oldValue = oldMap.get(propName)
 
-        // it is ok to call set even if the value doesn't change
-        // since internally it won't trigger a change if the value is the same
-        set(oldMap, propName, updateObservableValue(oldValue, value, localObservables))
+        if (oldValue !== newValue) {
+            set(oldMap, propName, updateObservableValue(oldValue, newValue, localObservables))
+        }
     })
 
     // remove missing props
@@ -120,16 +120,17 @@ function updateObservableObject(oldObj, newObj, isDeepProp, localObservables) {
     // add/update props
     Object.keys(newObj).forEach(propName => {
         oldObjKeysToRemove.delete(propName)
-        const value = newObj[propName]
+        const maybeNewValue = newObj[propName]
+        const oldValue = oldObj[propName]
 
         const newValue =
             isDeepProp && !isDeepProp(propName)
-                ? value
-                : updateObservableValue(oldObj[propName], value, localObservables)
+                ? maybeNewValue
+                : updateObservableValue(oldValue, maybeNewValue, localObservables)
 
-        // it is ok to call set even if the value doesn't change
-        // since internally it won't trigger a change if the value is the same
-        set(oldObj, propName, newValue)
+        if (oldValue !== newValue) {
+            set(oldObj, propName, newValue)
+        }
     })
 
     // remove missing props
