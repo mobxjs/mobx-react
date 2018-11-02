@@ -89,8 +89,11 @@ function updateObservableMap(oldMap, newMap, localObservables) {
         localObservables.set(oldMap, true)
     }
 
+    const oldMapKeysToRemove = new Set(oldMap.keys())
+
     // add/update props
     newMap.forEach((value, propName) => {
+        oldMapKeysToRemove.delete(propName)
         const oldValue = oldMap.get(propName)
 
         // it is ok to call set even if the value doesn't change
@@ -98,11 +101,9 @@ function updateObservableMap(oldMap, newMap, localObservables) {
         set(oldMap, propName, updateObservableValue(oldValue, value, localObservables))
     })
 
-    // remove removed props
-    oldMap.forEach((_, propName) => {
-        if (!newMap.has(propName)) {
-            remove(oldMap, propName)
-        }
+    // remove missing props
+    oldMapKeysToRemove.forEach(propName => {
+        remove(oldMap, propName)
     })
 
     return oldMap
@@ -114,8 +115,11 @@ function updateObservableObject(oldObj, newObj, isDeepProp, localObservables) {
         localObservables.set(oldObj, true)
     }
 
+    const oldObjKeysToRemove = new Set(Object.keys(oldObj))
+
     // add/update props
     Object.keys(newObj).forEach(propName => {
+        oldObjKeysToRemove.delete(propName)
         const value = newObj[propName]
 
         const newValue =
@@ -128,11 +132,9 @@ function updateObservableObject(oldObj, newObj, isDeepProp, localObservables) {
         set(oldObj, propName, newValue)
     })
 
-    // remove removed props
-    Object.keys(oldObj).forEach(propName => {
-        if (!(propName in newObj)) {
-            remove(oldObj, propName)
-        }
+    // remove missing props
+    oldObjKeysToRemove.forEach(propName => {
+        remove(oldObj, propName)
     })
 
     return oldObj
