@@ -92,7 +92,7 @@ export function useStaticRendering(value: boolean): void
  */
 
 export type ObservablePropsToProps<P> = P extends { obs: infer OP } ? OP : never
-export type PropsToObservableProps<P> = { obs: P }
+export type ObservableProps<P> = { obs: P }
 
 export function withObservableProps<ObsProps>(
     target: React.ComponentType<{ obs: ObsProps }>,

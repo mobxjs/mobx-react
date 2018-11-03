@@ -509,7 +509,7 @@ interface NameAndAgeProps {
 }
 
 const NameAndAge = withObservableProps(
-    class extends React.Component<PropsToObservableProps<NameAndAgeProps>> {
+    class extends React.Component<ObservableProps<NameAndAgeProps>> {
         @computed
         get fullName() {
             // this computed will only recompute when any of these props change
