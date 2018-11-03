@@ -39,6 +39,12 @@ export function withObservableProps(C, options) {
         class WithObservableProps extends React.Component {
             obsProps = observableProps(this, options)
 
+            shouldComponentUpdate = () => {
+                // we never need to update this component since the inner component will upate itself
+                // thanks to its reactions
+                return false
+            }
+
             render() {
                 return <C obs={this.obsProps} />
             }
