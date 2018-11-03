@@ -500,7 +500,7 @@ Example (TypeScript):
 
 ```typescript
 import { computed } from "mobx"
-import { withObservableProps, PropsToObservableProps } from "mobx-react"
+import { withObservableProps, ObservableProps } from "mobx-react"
 
 interface NameAndAgeProps {
     first: string;
