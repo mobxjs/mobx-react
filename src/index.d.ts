@@ -94,20 +94,18 @@ export function useStaticRendering(value: boolean): void
 export type ObservablePropsToProps<P> = P extends { obs: infer OP } ? OP : never
 export type ObservableProps<P> = { obs: P }
 
-export function withObservableProps<ObsProps>(
-    target: React.ComponentType<{
-        obs: ObsProps
-        children?: undefined
-    }>,
-    options?: { deepProps?: Array<keyof ObsProps> | boolean }
+type ExtractObsProps<Component> = Component extends React.Component<infer P>
+    ? ObservablePropsToProps<P>
+    : never
+
+export function withObservableProps<
+    Component extends React.Component<{ obs: object; children?: undefined }>
+>(
+    target: new (...args: any[]) => Component,
+    options?: { deepProps?: Array<keyof ExtractObsProps<Component>> | boolean }
 ): React.ComponentType<
-    ObsProps & {
-        ref?: React.Ref<
-            React.Component<{
-                obs: ObsProps
-                children?: undefined
-            }>
-        >
+    ExtractObsProps<Component> & {
+        ref?: React.Ref<Component>
     }
 >
 
