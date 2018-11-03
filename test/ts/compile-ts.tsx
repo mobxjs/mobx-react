@@ -322,7 +322,10 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
             const x: number = this.props.obs.x
         }
     }
-    const el = <C obs={{ x: 5 }} />
+    const ref1 = React.createRef<C>()
+    const el = <C obs={{ x: 5 }} ref={ref1} />
+
+    const ref2 = React.createRef<C>()
     const CC = withObservableProps(C)
-    const el2 = <CC x={5} />
+    const el2 = <CC x={5} ref={ref2} />
 }

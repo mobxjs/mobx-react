@@ -95,9 +95,21 @@ export type ObservablePropsToProps<P> = P extends { obs: infer OP } ? OP : never
 export type ObservableProps<P> = { obs: P }
 
 export function withObservableProps<ObsProps>(
-    target: React.ComponentType<{ obs: ObsProps }>,
+    target: React.ComponentType<{
+        obs: ObsProps
+        children?: undefined
+    }>,
     options?: { deepProps?: Array<keyof ObsProps> | boolean }
-): React.ComponentType<ObsProps>
+): React.ComponentType<
+    ObsProps & {
+        ref?: React.Ref<
+            React.Component<{
+                obs: ObsProps
+                children?: undefined
+            }>
+        >
+    }
+>
 
 /**
  * Enable dev tool support, makes sure that renderReport emits events.

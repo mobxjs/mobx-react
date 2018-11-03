@@ -27,6 +27,10 @@ export function withObservableProps(C, options) {
             throw new Error(`[mobx-react] withObservableProps requires WeakMap`)
         }
 
+        if (!React.forwardRef) {
+            throw new Error(`[mobx-react] withObservableProps requires React.forwardRef`)
+        }
+
         prechecksPassed = true
     }
 
@@ -35,7 +39,7 @@ export function withObservableProps(C, options) {
         C = observer(C)
     }
 
-    return observer(
+    const WithObservableProps = observer(
         class WithObservableProps extends React.Component {
             obsProps = observableProps(this, options)
 
@@ -46,10 +50,14 @@ export function withObservableProps(C, options) {
             }
 
             render() {
-                return <C obs={this.obsProps} />
+                return <C ref={this.props.__forwardedRef} obs={this.obsProps} />
             }
         }
     )
+
+    return React.forwardRef((props, ref) => {
+        return <WithObservableProps {...props} __forwardedRef={ref} />
+    })
 }
 
 function updateObservableValue(oldV, newV, localObservables) {
@@ -125,17 +133,19 @@ function updateObservableObject(oldObj, newObj, isDeepProp, localObservables) {
 
     // add/update props
     Object.keys(newObj).forEach(propName => {
-        oldObjKeysToRemove.delete(propName)
-        const maybeNewValue = newObj[propName]
-        const oldValue = oldObj[propName]
+        if (!isDeepProp || propName !== "__forwardedRef") {
+            oldObjKeysToRemove.delete(propName)
+            const maybeNewValue = newObj[propName]
+            const oldValue = oldObj[propName]
 
-        const newValue =
-            isDeepProp && !isDeepProp(propName)
-                ? maybeNewValue
-                : updateObservableValue(oldValue, maybeNewValue, localObservables)
+            const newValue =
+                isDeepProp && !isDeepProp(propName)
+                    ? maybeNewValue
+                    : updateObservableValue(oldValue, maybeNewValue, localObservables)
 
-        if (oldValue !== newValue) {
-            set(oldObj, propName, newValue)
+            if (oldValue !== newValue) {
+                set(oldObj, propName, newValue)
+            }
         }
     })
 

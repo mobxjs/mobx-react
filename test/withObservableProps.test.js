@@ -41,48 +41,47 @@ if (!getMobxCapabilities().canDetectNewProperties) {
                 return JSON.stringify(val)
             }
 
-            const Component = withObservableProps(
-                class Component extends React.Component {
-                    constructor(props) {
-                        super(props)
+            class ComponentClass extends React.Component {
+                constructor(props) {
+                    super(props)
 
-                        this.computedWithProp1 = mobx.computed(() => {
-                            const prop1Value = this.props.obs.prop1
-                            computedCalls.push("prop1: " + toJson(prop1Value))
-                            return prop1Value
-                        })
+                    this.computedWithProp1 = mobx.computed(() => {
+                        const prop1Value = this.props.obs.prop1
+                        computedCalls.push("prop1: " + toJson(prop1Value))
+                        return prop1Value
+                    })
 
-                        this.computedWithProp2 = mobx.computed(() => {
-                            const prop2Value = this.props.obs.prop2
-                            computedCalls.push("prop2: " + toJson(prop2Value))
-                            return prop2Value
-                        })
+                    this.computedWithProp2 = mobx.computed(() => {
+                        const prop2Value = this.props.obs.prop2
+                        computedCalls.push("prop2: " + toJson(prop2Value))
+                        return prop2Value
+                    })
 
-                        this.deepComputed = mobx.computed(() => {
-                            const prop3Value = this.props.obs.prop3 && this.props.obs.prop3.x
-                            computedCalls.push("prop3.x: " + toJson(prop3Value))
-                            return prop3Value
-                        })
+                    this.deepComputed = mobx.computed(() => {
+                        const prop3Value = this.props.obs.prop3 && this.props.obs.prop3.x
+                        computedCalls.push("prop3.x: " + toJson(prop3Value))
+                        return prop3Value
+                    })
 
-                        this.computedComponent = mobx.computed(() => {
-                            const value = this.props.obs.componentProp
-                            computedCalls.push("componentProp: " + toJson(!!value))
-                            return value
-                        })
-                    }
+                    this.computedComponent = mobx.computed(() => {
+                        const value = this.props.obs.componentProp
+                        computedCalls.push("componentProp: " + toJson(!!value))
+                        return value
+                    })
+                }
 
-                    render() {
-                        const p1 = this.computedWithProp1.get()
-                        toJson(p1) // just to deeply read it
-                        this.computedWithProp2.get()
-                        this.deepComputed.get()
+                render() {
+                    const p1 = this.computedWithProp1.get()
+                    toJson(p1) // just to deeply read it
+                    this.computedWithProp2.get()
+                    this.deepComputed.get()
 
-                        renders++
-                        return this.computedComponent.get() || this.props.obs.children || null
-                    }
-                },
-                options
-            )
+                    renders++
+                    return this.computedComponent.get() || this.props.obs.children || null
+                }
+            }
+
+            const Component = withObservableProps(ComponentClass, options)
 
             const Container = observer(
                 class Container extends React.Component {
@@ -97,10 +96,12 @@ if (!getMobxCapabilities().canDetectNewProperties) {
             })
 
             it("initial state", async () => {
+                const cr = React.createRef()
                 await asyncReactDOMRender(<Container renderStore={renderFnStore} />, testRoot)
                 renderFnStore.set(function() {
-                    return <Component prop1={1} />
+                    return <Component prop1={1} ref={cr} />
                 })
+                expect(cr.current instanceof ComponentClass).toBe(true)
                 expect(computedCalls).toEqual([
                     "prop1: 1",
                     "prop2: undefined",
