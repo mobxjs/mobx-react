@@ -24,6 +24,8 @@ import { observer } from "mobx-react/custom"
 This package provides the bindings for MobX and React.
 See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.html) for how to get started.
 
+If you are using [React hooks](https://reactjs.org/docs/hooks-intro.html) with latest React 16.7 and you like living on the bleeding edge then have a look at the new [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite).
+
 ## Boilerplate projects that use mobx-react
 
 *   Minimal MobX, React, ES6, JSX, Hot reloading: [MobX-React-Boilerplate](https://github.com/mobxjs/mobx-react-boilerplate)
