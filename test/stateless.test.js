@@ -74,3 +74,19 @@ test("component with observable propTypes", () => {
     expect(warnings.length).toBe(1)
     console.error = originalConsoleError
 })
+
+
+describe("stateless component with forwardRef", () => {
+    const ForwardRefCompObserver = observer(React.forwardRef(
+        ({ testProp }, ref) => <div>result: {testProp}, { ref ? 'got ref' : 'no ref' }</div>
+    ));
+
+    test("render test correct", () => {
+        const component = TestUtils.renderIntoDocument(
+            <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
+        )
+        expect(TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML).toBe(
+            "result: hello world, got ref"
+        )
+    })
+})
