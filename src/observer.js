@@ -1,7 +1,9 @@
 import React, { Component, PureComponent } from "react"
 import hoistStatics from "hoist-non-react-statics"
+import { ForwardRef } from "react-is"
 import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
+
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
 import { patch as newPatch, newSymbol } from "./utils/utils"
@@ -316,6 +318,13 @@ export function observer(arg1, arg2) {
         console.warn(
             "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
         )
+    }
+
+    // Unwrap forward refs into `<Observer>` component
+    if (componentClass["$$typeof"] === ForwardRef) {
+        return React.forwardRef((props, ref) => (
+            <Observer>{() => React.createElement(componentClass, { ...props, ref })}</Observer>
+        ))
     }
 
     // Stateless function component:
