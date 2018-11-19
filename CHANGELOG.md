@@ -1,4 +1,9 @@
 # MobX-React Changelog
+
+### 5.4.0
+
+* Added support for forward refs, fixes [#602](https://github.com/mobxjs/mobx-react/issues/602)
+
 ### 5.3.6
 
 * Fixed some additional issues around life-cycle patching, take 3. See [#536](https://github.com/mobxjs/mobx-react/pull/586) by [@xaviergonz](https://github.com/xaviergonz). Fixed [#579](https://github.com/mobxjs/mobx-react/issues/579)

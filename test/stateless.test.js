@@ -6,6 +6,8 @@ import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, propTypes } from "../src"
 import { createTestRoot } from "./index"
+import renderer from "react-test-renderer"
+import { observable } from "mobx"
 
 const testRoot = createTestRoot()
 
@@ -73,4 +75,34 @@ test("component with observable propTypes", () => {
     const secondWrapper = <Component a1={mobx.observable([])} a2={mobx.observable([])} />
     expect(warnings.length).toBe(1)
     console.error = originalConsoleError
+})
+
+describe("stateless component with forwardRef", () => {
+    const a = observable({
+        x: 1
+    })
+    const ForwardRefCompObserver = observer(
+        React.forwardRef(({ testProp }, ref) => {
+            return (
+                <div>
+                    result: {testProp}, {ref ? "got ref" : "no ref"}, a.x: {a.x}
+                </div>
+            )
+        })
+    )
+
+    test("render test correct", () => {
+        const component = renderer.create(
+            <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
+        )
+        expect(component).toMatchSnapshot()
+    })
+
+    test("is reactive", () => {
+        const component = renderer.create(
+            <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
+        )
+        a.x++
+        expect(component).toMatchSnapshot()
+    })
 })
