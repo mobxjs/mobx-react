@@ -325,6 +325,8 @@ export function observer(arg1, arg2) {
     // not the ForwardRef HoC
     if (componentClass["$$typeof"] === ForwardRef) {
         const baseRender = componentClass.render
+        if (typeof baseRender !== "function")
+            throw new Error("render property of ForwardRef was not a function")
         return {
             ...componentClass,
             render() {
