@@ -98,7 +98,7 @@ describe("stateless component with forwardRef", () => {
         expect(component).toMatchSnapshot()
     })
 
-    test.skip("is reactive", () => {
+    test("is reactive", () => {
         const component = renderer.create(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )

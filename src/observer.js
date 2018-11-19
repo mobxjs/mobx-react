@@ -321,10 +321,17 @@ export function observer(arg1, arg2) {
     }
 
     // Unwrap forward refs into `<Observer>` component
+    // we need to unwrap the render, because it is the inner render that needs to be tracked,
+    // not the ForwardRef HoC
     if (componentClass["$$typeof"] === ForwardRef) {
-        return React.forwardRef((props, ref) => (
-            <Observer>{() => React.createElement(componentClass, { ...props, ref })}</Observer>
-        ))
+        const baseRender = componentClass.render
+        return {
+            ...componentClass,
+            render() {
+                const args = arguments
+                return <Observer>{() => baseRender.apply(undefined, arguments)}</Observer>
+            }
+        }
     }
 
     // Stateless function component:
