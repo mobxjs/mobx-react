@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^3.0.0",
-    "react-is": "^16.0.0",
+    "react-is": "^16.3.2",
     "react-lifecycles-compat": "^3.0.2"
   },
   "keywords": [
