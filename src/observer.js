@@ -1,8 +1,5 @@
-import React, { Component, PureComponent } from "react"
+import React, { Component, PureComponent, forwardRef } from "react"
 import hoistStatics from "hoist-non-react-statics"
-// FIXME: This fails in rollup, sadly, as a full import is bigger :-(
-// import { ForwardRef }  from "react-is"
-import * as ReactIs from "react-is"
 import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 
@@ -28,6 +25,10 @@ export const renderReporter = new EventEmitter()
 
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
+
+// Using react-is had some issues (and operates on elements, not on types), see #608 / #609
+const ReactForwardRefSymbol =
+    typeof forwardRef === "function" && forwardRef((_props, _ref) => {})["$$typeof"]
 
 /**
  * Helper to set `prop` to `this` as non-enumerable (hidden prop)
@@ -325,7 +326,7 @@ export function observer(arg1, arg2) {
     // Unwrap forward refs into `<Observer>` component
     // we need to unwrap the render, because it is the inner render that needs to be tracked,
     // not the ForwardRef HoC
-    if (componentClass["$$typeof"] === ReactIs.ForwardRef) {
+    if (ReactForwardRefSymbol && componentClass["$$typeof"] === ReactForwardRefSymbol) {
         const baseRender = componentClass.render
         if (typeof baseRender !== "function")
             throw new Error("render property of ForwardRef was not a function")
