@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 5.4.1
+
+* Fixed issue where `react-is` wasn't properly rolled-up into the package. Fixes [#608](https://github.com/mobxjs/mobx-react/issues/608)
+
 ### 5.4.0
 
 * Added support for forward refs, fixes [#602](https://github.com/mobxjs/mobx-react/issues/602)

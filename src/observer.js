@@ -1,13 +1,14 @@
 import React, { Component, PureComponent } from "react"
 import hoistStatics from "hoist-non-react-statics"
+// FIXME: This fails in rollup, sadly, as a full import is bigger :-(
+// import { ForwardRef }  from "react-is"
+import * as ReactIs from "react-is"
 import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
 import { patch as newPatch, newSymbol } from "./utils/utils"
-
-const ReactIs = require("react-is")
 
 const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
