@@ -330,13 +330,9 @@ export function observer(arg1, arg2) {
         const baseRender = componentClass.render
         if (typeof baseRender !== "function")
             throw new Error("render property of ForwardRef was not a function")
-        return {
-            ...componentClass,
-            render() {
-                const args = arguments
-                return <Observer>{() => baseRender.apply(undefined, arguments)}</Observer>
-            }
-        }
+        return forwardRef(function ObserverForwardRef() {
+            return <Observer>{() => baseRender.apply(undefined, arguments)}</Observer>
+        })
     }
 
     // Stateless function component:
