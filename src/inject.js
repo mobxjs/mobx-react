@@ -137,7 +137,7 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
 
             let forwardRef =  React.forwardRef((props, ref) => {
                 return createElement(
-                    createStoreInjector(grabStoresFn, component, ref,),
+                    createStoreInjector(grabStoresFn, component, ref),
                     props)
             })
             
