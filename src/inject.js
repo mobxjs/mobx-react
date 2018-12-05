@@ -124,7 +124,7 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
         return function(componentClass) {
             return React.forwardRef((props, ref) => {
                 return createStoreInjector(grabStoresFn, componentClass, ref, storeNames.join("-"))
-            }
+            })
         }
     }
 }
