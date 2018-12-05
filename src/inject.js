@@ -103,13 +103,8 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
 
             let forwardRef =  React.forwardRef((props, ref) => {
                 let injected = createStoreInjector(grabStoresFn, component, ref)
-                injected.isMobxInjector = false // supress warning
-                // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
-                // see #111
-                injected = observer(injected)
-                injected.isMobxInjector = true // restore warning
 
-                return createElement(injected, props).render;
+                return createElement(injected, props)
             })
 
             // Static fields from component should be visible on the generated Injector
