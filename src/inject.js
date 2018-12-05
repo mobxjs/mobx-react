@@ -33,7 +33,7 @@ const proxiedInjectorProps = {
 /**
  * Store Injection
  */
-function createStoreInjector(grabStoresFn, component, injectNames) {
+function createStoreInjector(grabStoresFn, component, forwardedRef, injectNames) {
     let displayName =
         "inject-" +
         (component.displayName ||
@@ -44,10 +44,6 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
 
     class Injector extends Component {
         static displayName = displayName
-
-        storeRef = instance => {
-            this.wrappedInstance = instance
-        }
 
         render() {
             // Optimization: it might be more efficient to apply the mapper function *outside* the render method
@@ -65,7 +61,7 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
             }
 
             if (!isStateless(component)) {
-                newProps.ref = this.storeRef
+                newProps.ref = forwardedRef;
             }
 
             return createElement(component, newProps)
@@ -75,7 +71,6 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
     // Static fields from component should be visible on the generated Injector
     hoistStatics(Injector, component)
 
-    Injector.wrappedComponent = component
     Object.defineProperties(Injector, proxiedInjectorProps)
 
     return Injector
@@ -111,20 +106,25 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]
         return function(componentClass) {
-            let injected = createStoreInjector(grabStoresFn, componentClass)
-            injected.isMobxInjector = false // supress warning
-            // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
-            // see #111
-            injected = observer(injected)
-            injected.isMobxInjector = true // restore warning
-            return injected
+            return React.forwardRef((props, ref) => {
+                let injected = createStoreInjector(grabStoresFn, componentClass, ref)
+                injected.isMobxInjector = false // supress warning
+                // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
+                // see #111
+                injected = observer(injected)
+                injected.isMobxInjector = true // restore warning
+                return injected
+            })
+
         }
     } else {
         const storeNames = []
         for (let i = 0; i < arguments.length; i++) storeNames[i] = arguments[i]
         grabStoresFn = grabStoresByName(storeNames)
         return function(componentClass) {
-            return createStoreInjector(grabStoresFn, componentClass, storeNames.join("-"))
+            return React.forwardRef((props, ref) => {
+                return createStoreInjector(grabStoresFn, componentClass, ref, storeNames.join("-"))
+            }
         }
     }
 }
