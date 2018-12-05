@@ -33,18 +33,9 @@ const proxiedInjectorProps = {
 /**
  * Store Injection
  */
-function createStoreInjector(grabStoresFn, component, forwardedRef, injectNames) {
-    let displayName =
-        "inject-" +
-        (component.displayName ||
-            component.name ||
-            (component.constructor && component.constructor.name) ||
-            "Unknown")
-    if (injectNames) displayName += "-with-" + injectNames
+function createStoreInjector(grabStoresFn, component, forwardedRef) {
 
     class Injector extends Component {
-        static displayName = displayName
-
         render() {
             // Optimization: it might be more efficient to apply the mapper function *outside* the render method
             // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
@@ -68,10 +59,6 @@ function createStoreInjector(grabStoresFn, component, forwardedRef, injectNames)
         }
     }
 
-    // Static fields from component should be visible on the generated Injector
-    hoistStatics(Injector, component)
-
-    Injector.wrappedComponent = component
     Object.defineProperties(Injector, proxiedInjectorProps)
 
     return Injector
@@ -106,28 +93,56 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
     let grabStoresFn
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]
-        return function(componentClass) {
-            return React.forwardRef((props, ref) => {
-                let injected = createStoreInjector(grabStoresFn, componentClass, ref)
-                injected.isMobxInjector = false // supress warning
-                // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
-                // see #111
-                injected = observer(injected)
-                injected.isMobxInjector = true // restore warning
+        return function(component) {
+            let displayName =
+                "inject-" +
+                (component.displayName ||
+                    component.name ||
+                    (component.constructor && component.constructor.name) ||
+                    "Unknown")
+
+            let forwardRef =  React.forwardRef((props, ref) => {
+                let injected = createStoreInjector(grabStoresFn, component, ref)
+
                 return createElement(injected, props)
             })
 
+            // Static fields from component should be visible on the generated Injector
+            hoistStatics(forwardRef, component)
+            forwardRef.wrappedComponent = component
+            Object.defineProperties(forwardRef, proxiedInjectorProps)
+            forwardRef.displayName = displayName;
+
+            return forwardRef
         }
     } else {
         const storeNames = []
         for (let i = 0; i < arguments.length; i++) storeNames[i] = arguments[i]
         grabStoresFn = grabStoresByName(storeNames)
-        return function(componentClass) {
-            return React.forwardRef((props, ref) => {
+        return function(component) {
+            let displayName =
+                "inject-" +
+                (component.displayName ||
+                    component.name ||
+                    (component.constructor && component.constructor.name) ||
+                    "Unknown") + 
+                "-with-" +
+                storeNames.join("-")
+
+
+            let forwardRef =  React.forwardRef((props, ref) => {
                 return createElement(
-                    createStoreInjector(grabStoresFn, componentClass, ref, storeNames.join("-")),
+                    createStoreInjector(grabStoresFn, component, ref,),
                     props)
             })
+            
+            // Static fields from component should be visible on the generated Injector
+            hoistStatics(forwardRef, component)
+            forwardRef.wrappedComponent = component
+            Object.defineProperties(forwardRef, proxiedInjectorProps)
+            forwardRef.displayName = displayName;
+
+            return forwardRef
         }
     }
 }

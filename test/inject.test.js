@@ -244,10 +244,6 @@ describe("inject based context", () => {
         expect(C.bla).toBe(17)
         expect(C.bla2 === B.bla2).toBeTruthy()
         expect(Object.keys(C.wrappedComponent.propTypes)).toEqual(["x"])
-
-        const wrapper = mount(<C booh={42} />)
-        await sleepHelper(10)
-        expect(wrapper.instance().wrappedInstance.testField).toBe(1)
     })
 
     test("warning is printed when attaching contextTypes to HOC", () => {
