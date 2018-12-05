@@ -1,4 +1,4 @@
-import { Component, createElement } from "react"
+import React, { Component, createElement } from "react"
 import hoistStatics from "hoist-non-react-statics"
 import * as PropTypes from "./propTypes"
 import { observer } from "./observer"
@@ -113,7 +113,7 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
                 // see #111
                 injected = observer(injected)
                 injected.isMobxInjector = true // restore warning
-                return injected
+                return createElement(injected, props)
             })
 
         }
@@ -123,7 +123,9 @@ export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
         grabStoresFn = grabStoresByName(storeNames)
         return function(componentClass) {
             return React.forwardRef((props, ref) => {
-                return createStoreInjector(grabStoresFn, componentClass, ref, storeNames.join("-"))
+                return createElement(
+                    createStoreInjector(grabStoresFn, componentClass, ref, storeNames.join("-")),
+                    props)
             })
         }
     }
