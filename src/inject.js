@@ -71,6 +71,7 @@ function createStoreInjector(grabStoresFn, component, forwardedRef, injectNames)
     // Static fields from component should be visible on the generated Injector
     hoistStatics(Injector, component)
 
+    Injector.wrappedComponent = component
     Object.defineProperties(Injector, proxiedInjectorProps)
 
     return Injector
