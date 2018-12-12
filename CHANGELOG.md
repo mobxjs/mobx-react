@@ -1,6 +1,10 @@
 # MobX-React Changelog
 
-### 5.4.1
+### 5.4.3
+
+* Fixed [#612](https://github.com/mobxjs/mobx-react/issues/612), `contextType` was hoisted by `inject`, which shouldn't the case.
+
+### 5.4.1 / 5.4.2
 
 * Fixed issue where `react-is` wasn't properly rolled-up into the package. Fixes [#608](https://github.com/mobxjs/mobx-react/issues/608)
 
