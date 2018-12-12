@@ -35,7 +35,12 @@ describe("observer based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -55,7 +60,12 @@ describe("observer based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -77,7 +87,8 @@ describe("observer based context", () => {
                 render() {
                     return (
                         <div>
-                            context:{this.props.foo}
+                            context:
+                            {this.props.foo}
                             {this.props.bar}
                         </div>
                     )
@@ -130,7 +141,12 @@ describe("observer based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -160,7 +176,12 @@ describe("observer based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -179,7 +200,12 @@ describe("observer based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -222,7 +248,12 @@ describe("observer based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -255,7 +286,12 @@ describe("observer based context", () => {
     })
 })
 
-test("no warnings in modern react", () => {
+test.skip("no warnings in modern react", () => {
+    // MWE: 12-12-2018, disabled this test, the premise doesn't really make sense,
+    // To use Provider / inject in strict-mode: Instead, just leverage React's own
+    // Context mechanism, and don't use Provider / inject from mobx-react, if you want idiomatic React.
+    // Provider / inject is just a stop-gap when Context wasn't standardized
+    // (despite having a really convenient api :))
     const box = mobx.observable.box(3)
     const Child = inject("store")(
         observer(
