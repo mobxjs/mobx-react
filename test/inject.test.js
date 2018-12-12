@@ -16,7 +16,12 @@ describe("inject based context", () => {
             observer(
                 createClass({
                     render() {
-                        return <div>context:{this.props.foo}</div>
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
                     }
                 })
             )
@@ -35,7 +40,12 @@ describe("inject based context", () => {
         const C = inject("foo")(
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -58,7 +68,8 @@ describe("inject based context", () => {
                     render() {
                         return (
                             <div>
-                                context:{this.props.foo}
+                                context:
+                                {this.props.foo}
                                 {this.props.bar}
                             </div>
                         )
@@ -95,7 +106,12 @@ describe("inject based context", () => {
             observer(
                 createClass({
                     render() {
-                        return <div>context:{this.props.foo}</div>
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
                     }
                 })
             )
@@ -120,7 +136,12 @@ describe("inject based context", () => {
             observer(
                 createClass({
                     render() {
-                        return <div>context:{this.props.foo}</div>
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
                     }
                 })
             )
@@ -154,7 +175,12 @@ describe("inject based context", () => {
             ["foo"],
             createClass({
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -206,7 +232,8 @@ describe("inject based context", () => {
                     render() {
                         return (
                             <div>
-                                context:{this.props.zoom}
+                                context:
+                                {this.props.zoom}
                                 {this.props.baz}
                             </div>
                         )
@@ -258,7 +285,12 @@ describe("inject based context", () => {
             createClass({
                 displayName: "C",
                 render() {
-                    return <div>context:{this.props.foo}</div>
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
                 }
             })
         )
@@ -331,7 +363,12 @@ describe("inject based context", () => {
         const C = inject(["foo"])(
             createClass({
                 displayName: "C",
-                render: () => <div>context:{this.props.foo}</div>
+                render: () => (
+                    <div>
+                        context:
+                        {this.props.foo}
+                    </div>
+                )
             })
         )
         C.propTypes = {}
@@ -347,7 +384,12 @@ describe("inject based context", () => {
         const C = inject(["foo"])(
             createClass({
                 displayName: "C",
-                render: () => <div>context:{this.props.foo}</div>
+                render: () => (
+                    <div>
+                        context:
+                        {this.props.foo}
+                    </div>
+                )
             })
         )
         C.wrappedComponent.propTypes = {}
@@ -382,7 +424,8 @@ describe("inject based context", () => {
         }
 
         class State {
-            @observable highlighted = null
+            @observable
+            highlighted = null
             isHighlighted(item) {
                 return this.highlighted == item
             }
@@ -409,7 +452,13 @@ describe("inject based context", () => {
                 listRender++
                 const { items } = this.props
 
-                return <ul>{items.map(item => <ItemComponent key={item.title} item={item} />)}</ul>
+                return (
+                    <ul>
+                        {items.map(item => (
+                            <ItemComponent key={item.title} item={item} />
+                        ))}
+                    </ul>
+                )
             }
         }
 
@@ -469,4 +518,36 @@ describe("inject based context", () => {
             }
         )
     })
+})
+
+test("#612 - mixed context types", () => {
+    const SomeContext = React.createContext(true)
+
+    class MainCompClass extends React.Component {
+        static contextType = SomeContext
+        render() {
+            let active = this.context
+            return active ? this.props.value : "Inactive"
+        }
+    }
+
+    const MainComp = inject(stores => ({
+        value: stores.appState.value
+    }))(MainCompClass)
+
+    const appState = observable({
+        value: "Something"
+    })
+
+    function App() {
+        return (
+            <Provider appState={appState}>
+                <SomeContext.Provider value={true}>
+                    <MainComp />
+                </SomeContext.Provider>
+            </Provider>
+        )
+    }
+
+    ReactDOM.render(<App />, testRoot)
 })
