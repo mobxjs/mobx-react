@@ -6,10 +6,25 @@ var resolve = require("rollup-plugin-node-resolve")
 var uglify = require("rollup-plugin-uglify").uglify
 var alias = require("rollup-plugin-alias")
 var replace = require("rollup-plugin-replace")
+var buildVersion = require("./package.json").version
 
 var { rollup } = require("rollup")
 
 var emptyModulePath = path.resolve(__dirname, "empty.js")
+
+var license = ` * Copyright (c) 2015 Michel Weststrate.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.`
+
+function licenseWrapper(source, version, filename) {
+    return `/** @license mobx-react v${version}
+ * ${filename}
+ *
+${license}
+ */
+${source}`
+}
 
 function getExternals(target) {
     switch (target) {
@@ -47,7 +62,12 @@ function build(target, mode, filename) {
             module: true,
             main: true
         }),
-        commonjs()
+        commonjs(),
+        {
+            transformBundle(source) {
+                return licenseWrapper(source, buildVersion, filename)
+            }
+        }
     ]
 
     if (mode.endsWith(".min")) {

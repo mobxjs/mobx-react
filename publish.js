@@ -35,9 +35,6 @@ async function prompt(question, defaultValue) {
 }
 
 async function main() {
-    // build
-    run("npm run build")
-
     const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"))
 
     // Bump version number
@@ -68,6 +65,8 @@ async function main() {
 
         fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2), "utf8")
 
+        // build
+        run("npm run build")
         // Finally, commit and publish!
         run("npm publish")
         run(`git commit -am "Published version ${version}"`)
