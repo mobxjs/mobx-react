@@ -5,13 +5,21 @@ export function isStateless(component) {
 }
 
 let symbolId = 0
-export function newSymbol(name) {
+function createSymbol(name) {
     if (typeof Symbol === "function") {
         return Symbol(name)
     }
     const symbol = `__$mobx-react ${name} (${symbolId})`
     symbolId++
     return symbol
+}
+
+const createdSymbols = {}
+export function newSymbol(name) {
+    if (!createdSymbols[name]) {
+        createdSymbols[name] = createSymbol(name)
+    }
+    return createdSymbols[name]
 }
 
 const mobxMixins = newSymbol("patchMixins")
