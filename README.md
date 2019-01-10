@@ -202,7 +202,7 @@ class TodoView extends React.Component {
 ```
 
 *   `componentWillReact` doesn't take arguments
-*   `componentWillReact` won't fire before the initial render (use use `componentDidMount` or `constructor` instead)
+*   `componentWillReact` won't fire before the initial render (use `componentDidMount` or `constructor` instead)
 
 ### `PropTypes`
 
