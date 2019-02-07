@@ -503,3 +503,38 @@ it("componentDidMount should be different between components", async () => {
     await doTest(true)
     await doTest(false)
 })
+
+describe("should works with arrays", async () => {
+    test("as function", async () => {
+        class C extends React.Component {
+            methodA = jest.fn()
+            methodB = jest.fn()
+
+            componentDidMount() {
+                disposeOnUnmount(this, [this.methodA, this.methodB])
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        await testComponent(C)
+    })
+
+    test("as decorator", async () => {
+        class C extends React.Component {
+            methodA = jest.fn()
+            methodB = jest.fn()
+
+            @disposeOnUnmount
+            disposers = [this.methodA, this.methodB]
+
+            render() {
+                return null
+            }
+        }
+
+        await testComponent(C)
+    })
+})

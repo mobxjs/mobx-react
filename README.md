@@ -432,6 +432,14 @@ class SomeComponent extends React.Component {
     // decorator version
     @disposeOnUnmount
     someReactionDisposer = reaction(...)
+    
+    // decorator version with arrays
+    @disposeOnUnmount
+    someReactionDisposers = [
+        reaction(...),
+        reaction(...)
+    ]
+
 
     // function version over properties
     someReactionDisposer = disposeOnUnmount(this, reaction(...))
