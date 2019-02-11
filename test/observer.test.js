@@ -276,30 +276,6 @@ test("changing state in render should fail", () => {
     mobx._resetGlobalState()
 })
 
-test("component should not be inject", () => {
-    const msg = []
-    const baseWarn = console.warn
-    console.warn = m => msg.push(m)
-
-    observer(
-        inject("foo")(
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
-        )
-    )
-
-    expect(msg.length).toBe(1)
-    console.warn = baseWarn
-})
-
 test("observer component can be injected", () => {
     const msg = []
     const baseWarn = console.warn

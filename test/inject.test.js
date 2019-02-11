@@ -7,6 +7,7 @@ import * as mobx from "mobx"
 import { action, observable, computed } from "mobx"
 import { observer, inject, Provider } from "../src"
 import { createTestRoot, sleepHelper, withConsole } from "./index"
+import renderer from "react-test-renderer"
 
 const testRoot = createTestRoot()
 
@@ -14,7 +15,7 @@ describe("inject based context", () => {
     test("basic context", () => {
         const C = inject("foo")(
             observer(
-                createClass({
+                class X extends React.Component {
                     render() {
                         return (
                             <div>
@@ -23,7 +24,7 @@ describe("inject based context", () => {
                             </div>
                         )
                     }
-                })
+                }
             )
         )
         const B = () => <C />
@@ -254,7 +255,34 @@ describe("inject based context", () => {
         expect(wrapper.find("div").text()).toBe("context:bar84")
     })
 
-    test("support static hoisting, wrappedComponent and wrappedInstance", async () => {
+    test("inject forwards ref", async () => {
+        class FancyComp extends React.Component {
+            render() {
+                this.didRender = true
+                return null
+            }
+
+            doSomething() {}
+        }
+
+        const ref = React.createRef()
+        const component = renderer.create(<FancyComp ref={ref} />)
+        expect(typeof ref.current.doSomething).toBe("function")
+        expect(ref.current.didRender).toBe(true)
+
+        const InjectedFancyComp = inject("bla")(FancyComp)
+        const ref2 = React.createRef()
+
+        const component2 = renderer.create(
+            <Provider bla={42}>
+                <InjectedFancyComp ref={ref2} />
+            </Provider>
+        )
+        expect(typeof ref2.current.doSomething).toBe("function")
+        expect(ref2.current.didRender).toBe(true)
+    })
+
+    test("support static hoisting, wrappedComponent and ref forwarding", async () => {
         class B extends React.Component {
             render() {
                 this.testField = 1
@@ -273,16 +301,18 @@ describe("inject based context", () => {
         expect(C.bla2 === B.bla2).toBeTruthy()
         expect(Object.keys(C.wrappedComponent.propTypes)).toEqual(["x"])
 
-        const wrapper = mount(<C booh={42} />)
-        await sleepHelper(10)
-        expect(wrapper.instance().wrappedInstance.testField).toBe(1)
+        const ref = React.createRef()
+
+        const wrapper = renderer.create(<C booh={42} ref={ref} />)
+        expect(ref.current.testField).toBe(1)
     })
 
-    test("warning is printed when attaching contextTypes to HOC", () => {
+    test.skip("warning is printed when attaching contextTypes to HOC", () => {
+        // TODO: can be removed once using modern context?
         const msg = []
         const baseWarn = console.warn
         console.warn = m => msg.push(m)
-        const C = inject(["foo"])(
+        const C = inject("foo")(
             createClass({
                 displayName: "C",
                 render() {
@@ -324,6 +354,7 @@ describe("inject based context", () => {
                 displayName: "C",
                 render() {
                     expect(this.props.y).toEqual(3)
+
                     expect(this.props.x).toBeUndefined()
                     return null
                 }
@@ -398,7 +429,7 @@ describe("inject based context", () => {
         console.warn = baseWarn
     })
 
-    test("using a custom injector is reactive", () => {
+    test("using a custom injector is reactive", async () => {
         const user = mobx.observable({ name: "Noa" })
         const mapper = stores => ({ name: stores.user.name })
         const DisplayName = props => <h1>{props.name}</h1>

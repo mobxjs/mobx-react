@@ -27,7 +27,6 @@ export type IStoresToProps<
 
 export type IWrappedComponent<P> = {
     wrappedComponent: IReactComponent<P>
-    wrappedInstance: React.ReactInstance | undefined
 }
 
 // Ideally we would want to return React.ComponentClass<Partial<P>>,

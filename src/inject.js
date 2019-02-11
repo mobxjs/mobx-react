@@ -1,4 +1,4 @@
-import { Component, createElement } from "react"
+import React, { Component, createElement } from "react"
 import hoistStatics from "hoist-non-react-statics"
 import * as PropTypes from "./propTypes"
 import { observer } from "./observer"
@@ -33,7 +33,7 @@ const proxiedInjectorProps = {
 /**
  * Store Injection
  */
-function createStoreInjector(grabStoresFn, component, injectNames) {
+function createStoreInjector(grabStoresFn, component, injectNames, makeReactive) {
     let displayName =
         "inject-" +
         (component.displayName ||
@@ -43,42 +43,36 @@ function createStoreInjector(grabStoresFn, component, injectNames) {
     if (injectNames) displayName += "-with-" + injectNames
 
     class Injector extends Component {
-        static displayName = displayName
-
-        storeRef = instance => {
-            this.wrappedInstance = instance
-        }
-
         render() {
             // Optimization: it might be more efficient to apply the mapper function *outside* the render method
             // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
             // See this test: 'using a custom injector is not too reactive' in inject.js
-            let newProps = {}
-            for (let key in this.props)
-                if (this.props.hasOwnProperty(key)) {
-                    newProps[key] = this.props[key]
-                }
-            var additionalProps =
-                grabStoresFn(this.context.mobxStores || {}, newProps, this.context) || {}
-            for (let key in additionalProps) {
-                newProps[key] = additionalProps[key]
+            const { forwardRef, ...props } = this.props
+
+            Object.assign(
+                props,
+                grabStoresFn(this.context.mobxStores || {}, props, this.context) || {}
+            )
+
+            if (forwardRef && !isStateless(component)) {
+                props.ref = this.props.forwardRef
             }
 
-            if (!isStateless(component)) {
-                newProps.ref = this.storeRef
-            }
-
-            return createElement(component, newProps)
+            return createElement(component, props)
         }
     }
-
-    // Static fields from component should be visible on the generated Injector
-    hoistStatics(Injector, component)
-
-    Injector.wrappedComponent = component
+    if (makeReactive) Injector = observer(Injector)
     Object.defineProperties(Injector, proxiedInjectorProps)
 
-    return Injector
+    // Support forward refs
+    const InjectHocRef = React.forwardRef((props, ref) =>
+        React.createElement(Injector, { ...props, forwardRef: ref })
+    )
+    // Static fields from component should be visible on the generated Injector
+    hoistStatics(InjectHocRef, component)
+    InjectHocRef.wrappedComponent = component
+    InjectHocRef.displayName = displayName
+    return InjectHocRef
 }
 
 function grabStoresByName(storeNames) {
@@ -106,25 +100,19 @@ function grabStoresByName(storeNames) {
  * or a function that manually maps the available stores from the context to props:
  * storesToProps(mobxStores, props, context) => newProps
  */
-export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
+export default function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames) {
     let grabStoresFn
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]
-        return function(componentClass) {
-            let injected = createStoreInjector(grabStoresFn, componentClass)
-            injected.isMobxInjector = false // supress warning
-            // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
-            // see #111
-            injected = observer(injected)
-            injected.isMobxInjector = true // restore warning
-            return injected
-        }
+        return componentClass =>
+            createStoreInjector(grabStoresFn, componentClass, grabStoresFn.name, true)
     } else {
-        const storeNames = []
-        for (let i = 0; i < arguments.length; i++) storeNames[i] = arguments[i]
-        grabStoresFn = grabStoresByName(storeNames)
-        return function(componentClass) {
-            return createStoreInjector(grabStoresFn, componentClass, storeNames.join("-"))
-        }
+        return componentClass =>
+            createStoreInjector(
+                grabStoresByName(storeNames),
+                componentClass,
+                storeNames.join("-"),
+                false
+            )
     }
 }
