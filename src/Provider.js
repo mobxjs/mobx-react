@@ -1,5 +1,4 @@
 import { Children, Component } from "react"
-import { polyfill } from "react-lifecycles-compat"
 import * as PropTypes from "./propTypes"
 
 const specialReactKeys = { children: true, key: true, ref: true }
@@ -67,8 +66,5 @@ function copyStores(from, to) {
 function validStoreName(key) {
     return !specialReactKeys[key] && key !== "suppressChangedStoreWarning"
 }
-
-// TODO: kill in next major
-polyfill(Provider)
 
 export default Provider
