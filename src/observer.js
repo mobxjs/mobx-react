@@ -147,6 +147,7 @@ function makeComponentReactive(render) {
             }
         })
         if (exception) {
+            reaction.dispose()
             errorsReporter.emit(exception)
             throw exception
         }

@@ -6,6 +6,7 @@
 
 * The minimum support version of React is 16.8.0
 * Killed the possibility to directly pass store names to `observer`. Always use `inject` instead. (This was deprecate for a long time already). `observer(["a", "b"], component)` should now be written as `inject("a", "b")(component)`.
+* `observer` components no longer automatically recover from errors (to prevent potential memory leaks). Instead, this is the responsibility of error boundaries.
 
 **Improvements**
 
