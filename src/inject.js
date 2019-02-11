@@ -19,7 +19,6 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
 
     class Injector extends Component {
         static contextType = MobXProviderContext
-        static isMobxInjector = true
 
         render() {
             // Optimization: it might be more efficient to apply the mapper function *outside* the render method
@@ -37,6 +36,7 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
         }
     }
     if (makeReactive) Injector = observer(Injector)
+    Injector.isMobxInjector = true // assigned late to suppress observer warning
 
     // Support forward refs
     const InjectHocRef = React.forwardRef((props, ref) =>
