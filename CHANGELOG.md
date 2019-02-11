@@ -1,5 +1,13 @@
 # MobX-React Changelog
 
+### 6.0.0
+
+**Breaking changes**
+
+**Improvements**
+
+**Migration guide**
+
 ### 5.4.3
 
 * Fixed [#612](https://github.com/mobxjs/mobx-react/issues/612), `contextType` was hoisted by `inject`, which shouldn't the case.
