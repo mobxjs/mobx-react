@@ -168,9 +168,9 @@ describe("inject based context", () => {
     })
 
     test("warning is printed when changing stores", () => {
-        let msg
-        const baseWarn = console.warn
-        console.warn = m => (msg = m)
+        let msgs = []
+        const baseError = console.error
+        console.error = m => msgs.push(m.split("\n")[0]) // drop stacktraces to avoid line number issues
         const a = mobx.observable.box(3)
         const C = inject("foo")(
             observer(
@@ -208,15 +208,14 @@ describe("inject based context", () => {
         expect(wrapper.find("span").text()).toBe("3")
         expect(wrapper.find("div").text()).toBe("context:3")
 
-        a.set(42)
-
-        expect(wrapper.find("span").text()).toBe("42")
-        expect(wrapper.find("div").text()).toBe("context:3")
-        expect(msg).toBe(
-            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
+        expect(() => {
+            a.set(42)
+        }).toThrow(
+            "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
         )
+        expect(msgs).toMatchSnapshot() // nobody caught the error of the rendering
 
-        console.warn = baseWarn
+        console.error = baseError
     })
 
     test("custom storesToProps", () => {

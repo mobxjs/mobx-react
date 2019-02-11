@@ -8,6 +8,7 @@
 * Killed the possibility to directly pass store names to `observer`. Always use `inject` instead. (This was deprecate for a long time already). `observer(["a", "b"], component)` should now be written as `inject("a", "b")(component)`.
 * `observer` components no longer automatically recover from errors (to prevent potential memory leaks). Instead, this is the responsibility of error boundaries.
 * `inject` now supports ref forwarding. As such, the `.wrappedInstance` property has been removed since refs can be used instead. (Fixes [#616](https://github.com/mobxjs/mobx-react/issues/616) (See also [#619](https://github.com/mobxjs/mobx-react/pull/619) by [42shadow42](https://github.com/42shadow42))
+* Changing the set of stores in `Provider` is no longer supported and while throw a hard error (this was a warning before), as the model of `Provider` / `inject` has always been to inject final values into the tree. (That is, fixed references, injected objects themselves can be stateful without problem). If you want to dynamically swap what is provided into the tree, use `React.createContext` instead of `Provider` / `inject`. The  suppressChangedStoreWarning` flag for `Provider` has been dropped.
 
 **Improvements**
 
