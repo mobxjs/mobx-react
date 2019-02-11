@@ -442,7 +442,7 @@ class SomeComponent extends React.Component {
         disposeOnUnmount(this, reaction(...))
 
         // or function array
-        disposeOnUmount(this, [
+        disposeOnUnmount(this, [
             reaction(...),
             reaction(...)
         ])
