@@ -171,18 +171,19 @@ describe("inject based context", () => {
         const baseWarn = console.warn
         console.warn = m => (msg = m)
         const a = mobx.observable.box(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = observer(
             createClass({
