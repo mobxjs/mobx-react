@@ -14,35 +14,20 @@ describe("observer based context", () => {
         expect(sum).toBe(3)
     })
 
-    test("using observer to inject throws warning", done => {
-        const w = console.warn
-        const warns = []
-        console.warn = msg => warns.push(msg)
-
-        observer(["test"], () => null)
-
-        expect(warns.length).toBe(1)
-        expect(warns[0]).toBe(
-            'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`'
-        )
-
-        console.warn = w
-        done()
-    })
-
     test("basic context", done => {
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = () => <C />
         const A = () => (
@@ -56,18 +41,19 @@ describe("observer based context", () => {
     })
 
     test("props override context", done => {
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = () => <C foo={42} />
         const A = () => (
@@ -81,19 +67,20 @@ describe("observer based context", () => {
     })
 
     test("overriding stores is supported", done => {
-        const C = observer(
-            ["foo", "bar"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                            {this.props.bar}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo", "bar")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                                {this.props.bar}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = () => <C />
         const A = () => (
@@ -137,18 +124,19 @@ describe("observer based context", () => {
     })
 
     test("store should be available", done => {
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = () => (
             <ErrorCatcher>
@@ -172,18 +160,19 @@ describe("observer based context", () => {
     })
 
     test("store is not required if prop is available", done => {
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = () => <C foo="bar" />
         const wrapper = mount(<B />)
@@ -196,18 +185,19 @@ describe("observer based context", () => {
         const baseWarn = console.warn
         console.warn = m => (msg = m)
         const a = mobx.observable.box(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = observer(
             createClass({
@@ -244,18 +234,19 @@ describe("observer based context", () => {
         const baseWarn = console.warn
         console.warn = m => (msg = m)
         const a = mobx.observable.box(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = observer(
             createClass({
@@ -300,6 +291,7 @@ test.skip("no warnings in modern react", () => {
                     return (
                         <div>
                             {this.props.store} + {box.get()}
+                            ["foo"],
                         </div>
                     )
                 }

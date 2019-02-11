@@ -290,28 +290,7 @@ function makeObservableProp(target, propName) {
 /**
  * Observer function / decorator
  */
-export function observer(arg1, arg2) {
-    if (typeof arg1 === "string") {
-        throw new Error("Store names should be provided as array")
-    }
-    if (Array.isArray(arg1)) {
-        // TODO: remove in next major
-        // component needs stores
-        if (!warnedAboutObserverInjectDeprecation) {
-            warnedAboutObserverInjectDeprecation = true
-            console.warn(
-                'Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`'
-            )
-        }
-        if (!arg2) {
-            // invoked as decorator
-            return componentClass => observer(arg1, componentClass)
-        } else {
-            return inject.apply(null, arg1)(observer(arg2))
-        }
-    }
-    const componentClass = arg1
-
+export function observer(componentClass) {
     if (componentClass.isMobxInjector === true) {
         console.warn(
             "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
