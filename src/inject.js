@@ -5,32 +5,6 @@ import { observer } from "./observer"
 import { isStateless } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"
 
-const injectorContextTypes = {
-    mobxStores: PropTypes.objectOrObservableObject
-}
-Object.seal(injectorContextTypes)
-
-const proxiedInjectorProps = {
-    contextTypes: {
-        get: function() {
-            return injectorContextTypes
-        },
-        set: function(_) {
-            console.warn(
-                "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`"
-            )
-        },
-        configurable: true,
-        enumerable: false
-    },
-    isMobxInjector: {
-        value: true,
-        writable: true,
-        configurable: true,
-        enumerable: true
-    }
-}
-
 /**
  * Store Injection
  */
@@ -45,6 +19,7 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
 
     class Injector extends Component {
         static contextType = MobXProviderContext
+        static isMobxInjector = true
 
         render() {
             // Optimization: it might be more efficient to apply the mapper function *outside* the render method
@@ -62,7 +37,6 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
         }
     }
     if (makeReactive) Injector = observer(Injector)
-    Object.defineProperties(Injector, proxiedInjectorProps)
 
     // Support forward refs
     const InjectHocRef = React.forwardRef((props, ref) =>
