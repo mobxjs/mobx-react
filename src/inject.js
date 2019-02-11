@@ -27,7 +27,7 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
             // See this test: 'using a custom injector is not too reactive' in inject.js
             const { forwardRef, ...props } = this.props
 
-            Object.assign(props, grabStoresFn(this.context || {}, props, this.context) || {})
+            Object.assign(props, grabStoresFn(this.context || {}, props) || {})
 
             if (forwardRef && !isStateless(component)) {
                 props.ref = this.props.forwardRef

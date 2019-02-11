@@ -219,8 +219,7 @@ describe("inject based context", () => {
     })
 
     test("custom storesToProps", () => {
-        const C = inject((stores, props, context) => {
-            expect(context).toEqual({ mobxStores: { foo: "bar" } })
+        const C = inject((stores, props) => {
             expect(stores).toEqual({ foo: "bar" })
             expect(props).toEqual({ baz: 42 })
             return {
