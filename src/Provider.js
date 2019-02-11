@@ -1,17 +1,11 @@
-import { Children, Component } from "react"
+import { Children, Component, createContext, createElement } from "react"
 import * as PropTypes from "./propTypes"
 
 const specialReactKeys = { children: true, key: true, ref: true }
 
+export const MobXProviderContext = createContext({})
+
 class Provider extends Component {
-    static contextTypes = {
-        mobxStores: PropTypes.objectOrObservableObject
-    }
-
-    static childContextTypes = {
-        mobxStores: PropTypes.objectOrObservableObject.isRequired
-    }
-
     constructor(props, context) {
         super(props, context)
         this.state = {}
@@ -19,19 +13,23 @@ class Provider extends Component {
     }
 
     render() {
-        return Children.only(this.props.children)
+        return createElement(
+            MobXProviderContext.Provider,
+            { value: this.state },
+            Children.only(this.props.children)
+        )
     }
 
-    getChildContext() {
-        const stores = {}
-        // inherit stores
-        copyStores(this.context.mobxStores, stores)
-        // add own stores
-        copyStores(this.props, stores)
-        return {
-            mobxStores: stores
-        }
-    }
+    // getChildContext() {
+    //     const stores = {}
+    //     // inherit stores
+    //     copyStores(this.context.mobxStores, stores)
+    //     // add own stores
+    //     copyStores(this.props, stores)
+    //     return {
+    //         mobxStores: stores
+    //     }
+    // }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (!nextProps) return null

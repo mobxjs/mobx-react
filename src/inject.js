@@ -3,6 +3,7 @@ import hoistStatics from "hoist-non-react-statics"
 import * as PropTypes from "./propTypes"
 import { observer } from "./observer"
 import { isStateless } from "./utils/utils"
+import { MobXProviderContext } from "./Provider"
 
 const injectorContextTypes = {
     mobxStores: PropTypes.objectOrObservableObject
@@ -43,16 +44,15 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
     if (injectNames) displayName += "-with-" + injectNames
 
     class Injector extends Component {
+        static contextType = MobXProviderContext
+
         render() {
             // Optimization: it might be more efficient to apply the mapper function *outside* the render method
-            // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
+            // (if the mapper is a function), that could avMobXProviderContextoid expensive(?) re-rendering of the injector component
             // See this test: 'using a custom injector is not too reactive' in inject.js
             const { forwardRef, ...props } = this.props
 
-            Object.assign(
-                props,
-                grabStoresFn(this.context.mobxStores || {}, props, this.context) || {}
-            )
+            Object.assign(props, grabStoresFn(this.context || {}, props, this.context) || {})
 
             if (forwardRef && !isStateless(component)) {
                 props.ref = this.props.forwardRef
