@@ -4,6 +4,8 @@
 
 **Breaking changes**
 
+* The minimum support version of React is 16.8.0
+
 **Improvements**
 
 **Migration guide**
