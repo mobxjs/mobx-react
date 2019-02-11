@@ -305,43 +305,6 @@ describe("inject based context", () => {
         expect(ref.current.testField).toBe(1)
     })
 
-    test.skip("warning is printed when attaching contextTypes to HOC", () => {
-        // TODO: can be removed once using modern context?
-        const msg = []
-        const baseWarn = console.warn
-        console.warn = m => msg.push(m)
-        const C = inject("foo")(
-            createClass({
-                displayName: "C",
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
-        )
-        C.propTypes = {}
-        C.defaultProps = {}
-        C.contextTypes = {}
-
-        const B = () => <C />
-        const A = () => (
-            <Provider foo="bar">
-                <B />
-            </Provider>
-        )
-        mount(<A />)
-        expect(msg.length).toBe(1)
-        expect(msg[0]).toBe(
-            "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`"
-        )
-
-        console.warn = baseWarn
-    })
-
     test("propTypes and defaultProps are forwarded", () => {
         const msg = []
         const baseError = console.error
@@ -427,7 +390,7 @@ describe("inject based context", () => {
         console.warn = baseWarn
     })
 
-    test("using a custom injector is reactive", async () => {
+    test("using a custom injector is reactive", () => {
         const user = mobx.observable({ name: "Noa" })
         const mapper = stores => ({ name: stores.user.name })
         const DisplayName = props => <h1>{props.name}</h1>

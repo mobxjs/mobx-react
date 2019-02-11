@@ -357,24 +357,52 @@ describe("124 - react to changes in this.props via computed", () => {
 test.skip("should stop updating if error was thrown in render (#134)", () => {
     const data = mobx.observable.box(0)
     let renderingsCount = 0
+    let lastOwnRenderCount = 0
+    const errors = []
 
-    const Comp = observer(function() {
-        renderingsCount += 1
-        if (data.get() === 2) {
-            throw new Error("Hello")
+    class Outer extends React.Component {
+        render() {
+            return <div>{this.props.children}</div>
         }
-        return <div />
-    })
 
-    TestUtils.renderIntoDocument(<Comp />)
+        componentDidCatch(error, info) {
+            errors.push(error.toString().split("\n")[0], info)
+        }
+    }
+
+    const Comp = observer(
+        class X extends React.Component {
+            ownRenderCount = 0
+
+            render() {
+                lastOwnRenderCount = ++this.ownRenderCount
+                renderingsCount++
+                if (data.get() === 2) {
+                    throw new Error("Hello")
+                }
+                return <div />
+            }
+        }
+    )
+
+    TestUtils.renderIntoDocument(
+        <Outer>
+            <Comp />
+        </Outer>
+    )
     expect(data.observers.size).toBe(1)
     data.set(1)
-    expect(data.set(2)).toThrow("Hello")
+    expect(renderingsCount).toBe(2)
+    expect(lastOwnRenderCount).toBe(2)
+    data.set(2)
     expect(data.observers.size).toBe(0)
     data.set(3)
     data.set(4)
+    data.set(2)
     data.set(5)
-    expect(renderingsCount).toBe(3)
+    expect(errors).toMatchSnapshot()
+    expect(lastOwnRenderCount).toBe(4)
+    expect(renderingsCount).toBe(4)
 })
 
 describe("should render component even if setState called with exactly the same props", () => {

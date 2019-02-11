@@ -21,9 +21,6 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
         static contextType = MobXProviderContext
 
         render() {
-            // Optimization: it might be more efficient to apply the mapper function *outside* the render method
-            // (if the mapper is a function), that could avMobXProviderContextoid expensive(?) re-rendering of the injector component
-            // See this test: 'using a custom injector is not too reactive' in inject.js
             const { forwardRef, ...props } = this.props
 
             Object.assign(props, grabStoresFn(this.context || {}, props) || {})

@@ -1,5 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`should stop updating if error was thrown in render (#134) 1`] = `
+Array [
+  "Error: Hello",
+  Object {
+    "componentStack": "
+    in X
+    in div (created by Outer)
+    in Outer",
+  },
+]
+`;
+
 exports[`use Observer inject and render sugar should work   use children with inject should be correct 1`] = `
 Object {
   "errors": Array [],
