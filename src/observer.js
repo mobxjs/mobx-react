@@ -2,6 +2,7 @@ import React, { Component, PureComponent, forwardRef } from "react"
 import hoistStatics from "hoist-non-react-statics"
 import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
+import { observer as observerLite } from "mobx-react-lite"
 
 import EventEmitter from "./utils/EventEmitter"
 import inject from "./inject"
@@ -299,17 +300,18 @@ export function observer(componentClass) {
         !componentClass.isReactClass &&
         !Component.isPrototypeOf(componentClass)
     ) {
-        const observerComponent = observer(
-            class extends Component {
-                static displayName = componentClass.displayName || componentClass.name
-                static contextTypes = componentClass.contextTypes
-                static propTypes = componentClass.propTypes
-                static defaultProps = componentClass.defaultProps
-                render() {
-                    return componentClass.call(this, this.props, this.context)
-                }
-            }
-        )
+        const observerComponent = observerLite(componentClass)
+        // const observerComponent = observer(
+        //     class extends Component {
+        //         static displayName = componentClass.displayName || componentClass.name
+        //         static contextTypes = componentClass.contextTypes
+        //         static propTypes = componentClass.propTypes
+        //         static defaultProps = componentClass.defaultProps
+        //         render() {
+        //             return componentClass.call(this, this.props, this.context)
+        //         }
+        //     }
+        // )
         hoistStatics(observerComponent, componentClass)
         return observerComponent
     }
@@ -348,20 +350,12 @@ function mixinLifecycleEvents(target) {
     }
 }
 
-export const Observer = observer(({ children, inject: observerInject, render }) => {
+export const Observer = observer(({ children, render }) => {
     const component = children || render
     if (typeof component === "undefined") {
         return null
     }
-    if (!observerInject) {
-        return component()
-    }
-    // TODO: remove in next major
-    console.warn(
-        "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead"
-    )
-    const InjectComponent = inject(observerInject)(component)
-    return <InjectComponent />
+    return component()
 })
 
 Observer.displayName = "Observer"
