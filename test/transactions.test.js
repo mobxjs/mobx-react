@@ -23,11 +23,9 @@ test("mobx issue 50", async () => {
         })
     }
     let asText = ""
-    let willReactCount = 0
     mobx.autorun(() => (asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(":")))
     const Test = mobxReact.observer(
         createClass({
-            componentWillReact: () => willReactCount++,
             render: () => <div id="x">{[foo.a.get(), foo.b.get(), foo.c.get()].join(",")}</div>
         })
     )
@@ -42,7 +40,6 @@ test("mobx issue 50", async () => {
     expect(asText).toBe("false:true:true")
     // console.log(document.getElementById("x").innerHTML)
     expect(document.getElementById("x").innerHTML).toBe("false,true,true")
-    expect(willReactCount).toBe(1)
 })
 
 test("React.render should respect transaction", async () => {

@@ -1,6 +1,5 @@
 import React, { Component, createElement } from "react"
 import hoistStatics from "hoist-non-react-statics"
-import * as PropTypes from "./propTypes"
 import { observer } from "./observer"
 import { isStateless } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"

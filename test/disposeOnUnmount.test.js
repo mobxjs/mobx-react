@@ -271,7 +271,6 @@ test("custom patching should work", async () => {
             _makeAllSafe(this, BaseComponent.prototype, [
                 "componentWillMount",
                 "componentDidMount",
-                "shouldComponentUpdate",
                 "componentWillUpdate",
                 "componentWillReceiveProps",
                 "render",

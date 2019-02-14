@@ -25,7 +25,8 @@ async function testComponent(C, didMountMixin, willUnmountMixin, doMixinTest = t
     }
 }
 
-test("no overrides", async () => {
+// TODO: all tests in this file are disabled now, can be removed if patching is no longer used
+test.skip("no overrides", async () => {
     const cdm = jest.fn()
     const cwu = jest.fn()
     class C extends React.Component {
@@ -39,7 +40,7 @@ test("no overrides", async () => {
     await testComponent(C, cdm, cwu)
 })
 
-test("prototype overrides", async () => {
+test.skip("prototype overrides", async () => {
     const cdm = jest.fn()
     const cwu = jest.fn()
     let cdmCalls = 0
@@ -63,7 +64,7 @@ test("prototype overrides", async () => {
     expect(cwuCalls).toBe(1)
 })
 
-test("arrow function overrides", async () => {
+test.skip("arrow function overrides", async () => {
     const cdm = jest.fn()
     const cwu = jest.fn()
     let cdmCalls = 0
@@ -87,7 +88,7 @@ test("arrow function overrides", async () => {
     expect(cwuCalls).toBe(1)
 })
 
-test("recursive calls", async () => {
+test.skip("recursive calls", async () => {
     const cdm = jest.fn()
     const cwu = jest.fn()
     let cdmCalls = 0
@@ -117,7 +118,7 @@ test("recursive calls", async () => {
     expect(cwuCalls).toBe(10)
 })
 
-test("prototype + arrow function overrides", async () => {
+test.skip("prototype + arrow function overrides", async () => {
     const cdm = jest.fn()
     const cwu = jest.fn()
     let cdmCalls = 0
@@ -150,7 +151,7 @@ test("prototype + arrow function overrides", async () => {
     expect(cwuCalls).toBe(1)
 })
 
-describe("inheritance with prototype methods", async () => {
+describe.skip("inheritance with prototype methods", async () => {
     async function doTest(patchBase, patchOther, callSuper) {
         const cdm = jest.fn()
         const cwu = jest.fn()
@@ -217,7 +218,7 @@ describe("inheritance with prototype methods", async () => {
     }
 })
 
-describe("inheritance with arrow functions", async () => {
+describe.skip("inheritance with arrow functions", async () => {
     async function doTest(patchBase, patchOther, callSuper) {
         const cdm = jest.fn()
         const cwu = jest.fn()
@@ -276,7 +277,7 @@ describe("inheritance with arrow functions", async () => {
     }
 })
 
-test("custom decorator #579", async () => {
+test.skip("custom decorator #579", async () => {
     async function doTest(customFirst) {
         const customDidMount = jest.fn()
         const customConstruct = jest.fn()
@@ -289,7 +290,7 @@ test("custom decorator #579", async () => {
                 // a utility function to generate instances of a class
                 function construct(oldConstructor, args) {
                     var c = function() {
-                        return oldConstructor.apply(this, args)
+                        return new oldConstructor.apply(this, args)
                     }
                     c.prototype = oldConstructor.prototype
                     instance = new c()

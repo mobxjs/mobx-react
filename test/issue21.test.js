@@ -177,9 +177,6 @@ test("verify prop changes are picked up", async () => {
             componentWillUpdate(nextProps) {
                 events.push(["update", this.props.item.subid, nextProps.item.subid])
             },
-            componentWillReact() {
-                events.push(["react", this.props.item.subid])
-            },
             render() {
                 events.push(["render", this.props.item.subid, this.props.item.text])
                 return <span>{this.props.item.text}</span>
@@ -192,7 +189,9 @@ test("verify prop changes are picked up", async () => {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
-                        {data.items.map(item => <Child key="fixed" item={item} />)}
+                        {data.items.map(item => (
+                            <Child key="fixed" item={item} />
+                        ))}
                     </div>
                 )
             }
@@ -217,7 +216,6 @@ test("verify prop changes are picked up", async () => {
     expect(events.sort()).toEqual(
         [
             ["compute", 1],
-            ["react", 1],
             ["receive", 1, 2],
             ["update", 1, 2],
             ["compute", 2],
@@ -274,9 +272,6 @@ test("verify props is reactive", async () => {
             componentWillUpdate(nextProps) {
                 events.push(["update", this.props.item.subid, nextProps.item.subid])
             },
-            componentWillReact() {
-                events.push(["react", this.props.item.subid])
-            },
             render() {
                 events.push([
                     "render",
@@ -299,7 +294,9 @@ test("verify props is reactive", async () => {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
-                        {data.items.map(item => <Child key="fixed" item={item} />)}
+                        {data.items.map(item => (
+                            <Child key="fixed" item={item} />
+                        ))}
                     </div>
                 )
             }
@@ -326,7 +323,6 @@ test("verify props is reactive", async () => {
     expect(events.sort()).toEqual(
         [
             ["compute", 1],
-            ["react", 1],
             ["receive", 1, 2],
             ["update", 1, 2],
             ["compute", 2],
@@ -364,9 +360,6 @@ test("no re-render for shallow equal props", async () => {
             componentWillUpdate(nextProps) {
                 events.push(["update", this.props.item.subid, nextProps.item.subid])
             },
-            componentWillReact() {
-                events.push(["react", this.props.item.subid])
-            },
             render() {
                 events.push(["render", this.props.item.subid, this.props.item.label])
                 return <span>{this.props.item.label}</span>
@@ -382,7 +375,9 @@ test("no re-render for shallow equal props", async () => {
                 events.push(["parent render", data.parentValue])
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
-                        {data.items.map(item => <Child key="fixed" item={item} value={5} />)}
+                        {data.items.map(item => (
+                            <Child key="fixed" item={item} value={5} />
+                        ))}
                     </div>
                 )
             }

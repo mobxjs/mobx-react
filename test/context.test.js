@@ -44,7 +44,9 @@ test("no warnings in modern react", () => {
             const testRenderer = TestRenderer.create(<App />)
             expect(testRenderer.toJSON()).toMatchSnapshot()
 
-            box.set(4)
+            TestRenderer.act(() => {
+                box.set(4)
+            })
             expect(testRenderer.toJSON()).toMatchSnapshot()
         })
     ).toEqual({ errors: [], infos: [], warnings: [] })

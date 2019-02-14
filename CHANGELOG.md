@@ -11,8 +11,12 @@
 * Changing the set of stores in `Provider` is no longer supported and while throw a hard error (this was a warning before), as the model of `Provider` / `inject` has always been to inject final values into the tree. (That is, fixed references, injected objects themselves can be stateful without problem). If you want to dynamically swap what is provided into the tree, use `React.createContext` instead of `Provider` / `inject`. The  suppressChangedStoreWarning` flag for `Provider` has been dropped.
 * The third argument of custom `storesToProps` functions passed to `inject` is no longer available.
 * `<Observer>` no longer supports the deprecated `inject` property.
-
+* Defining `shouldComponentUpdate` on `observer` compon
 **Improvements**
+
+* Using `PureComponent` is now _recommended_.
+* For `observer` components, there will now be an additional `Observer` component in the tree. 
+* `componentWillReact` has been dropped
 
 **Migration guide**
 
