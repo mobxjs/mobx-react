@@ -9,11 +9,11 @@ if (!spy) throw new Error("mobx-react requires mobx to be available")
 if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
 else if (typeof rnBatched === "function") configure({ reactionScheduler: rnBatched })
 
-// TODO: re-export mobx-react-lite stuff?
+// TODO: re-export more mobx-react-lite stuff?
+export { Observer } from "mobx-react-lite"
 
 export {
     observer,
-    Observer,
     renderReporter,
     componentByNodeRegistry as componentByNodeRegistery,
     componentByNodeRegistry,

@@ -4,7 +4,8 @@ import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
 import {
     observer as observerLite,
-    useStaticRendering as useStaticRenderingLite
+    useStaticRendering as useStaticRenderingLite,
+    Observer
 } from "mobx-react-lite"
 
 import EventEmitter from "./utils/EventEmitter"
@@ -344,43 +345,4 @@ function mixinLifecycleEvents(target) {
             )
         }
     }
-}
-
-// TODO: use mobx-react-lite version?
-export const Observer = observer(({ children, render }) => {
-    const component = children || render
-    if (typeof component === "undefined") {
-        return null
-    }
-    return component()
-})
-
-Observer.displayName = "Observer"
-
-const ObserverPropsCheck = (props, key, componentName, location, propFullName) => {
-    const extraKey = key === "children" ? "render" : "children"
-    if (typeof props[key] === "function" && typeof props[extraKey] === "function") {
-        return new Error(
-            "Invalid prop,do not use children and render in the same time in`" + componentName
-        )
-    }
-
-    if (typeof props[key] === "function" || typeof props[extraKey] === "function") {
-        return
-    }
-    return new Error(
-        "Invalid prop `" +
-            propFullName +
-            "` of type `" +
-            typeof props[key] +
-            "` supplied to" +
-            " `" +
-            componentName +
-            "`, expected `function`."
-    )
-}
-
-Observer.propTypes = {
-    render: ObserverPropsCheck,
-    children: ObserverPropsCheck
 }
