@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^3.0.0",
-    "mobx-react-lite": "^1.0.0"
+    "mobx-react-lite": "1.0.1"
   },
   "keywords": [
     "mobx",

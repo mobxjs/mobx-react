@@ -1,5 +1,5 @@
 var path = require("path")
-var filesize = require("rollup-plugin-filesize")
+// var filesize = require("rollup-plugin-filesize")
 var babel = require("rollup-plugin-babel")
 var commonjs = require("rollup-plugin-commonjs")
 var resolve = require("rollup-plugin-node-resolve")
@@ -79,7 +79,7 @@ function build(target, mode, filename) {
         )
     }
 
-    plugins.push(filesize())
+    // plugins.push(filesize())
 
     return rollup({
         input: "src/index.js",
