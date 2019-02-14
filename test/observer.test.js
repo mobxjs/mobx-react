@@ -4,6 +4,7 @@ import React, { Component } from "react"
 import TestUtils from "react-dom/test-utils"
 import { inject, observer, Observer, onError, Provider, useStaticRendering } from "../src"
 import { asyncReactDOMRender, createTestRoot, sleepHelper, withAsyncConsole, withConsole } from "./"
+import renderer, { act } from "react-test-renderer"
 
 /**
  *  some test suite is too tedious
@@ -200,7 +201,8 @@ describe("does not views alive when using static rendering", () => {
     })
 })
 
-describe("issue 12", () => {
+test("issue 12", () => {
+    const events = []
     const data = mobx.observable({
         selected: "coffee",
         items: [
@@ -220,6 +222,7 @@ describe("issue 12", () => {
         }
 
         render() {
+            events.push("row: " + this.props.item.name)
             return (
                 <span>
                     {this.props.item.name}
@@ -230,6 +233,8 @@ describe("issue 12", () => {
     }
     /** table stateles component */
     const Table = observer(function table() {
+        events.push("table")
+        JSON.stringify(data)
         return (
             <div>
                 {data.items.map(item => (
@@ -239,27 +244,18 @@ describe("issue 12", () => {
         )
     })
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Table />, testRoot)
-        done()
-    })
+    const wrapper = renderer.create(<Table />)
+    expect(wrapper.toJSON()).toMatchSnapshot()
 
-    test("init state is correct", () => {
-        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
-            ["coffee!", "tea"].sort()
-        )
-    })
-
-    test("run transaction", () => {
+    act(() => {
         mobx.transaction(() => {
             data.items[1].name = "boe"
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
-            ["soup"]
-        )
     })
+    expect(wrapper.toJSON()).toMatchSnapshot()
+    expect(events).toEqual(["table", "row: coffee", "row: tea", "table", "row: soup"])
 })
 
 test("changing state in render should fail", () => {
@@ -447,7 +443,7 @@ describe("should render component even if setState called with exactly the same 
     })
 })
 
-describe("it rerenders correctly if some props are non-observables - 1", () => {
+test("it rerenders correctly if some props are non-observables - 1", () => {
     let renderCount = 0
     let odata = mobx.observable({ x: 1 })
     let data = { y: 1 }
@@ -483,29 +479,18 @@ describe("it rerenders correctly if some props are non-observables - 1", () => {
         odata.x++
     }
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Parent odata={odata} data={data} />, testRoot)
-        done()
-    })
+    const wrapper = renderer.create(<Parent odata={odata} data={data} />)
 
-    test("init renderCount === 1", () => {
-        expect(testRoot.querySelector("span").innerHTML).toBe("1-1-1")
-    })
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
-    test("after click renderCount === 2", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(10)
-        expect(testRoot.querySelector("span").innerHTML).toBe("2-2-2")
-    })
-
-    test("after click twice renderCount === 3", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(10)
-        expect(testRoot.querySelector("span").innerHTML).toBe("3-3-3")
-    })
+    expect(contents()).toEqual("1-1-1")
+    stuff()
+    expect(contents()).toEqual("2-2-2")
+    stuff()
+    expect(contents()).toEqual("3-3-3")
 })
 
-describe("it rerenders correctly if some props are non-observables - 2", () => {
+test("it rerenders correctly if some props are non-observables - 2", () => {
     let renderCount = 0
     let odata = mobx.observable({ x: 1 })
 
@@ -542,29 +527,20 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
         }
     )
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
-        done()
-    })
+    const wrapper = renderer.create(<Parent odata={odata} />)
 
-    test("init renderCount === 1", () => {
-        expect(renderCount).toBe(1)
-        expect(testRoot.querySelector("span").innerHTML).toBe("1-1")
-    })
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
-    test("after click renderCount === 2", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(100)
-        expect(renderCount).toBe(2)
-        expect(testRoot.querySelector("span").innerHTML).toBe("2-2")
-    })
+    expect(renderCount).toBe(1)
+    expect(contents()).toBe("1-1")
 
-    test("after click renderCount === 3", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(10)
-        expect(renderCount).toBe(3)
-        expect(testRoot.querySelector("span").innerHTML).toBe("3-3")
-    })
+    act(() => stuff())
+    expect(renderCount).toBe(2)
+    expect(contents()).toBe("2-2")
+
+    act(() => stuff())
+    expect(renderCount).toBe(3)
+    expect(contents()).toBe("3-3")
 })
 
 describe("Observer regions should react", () => {
@@ -594,7 +570,7 @@ describe("Observer regions should react", () => {
     })
 })
 
-describe("Observer should not re-render on shallow equal new props", () => {
+test("Observer should not re-render on shallow equal new props", () => {
     let childRendering = 0
     let parentRendering = 0
     const data = { x: 1 }
@@ -610,23 +586,20 @@ describe("Observer should not re-render on shallow equal new props", () => {
         return <Child data={data} />
     })
 
-    beforeAll(async () => {
-        await asyncReactDOMRender(<Parent />, testRoot)
-    })
+    const wrapper = renderer.create(<Parent />)
 
-    test("init state is correct", () => {
-        expect(parentRendering).toBe(1)
-        expect(childRendering).toBe(1)
-        expect(testRoot.querySelector("span").innerHTML).toBe("1")
-    })
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
-    test("after odata change", async () => {
+    expect(parentRendering).toBe(1)
+    expect(childRendering).toBe(1)
+    expect(contents()).toBe("1")
+
+    act(() => {
         odata.y++
-        sleepHelper(10)
-        expect(parentRendering).toBe(2)
-        expect(childRendering).toBe(1)
-        expect(testRoot.querySelector("span").innerHTML).toBe("1")
     })
+    expect(parentRendering).toBe(2)
+    expect(childRendering).toBe(1)
+    expect(contents()).toBe("1")
 })
 
 test("parent / childs render in the right order", done => {

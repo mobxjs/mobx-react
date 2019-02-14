@@ -6,7 +6,7 @@ import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, propTypes } from "../src"
 import { createTestRoot, asyncReactDOMRender } from "./index"
-import renderer from "react-test-renderer"
+import renderer, { act } from "react-test-renderer"
 import { observable } from "mobx"
 
 const testRoot = createTestRoot()
@@ -44,21 +44,23 @@ describe("stateless component with propTypes", () => {
     })
 })
 
-// TODO: modernize to modern context test
-test.skip("stateless component with context support", () => {
-    const StateLessCompWithContext = (props, context) =>
-        createElement("div", {}, "context: " + context.testContext)
-    StateLessCompWithContext.contextTypes = { testContext: PropTypes.string }
+test("stateless component with context support", async () => {
+    const C = React.createContext()
+
+    const StateLessCompWithContext = (props, context) => (
+        <C.Consumer>{value => <div>context: {value.testContext}</div>}</C.Consumer>
+    )
+
     const StateLessCompWithContextObserver = observer(StateLessCompWithContext)
-    const ContextProvider = createClass({
-        childContextTypes: StateLessCompWithContext.contextTypes,
-        getChildContext: () => ({ testContext: "hello world" }),
-        render: () => <StateLessCompWithContextObserver />
-    })
-    const component = TestUtils.renderIntoDocument(<ContextProvider />)
-    expect(
-        TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML.replace(/\n/, "")
-    ).toBe("context: hello world")
+
+    const ContextProvider = () => (
+        <C.Provider value={{ testContext: "hello world" }}>
+            <StateLessCompWithContext />
+        </C.Provider>
+    )
+
+    await asyncReactDOMRender(<ContextProvider />, testRoot)
+    expect(testRoot.querySelector("div").innerHTML.replace(/\n/, "")).toBe("context: hello world")
 })
 
 test("component with observable propTypes", () => {
@@ -104,7 +106,9 @@ describe("stateless component with forwardRef", () => {
         const component = renderer.create(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )
-        a.x++
+        act(() => {
+            a.x++
+        })
         expect(component).toMatchSnapshot()
     })
 })

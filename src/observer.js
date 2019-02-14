@@ -303,10 +303,12 @@ export function observer(componentClass) {
     ) {
         const observerComponent = observerLite(componentClass)
         // TODO: move to mobx-react-lite
+        // TODO: static hoisting is not needed?
         hoistStatics(observerComponent, componentClass)
         if (componentClass.propTypes) observerComponent.propTypes = componentClass.propTypes
         if (componentClass.defaultProps)
             observerComponent.defaultProps = componentClass.defaultProps
+        observerComponent.isMobXReactObserver = true
         return observerComponent
     }
 

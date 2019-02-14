@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`issue 12 1`] = `
+<div>
+  <span>
+    coffee
+    !
+  </span>
+  <span>
+    tea
+    
+  </span>
+</div>
+`;
+
+exports[`issue 12 2`] = `
+<div>
+  <span>
+    soup
+    
+  </span>
+</div>
+`;
+
 exports[`should stop updating if error was thrown in render (#134) 1`] = `
 Array [
   "Error: Hello",
