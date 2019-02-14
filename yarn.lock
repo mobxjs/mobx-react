@@ -3804,6 +3804,11 @@ mkdirp@^0.5.0, mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
+mobx-react-lite@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-1.0.0.tgz#8c07ce18fd505b19e00315d33a8558d415ba9198"
+  integrity sha512-lfqTgh/gyu1QJ9Os9SygqhNQ1Bs3IEeNXjwGzgOmT+7jB1xdTBlLbJ62hPL5olk5oBX2ZY9Og+WFVMxsl2t84A==
+
 mobx@^5.0.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.5.0.tgz#a29f6a7526eed28edcd3f0e921a1edaa8bb22575"
@@ -4568,11 +4573,6 @@ react-is@^16.5.2:
   version "16.5.2"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.5.2.tgz#e2a7b7c3f5d48062eb769fcb123505eb928722e3"
   integrity sha512-hSl7E6l25GTjNEZATqZIuWOgSnpXb3kD0DVCujmg46K5zLxsbiKaaT6VO9slkSBDPZfYs30lwfJwbOFOnoEnKQ==
-
-react-lifecycles-compat@^3.0.2:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
-  integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
 react-test-renderer@^16.0.0-0:
   version "16.5.2"

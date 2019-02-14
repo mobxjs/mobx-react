@@ -4,7 +4,7 @@ import ReactDOM from "react-dom"
 import { mount, shallow } from "enzyme"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { createTestRoot, withConsole } from "./index"
+import { createTestRoot, withConsole, asyncReactDOMRender } from "./index"
 
 const mobxAdminProperty = mobx.$mobx || "$mobx"
 
@@ -18,7 +18,12 @@ describe("custom shouldComponentUpdate is not respected for observable changes (
                 const x = mobx.observable.box(3)
                 const C = observer(
                     createClass({
-                        render: () => <div>value:{x.get()}</div>,
+                        render: () => (
+                            <div>
+                                value:
+                                {x.get()}
+                            </div>
+                        ),
                         shouldComponentUpdate: () => called++
                     })
                 )
@@ -45,7 +50,12 @@ describe("custom shouldComponentUpdate is not respected for observable changes (
                 const C = observer(
                     createClass({
                         render() {
-                            return <div>value:{this.props.y}</div>
+                            return (
+                                <div>
+                                    value:
+                                    {this.props.y}
+                                </div>
+                            )
                         },
                         shouldComponentUpdate(nextProps) {
                             called++
@@ -131,13 +141,20 @@ test("#85 Should handle state changing in constructors", done => {
                 a.set(3) // one shouldn't do this!
                 return {}
             },
-            render: () => <div>child:{a.get()} - </div>
+            render: () => (
+                <div>
+                    child:
+                    {a.get()} -{" "}
+                </div>
+            )
         })
     )
     const ParentWrapper = observer(function Parent() {
         return (
             <span>
-                <Child />parent:{a.get()}
+                <Child />
+                parent:
+                {a.get()}
             </span>
         )
     })
@@ -174,9 +191,9 @@ test("testIsComponentReactive", () => {
 })
 
 test("testGetDNode", () => {
-    const C = observer(() => null)
+    const C = observer(() => <div />)
 
-    const wrapper = mount(<C />)
+    const wrapper = renderer.create(<C />)
     expect(wrapper.instance().render[mobxAdminProperty]).toBeTruthy()
     expect(mobx.getAtom(wrapper.instance().render)).toBeTruthy()
 

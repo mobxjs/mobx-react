@@ -2,10 +2,12 @@ import React, { Component, PureComponent, forwardRef } from "react"
 import hoistStatics from "hoist-non-react-statics"
 import { createAtom, Reaction, _allowStateChanges, $mobx } from "mobx"
 import { findDOMNode as baseFindDOMNode } from "react-dom"
-import { observer as observerLite } from "mobx-react-lite"
+import {
+    observer as observerLite,
+    useStaticRendering as useStaticRenderingLite
+} from "mobx-react-lite"
 
 import EventEmitter from "./utils/EventEmitter"
-import inject from "./inject"
 import { patch as newPatch, newSymbol, shallowEqual } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
@@ -17,8 +19,6 @@ const mobxIsUnmounted = newSymbol("isUnmounted")
 let isDevtoolsEnabled = false
 
 let isUsingStaticRendering = false
-
-let warnedAboutObserverInjectDeprecation = false
 
 // WeakMap<Node, Object>;
 export const componentByNodeRegistry = typeof WeakMap !== "undefined" ? new WeakMap() : undefined
@@ -85,6 +85,7 @@ export function trackComponents() {
 
 export function useStaticRendering(useStaticRendering) {
     isUsingStaticRendering = useStaticRendering
+    useStaticRenderingLite(useStaticRendering)
 }
 
 /**
@@ -301,18 +302,11 @@ export function observer(componentClass) {
         !Component.isPrototypeOf(componentClass)
     ) {
         const observerComponent = observerLite(componentClass)
-        // const observerComponent = observer(
-        //     class extends Component {
-        //         static displayName = componentClass.displayName || componentClass.name
-        //         static contextTypes = componentClass.contextTypes
-        //         static propTypes = componentClass.propTypes
-        //         static defaultProps = componentClass.defaultProps
-        //         render() {
-        //             return componentClass.call(this, this.props, this.context)
-        //         }
-        //     }
-        // )
+        // TODO: move to mobx-react-lite
         hoistStatics(observerComponent, componentClass)
+        if (componentClass.propTypes) observerComponent.propTypes = componentClass.propTypes
+        if (componentClass.defaultProps)
+            observerComponent.defaultProps = componentClass.defaultProps
         return observerComponent
     }
 
@@ -350,6 +344,7 @@ function mixinLifecycleEvents(target) {
     }
 }
 
+// TODO: use mobx-react-lite version?
 export const Observer = observer(({ children, render }) => {
     const component = children || render
     if (typeof component === "undefined") {

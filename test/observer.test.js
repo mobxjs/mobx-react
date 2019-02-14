@@ -167,8 +167,7 @@ describe("keep views alive", () => {
     })
 })
 
-// TODO: fix! `observer` from lite doesn't support static rendering yet
-describe.skip("does not views alive when using static rendering", () => {
+describe("does not views alive when using static rendering", () => {
     useStaticRendering(true)
     let renderCount = 0
     const data = mobx.observable({
