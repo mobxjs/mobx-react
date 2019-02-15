@@ -1,16 +1,8 @@
+/dist
 /node_modules
 /test/node_modules
 /npm-debug.log
-/native.js
-/native.d.ts
-/custom.js
-/custom.module.js
-/custom.d.ts
 /test/custom.d.ts
-/index.js
-/index.module.js
-/index.min.js
-/index.d.ts
 /test/index.d.ts
 /.idea
 /*.iml
