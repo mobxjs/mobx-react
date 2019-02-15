@@ -1,10 +1,9 @@
-import React, { createElement } from "react"
+import React from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import { mount, shallow } from "enzyme"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { createTestRoot, withConsole, asyncReactDOMRender } from "./index"
+import { createTestRoot, withConsole } from "./index"
 import renderer, { act } from "react-test-renderer"
 
 const mobxAdminProperty = mobx.$mobx || "$mobx"

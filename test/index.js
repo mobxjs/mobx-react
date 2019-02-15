@@ -1,9 +1,5 @@
-import { configure } from "enzyme"
-import Adapter from "enzyme-adapter-react-16"
 import React from "react"
 import ReactDOM from "react-dom"
-
-configure({ adapter: new Adapter() })
 
 // Uglyness to find missing 'act' more easily
 // 14-2-19 / React 16.8.1, temporarily work around, as error message misses a stack-trace
