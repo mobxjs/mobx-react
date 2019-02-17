@@ -70,7 +70,7 @@ function grabStoresByName(storeNames) {
  * or a function that manually maps the available stores from the context to props:
  * storesToProps(mobxStores, props, context) => newProps
  */
-export default function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames) {
+export function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames) {
     let grabStoresFn
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]

@@ -12,6 +12,8 @@
 * The third argument of custom `storesToProps` functions passed to `inject` is no longer available.
 * `<Observer>` no longer supports the deprecated `inject` property.
 * Defining `shouldComponentUpdate` on `observer` compon
+* `propTypes` is no longer exposed, use `PropTypes` instead
+
 **Improvements**
 
 * Using `PureComponent` is now _recommended_.
