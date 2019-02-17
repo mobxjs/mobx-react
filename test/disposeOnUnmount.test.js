@@ -263,172 +263,6 @@ describe("with observer", () => {
     })
 })
 
-test("custom patching should work", async () => {
-    class BaseComponent extends React.Component {
-        constructor(props, context) {
-            super(props, context)
-
-            _makeAllSafe(this, BaseComponent.prototype, [
-                "componentWillMount",
-                "componentDidMount",
-                "componentWillUpdate",
-                "componentWillReceiveProps",
-                "render",
-                "componentDidUpdate",
-                "componentWillUnmount"
-            ])
-        }
-
-        componentDidMount() {
-            this.didMountCalled = true
-        }
-
-        componentWillUnmount() {
-            this.willUnmountCalled = true
-        }
-    }
-
-    function _makeAllSafe(obj, prototype, methodNames) {
-        for (let i = 0, len = methodNames.length; i < len; i++) {
-            _makeSafe(obj, prototype, methodNames[i])
-        }
-    }
-
-    function _makeSafe(obj, prototype, methodName) {
-        let classMethod = obj[methodName]
-        let prototypeMethod = prototype[methodName]
-
-        if (classMethod || prototypeMethod) {
-            obj[methodName] = function() {
-                this.patchRunFor = this.patchRunFor || []
-                this.patchRunFor.push(methodName)
-
-                let retVal
-
-                if (prototypeMethod) {
-                    retVal = prototypeMethod.apply(this, arguments)
-                }
-                if (classMethod !== prototypeMethod) {
-                    retVal = classMethod.apply(this, arguments)
-                }
-
-                return retVal
-            }
-        }
-    }
-
-    @observer
-    class C extends BaseComponent {
-        @disposeOnUnmount
-        methodA = jest.fn()
-        @disposeOnUnmount
-        methodB = jest.fn()
-        @disposeOnUnmount
-        methodC = null
-        @disposeOnUnmount
-        methodD = undefined
-
-        render() {
-            return null
-        }
-    }
-
-    await testComponent(
-        C,
-        ref => {
-            expect(ref.patchRunFor).toEqual(["render", "componentDidMount"])
-            expect(ref.didMountCalled).toBeTruthy()
-        },
-        ref => {
-            expect(ref.patchRunFor).toEqual(["render", "componentDidMount", "componentWillUnmount"])
-            expect(ref.willUnmountCalled).toBeTruthy()
-        }
-    )
-})
-
-describe("super calls should work", async () => {
-    async function doTest(baseObserver, cObserver) {
-        const events = []
-
-        const sharedMethod = jest.fn()
-
-        class BaseComponent extends React.Component {
-            @disposeOnUnmount
-            method0 = sharedMethod
-
-            @disposeOnUnmount
-            methodA = jest.fn()
-
-            componentDidMount() {
-                events.push("baseDidMount")
-            }
-
-            componentWillUnmount() {
-                events.push("baseWillUnmount")
-            }
-        }
-
-        class C extends BaseComponent {
-            @disposeOnUnmount
-            method0 = sharedMethod
-
-            @disposeOnUnmount
-            methodB = jest.fn()
-
-            componentDidMount() {
-                super.componentDidMount()
-                events.push("CDidMount")
-            }
-
-            componentWillUnmount() {
-                super.componentWillUnmount()
-                events.push("CWillUnmount")
-            }
-
-            render() {
-                return null
-            }
-        }
-
-        if (baseObserver) {
-            BaseComponent = observer(BaseComponent)
-        }
-        if (cObserver) {
-            C = observer(C)
-        }
-
-        await testComponent(
-            C,
-            ref => {
-                expect(events).toEqual(["baseDidMount", "CDidMount"])
-                expect(sharedMethod).toHaveBeenCalledTimes(0)
-            },
-            ref => {
-                expect(events).toEqual([
-                    "baseDidMount",
-                    "CDidMount",
-                    "baseWillUnmount",
-                    "CWillUnmount"
-                ])
-                expect(sharedMethod).toHaveBeenCalledTimes(2)
-            }
-        )
-    }
-
-    it("none is observer", async () => {
-        await doTest(false, false)
-    })
-    it("base is observer", async () => {
-        await doTest(true, false)
-    })
-    it("C is observer", async () => {
-        await doTest(false, true)
-    })
-    it("both observers", async () => {
-        await doTest(true, true)
-    })
-})
-
 it("componentDidMount should be different between components", async () => {
     async function doTest(withObserver) {
         const events = []
@@ -503,138 +337,6 @@ it("componentDidMount should be different between components", async () => {
     await doTest(false)
 })
 
-describe("inheritance with prototype methods", async () => {
-    async function doTest(patchBase, patchOther, callSuper) {
-        let Bcall = 0
-        let Ccall = 0
-        let c = 0
-        let c2 = 0
-
-        class B extends React.Component {
-            componentWillUnmount() {
-                Bcall++
-            }
-        }
-
-        class C extends B {
-            componentWillUnmount() {
-                if (callSuper) {
-                    super.componentWillUnmount()
-                }
-                Ccall++
-            }
-            render() {
-                return null
-            }
-        }
-
-        if (patchBase) {
-            let target = B.prototype
-            target.fn = () => {
-                c++
-            }
-            disposeOnUnmount(target, "fn")
-        }
-
-        if (patchOther) {
-            let target2 = C.prototype
-            target2.fn2 = () => {
-                c2++
-            }
-            disposeOnUnmount(target2, "fn2")
-        }
-
-        await asyncReactDOMRender(<C />, testRoot)
-        await asyncReactDOMRender(null, testRoot)
-
-        expect(Ccall).toBe(1)
-        expect(c).toBe(patchBase ? 1 : 0)
-        expect(Bcall).toBe(callSuper ? 1 : 0)
-        expect(c2).toBe(patchOther ? 1 : 0)
-    }
-
-    for (const base of [false, true]) {
-        for (const other of [false, true]) {
-            for (const callSuper of [false, true]) {
-                test(`base: ${base}, other: ${other}, callSuper: ${callSuper}`, async () => {
-                    if (base && !other && !callSuper) {
-                        // this one is expected to fail, since we are patching only the base and the other one totally ignores the base method
-                        try {
-                            await doTest(base, other, callSuper)
-                            fail("should have failed")
-                        } catch (e) {}
-                    } else {
-                        await doTest(base, other, callSuper)
-                    }
-                })
-            }
-        }
-    }
-})
-
-describe("inheritance with arrow functions", async () => {
-    async function doTest(patchBase, patchOther, callSuper) {
-        let Bcall = 0
-        let Ccall = 0
-        let c = 0
-        let c2 = 0
-
-        class B extends React.Component {
-            constructor() {
-                super()
-                if (patchBase) {
-                    this.fn = function() {
-                        c++
-                    }
-                    disposeOnUnmount(this, this.fn)
-                }
-            }
-            componentWillUnmount() {
-                Bcall++
-            }
-        }
-
-        class C extends B {
-            constructor() {
-                super()
-                if (patchOther) {
-                    this.fn2 = function() {
-                        c2++
-                    }
-                    disposeOnUnmount(this, this.fn2)
-                }
-            }
-            componentWillUnmount = () => {
-                if (callSuper) {
-                    super.componentWillUnmount()
-                }
-                Ccall++
-            }
-            render() {
-                return null
-            }
-        }
-
-        await asyncReactDOMRender(<C />, testRoot)
-        await asyncReactDOMRender(null, testRoot)
-
-        expect(c).toBe(patchBase ? 1 : 0)
-        expect(c2).toBe(patchOther ? 1 : 0)
-        expect(Ccall).toBe(1)
-        expect(Bcall).toBe(callSuper ? 1 : 0)
-    }
-
-    for (const base of [false, true]) {
-        for (const other of [false, true]) {
-            for (const callSuper of [false, true]) {
-                test(`base: ${base}, other: ${other}, callSuper: ${callSuper}`, async () => {
-                    await doTest(base, other, callSuper)
-                })
-            }
-        }
-    }
-})
-
 test("base cWU should not be called if overriden", async () => {
     let baseCalled = 0
     let dCalled = 0
@@ -667,4 +369,40 @@ test("base cWU should not be called if overriden", async () => {
     expect(dCalled).toBe(1)
     expect(oCalled).toBe(1)
     expect(baseCalled).toBe(0)
+})
+
+test("should error on inheritance", async () => {
+    class C extends React.Component {
+        render() {
+            return null
+        }
+    }
+
+    expect(() => {
+        class B extends C {
+            @disposeOnUnmount
+            fn() {
+                dCalled++
+            }
+        }
+    }).toThrow("disposeOnUnmount only supports direct subclasses")
+})
+
+test("should error on inheritance - 2", async () => {
+    class C extends React.Component {
+        render() {
+            return null
+        }
+    }
+
+    class B extends C {
+        constructor() {
+            super()
+            expect(() => {
+                this.fn = disposeOnUnmount(this, function() {})
+            }).toThrow("disposeOnUnmount only supports direct subclasses")
+        }
+    }
+
+    await asyncReactDOMRender(<B />, testRoot)
 })
