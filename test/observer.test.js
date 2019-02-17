@@ -38,13 +38,9 @@ describe("nestedRendering", async () => {
     })
 
     let todoListRenderings = 0
-    let todoListWillReactCount = 0
     const TodoList = observer(
         createClass({
             renderings: 0,
-            componentWillReact() {
-                todoListWillReactCount++
-            },
             render() {
                 todoListRenderings++
                 const todos = store.todos
@@ -68,7 +64,6 @@ describe("nestedRendering", async () => {
 
     test("first rendering", () => {
         expect(todoListRenderings).toBe(1)
-        expect(todoListWillReactCount).toBe(0)
         expect(testRoot.querySelectorAll("li").length).toBe(1)
         expect(testRoot.querySelector("li").innerHTML).toBe("|a")
         expect(todoItemRenderings).toBe(1)
@@ -77,7 +72,6 @@ describe("nestedRendering", async () => {
     test("second rendering with inner store changed", () => {
         store.todos[0].title += "a"
         expect(todoListRenderings).toBe(1)
-        expect(todoListWillReactCount).toBe(0)
         expect(todoItemRenderings).toBe(2)
         expect(getDNode(store, "todos").observers.size).toBe(1)
         expect(getDNode(store.todos[0], "title").observers.size).toBe(1)
@@ -95,7 +89,6 @@ describe("nestedRendering", async () => {
                 .sort()
         ).toEqual(["|aa", "|b"].sort())
         expect(todoListRenderings).toBe(2)
-        expect(todoListWillReactCount).toBe(1)
         expect(todoItemRenderings).toBe(3)
         expect(getDNode(store.todos[1], "title").observers.size).toBe(1)
         expect(getDNode(store.todos[1], "completed").observers.size).toBe(0)
@@ -104,7 +97,6 @@ describe("nestedRendering", async () => {
     test("rerendering with outer store pop", () => {
         const oldTodo = store.todos.pop()
         expect(todoListRenderings).toBe(3)
-        expect(todoListWillReactCount).toBe(2)
         expect(todoItemRenderings).toBe(3)
         expect(testRoot.querySelectorAll("li").length).toBe(1)
         expect(getDNode(oldTodo, "title").observers.size).toBe(0)
@@ -356,15 +348,21 @@ describe("124 - react to changes in this.props via computed", () => {
 
 // Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
 //this test case should be deprecated?
-test.skip("should stop updating if error was thrown in render (#134)", () => {
+test("should stop updating if error was thrown in render (#134)", () => {
     const data = mobx.observable.box(0)
     let renderingsCount = 0
     let lastOwnRenderCount = 0
     const errors = []
 
     class Outer extends React.Component {
+        state = { hasError: false }
+
         render() {
-            return <div>{this.props.children}</div>
+            return this.state.hasError ? <div>Error!</div> : <div>{this.props.children}</div>
+        }
+
+        static getDerivedStateFromError() {
+            return { hasError: true }
         }
 
         componentDidCatch(error, info) {
@@ -387,24 +385,26 @@ test.skip("should stop updating if error was thrown in render (#134)", () => {
         }
     )
 
-    TestUtils.renderIntoDocument(
-        <Outer>
-            <Comp />
-        </Outer>
-    )
-    expect(data.observers.size).toBe(1)
-    data.set(1)
-    expect(renderingsCount).toBe(2)
-    expect(lastOwnRenderCount).toBe(2)
-    data.set(2)
-    expect(data.observers.size).toBe(0)
-    data.set(3)
-    data.set(4)
-    data.set(2)
-    data.set(5)
-    expect(errors).toMatchSnapshot()
-    expect(lastOwnRenderCount).toBe(4)
-    expect(renderingsCount).toBe(4)
+    withConsole(() => {
+        TestUtils.renderIntoDocument(
+            <Outer>
+                <Comp />
+            </Outer>
+        )
+        expect(data.observers.size).toBe(1)
+        data.set(1)
+        expect(renderingsCount).toBe(2)
+        expect(lastOwnRenderCount).toBe(2)
+        data.set(2)
+        expect(data.observers.size).toBe(0)
+        data.set(3)
+        data.set(4)
+        data.set(2)
+        data.set(5)
+        expect(errors).toMatchSnapshot()
+        expect(lastOwnRenderCount).toBe(4)
+        expect(renderingsCount).toBe(4)
+    })
 })
 
 describe("should render component even if setState called with exactly the same props", () => {
@@ -475,13 +475,15 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
     )
 
     function stuff() {
-        data.y++
-        odata.x++
+        act(() => {
+            data.y++
+            odata.x++
+        })
     }
 
     const wrapper = renderer.create(<Parent odata={odata} data={data} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.rendered.join("")
 
     expect(contents()).toEqual("1-1-1")
     stuff()
@@ -495,7 +497,7 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
     let odata = mobx.observable({ x: 1 })
 
     @observer
-    class Component extends React.Component {
+    class Component extends React.PureComponent {
         @mobx.computed
         get computed() {
             return this.props.data.y // should recompute, since props.data is changed
@@ -529,7 +531,7 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
 
     const wrapper = renderer.create(<Parent odata={odata} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.join("")
 
     expect(renderCount).toBe(1)
     expect(contents()).toBe("1-1")
@@ -651,55 +653,9 @@ test("parent / childs render in the right order", done => {
 
     const container = TestUtils.renderIntoDocument(<Parent />)
 
-    debugger
     tryLogout()
     expect(events).toEqual(["parent", "child", "parent"])
     done()
-})
-
-describe("206 - @observer should produce usefull errors if it throws", () => {
-    const data = mobx.observable({ x: 1 })
-    let renderCount = 0
-
-    const emmitedErrors = []
-    const disposeErrorsHandler = onError(error => {
-        emmitedErrors.push(error)
-    })
-
-    @observer
-    class Child extends React.Component {
-        render() {
-            renderCount++
-            if (data.x === 42) throw new Error("Oops!")
-            return <span>{data.x}</span>
-        }
-    }
-
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Child />, testRoot)
-        done()
-    })
-
-    test("init renderCount should === 1", () => {
-        expect(renderCount).toBe(1)
-    })
-
-    test("catch exception", () => {
-        expect(() => {
-            withConsole(() => {
-                data.x = 42
-            })
-        }).toThrow(/Oops!/)
-        expect(renderCount).toBe(3) // React fiber will try to replay the rendering, so the exception gets thrown a second time
-    })
-
-    test("component recovers!", async () => {
-        await sleepHelper(500)
-        data.x = 3
-        TestUtils.renderIntoDocument(<Child />)
-        expect(renderCount).toBe(4)
-        expect(emmitedErrors).toEqual([new Error("Oops!"), new Error("Oops!")]) // see above comment
-    })
 })
 
 test("195 - async componentWillMount does not work", async () => {
@@ -731,22 +687,6 @@ test("195 - async componentWillMount does not work", async () => {
 
     await sleepHelper(500)
     expect(renderedValues).toEqual([0, 1])
-})
-
-test.skip("195 - should throw if trying to overwrite lifecycle methods", () => {
-    // Test disabled, see #231...
-
-    @observer
-    class WillMount extends React.Component {
-        componentWillMount = () => {}
-
-        render() {
-            return null
-        }
-    }
-    expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(
-        /Cannot assign to read only property 'componentWillMount'/
-    )
 })
 
 describe("use Observer inject and render sugar should work  ", () => {
@@ -787,13 +727,12 @@ describe("use Observer inject and render sugar should work  ", () => {
     })
 })
 
-test("don't use PureComponent", () => {
+test("use PureComponent", () => {
     const msg = []
     const baseWarn = console.warn
     console.warn = m => msg.push(m)
 
     try {
-        debugger
         observer(
             class X extends React.PureComponent {
                 return() {
@@ -802,9 +741,7 @@ test("don't use PureComponent", () => {
             }
         )
 
-        expect(msg).toEqual([
-            "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
-        ])
+        expect(msg).toEqual([])
     } finally {
         console.warn = baseWarn
     }
@@ -817,4 +754,48 @@ test("static on function components are hoisted", () => {
     const Comp2 = observer(Comp)
 
     expect(Comp2.foo).toBe(3)
+})
+
+test("computed properties react to props", async () => {
+    const seen = []
+    @observer
+    class Child extends React.Component {
+        @mobx.computed
+        get getPropX() {
+            return this.props.x
+        }
+
+        render() {
+            seen.push(this.getPropX)
+            return <div>{this.getPropX}</div>
+        }
+    }
+
+    class Parent extends React.Component {
+        state = { x: 0 }
+        render() {
+            seen.push("parent")
+            return <Child x={this.state.x} />
+        }
+
+        componentDidMount() {
+            setTimeout(() => this.setState({ x: 2 }), 100)
+        }
+    }
+
+    const wrapper = renderer.create(<Parent />)
+    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
+<div>
+  0
+</div>
+`)
+
+    await sleepHelper(200)
+    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
+<div>
+  2
+</div>
+`)
+
+    expect(seen).toEqual(["parent", 0, "parent", 2])
 })

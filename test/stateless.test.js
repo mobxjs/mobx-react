@@ -4,7 +4,7 @@ import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, propTypes } from "../src"
+import { observer, PropTypes as MRPropTypes } from "../src"
 import { createTestRoot, asyncReactDOMRender } from "./index"
 import renderer, { act } from "react-test-renderer"
 import { observable } from "mobx"
@@ -67,8 +67,8 @@ test("component with observable propTypes", () => {
     const Component = createClass({
         render: () => null,
         propTypes: {
-            a1: propTypes.observableArray,
-            a2: propTypes.arrayOrObservableArray
+            a1: MRPropTypes.observableArray,
+            a2: MRPropTypes.arrayOrObservableArray
         }
     })
     const originalConsoleError = console.error

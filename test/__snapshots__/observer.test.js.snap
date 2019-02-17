@@ -27,6 +27,7 @@ Array [
   "Error: Hello",
   Object {
     "componentStack": "
+    in Observer (created by X)
     in X
     in div (created by Outer)
     in Outer",

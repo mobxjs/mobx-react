@@ -2,12 +2,11 @@ import React from "react"
 import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import { mount } from "enzyme"
 import * as mobx from "mobx"
-import { action, observable, computed } from "mobx"
+import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
 import { createTestRoot, sleepHelper, withConsole } from "./index"
-import renderer from "react-test-renderer"
+import renderer, { act } from "react-test-renderer"
 
 const testRoot = createTestRoot()
 
@@ -33,8 +32,13 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        const wrapper = mount(<A />)
-        expect(wrapper.find("div").text()).toEqual("context:bar")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  bar
+</div>
+`)
     })
 
     test("props override context", () => {
@@ -58,8 +62,13 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        const wrapper = mount(<A />)
-        expect(wrapper.find("div").text()).toEqual("context:42")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  42
+</div>
+`)
     })
 
     test("overriding stores is supported", () => {
@@ -95,9 +104,25 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        const wrapper = mount(<A />)
-        expect(wrapper.find("span").text()).toEqual("context:bar1337")
-        expect(wrapper.find("section").text()).toEqual("context:421337")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  <span>
+    <div>
+      context:
+      bar
+      1337
+    </div>
+  </span>
+  <section>
+    <div>
+      context:
+      42
+      1337
+    </div>
+  </section>
+</div>
+`)
     })
 
     // FIXME: see other comments related to error catching in React
@@ -126,7 +151,7 @@ describe("inject based context", () => {
             )
         })
         withConsole(() => {
-            expect(() => mount(<A />)).toThrow(
+            expect(() => renderer.create(<A />)).toThrow(
                 /Store 'foo' is not available! Make sure it is provided by some Provider/
             )
         })
@@ -148,8 +173,13 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C foo="bar" />
-        const wrapper = mount(<B />)
-        expect(wrapper.find("div").text()).toEqual("context:bar")
+        const wrapper = renderer.create(<B />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  bar
+</div>
+`)
     })
 
     test("inject merges (and overrides) props", () => {
@@ -164,13 +194,13 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C a={2} b={2} />
-        mount(<B />)
+        renderer.create(<B />)
     })
 
     test("warning is printed when changing stores", () => {
         let msgs = []
         const baseError = console.error
-        console.error = m => msgs.push(m.split("\n")[0]) // drop stacktraces to avoid line number issues
+        console.error = m => msgs.push(m.split("\n").slice(0, 7)) // drop stacktraces to avoid line number issues
         const a = mobx.observable.box(3)
         const C = inject("foo")(
             observer(
@@ -203,13 +233,24 @@ describe("inject based context", () => {
                 )
             })
         )
-        const wrapper = mount(<A />)
+        const wrapper = renderer.create(<A />)
 
-        expect(wrapper.find("span").text()).toBe("3")
-        expect(wrapper.find("div").text()).toBe("context:3")
+        expect(wrapper).toMatchInlineSnapshot(`
+<section>
+  <span>
+    3
+  </span>
+  <div>
+    context:
+    3
+  </div>
+</section>
+`)
 
         expect(() => {
-            a.set(42)
+            act(() => {
+                a.set(42)
+            })
         }).toThrow(
             "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
         )
@@ -249,8 +290,14 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        const wrapper = mount(<A />)
-        expect(wrapper.find("div").text()).toBe("context:bar84")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  bar
+  84
+</div>
+`)
     })
 
     test("inject forwards ref", async () => {
@@ -337,7 +384,7 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        mount(<A />)
+        renderer.create(<A />)
         expect(msg.length).toBe(2)
         expect(msg[0].split("\n")[0]).toBe(
             "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`."
@@ -400,11 +447,21 @@ describe("inject based context", () => {
                 <User />
             </Provider>
         )
-        const wrapper = mount(<App />)
+        const wrapper = renderer.create(<App />)
 
-        expect(wrapper.find("h1").text()).toBe("Noa")
-        user.name = "Veria"
-        expect(wrapper.find("h1").text()).toBe("Veria")
+        expect(wrapper).toMatchInlineSnapshot(`
+<h1>
+  Noa
+</h1>
+`)
+        act(() => {
+            user.name = "Veria"
+        })
+        expect(wrapper).toMatchInlineSnapshot(`
+<h1>
+  Veria
+</h1>
+`)
     })
 
     test("using a custom injector is not too reactive", done => {
@@ -440,7 +497,7 @@ describe("inject based context", () => {
 
         const state = new State()
 
-        class ListComponent extends React.Component {
+        class ListComponent extends React.PureComponent {
             render() {
                 listRender++
                 const { items } = this.props
@@ -467,7 +524,7 @@ describe("inject based context", () => {
                 highlight: state.highlight
             }
         })
-        class ItemComponent extends React.Component {
+        class ItemComponent extends React.PureComponent {
             highlight = () => {
                 const { item, highlight } = this.props
                 highlight(item)

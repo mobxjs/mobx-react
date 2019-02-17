@@ -9,23 +9,6 @@ Exports the `observer` decorator and some development utilities.
 For documentation, see the [MobX](https://mobxjs.github.io/mobx) project.
 This package supports both React and React Native.
 
-## Choosing your version
-
-There are currently two actively maintained versions of mobx-react:
-
-| NPM Version | Supported React versions | Supports hook based components |
-| --- | --- | -- |
-| v6 | 16.8.0 and higher | Yes |
-| v5 | 0.13 and higher | No, but it is possible to use `<Observer>` sections inside hook based components |
-
-The V5 documentation can be found in the [README_v5](README_v5.md).
-
-Version 6 is a repackage of the [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
-* Support for class based components for `observer` and `@observer`
-* `Provider / inject` to pass stores around (but consider to use `React.createContext` instead)
-* `PropTypes` to describe observable based property checkers (but consider to use TypeScript instead)
-* The `disposeOnUnmount` utility / decorator to easily clean up resources such as reactions created in your class based components.
-
 ## Installation
 
 `npm install mobx-react --save`
@@ -43,9 +26,17 @@ See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.htm
 
 If you are using [React hooks](https://reactjs.org/docs/hooks-intro.html) with latest React 16.7 and you like living on the bleeding edge then have a look at the new [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite).
 
-## API documentation
+## Boilerplate projects that use mobx-react
 
-Please check [mobx.js.org](https://mobx.js.org) for the general documentation. The documentation below highlights some specifics.
+*   Minimal MobX, React, ES6, JSX, Hot reloading: [MobX-React-Boilerplate](https://github.com/mobxjs/mobx-react-boilerplate)
+*   TodoMVC MobX, React, ES6, JSX, Hot reloading: [MobX-React-TodoMVC](https://github.com/mobxjs/mobx-react-todomvc)
+*   Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript-Boilerplate](https://github.com/mobxjs/mobx-react-typescript-boilerplate)
+*   Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
+    [jspm-react](https://github.com/capaj/jspm-react)
+*   React Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
+*   React Native, TypeScript, React Navigation: [Ignite Bowser](https://github.com/infinitered/ignite-bowser)
+
+## API documentation
 
 ### observer(componentClass)
 
@@ -88,7 +79,7 @@ class TodoView extends React.Component {
     }
 }
 
-// ---- or just use function components: ----
+// ---- or just use a stateless component function: ----
 
 const TodoView = observer(({ todo }) => <div>{todo.title}</div>)
 ```
@@ -140,6 +131,19 @@ React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
+### Global error handler with `onError`
+
+If a component throws an error, this logs to the console but does not 'crash' the app, so it might go unnoticed.
+For this reason it is possible to attach a global error handler using `onError` to intercept any error thrown in the render of an `observer` component.
+This can be used to hook up any client side error collection system.
+
+```javascript
+import { onError } from "mobx-react"
+
+onError(error => {
+    console.log(error)
+})
+```
 
 ### Server Side Rendering with `useStaticRendering`
 
@@ -168,6 +172,37 @@ Decorators are currently a stage-2 ESNext feature. How to enable them is documen
 
 See this [thread](https://www.reddit.com/r/reactjs/comments/4vnxg5/free_eggheadio_course_learn_mobx_react_in_30/d61oh0l).
 TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, but use `observer` on all components.
+
+### About `shouldComponentUpdate`
+
+When using `@observer` on a component, don't implement `shouldComponentUpdate`, as it will override the default implementation that MobX provides.
+When using mobx-react, you should in general not need to write an `sCU` (in our entire Mendix code base we have none). If you really need to implement `sCU`, split the component into two, a reactive and non-reactive (with the `sCU`) part, or use `<Observer>` sections instead of `observer` on the entire component.
+
+Similarly, `PureComponent` should not be combined with `observer`. As pure components are supposed to be dumb and never update themselves automatically, but only by getting passed in new props from the parent. `observer` is the opposite, it makes components smart and dependency aware, allowing them to update without the parents even needing to be aware of the change.
+
+### `componentWillReact` (lifecycle hook)
+
+React components usually render on a fresh stack, so that makes it often hard to figure out what _caused_ a component to re-render.
+When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component is scheduled to be re-rendered because
+data it observes has changed. This makes it easy to trace renders back to the action that caused the rendering.
+
+```javascript
+import { observer } from "mobx-react"
+
+@observer
+class TodoView extends React.Component {
+    componentWillReact() {
+        console.log("I will re-render, since the todo has changed!")
+    }
+
+    render() {
+        return <div>{this.props.todo.title}</div>
+    }
+}
+```
+
+*   `componentWillReact` doesn't take arguments
+*   `componentWillReact` won't fire before the initial render (use `componentDidMount` or `constructor` instead)
 
 ### `PropTypes`
 
@@ -226,9 +261,11 @@ class MessageList extends React.Component {
 Notes:
 
 *   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
+*   If updates to an observable store are not triggering `render()`, make sure you are using Class methods for React lifecycle hooks such as `componentWillMount() {}`, using `componentWillMount = () => {}` will create a property on the instance and cause conflicts with mobx-react.
 *   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
 *   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
 *   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
+*   For mounted component instances, the wrapped component instance is available through the `wrappedInstance` property (except for stateless components).
 
 #### Inject as function
 
@@ -356,6 +393,10 @@ public render() {
 }
 ```
 
+##### With Flow
+
+Currently, there is a community-discussion around the best way to use `inject` with Flow. Join the discussion at [this gist](https://gist.github.com/vonovak/29c972c6aa9efbb7d63a6853d021fba9).
+
 #### Testing store injection
 
 It is allowed to pass any declared store in directly as a property as well. This makes it easy to set up individual component tests without a provider.
@@ -409,17 +450,6 @@ class SomeComponent extends React.Component {
 }
 ```
 
-## DevTools
-
-`mobx-react@6` and higher are no longer compatible with the mobx-react-devtools. 
-That is, the MobX react devtools will no longer show render timings or dependency trees of the component. 
-The reason is that the standard React devtools are no also capable of highlighting re-rendering components.
-And the dependency tree of a component can now be inspected by the standard devtools as well, as shown in the image below:
-
-![hooks.png](hooks.png)
-
-The event spy will still work as is.
-
 ## FAQ
 
 **Should I use `observer` for each component?**
@@ -446,3 +476,43 @@ Warning: setState(...): Cannot update during an existing state transition (such 
 
 Usually this means that (another) component is trying to modify observables used by this components in their `constructor` or `getInitialState` methods.
 This violates the React Lifecycle, `componentWillMount` should be used instead if state needs to be modified before mounting.
+
+## Internal DevTools Api
+
+### trackComponents()
+
+Enables the tracking from components. Each rendered reactive component will be added to the `componentByNodeRegistery` and its renderings will be reported through the `renderReporter` event emitter.
+
+### renderReporter
+
+Event emitter that reports render timings and component destructions. Only available after invoking `trackComponents()`.
+New listeners can be added through `renderReporter.on(function(data) { /* */ })`.
+
+Data will have one of the following formats:
+
+```javascript
+{
+    event: 'render',
+    renderTime: /* time spend in the .render function of a component, in ms. */,
+    totalTime: /* time between starting a .render and flushing the changes to the DOM, in ms. */,
+    component: /* component instance */,
+    node: /* DOM node */
+}
+```
+
+```javascript
+{
+    event: 'destroy',
+    component: /* component instance */,
+    node: /* DOM Node */
+}
+```
+
+### componentByNodeRegistery
+
+WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
+This map is only available after invoking `trackComponents`.
+
+### Debugging reactions with trace
+
+Using Mobx.trace() inside a React render function will print out the observable that triggered the change. See [the mobx trace docs](https://mobx.js.org/best/trace.html) for more information.

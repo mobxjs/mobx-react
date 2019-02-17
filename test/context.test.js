@@ -1,11 +1,7 @@
 import React from "react"
-import createClass from "create-react-class"
-import { mount } from "enzyme"
 import * as mobx from "mobx"
-import { shallow } from "enzyme"
-import ErrorCatcher from "./ErrorCatcher"
 import { Provider, observer, inject } from "../src"
-import { sleepHelper, withConsole } from "./"
+import { withConsole } from "./"
 import TestRenderer from "react-test-renderer"
 
 test("no warnings in modern react", () => {
@@ -38,13 +34,14 @@ test("no warnings in modern react", () => {
         }
     }
 
-    // Enzyme can't handle React.strictMode
     expect(
         withConsole(() => {
             const testRenderer = TestRenderer.create(<App />)
             expect(testRenderer.toJSON()).toMatchSnapshot()
 
-            box.set(4)
+            TestRenderer.act(() => {
+                box.set(4)
+            })
             expect(testRenderer.toJSON()).toMatchSnapshot()
         })
     ).toEqual({ errors: [], infos: [], warnings: [] })

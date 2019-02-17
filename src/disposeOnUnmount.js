@@ -1,9 +1,11 @@
 import * as React from "react"
-import { patch, newSymbol } from "./utils/utils"
+import { newSymbol } from "./utils/utils"
 
 const storeKey = newSymbol("disposeOnUnmount")
+const baseUnmountKey = newSymbol("originalOnUnmount")
 
 function runDisposersOnWillUnmount() {
+    if (this[baseUnmountKey]) this[baseUnmountKey]()
     if (!this[storeKey]) {
         // when disposeOnUnmount is only set to some instances of a component it will still patch the prototype
         return
@@ -28,8 +30,19 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
         return propertyKeyOrFunction.map(fn => disposeOnUnmount(target, fn))
     }
 
-    if (!target instanceof React.Component) {
-        throw new Error("[mobx-react] disposeOnUnmount only works on class based React components.")
+    const c = Object.getPrototypeOf(target).constructor || Object.getPrototypeOf(target.constructor)
+    const c2 = Object.getPrototypeOf(target.constructor)
+    if (
+        !(
+            c === React.Component ||
+            c === React.PureComponent ||
+            c2 === React.Component ||
+            c2 === React.PureComponent
+        )
+    ) {
+        throw new Error(
+            "[mobx-react] disposeOnUnmount only supports direct subclasses of React.Component or React.PureComponent."
+        )
     }
 
     if (typeof propertyKeyOrFunction !== "string" && typeof propertyKeyOrFunction !== "function") {
@@ -41,12 +54,26 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
     // add property key / function we want run (disposed) to the store
     const componentWasAlreadyModified = !!target[storeKey]
     const store = target[storeKey] || (target[storeKey] = [])
-
     store.push(propertyKeyOrFunction)
 
     // tweak the component class componentWillUnmount if not done already
     if (!componentWasAlreadyModified) {
-        patch(target, "componentWillUnmount", runDisposersOnWillUnmount)
+        // make sure original definition is invoked
+        if (target.componentWillUnmount) target[baseUnmountKey] = target.componentWillUnmount
+
+        Object.defineProperty(target, "componentWillUnmount", {
+            get() {
+                return runDisposersOnWillUnmount
+            },
+            set(fn) {
+                // this will happen if componentWillUnmount is being assigned after patching the prototype
+                this[storeKey].push(fn)
+                // assigning a new local value to componentWillUnmount would hide the super implementation...
+                this[baseUnmountKey] = undefined
+            },
+            configurable: false,
+            enumerable: false
+        })
     }
 
     // return the disposer as is if invoked as a non decorator

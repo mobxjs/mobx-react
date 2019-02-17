@@ -5,7 +5,7 @@ const specialReactKeys = { children: true, key: true, ref: true }
 
 export const MobXProviderContext = createContext({})
 
-class Provider extends Component {
+export class Provider extends Component {
     static contextType = MobXProviderContext
 
     constructor(props, context) {
@@ -44,4 +44,3 @@ function grabStores(from) {
 function validStoreName(key) {
     return !specialReactKeys[key] && key !== "suppressChangedStoreWarning"
 }
-export default Provider
