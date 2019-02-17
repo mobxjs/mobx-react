@@ -502,3 +502,169 @@ it("componentDidMount should be different between components", async () => {
     await doTest(true)
     await doTest(false)
 })
+
+describe("inheritance with prototype methods", async () => {
+    async function doTest(patchBase, patchOther, callSuper) {
+        let Bcall = 0
+        let Ccall = 0
+        let c = 0
+        let c2 = 0
+
+        class B extends React.Component {
+            componentWillUnmount() {
+                Bcall++
+            }
+        }
+
+        class C extends B {
+            componentWillUnmount() {
+                if (callSuper) {
+                    super.componentWillUnmount()
+                }
+                Ccall++
+            }
+            render() {
+                return null
+            }
+        }
+
+        if (patchBase) {
+            let target = B.prototype
+            target.fn = () => {
+                c++
+            }
+            disposeOnUnmount(target, "fn")
+        }
+
+        if (patchOther) {
+            let target2 = C.prototype
+            target2.fn2 = () => {
+                c2++
+            }
+            disposeOnUnmount(target2, "fn2")
+        }
+
+        await asyncReactDOMRender(<C />, testRoot)
+        await asyncReactDOMRender(null, testRoot)
+
+        expect(Ccall).toBe(1)
+        expect(c).toBe(patchBase ? 1 : 0)
+        expect(Bcall).toBe(callSuper ? 1 : 0)
+        expect(c2).toBe(patchOther ? 1 : 0)
+    }
+
+    for (const base of [false, true]) {
+        for (const other of [false, true]) {
+            for (const callSuper of [false, true]) {
+                test(`base: ${base}, other: ${other}, callSuper: ${callSuper}`, async () => {
+                    if (base && !other && !callSuper) {
+                        // this one is expected to fail, since we are patching only the base and the other one totally ignores the base method
+                        try {
+                            await doTest(base, other, callSuper)
+                            fail("should have failed")
+                        } catch (e) {}
+                    } else {
+                        await doTest(base, other, callSuper)
+                    }
+                })
+            }
+        }
+    }
+})
+
+describe("inheritance with arrow functions", async () => {
+    async function doTest(patchBase, patchOther, callSuper) {
+        let Bcall = 0
+        let Ccall = 0
+        let c = 0
+        let c2 = 0
+
+        class B extends React.Component {
+            constructor() {
+                super()
+                if (patchBase) {
+                    this.fn = function() {
+                        c++
+                    }
+                    disposeOnUnmount(this, this.fn)
+                }
+            }
+            componentWillUnmount() {
+                Bcall++
+            }
+        }
+
+        class C extends B {
+            constructor() {
+                super()
+                if (patchOther) {
+                    this.fn2 = function() {
+                        c2++
+                    }
+                    disposeOnUnmount(this, this.fn2)
+                }
+            }
+            componentWillUnmount = () => {
+                if (callSuper) {
+                    super.componentWillUnmount()
+                }
+                Ccall++
+            }
+            render() {
+                return null
+            }
+        }
+
+        await asyncReactDOMRender(<C />, testRoot)
+        await asyncReactDOMRender(null, testRoot)
+
+        expect(c).toBe(patchBase ? 1 : 0)
+        expect(c2).toBe(patchOther ? 1 : 0)
+        expect(Ccall).toBe(1)
+        expect(Bcall).toBe(callSuper ? 1 : 0)
+    }
+
+    for (const base of [false, true]) {
+        for (const other of [false, true]) {
+            for (const callSuper of [false, true]) {
+                test(`base: ${base}, other: ${other}, callSuper: ${callSuper}`, async () => {
+                    await doTest(base, other, callSuper)
+                })
+            }
+        }
+    }
+})
+
+test("base cWU should not be called if overriden", async () => {
+    let baseCalled = 0
+    let dCalled = 0
+    let oCalled = 0
+
+    class C extends React.Component {
+        componentWillUnmount() {
+            baseCalled++
+        }
+
+        constructor() {
+            super()
+            this.componentWillUnmount = () => {
+                oCalled++
+            }
+        }
+
+        render() {
+            return null
+        }
+
+        @disposeOnUnmount
+        fn() {
+            dCalled++
+        }
+    }
+
+    await asyncReactDOMRender(<C />, testRoot)
+    await asyncReactDOMRender(null, testRoot)
+    expect(dCalled).toBe(1)
+    expect(oCalled).toBe(1)
+    expect(baseCalled).toBe(0)
+})
