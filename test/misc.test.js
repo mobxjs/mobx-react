@@ -107,22 +107,6 @@ test("testIsComponentReactive", () => {
     expect(mobx.isObservable(instance)).toBeFalsy()
 })
 
-// TODO: needs to be restored to support devtools!
-test.skip("testGetDNode", () => {
-    const C = observer(() => null)
-
-    const wrapper = renderer.create(<C />)
-    expect(wrapper.getInstance()[mobxAdminProperty]).toBeTruthy()
-    expect(mobx.getAtom(wrapper.instance().render)).toBeTruthy()
-
-    mobx.extendObservable(wrapper.instance(), {
-        x: 3
-    })
-    expect(mobx.getAtom(wrapper.instance(), "x")).not.toEqual(
-        mobx.getAtom(wrapper.instance().render)
-    )
-})
-
 test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {
     expect(
         withConsole(() => {

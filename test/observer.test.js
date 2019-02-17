@@ -348,15 +348,21 @@ describe("124 - react to changes in this.props via computed", () => {
 
 // Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
 //this test case should be deprecated?
-test.skip("should stop updating if error was thrown in render (#134)", () => {
+test("should stop updating if error was thrown in render (#134)", () => {
     const data = mobx.observable.box(0)
     let renderingsCount = 0
     let lastOwnRenderCount = 0
     const errors = []
 
     class Outer extends React.Component {
+        state = { hasError: false }
+
         render() {
-            return <div>{this.props.children}</div>
+            return this.state.hasError ? <div>Error!</div> : <div>{this.props.children}</div>
+        }
+
+        static getDerivedStateFromError() {
+            return { hasError: true }
         }
 
         componentDidCatch(error, info) {
@@ -379,24 +385,26 @@ test.skip("should stop updating if error was thrown in render (#134)", () => {
         }
     )
 
-    TestUtils.renderIntoDocument(
-        <Outer>
-            <Comp />
-        </Outer>
-    )
-    expect(data.observers.size).toBe(1)
-    data.set(1)
-    expect(renderingsCount).toBe(2)
-    expect(lastOwnRenderCount).toBe(2)
-    data.set(2)
-    expect(data.observers.size).toBe(0)
-    data.set(3)
-    data.set(4)
-    data.set(2)
-    data.set(5)
-    expect(errors).toMatchSnapshot()
-    expect(lastOwnRenderCount).toBe(4)
-    expect(renderingsCount).toBe(4)
+    withConsole(() => {
+        TestUtils.renderIntoDocument(
+            <Outer>
+                <Comp />
+            </Outer>
+        )
+        expect(data.observers.size).toBe(1)
+        data.set(1)
+        expect(renderingsCount).toBe(2)
+        expect(lastOwnRenderCount).toBe(2)
+        data.set(2)
+        expect(data.observers.size).toBe(0)
+        data.set(3)
+        data.set(4)
+        data.set(2)
+        data.set(5)
+        expect(errors).toMatchSnapshot()
+        expect(lastOwnRenderCount).toBe(4)
+        expect(renderingsCount).toBe(4)
+    })
 })
 
 describe("should render component even if setState called with exactly the same props", () => {
@@ -650,52 +658,6 @@ test("parent / childs render in the right order", done => {
     done()
 })
 
-// TODO: waits for error throw fix in lite
-describe.skip("206 - @observer should produce usefull errors if it throws", () => {
-    const data = mobx.observable({ x: 1 })
-    let renderCount = 0
-
-    const emmitedErrors = []
-    const disposeErrorsHandler = onError(error => {
-        emmitedErrors.push(error)
-    })
-
-    @observer
-    class Child extends React.Component {
-        render() {
-            renderCount++
-            if (data.x === 42) throw new Error("Oops!")
-            return <span>{data.x}</span>
-        }
-    }
-
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Child />, testRoot)
-        done()
-    })
-
-    test("init renderCount should === 1", () => {
-        expect(renderCount).toBe(1)
-    })
-
-    test("catch exception", () => {
-        expect(() => {
-            withConsole(() => {
-                data.x = 42
-            })
-        }).toThrow(/Oops!/)
-        expect(renderCount).toBe(3) // React fiber will try to replay the rendering, so the exception gets thrown a second time
-    })
-
-    test("component recovers!", async () => {
-        await sleepHelper(500)
-        data.x = 3
-        TestUtils.renderIntoDocument(<Child />)
-        expect(renderCount).toBe(4)
-        expect(emmitedErrors).toEqual([new Error("Oops!"), new Error("Oops!")]) // see above comment
-    })
-})
-
 test("195 - async componentWillMount does not work", async () => {
     const renderedValues = []
 
@@ -725,22 +687,6 @@ test("195 - async componentWillMount does not work", async () => {
 
     await sleepHelper(500)
     expect(renderedValues).toEqual([0, 1])
-})
-
-test.skip("195 - should throw if trying to overwrite lifecycle methods", () => {
-    // Test disabled, see #231...
-
-    @observer
-    class WillMount extends React.Component {
-        componentWillMount = () => {}
-
-        render() {
-            return null
-        }
-    }
-    expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(
-        /Cannot assign to read only property 'componentWillMount'/
-    )
 })
 
 describe("use Observer inject and render sugar should work  ", () => {
