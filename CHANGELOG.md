@@ -15,6 +15,7 @@
 * `propTypes` is no longer exposed, use `PropTypes` instead
 * `disposeOnUnmount` now only supports direct subclasses of `React.Component` and `React.PureComponent`. This prevents several unreliable edge cases that silently leaked memory before. Either only extend React.(Pure)Component when using `disposeOnUnmount`, or manually clean up stuff in `componentWillUnmount`.
 * The `onError` global error handler has been removed. Use error boundaries instead.
+* Improved dev tool names for `inject` wrapped components, see [#472](https://github.com/mobxjs/mobx-react/pull/472) by [SimeonC](https://github.com/SimeonC). Fixes [#466](https://github.com/mobxjs/mobx-react/issues/466)
 
 **Improvements**
 
