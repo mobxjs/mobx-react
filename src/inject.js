@@ -8,13 +8,7 @@ import { MobXProviderContext } from "./Provider"
  * Store Injection
  */
 function createStoreInjector(grabStoresFn, component, injectNames, makeReactive) {
-    let displayName =
-        "inject-" +
-        (component.displayName ||
-            component.name ||
-            (component.constructor && component.constructor.name) ||
-            "Unknown")
-    if (injectNames) displayName += "-with-" + injectNames
+    let displayName = getInjectName(component, injectNames)
 
     class Injector extends Component {
         static contextType = MobXProviderContext
@@ -43,6 +37,18 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
     InjectHocRef.wrappedComponent = component
     InjectHocRef.displayName = displayName
     return InjectHocRef
+}
+
+function getInjectName(component, injectNames) {
+    let displayName
+    const componentName =
+        component.displayName ||
+        component.name ||
+        (component.constructor && component.constructor.name) ||
+        "Component"
+    if (injectNames) displayName = "inject-with-" + injectNames + "(" + componentName + ")"
+    else displayName = "inject(" + componentName + ")"
+    return displayName
 }
 
 function grabStoresByName(storeNames) {

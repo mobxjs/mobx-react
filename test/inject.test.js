@@ -71,6 +71,66 @@ describe("inject based context", () => {
 `)
     })
 
+    test("wraps displayName of original component", () => {
+        const A = inject("foo")(
+            createClass({
+                displayName: "ComponentA",
+                render() {
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
+                }
+            })
+        )
+        const B = inject()(
+            createClass({
+                displayName: "ComponentB",
+                render() {
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
+                }
+            })
+        )
+        const C = inject(() => ({}))(
+            createClass({
+                displayName: "ComponentC",
+                render() {
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
+                }
+            })
+        )
+        const wrapperA = renderer.create(
+            <Provider foo="foo">
+                <A />
+            </Provider>
+        )
+        expect(wrapperA.root.children[0].type.displayName).toBe("inject-with-foo(ComponentA)")
+        const wrapperB = renderer.create(
+            <Provider foo="foo">
+                <B />
+            </Provider>
+        )
+        expect(wrapperB.root.children[0].type.displayName).toBe("inject(ComponentB)")
+        const wrapperC = renderer.create(
+            <Provider>
+                <C />
+            </Provider>
+        )
+        expect(wrapperC.root.children[0].type.displayName).toBe("inject(ComponentC)")
+    })
+
     test("overriding stores is supported", () => {
         const C = inject("foo", "bar")(
             observer(
@@ -387,7 +447,7 @@ describe("inject based context", () => {
         renderer.create(<A />)
         expect(msg.length).toBe(2)
         expect(msg[0].split("\n")[0]).toBe(
-            "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`."
+            "Warning: Failed prop type: The prop `x` is marked as required in `inject-with-foo(C)`, but its value is `undefined`."
         )
         expect(msg[1].split("\n")[0]).toBe(
             "Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`."

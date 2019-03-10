@@ -98,6 +98,7 @@ export function observer(componentClass) {
         )
     }
 
+    // TODO: still needed? (if func comp?)
     // Unwrap forward refs into `<Observer>` component
     // we need to unwrap the render, because it is the inner render that needs to be tracked,
     // not the ForwardRef HoC
@@ -117,15 +118,7 @@ export function observer(componentClass) {
         !componentClass.isReactClass &&
         !Component.isPrototypeOf(componentClass)
     ) {
-        const observerComponent = observerLite(componentClass)
-        // TODO: move to mobx-react-lite
-        // TODO: static hoisting is not needed?
-        hoistStatics(observerComponent, componentClass)
-        if (componentClass.propTypes) observerComponent.propTypes = componentClass.propTypes
-        if (componentClass.defaultProps)
-            observerComponent.defaultProps = componentClass.defaultProps
-        observerComponent.isMobXReactObserver = true
-        return observerComponent
+        return observerLite(componentClass)
     }
 
     return makeClassComponentObserver(componentClass)
@@ -142,7 +135,6 @@ function makeClassComponentObserver(componentClass) {
                 "It is not allowed to use shouldComponentUpdate in observer based components."
             )
     }
-    componentClass.isMobXReactObserver = true
     makeObservableProp(target, "props")
     makeObservableProp(target, "state")
     const baseRender = target.render
