@@ -2,8 +2,8 @@ import createClass from "create-react-class"
 import * as mobx from "mobx"
 import React, { Component } from "react"
 import TestUtils from "react-dom/test-utils"
-import { inject, observer, Observer, onError, Provider, useStaticRendering } from "../src"
-import { asyncReactDOMRender, createTestRoot, sleepHelper, withAsyncConsole, withConsole } from "./"
+import { inject, observer, Observer, useStaticRendering } from "../src"
+import { asyncReactDOMRender, createTestRoot, sleepHelper, withConsole } from "./"
 import renderer, { act } from "react-test-renderer"
 
 /**
@@ -294,6 +294,25 @@ test("observer component can be injected", () => {
 
     expect(msg.length).toBe(0)
     console.warn = baseWarn
+})
+
+// TODO: re-enable when https://github.com/mobxjs/mobx-react-lite/pull/75
+test.skip("correctly wraps display name of child component", () => {
+    const A = observer(
+        createClass({
+            displayName: "ObserverClass",
+            render: () => null
+        })
+    )
+    const B = observer(function StatelessObserver() {
+        return null
+    })
+
+    const wrapper = renderer.create(<A />)
+    expect(wrapper.root.type.displayName).toEqual("ObserverClass")
+
+    const wrapper2 = renderer.create(<B />)
+    expect(wrapper2.root.type.displayName).toEqual("StatelessObserver")
 })
 
 describe("124 - react to changes in this.props via computed", () => {

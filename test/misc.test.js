@@ -101,8 +101,6 @@ test("testIsComponentReactive", () => {
     const wrapper = renderer.create(<C />)
     const instance = wrapper.getInstance()
 
-    expect(C.isMobXReactObserver).toBeTruthy()
-
     // instance is something different then the rendering reaction!
     expect(mobx.isObservable(instance)).toBeFalsy()
 })
