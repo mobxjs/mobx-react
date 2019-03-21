@@ -1,5 +1,4 @@
 import React, { Component, PureComponent, forwardRef } from "react"
-import hoistStatics from "hoist-non-react-statics"
 import { createAtom, _allowStateChanges } from "mobx"
 import {
     observer as observerLite,

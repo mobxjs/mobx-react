@@ -1,7 +1,6 @@
 import React, { Component, createElement } from "react"
-import hoistStatics from "hoist-non-react-statics"
 import { observer } from "./observer"
-import { isStateless } from "./utils/utils"
+import { isStateless, copyStaticProperties } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"
 
 /**
@@ -33,7 +32,7 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
         React.createElement(Injector, { ...props, forwardRef: ref })
     )
     // Static fields from component should be visible on the generated Injector
-    hoistStatics(InjectHocRef, component)
+    copyStaticProperties(component, InjectHocRef)
     InjectHocRef.wrappedComponent = component
     InjectHocRef.displayName = displayName
     return InjectHocRef

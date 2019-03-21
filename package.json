@@ -64,7 +64,6 @@
     "typescript": "^2.6.0"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^3.0.0",
     "mobx-react-lite": "1.1.0"
   },
   "files": [

@@ -47,3 +47,28 @@ function is(x, y) {
         return x !== x && y !== y
     }
 }
+
+// based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js
+const hoistBlackList = {
+    $$typeof: 1,
+    render: 1,
+    compare: 1,
+    type: 1,
+    childContextTypes: 1,
+    contextType: 1,
+    contextTypes: 1,
+    defaultProps: 1,
+    getDefaultProps: 1,
+    getDerivedStateFromError: 1,
+    getDerivedStateFromProps: 1,
+    mixins: 1,
+    propTypes: 1
+}
+
+export function copyStaticProperties(base, target) {
+    Object.keys(base).forEach(key => {
+        if (base.hasOwnProperty(key) && !hoistBlackList[key]) {
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key))
+        }
+    })
+}
