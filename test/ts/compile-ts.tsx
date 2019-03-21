@@ -2,7 +2,7 @@ import * as React from "react"
 import * as ReactDOM from "react-dom"
 import { Component } from "react"
 import * as PropTypes from "prop-types"
-import { observer, Provider, propTypes, inject, Observer, disposeOnUnmount } from "../../src"
+import { observer, Provider, propTypes, inject, Observer, disposeOnUnmount, useObservable } from "../../src"
 import * as createClass from "create-react-class"
 
 @observer
@@ -269,4 +269,16 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
         methodB = disposeOnUnmount(this, () => {})
     }
     */
+}
+
+{
+    const TestComponent = () => {
+        const observable = useObservable({
+            test: 3
+        })
+
+        return <h1>{observable.test * 2}</h1>
+    }
+
+    <TestComponent />
 }

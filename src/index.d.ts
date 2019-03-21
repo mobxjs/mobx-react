@@ -3,6 +3,15 @@
  */
 import * as React from "react"
 
+export {
+    useObservable,
+    useComputed,
+    useDisposable,
+    IObserverOptions,
+    useObserver,
+    Observer
+} from "mobx-react-lite"
+
 export type IReactComponent<P = any> =
     | React.StatelessComponent<P>
     | React.ComponentClass<P>
@@ -69,14 +78,6 @@ export function disposeOnUnmount<TF extends Disposer | Disposer[]>(
  * Utilities
  */
 export class Provider extends React.Component<any, {}> {}
-
-export class Observer extends React.Component<
-    {
-        children?: () => React.ReactNode
-        render?: () => React.ReactNode
-    },
-    {}
-> {}
 
 export function useStaticRendering(value: boolean): void
 

@@ -8,7 +8,7 @@
 		"noEmit": true,
 		"rootDir": "../../",
 		"module": "commonjs",
-		"lib": ["es5", "dom"]
+		"lib": ["es6", "dom"]
 	},
 	"exclude": [
 

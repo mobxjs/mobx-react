@@ -4,12 +4,12 @@
   "description": "React bindings for MobX. Create fully reactive components.",
   "source": "src/index.js",
   "main": "dist/mobx-react.js",
-  "jsnext:main": "dist/mobx-react.mjs",
-  "umd:main": "dist/core.umd.js",
-  "unpkg": "dist/core.umd.js",
-  "module": "dist/mobx-react.mjs",
-  "react-native": "dist/mobx-react.mjs",
-  "typings": "dist/mobx-react.d.ts",
+  "jsnext:main": "dist/mobx-react.module.js",
+  "umd:main": "dist/mobx-react.umd.js",
+  "unpkg": "dist/mobx-react.umd.js",
+  "module": "dist/mobx-react.module.js",
+  "react-native": "dist/mobx-react.module.js",
+  "types": "dist/mobx-react.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mobxjs/mobx-react.git"
