@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "5.4.3",
+  "version": "6.0.0-rc.2",
   "description": "React bindings for MobX. Create fully reactive components.",
   "source": "src/index.js",
   "main": "dist/mobx-react.js",
@@ -8,7 +8,7 @@
   "umd:main": "dist/mobx-react.umd.js",
   "unpkg": "dist/mobx-react.umd.js",
   "module": "dist/mobx-react.module.js",
-  "react-native": "dist/mobx-react.module.js",
+  "react-native": "dist/mobx-react.rn.module.js",
   "types": "dist/mobx-react.d.ts",
   "repository": {
     "type": "git",
@@ -19,8 +19,8 @@
     "test": "jest && npm run test:ts",
     "test:ts": "tsc -p test/ts",
     "test:travis": "npm run build && jest && npm run test:ts",
-    "build": "yarn bundle && shx cp src/index.d.ts dist/mobx-react.d.ts",
-    "bundle": "microbundle --external mobx,react,react-dom,react-native --globals react-dom=ReactDOM,react-native=ReactNative,react=React --name mobxReact",
+    "build": "yarn bundle && shx cp src/index.d.ts dist/mobx-react.d.ts && shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && sed -i 's/\"react-dom\"/\"react-native\"/g' dist/mobx-react.rn.module.js",
+    "bundle": "microbundle --external mobx,react,react-dom --globals react-dom=ReactDOM,react=React --name mobxReact",
     "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
