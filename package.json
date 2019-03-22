@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "6.0.0-rc.2",
+  "version": "6.0.0-rc.3",
   "description": "React bindings for MobX. Create fully reactive components.",
   "source": "src/index.js",
   "main": "dist/mobx-react.js",
@@ -20,7 +20,7 @@
     "test:ts": "tsc -p test/ts",
     "test:travis": "npm run build && jest && npm run test:ts",
     "build": "yarn bundle && shx cp src/index.d.ts dist/mobx-react.d.ts && shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && sed -i 's/\"react-dom\"/\"react-native\"/g' dist/mobx-react.rn.module.js",
-    "bundle": "microbundle --external mobx,react,react-dom --globals react-dom=ReactDOM,react=React --name mobxReact",
+    "bundle": "microbundle --external mobx,react,react-dom --globals react-dom=ReactDOM,react=React --name mobxReact --no-compress",
     "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
@@ -51,7 +51,7 @@
     "jest-environment-jsdom": "^24.0.0",
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
-    "microbundle": "^0.9.0",
+    "microbundle": "^0.11.0",
     "mobx": "^5.0.0",
     "prettier": "^1.7.2",
     "prop-types": "^15.6.0",
