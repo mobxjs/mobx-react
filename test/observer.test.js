@@ -2,8 +2,9 @@ import createClass from "create-react-class"
 import * as mobx from "mobx"
 import React, { Component } from "react"
 import TestUtils from "react-dom/test-utils"
-import { inject, observer, Observer, onError, Provider, useStaticRendering } from "../src"
-import { asyncReactDOMRender, createTestRoot, sleepHelper, withAsyncConsole, withConsole } from "./"
+import { inject, observer, Observer, useStaticRendering } from "../src"
+import { asyncReactDOMRender, createTestRoot, sleepHelper, withConsole } from "./"
+import renderer, { act } from "react-test-renderer"
 
 /**
  *  some test suite is too tedious
@@ -37,13 +38,9 @@ describe("nestedRendering", async () => {
     })
 
     let todoListRenderings = 0
-    let todoListWillReactCount = 0
     const TodoList = observer(
         createClass({
             renderings: 0,
-            componentWillReact() {
-                todoListWillReactCount++
-            },
             render() {
                 todoListRenderings++
                 const todos = store.todos
@@ -67,7 +64,6 @@ describe("nestedRendering", async () => {
 
     test("first rendering", () => {
         expect(todoListRenderings).toBe(1)
-        expect(todoListWillReactCount).toBe(0)
         expect(testRoot.querySelectorAll("li").length).toBe(1)
         expect(testRoot.querySelector("li").innerHTML).toBe("|a")
         expect(todoItemRenderings).toBe(1)
@@ -76,7 +72,6 @@ describe("nestedRendering", async () => {
     test("second rendering with inner store changed", () => {
         store.todos[0].title += "a"
         expect(todoListRenderings).toBe(1)
-        expect(todoListWillReactCount).toBe(0)
         expect(todoItemRenderings).toBe(2)
         expect(getDNode(store, "todos").observers.size).toBe(1)
         expect(getDNode(store.todos[0], "title").observers.size).toBe(1)
@@ -94,7 +89,6 @@ describe("nestedRendering", async () => {
                 .sort()
         ).toEqual(["|aa", "|b"].sort())
         expect(todoListRenderings).toBe(2)
-        expect(todoListWillReactCount).toBe(1)
         expect(todoItemRenderings).toBe(3)
         expect(getDNode(store.todos[1], "title").observers.size).toBe(1)
         expect(getDNode(store.todos[1], "completed").observers.size).toBe(0)
@@ -103,7 +97,6 @@ describe("nestedRendering", async () => {
     test("rerendering with outer store pop", () => {
         const oldTodo = store.todos.pop()
         expect(todoListRenderings).toBe(3)
-        expect(todoListWillReactCount).toBe(2)
         expect(todoItemRenderings).toBe(3)
         expect(testRoot.querySelectorAll("li").length).toBe(1)
         expect(getDNode(oldTodo, "title").observers.size).toBe(0)
@@ -150,17 +143,20 @@ describe("keep views alive", () => {
             </div>
         )
     })
-    const element = TestUtils.renderIntoDocument(<TestComponent />)
+
+    beforeAll(async () => {
+        await asyncReactDOMRender(<TestComponent />, testRoot)
+    })
 
     test("init state", () => {
         expect(yCalcCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi6")
+        expect(testRoot.querySelector("div").innerHTML).toBe("hi6")
     })
 
     test("rerender should not need a recomputation of data.y", () => {
         data.z = "hello"
         expect(yCalcCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hello6")
+        expect(testRoot.querySelector("div").innerHTML).toBe("hello6")
     })
 })
 
@@ -175,7 +171,10 @@ describe("does not views alive when using static rendering", () => {
         renderCount++
         return <div>{data.z}</div>
     })
-    const element = TestUtils.renderIntoDocument(<TestComponent />)
+
+    beforeAll(async () => {
+        await asyncReactDOMRender(<TestComponent />, testRoot)
+    })
 
     afterAll(() => {
         useStaticRendering(false)
@@ -183,18 +182,19 @@ describe("does not views alive when using static rendering", () => {
 
     test("init state is correct", () => {
         expect(renderCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
+        expect(testRoot.querySelector("div").innerHTML).toBe("hi")
     })
 
     test("no re-rendering on static rendering", () => {
         data.z = "hello"
-        expect(renderCount).toBe(1)
-        expect(TestUtils.findRenderedDOMComponentWithTag(element, "div").innerHTML).toBe("hi")
         expect(getDNode(data, "z").observers.size).toBe(0)
+        expect(renderCount).toBe(1)
+        expect(testRoot.querySelector("div").innerHTML).toBe("hi")
     })
 })
 
-describe("issue 12", () => {
+test("issue 12", () => {
+    const events = []
     const data = mobx.observable({
         selected: "coffee",
         items: [
@@ -214,6 +214,7 @@ describe("issue 12", () => {
         }
 
         render() {
+            events.push("row: " + this.props.item.name)
             return (
                 <span>
                     {this.props.item.name}
@@ -224,6 +225,8 @@ describe("issue 12", () => {
     }
     /** table stateles component */
     const Table = observer(function table() {
+        events.push("table")
+        JSON.stringify(data)
         return (
             <div>
                 {data.items.map(item => (
@@ -233,27 +236,18 @@ describe("issue 12", () => {
         )
     })
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Table />, testRoot)
-        done()
-    })
+    const wrapper = renderer.create(<Table />)
+    expect(wrapper.toJSON()).toMatchSnapshot()
 
-    test("init state is correct", () => {
-        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
-            ["coffee!", "tea"].sort()
-        )
-    })
-
-    test("run transaction", () => {
+    act(() => {
         mobx.transaction(() => {
             data.items[1].name = "boe"
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
         })
-        expect([].map.call(testRoot.querySelectorAll("span"), tag => tag.innerHTML).sort()).toEqual(
-            ["soup"]
-        )
     })
+    expect(wrapper.toJSON()).toMatchSnapshot()
+    expect(events).toEqual(["table", "row: coffee", "row: tea", "table", "row: soup"])
 })
 
 test("changing state in render should fail", () => {
@@ -274,30 +268,6 @@ test("changing state in render should fail", () => {
 
     data.set(3)
     mobx._resetGlobalState()
-})
-
-test("component should not be inject", () => {
-    const msg = []
-    const baseWarn = console.warn
-    console.warn = m => msg.push(m)
-
-    observer(
-        inject("foo")(
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
-        )
-    )
-
-    expect(msg.length).toBe(1)
-    console.warn = baseWarn
 })
 
 test("observer component can be injected", () => {
@@ -324,6 +294,24 @@ test("observer component can be injected", () => {
 
     expect(msg.length).toBe(0)
     console.warn = baseWarn
+})
+
+test("correctly wraps display name of child component", () => {
+    const A = observer(
+        createClass({
+            displayName: "ObserverClass",
+            render: () => null
+        })
+    )
+    const B = observer(function StatelessObserver() {
+        return null
+    })
+
+    const wrapper = renderer.create(<A />)
+    expect(wrapper.root.type.displayName).toEqual("ObserverClass")
+
+    const wrapper2 = renderer.create(<B />)
+    expect(wrapper2.root.type.displayName).toEqual("StatelessObserver")
 })
 
 describe("124 - react to changes in this.props via computed", () => {
@@ -378,27 +366,63 @@ describe("124 - react to changes in this.props via computed", () => {
 
 // Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
 //this test case should be deprecated?
-test.skip("should stop updating if error was thrown in render (#134)", () => {
+test("should stop updating if error was thrown in render (#134)", () => {
     const data = mobx.observable.box(0)
     let renderingsCount = 0
+    let lastOwnRenderCount = 0
+    const errors = []
 
-    const Comp = observer(function() {
-        renderingsCount += 1
-        if (data.get() === 2) {
-            throw new Error("Hello")
+    class Outer extends React.Component {
+        state = { hasError: false }
+
+        render() {
+            return this.state.hasError ? <div>Error!</div> : <div>{this.props.children}</div>
         }
-        return <div />
-    })
 
-    TestUtils.renderIntoDocument(<Comp />)
-    expect(data.observers.size).toBe(1)
-    data.set(1)
-    expect(data.set(2)).toThrow("Hello")
-    expect(data.observers.size).toBe(0)
-    data.set(3)
-    data.set(4)
-    data.set(5)
-    expect(renderingsCount).toBe(3)
+        static getDerivedStateFromError() {
+            return { hasError: true }
+        }
+
+        componentDidCatch(error, info) {
+            errors.push(error.toString().split("\n")[0], info)
+        }
+    }
+
+    const Comp = observer(
+        class X extends React.Component {
+            ownRenderCount = 0
+
+            render() {
+                lastOwnRenderCount = ++this.ownRenderCount
+                renderingsCount++
+                if (data.get() === 2) {
+                    throw new Error("Hello")
+                }
+                return <div />
+            }
+        }
+    )
+
+    withConsole(() => {
+        TestUtils.renderIntoDocument(
+            <Outer>
+                <Comp />
+            </Outer>
+        )
+        expect(data.observers.size).toBe(1)
+        data.set(1)
+        expect(renderingsCount).toBe(2)
+        expect(lastOwnRenderCount).toBe(2)
+        data.set(2)
+        expect(data.observers.size).toBe(0)
+        data.set(3)
+        data.set(4)
+        data.set(2)
+        data.set(5)
+        expect(errors).toMatchSnapshot()
+        expect(lastOwnRenderCount).toBe(4)
+        expect(renderingsCount).toBe(4)
+    })
 })
 
 describe("should render component even if setState called with exactly the same props", () => {
@@ -437,7 +461,7 @@ describe("should render component even if setState called with exactly the same 
     })
 })
 
-describe("it rerenders correctly if some props are non-observables - 1", () => {
+test("it rerenders correctly if some props are non-observables - 1", () => {
     let renderCount = 0
     let odata = mobx.observable({ x: 1 })
     let data = { y: 1 }
@@ -469,38 +493,29 @@ describe("it rerenders correctly if some props are non-observables - 1", () => {
     )
 
     function stuff() {
-        data.y++
-        odata.x++
+        act(() => {
+            data.y++
+            odata.x++
+        })
     }
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Parent odata={odata} data={data} />, testRoot)
-        done()
-    })
+    const wrapper = renderer.create(<Parent odata={odata} data={data} />)
 
-    test("init renderCount === 1", () => {
-        expect(testRoot.querySelector("span").innerHTML).toBe("1-1-1")
-    })
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.rendered.join("")
 
-    test("after click renderCount === 2", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(10)
-        expect(testRoot.querySelector("span").innerHTML).toBe("2-2-2")
-    })
-
-    test("after click twice renderCount === 3", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(10)
-        expect(testRoot.querySelector("span").innerHTML).toBe("3-3-3")
-    })
+    expect(contents()).toEqual("1-1-1")
+    stuff()
+    expect(contents()).toEqual("2-2-2")
+    stuff()
+    expect(contents()).toEqual("3-3-3")
 })
 
-describe("it rerenders correctly if some props are non-observables - 2", () => {
+test("it rerenders correctly if some props are non-observables - 2", () => {
     let renderCount = 0
     let odata = mobx.observable({ x: 1 })
 
     @observer
-    class Component extends React.Component {
+    class Component extends React.PureComponent {
         @mobx.computed
         get computed() {
             return this.props.data.y // should recompute, since props.data is changed
@@ -532,29 +547,20 @@ describe("it rerenders correctly if some props are non-observables - 2", () => {
         }
     )
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Parent odata={odata} />, testRoot)
-        done()
-    })
+    const wrapper = renderer.create(<Parent odata={odata} />)
 
-    test("init renderCount === 1", () => {
-        expect(renderCount).toBe(1)
-        expect(testRoot.querySelector("span").innerHTML).toBe("1-1")
-    })
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.join("")
 
-    test("after click renderCount === 2", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(100)
-        expect(renderCount).toBe(2)
-        expect(testRoot.querySelector("span").innerHTML).toBe("2-2")
-    })
+    expect(renderCount).toBe(1)
+    expect(contents()).toBe("1-1")
 
-    test("after click renderCount === 3", async () => {
-        testRoot.querySelector("span").click()
-        await sleepHelper(10)
-        expect(renderCount).toBe(3)
-        expect(testRoot.querySelector("span").innerHTML).toBe("3-3")
-    })
+    act(() => stuff())
+    expect(renderCount).toBe(2)
+    expect(contents()).toBe("2-2")
+
+    act(() => stuff())
+    expect(renderCount).toBe(3)
+    expect(contents()).toBe("3-3")
 })
 
 describe("Observer regions should react", () => {
@@ -584,7 +590,7 @@ describe("Observer regions should react", () => {
     })
 })
 
-describe("Observer should not re-render on shallow equal new props", () => {
+test("Observer should not re-render on shallow equal new props", () => {
     let childRendering = 0
     let parentRendering = 0
     const data = { x: 1 }
@@ -600,23 +606,20 @@ describe("Observer should not re-render on shallow equal new props", () => {
         return <Child data={data} />
     })
 
-    beforeAll(async () => {
-        await asyncReactDOMRender(<Parent />, testRoot)
-    })
+    const wrapper = renderer.create(<Parent />)
 
-    test("init state is correct", () => {
-        expect(parentRendering).toBe(1)
-        expect(childRendering).toBe(1)
-        expect(testRoot.querySelector("span").innerHTML).toBe("1")
-    })
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
-    test("after odata change", async () => {
+    expect(parentRendering).toBe(1)
+    expect(childRendering).toBe(1)
+    expect(contents()).toBe("1")
+
+    act(() => {
         odata.y++
-        sleepHelper(10)
-        expect(parentRendering).toBe(2)
-        expect(childRendering).toBe(1)
-        expect(testRoot.querySelector("span").innerHTML).toBe("1")
     })
+    expect(parentRendering).toBe(2)
+    expect(childRendering).toBe(1)
+    expect(contents()).toBe("1")
 })
 
 test("parent / childs render in the right order", done => {
@@ -668,55 +671,9 @@ test("parent / childs render in the right order", done => {
 
     const container = TestUtils.renderIntoDocument(<Parent />)
 
-    debugger
     tryLogout()
     expect(events).toEqual(["parent", "child", "parent"])
     done()
-})
-
-describe("206 - @observer should produce usefull errors if it throws", () => {
-    const data = mobx.observable({ x: 1 })
-    let renderCount = 0
-
-    const emmitedErrors = []
-    const disposeErrorsHandler = onError(error => {
-        emmitedErrors.push(error)
-    })
-
-    @observer
-    class Child extends React.Component {
-        render() {
-            renderCount++
-            if (data.x === 42) throw new Error("Oops!")
-            return <span>{data.x}</span>
-        }
-    }
-
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Child />, testRoot)
-        done()
-    })
-
-    test("init renderCount should === 1", () => {
-        expect(renderCount).toBe(1)
-    })
-
-    test("catch exception", () => {
-        expect(() => {
-            withConsole(() => {
-                data.x = 42
-            })
-        }).toThrow(/Oops!/)
-        expect(renderCount).toBe(3) // React fiber will try to replay the rendering, so the exception gets thrown a second time
-    })
-
-    test("component recovers!", async () => {
-        await sleepHelper(500)
-        data.x = 3
-        TestUtils.renderIntoDocument(<Child />)
-        expect(renderCount).toBe(4)
-        expect(emmitedErrors).toEqual([new Error("Oops!"), new Error("Oops!")]) // see above comment
-    })
 })
 
 test("195 - async componentWillMount does not work", async () => {
@@ -750,22 +707,6 @@ test("195 - async componentWillMount does not work", async () => {
     expect(renderedValues).toEqual([0, 1])
 })
 
-test.skip("195 - should throw if trying to overwrite lifecycle methods", () => {
-    // Test disabled, see #231...
-
-    @observer
-    class WillMount extends React.Component {
-        componentWillMount = () => {}
-
-        render() {
-            return null
-        }
-    }
-    expect(TestUtils.renderIntoDocument(<WillMount />)).toThrow(
-        /Cannot assign to read only property 'componentWillMount'/
-    )
-})
-
 describe("use Observer inject and render sugar should work  ", () => {
     test("use render without inject should be correct", async () => {
         const Comp = () => (
@@ -787,50 +728,6 @@ describe("use Observer inject and render sugar should work  ", () => {
         expect(testRoot.querySelector("span").innerHTML).toBe("123")
     })
 
-    test("use render with inject should be correct", async () => {
-        const Comp = () => (
-            <div>
-                <Observer
-                    inject={store => ({ h: store.h, w: store.w })}
-                    render={props => <span>{`${props.h} ${props.w}`}</span>}
-                />
-            </div>
-        )
-        const A = () => (
-            <Provider h="hello" w="world">
-                <Comp />
-            </Provider>
-        )
-
-        expect(
-            await withAsyncConsole(async () => {
-                await asyncReactDOMRender(<A />, testRoot)
-                expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
-            })
-        ).toMatchSnapshot()
-    })
-
-    test("use children with inject should be correct", async () => {
-        const Comp = () => (
-            <div>
-                <Observer inject={store => ({ h: store.h, w: store.w })}>
-                    {props => <span>{`${props.h} ${props.w}`}</span>}
-                </Observer>
-            </div>
-        )
-        const A = () => (
-            <Provider h="hello" w="world">
-                <Comp />
-            </Provider>
-        )
-        expect(
-            await withAsyncConsole(async () => {
-                await asyncReactDOMRender(<A />, testRoot)
-                expect(testRoot.querySelector("span").innerHTML).toBe("hello world")
-            })
-        ).toMatchSnapshot()
-    })
-
     test("show error when using children and render at same time ", async () => {
         const msg = []
         const baseError = console.error
@@ -848,13 +745,12 @@ describe("use Observer inject and render sugar should work  ", () => {
     })
 })
 
-test("don't use PureComponent", () => {
+test("use PureComponent", () => {
     const msg = []
     const baseWarn = console.warn
     console.warn = m => msg.push(m)
 
     try {
-        debugger
         observer(
             class X extends React.PureComponent {
                 return() {
@@ -863,9 +759,7 @@ test("don't use PureComponent", () => {
             }
         )
 
-        expect(msg).toEqual([
-            "Mobx observer: You are using 'observer' on React.PureComponent. These two achieve two opposite goals and should not be used together"
-        ])
+        expect(msg).toEqual([])
     } finally {
         console.warn = baseWarn
     }
@@ -878,4 +772,48 @@ test("static on function components are hoisted", () => {
     const Comp2 = observer(Comp)
 
     expect(Comp2.foo).toBe(3)
+})
+
+test("computed properties react to props", async () => {
+    const seen = []
+    @observer
+    class Child extends React.Component {
+        @mobx.computed
+        get getPropX() {
+            return this.props.x
+        }
+
+        render() {
+            seen.push(this.getPropX)
+            return <div>{this.getPropX}</div>
+        }
+    }
+
+    class Parent extends React.Component {
+        state = { x: 0 }
+        render() {
+            seen.push("parent")
+            return <Child x={this.state.x} />
+        }
+
+        componentDidMount() {
+            setTimeout(() => this.setState({ x: 2 }), 100)
+        }
+    }
+
+    const wrapper = renderer.create(<Parent />)
+    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
+<div>
+  0
+</div>
+`)
+
+    await sleepHelper(200)
+    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
+<div>
+  2
+</div>
+`)
+
+    expect(seen).toEqual(["parent", 0, "parent", 2])
 })

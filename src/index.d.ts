@@ -3,6 +3,15 @@
  */
 import * as React from "react"
 
+export {
+    useObservable,
+    useComputed,
+    useDisposable,
+    IObserverOptions,
+    useObserver,
+    Observer
+} from "mobx-react-lite"
+
 export type IReactComponent<P = any> =
     | React.StatelessComponent<P>
     | React.ComponentClass<P>
@@ -12,10 +21,6 @@ export type IReactComponent<P = any> =
  * Observer
  */
 
-// Deprecated: observer with with stores (as decorator)
-export function observer(stores: string[]): <T extends IReactComponent>(clazz: T) => void
-// Deprecated: observer with with stores
-export function observer<T extends IReactComponent>(stores: string[], clazz: T): T
 export function observer<T extends IReactComponent>(target: T): T
 
 /**
@@ -31,7 +36,6 @@ export type IStoresToProps<
 
 export type IWrappedComponent<P> = {
     wrappedComponent: IReactComponent<P>
-    wrappedInstance: React.ReactInstance | undefined
 }
 
 // Ideally we would want to return React.ComponentClass<Partial<P>>,
@@ -73,48 +77,9 @@ export function disposeOnUnmount<TF extends Disposer | Disposer[]>(
 /**
  * Utilities
  */
-export function onError(cb: (error: Error) => void): () => void
-
 export class Provider extends React.Component<any, {}> {}
 
-export class Observer extends React.Component<
-    {
-        children?: () => React.ReactNode
-        render?: () => React.ReactNode
-    },
-    {}
-> {}
-
 export function useStaticRendering(value: boolean): void
-
-/**
- * Enable dev tool support, makes sure that renderReport emits events.
- */
-export function trackComponents(): void
-
-export const renderReporter: RenderReporter
-
-export interface RenderReporter {
-    on(handler: (data: IRenderEvent) => void): void
-}
-
-export interface IRenderEvent {
-    event: "render" | "destroy"
-    renderTime?: number
-    totalTime?: number
-    component: React.ReactElement<any> // Component instance
-    node: any // DOMNode
-}
-
-/**
- * WeakMap DOMNode -> Component instance
- * @deprecated
- */
-export const componentByNodeRegistery: any
-/**
- * WeakMap DOMNode -> Component instance
- */
-export const componentByNodeRegistry: any
 
 /**
  * @deprecated, use PropTypes instead

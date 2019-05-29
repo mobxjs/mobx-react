@@ -1,29 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[` 1`] = `
-Object {
-  "errors": Array [],
-  "infos": Array [],
-  "warnings": Array [
-    Array [
-      "Use \`shouldComponentUpdate\` in an \`observer\` based component breaks the behavior of \`observer\` and might lead to unexpected results. Manually implementing \`sCU\` should not be needed when using mobx-react.",
-    ],
-  ],
-}
-`;
-
-exports[` 2`] = `
-Object {
-  "errors": Array [],
-  "infos": Array [],
-  "warnings": Array [
-    Array [
-      "Use \`shouldComponentUpdate\` in an \`observer\` based component breaks the behavior of \`observer\` and might lead to unexpected results. Manually implementing \`sCU\` should not be needed when using mobx-react.",
-    ],
-  ],
-}
-`;
-
 exports[`Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin 1`] = `
 Object {
   "errors": Array [],

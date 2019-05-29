@@ -1,94 +1,14 @@
-import React, { createElement } from "react"
+import React from "react"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import { mount, shallow } from "enzyme"
 import * as mobx from "mobx"
 import { observer } from "../src"
 import { createTestRoot, withConsole } from "./index"
+import renderer, { act } from "react-test-renderer"
 
 const mobxAdminProperty = mobx.$mobx || "$mobx"
 
 const testRoot = createTestRoot()
-
-describe("custom shouldComponentUpdate is not respected for observable changes (#50)", () => {
-    describe("(#50)-1", () => {
-        expect(
-            withConsole(() => {
-                let called = 0
-                const x = mobx.observable.box(3)
-                const C = observer(
-                    createClass({
-                        render: () => <div>value:{x.get()}</div>,
-                        shouldComponentUpdate: () => called++
-                    })
-                )
-                const wrapper = mount(<C />)
-                test("init div context  === value:3 and shouldUpdate hook did not run ", () => {
-                    expect(wrapper.find("div").text()).toBe("value:3")
-                    expect(called).toBe(0)
-                })
-                test("update div context === value:42 and shouldUpdate hook did not run  ", () => {
-                    x.set(42)
-                    expect(wrapper.find("div").text()).toBe("value:42")
-                    expect(called).toBe(0)
-                })
-            })
-        ).toMatchSnapshot()
-    })
-
-    describe("(#50) - 2", () => {
-        expect(
-            withConsole(() => {
-                // shouldComponentUpdate is meaningless with observable props...., just show warning in component definition?
-                let called = 0
-                const y = mobx.observable.box(5)
-                const C = observer(
-                    createClass({
-                        render() {
-                            return <div>value:{this.props.y}</div>
-                        },
-                        shouldComponentUpdate(nextProps) {
-                            called++
-                            return nextProps.y !== 42
-                        }
-                    })
-                )
-                const B = observer(
-                    createClass({
-                        render: () => (
-                            <span>
-                                <C y={y.get()} />
-                            </span>
-                        )
-                    })
-                )
-                const wrapper = mount(<B />)
-                test("init div context === value:5", () => {
-                    expect(wrapper.find("div").text()).toBe("value:5")
-                    expect(called).toBe(0)
-                })
-
-                test("update div context === value:6 and shouldComponentUpdate hook run", () => {
-                    y.set(6)
-                    expect(wrapper.find("div").text()).toBe("value:6")
-                    expect(called).toBe(1)
-                })
-
-                test("update div context === value:6 and shouldComponentUpdate hook run 2", () => {
-                    y.set(42)
-                    // expect(wrapper.find('div').text()).toBe('value:6'); // not updated! TODO: fix
-                    expect(called).toBe(2)
-                })
-
-                test("update div context === value:7 and shouldComponentUpdate hook run 3", () => {
-                    y.set(7)
-                    expect(wrapper.find("div").text()).toBe("value:7")
-                    expect(called).toBe(3)
-                })
-            })
-        ).toMatchSnapshot()
-    })
-})
 
 test("issue mobx 405", () => {
     function ExampleState() {
@@ -118,8 +38,19 @@ test("issue mobx 405", () => {
     )
 
     const exampleState = new ExampleState()
-    const wrapper = shallow(<ExampleView exampleState={exampleState} />)
-    expect(wrapper.find("span").text()).toBe("Hello my name is test")
+    const wrapper = renderer.create(<ExampleView exampleState={exampleState} />)
+    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
+<div>
+  <input
+    onChange={[Function]}
+    type="text"
+    value="test"
+  />
+  <span>
+    Hello my name is test
+  </span>
+</div>
+`)
 })
 
 test("#85 Should handle state changing in constructors", done => {
@@ -131,13 +62,20 @@ test("#85 Should handle state changing in constructors", done => {
                 a.set(3) // one shouldn't do this!
                 return {}
             },
-            render: () => <div>child:{a.get()} - </div>
+            render: () => (
+                <div>
+                    child:
+                    {a.get()} -{" "}
+                </div>
+            )
         })
     )
     const ParentWrapper = observer(function Parent() {
         return (
             <span>
-                <Child />parent:{a.get()}
+                <Child />
+                parent:
+                {a.get()}
             </span>
         )
     })
@@ -160,32 +98,11 @@ test("#85 Should handle state changing in constructors", done => {
 
 test("testIsComponentReactive", () => {
     const C = observer(() => null)
-    const wrapper = mount(<C />)
-    const instance = wrapper.instance()
-
-    expect(C.isMobXReactObserver).toBeTruthy()
+    const wrapper = renderer.create(<C />)
+    const instance = wrapper.getInstance()
 
     // instance is something different then the rendering reaction!
     expect(mobx.isObservable(instance)).toBeFalsy()
-    expect(mobx.isObservable(instance.render)).toBeTruthy()
-
-    mobx.extendObservable(instance, {})
-    expect(mobx.isObservable(instance)).toBeTruthy()
-})
-
-test("testGetDNode", () => {
-    const C = observer(() => null)
-
-    const wrapper = mount(<C />)
-    expect(wrapper.instance().render[mobxAdminProperty]).toBeTruthy()
-    expect(mobx.getAtom(wrapper.instance().render)).toBeTruthy()
-
-    mobx.extendObservable(wrapper.instance(), {
-        x: 3
-    })
-    expect(mobx.getAtom(wrapper.instance(), "x")).not.toEqual(
-        mobx.getAtom(wrapper.instance().render)
-    )
 })
 
 test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {

@@ -189,10 +189,20 @@ function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
     })
 }
 
-export const observableArray = createObservableTypeCheckerCreator(false, "Array")
-export const observableArrayOf = createObservableArrayOfTypeChecker.bind(null, false)
-export const observableMap = createObservableTypeCheckerCreator(false, "Map")
-export const observableObject = createObservableTypeCheckerCreator(false, "Object")
-export const arrayOrObservableArray = createObservableTypeCheckerCreator(true, "Array")
-export const arrayOrObservableArrayOf = createObservableArrayOfTypeChecker.bind(null, true)
-export const objectOrObservableObject = createObservableTypeCheckerCreator(true, "Object")
+const observableArray = createObservableTypeCheckerCreator(false, "Array")
+const observableArrayOf = createObservableArrayOfTypeChecker.bind(null, false)
+const observableMap = createObservableTypeCheckerCreator(false, "Map")
+const observableObject = createObservableTypeCheckerCreator(false, "Object")
+const arrayOrObservableArray = createObservableTypeCheckerCreator(true, "Array")
+const arrayOrObservableArrayOf = createObservableArrayOfTypeChecker.bind(null, true)
+const objectOrObservableObject = createObservableTypeCheckerCreator(true, "Object")
+
+export const PropTypes = {
+    observableArray,
+    observableArrayOf,
+    observableMap,
+    observableObject,
+    arrayOrObservableArray,
+    arrayOrObservableArrayOf,
+    objectOrObservableObject
+}

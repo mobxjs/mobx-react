@@ -2,11 +2,11 @@ import React from "react"
 import * as PropTypes from "prop-types"
 import createClass from "create-react-class"
 import ReactDOM from "react-dom"
-import { mount } from "enzyme"
 import * as mobx from "mobx"
-import { action, observable, computed } from "mobx"
+import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
 import { createTestRoot, sleepHelper, withConsole } from "./index"
+import renderer, { act } from "react-test-renderer"
 
 const testRoot = createTestRoot()
 
@@ -14,7 +14,7 @@ describe("inject based context", () => {
     test("basic context", () => {
         const C = inject("foo")(
             observer(
-                createClass({
+                class X extends React.Component {
                     render() {
                         return (
                             <div>
@@ -23,7 +23,7 @@ describe("inject based context", () => {
                             </div>
                         )
                     }
-                })
+                }
             )
         )
         const B = () => <C />
@@ -32,8 +32,13 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        const wrapper = mount(<A />)
-        expect(wrapper.find("div").text()).toEqual("context:bar")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  bar
+</div>
+`)
     })
 
     test("props override context", () => {
@@ -57,8 +62,73 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        const wrapper = mount(<A />)
-        expect(wrapper.find("div").text()).toEqual("context:42")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  42
+</div>
+`)
+    })
+
+    test("wraps displayName of original component", () => {
+        const A = inject("foo")(
+            createClass({
+                displayName: "ComponentA",
+                render() {
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
+                }
+            })
+        )
+        const B = inject()(
+            createClass({
+                displayName: "ComponentB",
+                render() {
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
+                }
+            })
+        )
+        const C = inject(() => ({}))(
+            createClass({
+                displayName: "ComponentC",
+                render() {
+                    return (
+                        <div>
+                            context:
+                            {this.props.foo}
+                        </div>
+                    )
+                }
+            })
+        )
+        const wrapperA = renderer.create(
+            <Provider foo="foo">
+                <A />
+            </Provider>
+        )
+        expect(wrapperA.root.children[0].type.displayName).toBe("inject-with-foo(ComponentA)")
+        const wrapperB = renderer.create(
+            <Provider foo="foo">
+                <B />
+            </Provider>
+        )
+        expect(wrapperB.root.children[0].type.displayName).toBe("inject(ComponentB)")
+        const wrapperC = renderer.create(
+            <Provider>
+                <C />
+            </Provider>
+        )
+        expect(wrapperC.root.children[0].type.displayName).toBe("inject(ComponentC)")
     })
 
     test("overriding stores is supported", () => {
@@ -94,9 +164,25 @@ describe("inject based context", () => {
                 </Provider>
             )
         })
-        const wrapper = mount(<A />)
-        expect(wrapper.find("span").text()).toEqual("context:bar1337")
-        expect(wrapper.find("section").text()).toEqual("context:421337")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  <span>
+    <div>
+      context:
+      bar
+      1337
+    </div>
+  </span>
+  <section>
+    <div>
+      context:
+      42
+      1337
+    </div>
+  </section>
+</div>
+`)
     })
 
     // FIXME: see other comments related to error catching in React
@@ -125,7 +211,7 @@ describe("inject based context", () => {
             )
         })
         withConsole(() => {
-            expect(() => mount(<A />)).toThrow(
+            expect(() => renderer.create(<A />)).toThrow(
                 /Store 'foo' is not available! Make sure it is provided by some Provider/
             )
         })
@@ -147,8 +233,13 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C foo="bar" />
-        const wrapper = mount(<B />)
-        expect(wrapper.find("div").text()).toEqual("context:bar")
+        const wrapper = renderer.create(<B />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  bar
+</div>
+`)
     })
 
     test("inject merges (and overrides) props", () => {
@@ -163,26 +254,27 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C a={2} b={2} />
-        mount(<B />)
+        renderer.create(<B />)
     })
 
     test("warning is printed when changing stores", () => {
-        let msg
-        const baseWarn = console.warn
-        console.warn = m => (msg = m)
+        let msgs = []
+        const baseError = console.error
+        console.error = m => msgs.push(m.split("\n").slice(0, 7)) // drop stacktraces to avoid line number issues
         const a = mobx.observable.box(3)
-        const C = observer(
-            ["foo"],
-            createClass({
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
+        const C = inject("foo")(
+            observer(
+                createClass({
+                    render() {
+                        return (
+                            <div>
+                                context:
+                                {this.props.foo}
+                            </div>
+                        )
+                    }
+                })
+            )
         )
         const B = observer(
             createClass({
@@ -201,25 +293,34 @@ describe("inject based context", () => {
                 )
             })
         )
-        const wrapper = mount(<A />)
+        const wrapper = renderer.create(<A />)
 
-        expect(wrapper.find("span").text()).toBe("3")
-        expect(wrapper.find("div").text()).toBe("context:3")
+        expect(wrapper).toMatchInlineSnapshot(`
+<section>
+  <span>
+    3
+  </span>
+  <div>
+    context:
+    3
+  </div>
+</section>
+`)
 
-        a.set(42)
-
-        expect(wrapper.find("span").text()).toBe("42")
-        expect(wrapper.find("div").text()).toBe("context:3")
-        expect(msg).toBe(
-            "MobX Provider: Provided store 'foo' has changed. Please avoid replacing stores as the change might not propagate to all children"
+        expect(() => {
+            act(() => {
+                a.set(42)
+            })
+        }).toThrow(
+            "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
         )
+        expect(msgs).toMatchSnapshot() // nobody caught the error of the rendering
 
-        console.warn = baseWarn
+        console.error = baseError
     })
 
     test("custom storesToProps", () => {
-        const C = inject((stores, props, context) => {
-            expect(context).toEqual({ mobxStores: { foo: "bar" } })
+        const C = inject((stores, props) => {
             expect(stores).toEqual({ foo: "bar" })
             expect(props).toEqual({ baz: 42 })
             return {
@@ -249,11 +350,44 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        const wrapper = mount(<A />)
-        expect(wrapper.find("div").text()).toBe("context:bar84")
+        const wrapper = renderer.create(<A />)
+        expect(wrapper).toMatchInlineSnapshot(`
+<div>
+  context:
+  bar
+  84
+</div>
+`)
     })
 
-    test("support static hoisting, wrappedComponent and wrappedInstance", async () => {
+    test("inject forwards ref", async () => {
+        class FancyComp extends React.Component {
+            render() {
+                this.didRender = true
+                return null
+            }
+
+            doSomething() {}
+        }
+
+        const ref = React.createRef()
+        const component = renderer.create(<FancyComp ref={ref} />)
+        expect(typeof ref.current.doSomething).toBe("function")
+        expect(ref.current.didRender).toBe(true)
+
+        const InjectedFancyComp = inject("bla")(FancyComp)
+        const ref2 = React.createRef()
+
+        const component2 = renderer.create(
+            <Provider bla={42}>
+                <InjectedFancyComp ref={ref2} />
+            </Provider>
+        )
+        expect(typeof ref2.current.doSomething).toBe("function")
+        expect(ref2.current.didRender).toBe(true)
+    })
+
+    test("support static hoisting, wrappedComponent and ref forwarding", async () => {
         class B extends React.Component {
             render() {
                 this.testField = 1
@@ -272,45 +406,10 @@ describe("inject based context", () => {
         expect(C.bla2 === B.bla2).toBeTruthy()
         expect(Object.keys(C.wrappedComponent.propTypes)).toEqual(["x"])
 
-        const wrapper = mount(<C booh={42} />)
-        await sleepHelper(10)
-        expect(wrapper.instance().wrappedInstance.testField).toBe(1)
-    })
+        const ref = React.createRef()
 
-    test("warning is printed when attaching contextTypes to HOC", () => {
-        const msg = []
-        const baseWarn = console.warn
-        console.warn = m => msg.push(m)
-        const C = inject(["foo"])(
-            createClass({
-                displayName: "C",
-                render() {
-                    return (
-                        <div>
-                            context:
-                            {this.props.foo}
-                        </div>
-                    )
-                }
-            })
-        )
-        C.propTypes = {}
-        C.defaultProps = {}
-        C.contextTypes = {}
-
-        const B = () => <C />
-        const A = () => (
-            <Provider foo="bar">
-                <B />
-            </Provider>
-        )
-        mount(<A />)
-        expect(msg.length).toBe(1)
-        expect(msg[0]).toBe(
-            "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`"
-        )
-
-        console.warn = baseWarn
+        const wrapper = renderer.create(<C booh={42} ref={ref} />)
+        expect(ref.current.testField).toBe(1)
     })
 
     test("propTypes and defaultProps are forwarded", () => {
@@ -323,6 +422,7 @@ describe("inject based context", () => {
                 displayName: "C",
                 render() {
                     expect(this.props.y).toEqual(3)
+
                     expect(this.props.x).toBeUndefined()
                     return null
                 }
@@ -344,10 +444,10 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        mount(<A />)
+        renderer.create(<A />)
         expect(msg.length).toBe(2)
         expect(msg[0].split("\n")[0]).toBe(
-            "Warning: Failed prop type: The prop `x` is marked as required in `inject-C-with-foo`, but its value is `undefined`."
+            "Warning: Failed prop type: The prop `x` is marked as required in `inject-with-foo(C)`, but its value is `undefined`."
         )
         expect(msg[1].split("\n")[0]).toBe(
             "Warning: Failed prop type: The prop `a` is marked as required in `C`, but its value is `undefined`."
@@ -407,11 +507,21 @@ describe("inject based context", () => {
                 <User />
             </Provider>
         )
-        const wrapper = mount(<App />)
+        const wrapper = renderer.create(<App />)
 
-        expect(wrapper.find("h1").text()).toBe("Noa")
-        user.name = "Veria"
-        expect(wrapper.find("h1").text()).toBe("Veria")
+        expect(wrapper).toMatchInlineSnapshot(`
+<h1>
+  Noa
+</h1>
+`)
+        act(() => {
+            user.name = "Veria"
+        })
+        expect(wrapper).toMatchInlineSnapshot(`
+<h1>
+  Veria
+</h1>
+`)
     })
 
     test("using a custom injector is not too reactive", done => {
@@ -447,7 +557,7 @@ describe("inject based context", () => {
 
         const state = new State()
 
-        class ListComponent extends React.Component {
+        class ListComponent extends React.PureComponent {
             render() {
                 listRender++
                 const { items } = this.props
@@ -474,7 +584,7 @@ describe("inject based context", () => {
                 highlight: state.highlight
             }
         })
-        class ItemComponent extends React.Component {
+        class ItemComponent extends React.PureComponent {
             highlight = () => {
                 const { item, highlight } = this.props
                 highlight(item)

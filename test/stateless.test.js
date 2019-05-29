@@ -4,67 +4,71 @@ import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
-import { observer, propTypes } from "../src"
-import { createTestRoot } from "./index"
-import renderer from "react-test-renderer"
+import { observer, PropTypes as MRPropTypes } from "../src"
+import { createTestRoot, asyncReactDOMRender } from "./index"
+import renderer, { act } from "react-test-renderer"
 import { observable } from "mobx"
 
 const testRoot = createTestRoot()
 
-const stateLessComp = ({ testProp }) => <div>result: {testProp}</div>
+const StatelessComp = ({ testProp }) => <div>result: {testProp}</div>
 
-stateLessComp.propTypes = {
+StatelessComp.propTypes = {
     testProp: PropTypes.string
 }
-stateLessComp.defaultProps = {
+StatelessComp.defaultProps = {
     testProp: "default value for prop testProp"
 }
 
 describe("stateless component with propTypes", () => {
-    const StatelessCompObserver = observer(stateLessComp)
+    const StatelessCompObserver = observer(StatelessComp)
+
     test("default property value should be propagated", () => {
+        expect(StatelessComp.defaultProps.testProp).toBe("default value for prop testProp")
         expect(StatelessCompObserver.defaultProps.testProp).toBe("default value for prop testProp")
     })
+
     const originalConsoleError = console.error
     let beenWarned = false
     console.error = () => (beenWarned = true)
     const wrapper = <StatelessCompObserver testProp={10} />
     console.error = originalConsoleError
+
     test("an error should be logged with a property type warning", () => {
         expect(beenWarned).toBeTruthy()
     })
-    test("render test correct", () => {
-        const component = TestUtils.renderIntoDocument(
-            <StatelessCompObserver testProp="hello world" />
-        )
-        expect(TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML).toBe(
-            "result: hello world"
-        )
+
+    test("render test correct", async () => {
+        await asyncReactDOMRender(<StatelessCompObserver testProp="hello world" />, testRoot)
+        expect(testRoot.querySelector("div").innerHTML).toBe("result: hello world")
     })
 })
 
-test("stateless component with context support", () => {
-    const StateLessCompWithContext = (props, context) =>
-        createElement("div", {}, "context: " + context.testContext)
-    StateLessCompWithContext.contextTypes = { testContext: PropTypes.string }
+test("stateless component with context support", async () => {
+    const C = React.createContext()
+
+    const StateLessCompWithContext = (props, context) => (
+        <C.Consumer>{value => <div>context: {value.testContext}</div>}</C.Consumer>
+    )
+
     const StateLessCompWithContextObserver = observer(StateLessCompWithContext)
-    const ContextProvider = createClass({
-        childContextTypes: StateLessCompWithContext.contextTypes,
-        getChildContext: () => ({ testContext: "hello world" }),
-        render: () => <StateLessCompWithContextObserver />
-    })
-    const component = TestUtils.renderIntoDocument(<ContextProvider />)
-    expect(
-        TestUtils.findRenderedDOMComponentWithTag(component, "div").innerHTML.replace(/\n/, "")
-    ).toBe("context: hello world")
+
+    const ContextProvider = () => (
+        <C.Provider value={{ testContext: "hello world" }}>
+            <StateLessCompWithContext />
+        </C.Provider>
+    )
+
+    await asyncReactDOMRender(<ContextProvider />, testRoot)
+    expect(testRoot.querySelector("div").innerHTML.replace(/\n/, "")).toBe("context: hello world")
 })
 
 test("component with observable propTypes", () => {
     const Component = createClass({
         render: () => null,
         propTypes: {
-            a1: propTypes.observableArray,
-            a2: propTypes.arrayOrObservableArray
+            a1: MRPropTypes.observableArray,
+            a2: MRPropTypes.arrayOrObservableArray
         }
     })
     const originalConsoleError = console.error
@@ -102,7 +106,9 @@ describe("stateless component with forwardRef", () => {
         const component = renderer.create(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )
-        a.x++
+        act(() => {
+            a.x++
+        })
         expect(component).toMatchSnapshot()
     })
 })

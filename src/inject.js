@@ -1,84 +1,53 @@
-import { Component, createElement } from "react"
-import hoistStatics from "hoist-non-react-statics"
-import * as PropTypes from "./propTypes"
+import React, { Component, createElement } from "react"
 import { observer } from "./observer"
-import { isStateless } from "./utils/utils"
-
-const injectorContextTypes = {
-    mobxStores: PropTypes.objectOrObservableObject
-}
-Object.seal(injectorContextTypes)
-
-const proxiedInjectorProps = {
-    contextTypes: {
-        get: function() {
-            return injectorContextTypes
-        },
-        set: function(_) {
-            console.warn(
-                "Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`"
-            )
-        },
-        configurable: true,
-        enumerable: false
-    },
-    isMobxInjector: {
-        value: true,
-        writable: true,
-        configurable: true,
-        enumerable: true
-    }
-}
+import { isStateless, copyStaticProperties } from "./utils/utils"
+import { MobXProviderContext } from "./Provider"
 
 /**
  * Store Injection
  */
-function createStoreInjector(grabStoresFn, component, injectNames) {
-    let displayName =
-        "inject-" +
-        (component.displayName ||
-            component.name ||
-            (component.constructor && component.constructor.name) ||
-            "Unknown")
-    if (injectNames) displayName += "-with-" + injectNames
+function createStoreInjector(grabStoresFn, component, injectNames, makeReactive) {
+    let displayName = getInjectName(component, injectNames)
 
     class Injector extends Component {
-        static displayName = displayName
-
-        storeRef = instance => {
-            this.wrappedInstance = instance
-        }
+        static contextType = MobXProviderContext
 
         render() {
-            // Optimization: it might be more efficient to apply the mapper function *outside* the render method
-            // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
-            // See this test: 'using a custom injector is not too reactive' in inject.js
-            let newProps = {}
-            for (let key in this.props)
-                if (this.props.hasOwnProperty(key)) {
-                    newProps[key] = this.props[key]
-                }
-            var additionalProps =
-                grabStoresFn(this.context.mobxStores || {}, newProps, this.context) || {}
-            for (let key in additionalProps) {
-                newProps[key] = additionalProps[key]
+            const { forwardRef, ...props } = this.props
+
+            Object.assign(props, grabStoresFn(this.context || {}, props) || {})
+
+            if (forwardRef && !isStateless(component)) {
+                props.ref = this.props.forwardRef
             }
 
-            if (!isStateless(component)) {
-                newProps.ref = this.storeRef
-            }
-
-            return createElement(component, newProps)
+            return createElement(component, props)
         }
     }
+    if (makeReactive) Injector = observer(Injector)
+    Injector.isMobxInjector = true // assigned late to suppress observer warning
 
+    // Support forward refs
+    const InjectHocRef = React.forwardRef((props, ref) =>
+        React.createElement(Injector, { ...props, forwardRef: ref })
+    )
     // Static fields from component should be visible on the generated Injector
-    hoistStatics(Injector, component)
+    copyStaticProperties(component, InjectHocRef)
+    InjectHocRef.wrappedComponent = component
+    InjectHocRef.displayName = displayName
+    return InjectHocRef
+}
 
-    Injector.wrappedComponent = component
-    Object.defineProperties(Injector, proxiedInjectorProps)
-
-    return Injector
+function getInjectName(component, injectNames) {
+    let displayName
+    const componentName =
+        component.displayName ||
+        component.name ||
+        (component.constructor && component.constructor.name) ||
+        "Component"
+    if (injectNames) displayName = "inject-with-" + injectNames + "(" + componentName + ")"
+    else displayName = "inject(" + componentName + ")"
+    return displayName
 }
 
 function grabStoresByName(storeNames) {
@@ -106,25 +75,19 @@ function grabStoresByName(storeNames) {
  * or a function that manually maps the available stores from the context to props:
  * storesToProps(mobxStores, props, context) => newProps
  */
-export default function inject(/* fn(stores, nextProps) or ...storeNames */) {
+export function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames) {
     let grabStoresFn
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]
-        return function(componentClass) {
-            let injected = createStoreInjector(grabStoresFn, componentClass)
-            injected.isMobxInjector = false // supress warning
-            // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
-            // see #111
-            injected = observer(injected)
-            injected.isMobxInjector = true // restore warning
-            return injected
-        }
+        return componentClass =>
+            createStoreInjector(grabStoresFn, componentClass, grabStoresFn.name, true)
     } else {
-        const storeNames = []
-        for (let i = 0; i < arguments.length; i++) storeNames[i] = arguments[i]
-        grabStoresFn = grabStoresByName(storeNames)
-        return function(componentClass) {
-            return createStoreInjector(grabStoresFn, componentClass, storeNames.join("-"))
-        }
+        return componentClass =>
+            createStoreInjector(
+                grabStoresByName(storeNames),
+                componentClass,
+                storeNames.join("-"),
+                false
+            )
     }
 }

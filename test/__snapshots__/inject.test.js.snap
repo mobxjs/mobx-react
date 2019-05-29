@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`inject based context warning is printed when changing stores 2`] = `
+Array [
+  Array [
+    "The above error occurred in the <Provider> component:",
+    "    in Provider (created by Observer)",
+    "    in section (created by Observer)",
+    "    in Observer",
+    "    in Unknown",
+    "",
+    "Consider adding an error boundary to your tree to customize error handling behavior.",
+  ],
+]
+`;

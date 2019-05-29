@@ -1,25 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`use Observer inject and render sugar should work   use children with inject should be correct 1`] = `
-Object {
-  "errors": Array [],
-  "infos": Array [],
-  "warnings": Array [
-    Array [
-      "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead",
-    ],
-  ],
-}
+exports[`issue 12 1`] = `
+<div>
+  <span>
+    coffee
+    !
+  </span>
+  <span>
+    tea
+    
+  </span>
+</div>
 `;
 
-exports[`use Observer inject and render sugar should work   use render with inject should be correct 1`] = `
-Object {
-  "errors": Array [],
-  "infos": Array [],
-  "warnings": Array [
-    Array [
-      "<Observer inject=.../> is no longer supported. Please use inject on the enclosing component instead",
-    ],
-  ],
-}
+exports[`issue 12 2`] = `
+<div>
+  <span>
+    soup
+    
+  </span>
+</div>
+`;
+
+exports[`should stop updating if error was thrown in render (#134) 1`] = `
+Array [
+  "Error: Hello",
+  Object {
+    "componentStack": "
+    in Observer (created by X)
+    in X
+    in div (created by Outer)
+    in Outer",
+  },
+]
 `;

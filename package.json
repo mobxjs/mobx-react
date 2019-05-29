@@ -1,12 +1,15 @@
 {
   "name": "mobx-react",
-  "version": "5.4.4",
+  "version": "6.0.0-rc.4",
   "description": "React bindings for MobX. Create fully reactive components.",
-  "main": "index.js",
-  "jsnext:main": "index.module.js",
-  "module": "index.module.js",
-  "react-native": "native.js",
-  "typings": "index",
+  "source": "src/index.js",
+  "main": "dist/mobx-react.js",
+  "jsnext:main": "dist/mobx-react.module.js",
+  "umd:main": "dist/mobx-react.umd.js",
+  "unpkg": "dist/mobx-react.umd.js",
+  "module": "dist/mobx-react.module.js",
+  "react-native": "dist/mobx-react.rn.module.js",
+  "types": "dist/mobx-react.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mobxjs/mobx-react.git"
@@ -16,7 +19,8 @@
     "test": "jest && npm run test:ts",
     "test:ts": "tsc -p test/ts",
     "test:travis": "npm run build && jest && npm run test:ts",
-    "build": "node build-rollup.js && shx cp src/index.d.ts index.d.ts && shx cp src/index.d.ts native.d.ts && shx cp src/index.d.ts custom.d.ts",
+    "build": "yarn bundle && shx cp src/index.d.ts dist/mobx-react.d.ts && shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && sed -i 's/\"react-dom\"/\"react-native\"/g' dist/mobx-react.rn.module.js",
+    "bundle": "microbundle  --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite --globals react-dom=ReactDOM,react=React,mobx-react-lite=mobxReactLite --name mobxReact",
     "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
@@ -27,7 +31,7 @@
   "homepage": "https://mobxjs.github.io/mobx",
   "peerDependencies": {
     "mobx": "^4.0.0 || ^5.0.0",
-    "react": "^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0"
+    "react": "^16.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.1.0",
@@ -40,41 +44,31 @@
     "@types/prop-types": "^15.5.2",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^23.6.0",
+    "babel-jest": "^24.1.0",
     "create-react-class": "^15.6.2",
-    "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.0.0",
     "husky": "^1.0.0",
-    "jest": "^23.6.0",
-    "jest-environment-jsdom": "^23.4.0",
+    "jest": "^24.0.0",
+    "jest-environment-jsdom": "^24.0.0",
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
+    "microbundle": "^0.11.0",
     "mobx": "^5.0.0",
-    "opn-cli": "^3.1.0",
     "prettier": "^1.7.2",
     "prop-types": "^15.6.0",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2",
     "react-test-renderer": "^16.6.3",
-    "regenerator-runtime": "^0.12.1",
     "request": "^2.83.0",
-    "rollup": "^0.66.2",
-    "rollup-plugin-alias": "^1.3.0",
-    "rollup-plugin-babel": "^4.0.3",
-    "rollup-plugin-commonjs": "^9.0.0",
-    "rollup-plugin-filesize": "^5.0.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-uglify": "^6.0.0",
-    "shelljs": "^0.8.2",
+    "shelljs": "^0.8.3",
     "shx": "^0.3.2",
     "typescript": "^2.6.0"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^3.0.0",
-    "react-lifecycles-compat": "^3.0.2"
+    "mobx-react-lite": "1.4.0"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "mobx",
     "mobservable",

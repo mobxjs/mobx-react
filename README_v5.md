@@ -5,62 +5,63 @@
 [![CDNJS](https://img.shields.io/cdnjs/v/mobx-react.svg)](https://cdnjs.com/libraries/mobx-react)
 
 Package with React component wrapper for combining React with MobX.
-Exports the `observer` decorator and other utilities.
+Exports the `observer` decorator and some development utilities.
 For documentation, see the [MobX](https://mobxjs.github.io/mobx) project.
 This package supports both React and React Native.
-
-## Choosing your version
-
-There are currently two actively maintained versions of mobx-react:
-
-| NPM Version | Supported React versions | Supports hook based components                                                   |
-| ----------- | ------------------------ | -------------------------------------------------------------------------------- |
-| v6          | 16.8.0 and higher        | Yes                                                                              |
-| v5          | 0.13 and higher          | No, but it is possible to use `<Observer>` sections inside hook based components |
-
-The V5 documentation can be found in the [README_v5](README_v5.md).
-
-Both mobx-react 5 and 6 are compatible with mobx 4 and 5
-
-Version 6 is a repackage of the [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
-
--   Support for class based components for `observer` and `@observer`
--   `Provider / inject` to pass stores around (but consider to use `React.createContext` instead)
--   `PropTypes` to describe observable based property checkers (but consider to use TypeScript instead)
--   The `disposeOnUnmount` utility / decorator to easily clean up resources such as reactions created in your class based components.
 
 ## Installation
 
 `npm install mobx-react --save`
 
-Or CDN: https://unpkg.com/mobx-react (UMD namespace: `mobxReact`)
+Or CDN: https://unpkg.com/mobx-react (namespace: `mobxReact`)
 
 ```javascript
 import { observer } from "mobx-react"
+// - or, for custom renderers without DOM: -
+import { observer } from "mobx-react/custom"
 ```
 
 This package provides the bindings for MobX and React.
 See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.html) for how to get started.
 
-For greenfield projects you might want to consider to use [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite), if you intend to only use function based components. `React.createContext` can be used to pass stores around.
+If you are using [React hooks](https://reactjs.org/docs/hooks-intro.html) with latest React 16.7 and you like living on the bleeding edge then have a look at the new [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite).
+
+## Boilerplate projects that use mobx-react
+
+*   Minimal MobX, React, ES6, JSX, Hot reloading: [MobX-React-Boilerplate](https://github.com/mobxjs/mobx-react-boilerplate)
+*   TodoMVC MobX, React, ES6, JSX, Hot reloading: [MobX-React-TodoMVC](https://github.com/mobxjs/mobx-react-todomvc)
+*   Minimal MobX, React, Typescript, TSX: [MobX-React-Typescript-Boilerplate](https://github.com/mobxjs/mobx-react-typescript-boilerplate)
+*   Minimal MobX, React, ES6(babel), JSPM with hot reloading modules:
+    [jspm-react](https://github.com/capaj/jspm-react)
+*   React Native Counter: [Mobx-React-Native-Counter](https://github.com/bartonhammond/mobx-react-native-counter)
+*   React Native, TypeScript, React Navigation: [Ignite Bowser](https://github.com/infinitered/ignite-bowser)
 
 ## API documentation
 
-Please check [mobx.js.org](https://mobx.js.org) for the general documentation. The documentation below highlights some specifics.
-
-### `observer(componentClass)`
+### observer(componentClass)
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
 
-When using component classes, `this.props` and `this.state` will be made observables, so the component will react to all changes in props and state that are used by `render`.
-Note that `observer` automatically applies `React.memo` to any component you pass to it.
+Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all changes in props and state that are  used by `render`.
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
 ```javascript
 import { observer } from "mobx-react"
 
+// ---- ES5 syntax ----
+
+const TodoView = observer(
+    React.createClass({
+        displayName: "TodoView",
+        render() {
+            return <div>{this.props.todo.title}</div>
+        }
+    })
+)
+
 // ---- ES6 syntax ----
+
 const TodoView = observer(
     class TodoView extends React.Component {
         render() {
@@ -69,7 +70,8 @@ const TodoView = observer(
     }
 )
 
-// ---- ESNext syntax with decorator syntax enabled ----
+// ---- ESNext syntax with decorators ----
+
 @observer
 class TodoView extends React.Component {
     render() {
@@ -77,7 +79,8 @@ class TodoView extends React.Component {
     }
 }
 
-// ---- or just use function components: ----
+// ---- or just use a stateless component function: ----
+
 const TodoView = observer(({ todo }) => <div>{todo.title}</div>)
 ```
 
@@ -128,88 +131,19 @@ React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
-### `useLocalStore` hook
+### Global error handler with `onError`
 
-Local observable state can be introduced by using the `useLocalStore` hook, that runs once to create an observable store. A quick example would be:
+If a component throws an error, this logs to the console but does not 'crash' the app, so it might go unnoticed.
+For this reason it is possible to attach a global error handler using `onError` to intercept any error thrown in the render of an `observer` component.
+This can be used to hook up any client side error collection system.
 
 ```javascript
-import { useLocalStore, useObserver } from "mobx-react-lite"
+import { onError } from "mobx-react"
 
-const Todo = () => {
-    const todo = useLocalStore(() => ({
-        title: "Test",
-        done: true,
-        toggle() {
-            this.done = !this.done
-        }
-    }))
-
-    return useObserver(() => (
-        <h1 onClick={todo.toggle}>
-            {todo.title} {todo.done ? "[DONE]" : "[TODO]"}
-        </h1>
-    ))
+onError(error => {
+    console.log(error)
 })
 ```
-
-When using `useLocalStore`, all properties of the returned object will be made observable automatically, getters will be turned into computed properties, and methods will be bound to the store and apply mobx transactions automatically. If new class instances are returned from the initializer, they will be kept as is.
-
-It is important to realize that the store is created only once! It is not possible to specify dependencies to force re-creation, _nor should you directly be referring to props for the initializer function_, as changes in those won't propagate.
-
-Instead, if your store needs to refer to props (or `useState` based local state), the `useLocalStore` should be combined with the `useAsObservableSource` hook, see below.
-
-Note that in many cases it is possible to extract the initializer function to a function outside the component definition. Which makes it possible to test the store itself in a more straight-forward manner, and avoids creating the initializer closure on each re-render.
-
-_Note: using `useLocalStore` is mostly beneficial for really complex local state, or to obtain more uniform code base. Note that using a local store might conflict with future React features like concurrent rendering._
-
-### `useAsObservableSource` hook
-
-The `useAsObservableSource` hook can be used to turn any set of values into an observable object that has a stable reference (the same object is returned every time from the hook).
-The goal of this hook is to trap React primitives such as props or state (which are not observable themselves) into a local, observable object
-so that the `store` or any reactions created by the component can safely refer to it, and get notified if any of the values change.
-
-The value passed to `useAsObservableSource` should always be an object, and is made only shallowly observable.
-
-The object returned by `useAsObservableSource`, although observable, should be considered read-only for all practical purposes.
-Use `useLocalStore` instead if you want to create local, observable, mutable, state.
-
-Warning: \_the return value of `useAsObservableSource` should never be deconstructed! So, don't write: `const {multiplier} = useAsObservableSource({ multiplier })`!\_useObservable
-
-The following example combines all concepts mentioned so far: `useLocalStore` to create a local store, and `useAsObservableProps` to make the props observable, so that it can be uses savely in `store.multiplied`:
-
-```typescript
-import { observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
-
-interface CounterProps {
-    multiplier: number
-}
-
-export const Counter = observer(function Counter(props: CounterProps) {
-    const observableProps = useAsObservableSource(props)
-    const store = useLocalStore(() => ({
-        count: 10,
-        get multiplied() {
-            return observableProps.multiplier * this.count
-        },
-        inc() {
-            this.count += 1
-        }
-    }))
-
-    return (
-        <div>
-            Multiplied count: <span>{store.multiplied}</span>
-            <button id="inc" onClick={store.inc}>
-                Increment
-            </button>
-        </div>
-    )
-})
-```
-
-Note that we cannot directly use `props.multiplier` in `multiplied` in the above example, it would not cause the `multiplied` to be invalidated, as it is not observable. Recreating the local store would also not have the desired state, as it would be a shame if it lost its local state such as `count`.
-
-_Performance tip: for optimal performance it is recommend to not use `useAsObservableSource` together on the same component as `observer`, as it might trigger double renderings. In those cases, use `<Observer>` instead._
 
 ### Server Side Rendering with `useStaticRendering`
 
@@ -220,7 +154,7 @@ To avoid leaking memory, call `useStaticRendering(true)` when using server side 
 ```javascript
 import { useStaticRendering } from "mobx-react"
 
-useStaticRendering(true)
+useStaticRendering(true);
 ```
 
 This makes sure the component won't try to react to any future data changes.
@@ -239,23 +173,52 @@ Decorators are currently a stage-2 ESNext feature. How to enable them is documen
 See this [thread](https://www.reddit.com/r/reactjs/comments/4vnxg5/free_eggheadio_course_learn_mobx_react_in_30/d61oh0l).
 TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, but use `observer` on all components.
 
+### About `shouldComponentUpdate`
+
+When using `@observer` on a component, don't implement `shouldComponentUpdate`, as it will override the default implementation that MobX provides.
+When using mobx-react, you should in general not need to write an `sCU` (in our entire Mendix code base we have none). If you really need to implement `sCU`, split the component into two, a reactive and non-reactive (with the `sCU`) part, or use `<Observer>` sections instead of `observer` on the entire component.
+
+Similarly, `PureComponent` should not be combined with `observer`. As pure components are supposed to be dumb and never update themselves automatically, but only by getting passed in new props from the parent. `observer` is the opposite, it makes components smart and dependency aware, allowing them to update without the parents even needing to be aware of the change.
+
+### `componentWillReact` (lifecycle hook)
+
+React components usually render on a fresh stack, so that makes it often hard to figure out what _caused_ a component to re-render.
+When using `mobx-react` you can define a new life cycle hook, `componentWillReact` (pun intended) that will be triggered when a component is scheduled to be re-rendered because
+data it observes has changed. This makes it easy to trace renders back to the action that caused the rendering.
+
+```javascript
+import { observer } from "mobx-react"
+
+@observer
+class TodoView extends React.Component {
+    componentWillReact() {
+        console.log("I will re-render, since the todo has changed!")
+    }
+
+    render() {
+        return <div>{this.props.todo.title}</div>
+    }
+}
+```
+
+*   `componentWillReact` doesn't take arguments
+*   `componentWillReact` won't fire before the initial render (use `componentDidMount` or `constructor` instead)
+
 ### `PropTypes`
 
 MobX-react provides the following additional `PropTypes` which can be used to validate against MobX structures:
 
--   `observableArray`
--   `observableArrayOf(React.PropTypes.number)`
--   `observableMap`
--   `observableObject`
--   `arrayOrObservableArray`
--   `arrayOrObservableArrayOf(React.PropTypes.number)`
--   `objectOrObservableObject`
+*   `observableArray`
+*   `observableArrayOf(React.PropTypes.number)`
+*   `observableMap`
+*   `observableObject`
+*   `arrayOrObservableArray`
+*   `arrayOrObservableArrayOf(React.PropTypes.number)`
+*   `objectOrObservableObject`
 
 Use `import { PropTypes } from "mobx-react"` to import them, then use for example `PropTypes.observableArray`
 
 ### `Provider` and `inject`
-
-_Note: usually there is no need anymore to use `Provider` / `inject` in new code bases; most of its features are now covered by `React.createContext`._
 
 `Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
@@ -297,11 +260,12 @@ class MessageList extends React.Component {
 
 Notes:
 
--   It is possible to read the stores provided by `Provider` using `React.useContext`, by using the `MobXProviderContext` context that can be imported from `mobx-react`.
--   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
--   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
--   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
--   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
+*   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
+*   If updates to an observable store are not triggering `render()`, make sure you are using Class methods for React lifecycle hooks such as `componentWillMount() {}`, using `componentWillMount = () => {}` will create a property on the instance and cause conflicts with mobx-react.
+*   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
+*   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
+*   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
+*   For mounted component instances, the wrapped component instance is available through the `wrappedInstance` property (except for stateless components).
 
 #### Inject as function
 
@@ -359,7 +323,7 @@ ReactDOM.render(<App />, document.body)
 
 _N.B. note that in this *specific* case neither `NameDisplayer` nor `UserNameDisplayer` needs to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
 
-#### Using `PropTypes` and `defaultProps` and other static properties in combination with `inject`
+#### Using `propTypes` and `defaultProps` and other static properties in combination with `inject`
 
 Inject wraps a new component around the component you pass into it.
 This means that assigning a static property to the resulting component, will be applied to the HoC, and not to the original component.
@@ -429,6 +393,10 @@ public render() {
 }
 ```
 
+##### With Flow
+
+Currently, there is a community-discussion around the best way to use `inject` with Flow. Join the discussion at [this gist](https://gist.github.com/vonovak/29c972c6aa9efbb7d63a6853d021fba9).
+
 #### Testing store injection
 
 It is allowed to pass any declared store in directly as a property as well. This makes it easy to set up individual component tests without a provider.
@@ -482,15 +450,6 @@ class SomeComponent extends React.Component {
 }
 ```
 
-## DevTools
-
-`mobx-react@6` and higher are no longer compatible with the mobx-react-devtools.
-That is, the MobX react devtools will no longer show render timings or dependency trees of the component.
-The reason is that the standard React devtools are also capable of highlighting re-rendering components.
-And the dependency tree of a component can now be inspected by the standard devtools as well, as shown in the image below:
-
-![hooks.png](hooks.png)
-
 ## FAQ
 
 **Should I use `observer` for each component?**
@@ -517,3 +476,43 @@ Warning: setState(...): Cannot update during an existing state transition (such 
 
 Usually this means that (another) component is trying to modify observables used by this components in their `constructor` or `getInitialState` methods.
 This violates the React Lifecycle, `componentWillMount` should be used instead if state needs to be modified before mounting.
+
+## Internal DevTools Api
+
+### trackComponents()
+
+Enables the tracking from components. Each rendered reactive component will be added to the `componentByNodeRegistery` and its renderings will be reported through the `renderReporter` event emitter.
+
+### renderReporter
+
+Event emitter that reports render timings and component destructions. Only available after invoking `trackComponents()`.
+New listeners can be added through `renderReporter.on(function(data) { /* */ })`.
+
+Data will have one of the following formats:
+
+```javascript
+{
+    event: 'render',
+    renderTime: /* time spend in the .render function of a component, in ms. */,
+    totalTime: /* time between starting a .render and flushing the changes to the DOM, in ms. */,
+    component: /* component instance */,
+    node: /* DOM node */
+}
+```
+
+```javascript
+{
+    event: 'destroy',
+    component: /* component instance */,
+    node: /* DOM Node */
+}
+```
+
+### componentByNodeRegistery
+
+WeakMap. Its `get` function returns the associated reactive component of the given node. The node needs to be precisely the root node of the component.
+This map is only available after invoking `trackComponents`.
+
+### Debugging reactions with trace
+
+Using Mobx.trace() inside a React render function will print out the observable that triggered the change. See [the mobx trace docs](https://mobx.js.org/best/trace.html) for more information.

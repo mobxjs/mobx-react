@@ -2,7 +2,15 @@ import * as React from "react"
 import * as ReactDOM from "react-dom"
 import { Component } from "react"
 import * as PropTypes from "prop-types"
-import { observer, Provider, propTypes, inject, Observer, disposeOnUnmount } from "../../src"
+import {
+    observer,
+    Provider,
+    propTypes,
+    inject,
+    Observer,
+    disposeOnUnmount,
+    useObservable
+} from "../../src"
 import * as createClass from "create-react-class"
 
 @observer
@@ -68,36 +76,6 @@ class T7 extends Component<{ pizza: number }, {}> {
 React.createElement(observer(T7), { pizza: 4 })
 
 ReactDOM.render(<T5 />, document.body)
-
-/// with stores
-@observer(["store1", "store2"])
-class T8 extends Component<{ pizza: number }, {}> {
-    render() {
-        return <div>{this.props.pizza}</div>
-    }
-}
-
-const T9 = observer(
-    ["stores"],
-    createClass({
-        getDefaultProps() {
-            return { cake: 7 }
-        },
-        render() {
-            return (
-                <div>
-                    <T1 pizza={this.props.cake} />
-                </div>
-            )
-        }
-    })
-)
-
-const T10 = observer(["stores"], (props: { hamburger: number }) => {
-    return <T2 cake={props.hamburger} />
-})
-
-React.createElement(observer(T8), { pizza: 4 })
 
 class ProviderTest extends Component<any, any> {
     render() {
@@ -221,8 +199,6 @@ class LoginContainer2 extends Component<
 
 ReactDOM.render(<LoginContainer2 x="test" />, document.body)
 
-ReactDOM.render(<T10 hamburger={3} />, document.body)
-
 class ObserverTest extends Component<any, any> {
     render() {
         return <Observer>{() => <div>test</div>}</Observer>
@@ -269,7 +245,6 @@ class InjectSomeStores extends Component<{ x: any }, {}> {
 
 inject(({ x }) => ({ x }))(InjectSomeStores)
 
-// TODO: not possible: App2.wrappedComponent
 {
     class T extends Component<{ x: number }> {
         render() {
@@ -300,4 +275,15 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
         methodB = disposeOnUnmount(this, () => {})
     }
     */
+}
+
+{
+    const TestComponent = () => {
+        const observable = useObservable({
+            test: 3
+        })
+
+        return <h1>{observable.test * 2}</h1>
+    }
+    ;<TestComponent />
 }
