@@ -20,7 +20,7 @@
     "test:ts": "tsc -p test/ts",
     "test:travis": "npm run build && jest && npm run test:ts",
     "build": "yarn bundle && shx cp src/index.d.ts dist/mobx-react.d.ts && shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && sed -i 's/\"react-dom\"/\"react-native\"/g' dist/mobx-react.rn.module.js",
-    "bundle": "microbundle  --jsx React.createElement --external mobx,react,react-dom --globals react-dom=ReactDOM,react=React --name mobxReact",
+    "bundle": "microbundle  --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite --globals react-dom=ReactDOM,react=React,mobx-react-lite=mobxReactLite --name mobxReact",
     "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
