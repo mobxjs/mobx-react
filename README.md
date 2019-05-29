@@ -5,7 +5,7 @@
 [![CDNJS](https://img.shields.io/cdnjs/v/mobx-react.svg)](https://cdnjs.com/libraries/mobx-react)
 
 Package with React component wrapper for combining React with MobX.
-Exports the `observer` decorator and some development utilities.
+Exports the `observer` decorator and other utilities.
 For documentation, see the [MobX](https://mobxjs.github.io/mobx) project.
 This package supports both React and React Native.
 
@@ -13,64 +13,52 @@ This package supports both React and React Native.
 
 There are currently two actively maintained versions of mobx-react:
 
-| NPM Version | Supported React versions | Supports hook based components |
-| --- | --- | -- |
-| v6 | 16.8.0 and higher | Yes |
-| v5 | 0.13 and higher | No, but it is possible to use `<Observer>` sections inside hook based components |
+| NPM Version | Supported React versions | Supports hook based components                                                   |
+| ----------- | ------------------------ | -------------------------------------------------------------------------------- |
+| v6          | 16.8.0 and higher        | Yes                                                                              |
+| v5          | 0.13 and higher          | No, but it is possible to use `<Observer>` sections inside hook based components |
 
 The V5 documentation can be found in the [README_v5](README_v5.md).
 
 Version 6 is a repackage of the [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
-* Support for class based components for `observer` and `@observer`
-* `Provider / inject` to pass stores around (but consider to use `React.createContext` instead)
-* `PropTypes` to describe observable based property checkers (but consider to use TypeScript instead)
-* The `disposeOnUnmount` utility / decorator to easily clean up resources such as reactions created in your class based components.
+
+-   Support for class based components for `observer` and `@observer`
+-   `Provider / inject` to pass stores around (but consider to use `React.createContext` instead)
+-   `PropTypes` to describe observable based property checkers (but consider to use TypeScript instead)
+-   The `disposeOnUnmount` utility / decorator to easily clean up resources such as reactions created in your class based components.
 
 ## Installation
 
 `npm install mobx-react --save`
 
-Or CDN: https://unpkg.com/mobx-react (namespace: `mobxReact`)
+Or CDN: https://unpkg.com/mobx-react (UMD namespace: `mobxReact`)
 
 ```javascript
 import { observer } from "mobx-react"
-// - or, for custom renderers without DOM: -
-import { observer } from "mobx-react/custom"
 ```
 
 This package provides the bindings for MobX and React.
 See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.html) for how to get started.
 
-If you are using [React hooks](https://reactjs.org/docs/hooks-intro.html) with latest React 16.7 and you like living on the bleeding edge then have a look at the new [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite).
+For greenfield projects you might want to consider to use [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite), if you intend to only use function based components. `React.createContext` can be used to pass stores around.
 
 ## API documentation
 
 Please check [mobx.js.org](https://mobx.js.org) for the general documentation. The documentation below highlights some specifics.
 
-### observer(componentClass)
+### `observer(componentClass)`
 
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
 
-Apart from observables passed/injected in or defined inside an `observer` component, `this.props` and `this.state` are also observables themselves, so the component will react to all changes in props and state that are  used by `render`.
+When using component classes, `this.props` and `this.state` will be made observables, so the component will react to all changes in props and state that are used by `render`.
+Note that `observer` automatically applies `React.memo` to any component you pass to it.
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
 ```javascript
 import { observer } from "mobx-react"
 
-// ---- ES5 syntax ----
-
-const TodoView = observer(
-    React.createClass({
-        displayName: "TodoView",
-        render() {
-            return <div>{this.props.todo.title}</div>
-        }
-    })
-)
-
 // ---- ES6 syntax ----
-
 const TodoView = observer(
     class TodoView extends React.Component {
         render() {
@@ -79,8 +67,7 @@ const TodoView = observer(
     }
 )
 
-// ---- ESNext syntax with decorators ----
-
+// ---- ESNext syntax with decorator syntax enabled ----
 @observer
 class TodoView extends React.Component {
     render() {
@@ -89,7 +76,6 @@ class TodoView extends React.Component {
 }
 
 // ---- or just use function components: ----
-
 const TodoView = observer(({ todo }) => <div>{todo.title}</div>)
 ```
 
@@ -140,6 +126,88 @@ React.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
+### `useLocalStore` hook
+
+Local observable state can be introduced by using the `useLocalStore` hook, that runs once to create an observable store. A quick example would be:
+
+```javascript
+import { useLocalStore, useObserver } from "mobx-react-lite"
+
+const Todo = () => {
+    const todo = useLocalStore(() => ({
+        title: "Test",
+        done: true,
+        toggle() {
+            this.done = !this.done
+        }
+    }))
+
+    return useObserver(() => (
+        <h1 onClick={todo.toggle}>
+            {todo.title} {todo.done ? "[DONE]" : "[TODO]"}
+        </h1>
+    ))
+})
+```
+
+When using `useLocalStore`, all properties of the returned object will be made observable automatically, getters will be turned into computed properties, and methods will be bound to the store and apply mobx transactions automatically. If new class instances are returned from the initializer, they will be kept as is.
+
+It is important to realize that the store is created only once! It is not possible to specify dependencies to force re-creation, _nor should you directly be referring to props for the initializer function_, as changes in those won't propagate.
+
+Instead, if your store needs to refer to props (or `useState` based local state), the `useLocalStore` should be combined with the `useAsObservableSource` hook, see below.
+
+Note that in many cases it is possible to extract the initializer function to a function outside the component definition. Which makes it possible to test the store itself in a more straight-forward manner, and avoids creating the initializer closure on each re-render.
+
+_Note: using `useLocalStore` is mostly beneficial for really complex local state, or to obtain more uniform code base. Note that using a local store might conflict with future React features like concurrent rendering._
+
+### `useAsObservableSource` hook
+
+The `useAsObservableSource` hook can be used to turn any set of values into an observable object that has a stable reference (the same object is returned every time from the hook).
+The goal of this hook is to trap React primitives such as props or state (which are not observable themselves) into a local, observable object
+so that the `store` or any reactions created by the component can safely refer to it, and get notified if any of the values change.
+
+The value passed to `useAsObservableSource` should always be an object, and is made only shallowly observable.
+
+The object returned by `useAsObservableSource`, although observable, should be considered read-only for all practical purposes.
+Use `useLocalStore` instead if you want to create local, observable, mutable, state.
+
+Warning: \_the return value of `useAsObservableSource` should never be deconstructed! So, don't write: `const {multiplier} = useAsObservableSource({ multiplier })`!\_useObservable
+
+The following example combines all concepts mentioned so far: `useLocalStore` to create a local store, and `useAsObservableProps` to make the props observable, so that it can be uses savely in `store.multiplied`:
+
+```typescript
+import { observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
+
+interface CounterProps {
+    multiplier: number
+}
+
+export const Counter = observer(function Counter(props: CounterProps) {
+    const observableProps = useAsObservableSource(props)
+    const store = useLocalStore(() => ({
+        count: 10,
+        get multiplied() {
+            return observableProps.multiplier * this.count
+        },
+        inc() {
+            this.count += 1
+        }
+    }))
+
+    return (
+        <div>
+            Multiplied count: <span>{store.multiplied}</span>
+            <button id="inc" onClick={store.inc}>
+                Increment
+            </button>
+        </div>
+    )
+})
+```
+
+Note that we cannot directly use `props.multiplier` in `multiplied` in the above example, it would not cause the `multiplied` to be invalidated, as it is not observable. Recreating the local store would also not have the desired state, as it would be a shame if it lost its local state such as `count`.
+
+_Performance tip: for optimal performance it is recommend to not use `useAsObservableSource` together on the same component as `observer`, as it might trigger double renderings. In those cases, use `<Observer>` instead._
 
 ### Server Side Rendering with `useStaticRendering`
 
@@ -150,7 +218,7 @@ To avoid leaking memory, call `useStaticRendering(true)` when using server side 
 ```javascript
 import { useStaticRendering } from "mobx-react"
 
-useStaticRendering(true);
+useStaticRendering(true)
 ```
 
 This makes sure the component won't try to react to any future data changes.
@@ -173,17 +241,19 @@ TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, 
 
 MobX-react provides the following additional `PropTypes` which can be used to validate against MobX structures:
 
-*   `observableArray`
-*   `observableArrayOf(React.PropTypes.number)`
-*   `observableMap`
-*   `observableObject`
-*   `arrayOrObservableArray`
-*   `arrayOrObservableArrayOf(React.PropTypes.number)`
-*   `objectOrObservableObject`
+-   `observableArray`
+-   `observableArrayOf(React.PropTypes.number)`
+-   `observableMap`
+-   `observableObject`
+-   `arrayOrObservableArray`
+-   `arrayOrObservableArrayOf(React.PropTypes.number)`
+-   `objectOrObservableObject`
 
 Use `import { PropTypes } from "mobx-react"` to import them, then use for example `PropTypes.observableArray`
 
 ### `Provider` and `inject`
+
+_Note: usually there is no need anymore to use `Provider` / `inject` in new code bases; most of its features are now covered by `React.createContext`._
 
 `Provider` is a component that can pass stores (or other stuff) using React's context mechanism to child components.
 This is useful if you have things that you don't want to pass through multiple layers of components explicitly.
@@ -225,10 +295,11 @@ class MessageList extends React.Component {
 
 Notes:
 
-*   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
-*   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
-*   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
-*   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
+-   It is possible to read the stores provided by `Provider` using `React.useContext`, by using the `MobXProviderContext` context that can be imported from `mobx-react`.
+-   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
+-   Values provided through `Provider` should be final, to avoid issues like mentioned in [React #2517](https://github.com/facebook/react/issues/2517) and [React #3973](https://github.com/facebook/react/pull/3973), where optimizations might stop the propagation of new context. Instead, make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will warn you. To suppress that warning explicitly, you can use `suppressChangedStoreWarning={true}` as a prop at your own risk.
+-   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
+-   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
 
 #### Inject as function
 
@@ -286,7 +357,7 @@ ReactDOM.render(<App />, document.body)
 
 _N.B. note that in this *specific* case neither `NameDisplayer` nor `UserNameDisplayer` needs to be decorated with `observer`, since the observable dereferencing is done in the mapper function_
 
-#### Using `propTypes` and `defaultProps` and other static properties in combination with `inject`
+#### Using `PropTypes` and `defaultProps` and other static properties in combination with `inject`
 
 Inject wraps a new component around the component you pass into it.
 This means that assigning a static property to the resulting component, will be applied to the HoC, and not to the original component.
@@ -411,14 +482,12 @@ class SomeComponent extends React.Component {
 
 ## DevTools
 
-`mobx-react@6` and higher are no longer compatible with the mobx-react-devtools. 
-That is, the MobX react devtools will no longer show render timings or dependency trees of the component. 
-The reason is that the standard React devtools are no also capable of highlighting re-rendering components.
+`mobx-react@6` and higher are no longer compatible with the mobx-react-devtools.
+That is, the MobX react devtools will no longer show render timings or dependency trees of the component.
+The reason is that the standard React devtools are also capable of highlighting re-rendering components.
 And the dependency tree of a component can now be inspected by the standard devtools as well, as shown in the image below:
 
 ![hooks.png](hooks.png)
-
-The event spy will still work as is.
 
 ## FAQ
 

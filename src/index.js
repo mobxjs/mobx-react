@@ -11,7 +11,7 @@ export { Observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
 
 export { observer, useStaticRendering } from "./observer"
 
-export { Provider } from "./Provider"
+export { Provider, MobXProviderContext } from "./Provider"
 export { inject } from "./inject"
 export { disposeOnUnmount } from "./disposeOnUnmount"
 export { PropTypes } from "./propTypes"
