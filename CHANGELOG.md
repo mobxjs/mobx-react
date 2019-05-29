@@ -21,7 +21,7 @@
 -   The MobX-react devtools (either as package or browser plugin) are no longer supported. Instead, the following tools can be analyzed to analyze your mobx-react application:
     -   Visualizing re-rendering of components is now part of the standard React devtools
     -   The dependency tree of a compent tree can be inspected by showing the state of the `useObserver` hook in the React devtools (at the time of this release it displays as just `Object`, but the next iteration of the React devtools will support those properly)
-    -   Spying on events can still be done with the [MobX-react browser plugin](TODO: link), through the [mobx-logger](TODO: link) package or manually by using the `spy` or `trace` utility from the mobx package.
+    -   Spying on events can still be done with the [MobX-react browser plugin](https://github.com/mobxjs/mobx-devtools), through the [mobx-logger](https://github.com/winterbe/mobx-logger) package or manually by using the `spy` or `trace` utility from the mobx package.
 
 **Improvements**
 
@@ -30,10 +30,6 @@
 -   For `observer` based components, there will now be an additional `Observer` component in the tree.
 -   Two new hooks have been exposed, in case you want to manage local state in observable: `useLocalStore` and `useAsObservableSource`.
 -   `MobXProviderContext` is now exposed from the package, in case you want to consume the context used by `Provider` with a `useContext` hook.
-
-**Migration guide**
-
-TODO: answer FAQ: https://twitter.com/winterbe_/status/1108768407925780482
 
 ### 5.4.3
 

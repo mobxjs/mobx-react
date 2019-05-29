@@ -20,6 +20,8 @@ There are currently two actively maintained versions of mobx-react:
 
 The V5 documentation can be found in the [README_v5](README_v5.md).
 
+Both mobx-react 5 and 6 are compatible with mobx 4 and 5
+
 Version 6 is a repackage of the [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
 
 -   Support for class based components for `observer` and `@observer`
