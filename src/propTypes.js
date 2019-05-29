@@ -1,6 +1,5 @@
 import { isObservableArray, isObservableObject, isObservableMap, untracked } from "mobx"
 
-// TODO: can we just import this stuff?
 // Copied from React.PropTypes
 function createChainableTypeChecker(validate) {
     function checkType(

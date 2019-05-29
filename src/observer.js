@@ -97,7 +97,6 @@ export function observer(componentClass) {
         )
     }
 
-    // TODO: still needed? (if func comp?)
     // Unwrap forward refs into `<Observer>` component
     // we need to unwrap the render, because it is the inner render that needs to be tracked,
     // not the ForwardRef HoC

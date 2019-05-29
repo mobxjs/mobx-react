@@ -2,7 +2,15 @@ import * as React from "react"
 import * as ReactDOM from "react-dom"
 import { Component } from "react"
 import * as PropTypes from "prop-types"
-import { observer, Provider, propTypes, inject, Observer, disposeOnUnmount, useObservable } from "../../src"
+import {
+    observer,
+    Provider,
+    propTypes,
+    inject,
+    Observer,
+    disposeOnUnmount,
+    useObservable
+} from "../../src"
 import * as createClass from "create-react-class"
 
 @observer
@@ -68,7 +76,6 @@ class T7 extends Component<{ pizza: number }, {}> {
 React.createElement(observer(T7), { pizza: 4 })
 
 ReactDOM.render(<T5 />, document.body)
-
 
 class ProviderTest extends Component<any, any> {
     render() {
@@ -238,7 +245,6 @@ class InjectSomeStores extends Component<{ x: any }, {}> {
 
 inject(({ x }) => ({ x }))(InjectSomeStores)
 
-// TODO: not possible: App2.wrappedComponent
 {
     class T extends Component<{ x: number }> {
         render() {
@@ -279,6 +285,5 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
 
         return <h1>{observable.test * 2}</h1>
     }
-
-    <TestComponent />
+    ;<TestComponent />
 }

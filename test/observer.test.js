@@ -296,8 +296,7 @@ test("observer component can be injected", () => {
     console.warn = baseWarn
 })
 
-// TODO: re-enable when https://github.com/mobxjs/mobx-react-lite/pull/75
-test.skip("correctly wraps display name of child component", () => {
+test("correctly wraps display name of child component", () => {
     const A = observer(
         createClass({
             displayName: "ObserverClass",

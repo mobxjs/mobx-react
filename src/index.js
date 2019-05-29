@@ -7,7 +7,7 @@ if (!observable) throw new Error("mobx-react requires mobx to be available")
 
 if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
 
-export { useObservable, useComputed, useDisposable, useObserver, Observer } from "mobx-react-lite"
+export { Observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
 
 export { observer, useStaticRendering } from "./observer"
 
