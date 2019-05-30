@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.0.1
+
+-   Added missing types for `MobXProviderContext`, `useLocalStore` and `useAsObservableSource`. Fixes #679.
+
 ### 6.0.0
 
 **Breaking changes**
