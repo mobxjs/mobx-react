@@ -3,14 +3,7 @@
  */
 import * as React from "react"
 
-export {
-    useObservable,
-    useComputed,
-    useDisposable,
-    IObserverOptions,
-    useObserver,
-    Observer
-} from "mobx-react-lite"
+export { useAsObservableSource, useLocalStore, IObserverOptions, Observer } from "mobx-react-lite"
 
 export type IReactComponent<P = any> =
     | React.StatelessComponent<P>
@@ -79,20 +72,9 @@ export function disposeOnUnmount<TF extends Disposer | Disposer[]>(
  */
 export class Provider extends React.Component<any, {}> {}
 
-export function useStaticRendering(value: boolean): void
+export const MobXProviderContext: React.Context<any>
 
-/**
- * @deprecated, use PropTypes instead
- */
-export const propTypes: {
-    observableArray: React.Requireable<any>
-    observableArrayOf: (type: React.Validator<any>) => React.Requireable<any>
-    observableMap: React.Requireable<any>
-    observableObject: React.Requireable<any>
-    arrayOrObservableArray: React.Requireable<any>
-    arrayOrObservableArrayOf: (type: React.Validator<any>) => React.Requireable<any>
-    objectOrObservableObject: React.Requireable<any>
-}
+export function useStaticRendering(value: boolean): void
 
 export const PropTypes: {
     observableArray: React.Requireable<any>

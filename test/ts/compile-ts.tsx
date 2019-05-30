@@ -1,15 +1,15 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom"
 import { Component } from "react"
-import * as PropTypes from "prop-types"
+import * as ClassicPropTypes from "prop-types"
 import {
     observer,
     Provider,
-    propTypes,
     inject,
     Observer,
     disposeOnUnmount,
-    useObservable
+    PropTypes,
+    useLocalStore
 } from "../../src"
 import * as createClass from "create-react-class"
 
@@ -33,7 +33,7 @@ const T2 = observer(
             )
         },
         propTypes: {
-            zoem: propTypes.arrayOrObservableArray
+            zoem: PropTypes.arrayOrObservableArray
         }
     })
 )
@@ -154,7 +154,7 @@ const LoginContainer = inject((allStores, props) => ({
             {}
         > {
             static contextTypes: React.ValidationMap<any> = {
-                router: PropTypes.func.isRequired
+                router: ClassicPropTypes.func.isRequired
             }
 
             render() {
@@ -183,7 +183,7 @@ class LoginContainer2 extends Component<
     {}
 > {
     static contextTypes: React.ValidationMap<any> = {
-        router: PropTypes.func.isRequired
+        router: ClassicPropTypes.func.isRequired
     }
 
     render() {
@@ -279,9 +279,9 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
 
 {
     const TestComponent = () => {
-        const observable = useObservable({
+        const observable = useLocalStore(() => ({
             test: 3
-        })
+        }))
 
         return <h1>{observable.test * 2}</h1>
     }
