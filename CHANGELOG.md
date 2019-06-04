@@ -1,5 +1,10 @@
 # MobX-React Changelog
 
+### 6.0.3
+
+- `disposeOnUnmount` now supports initializing it with an array of disposers. Fixes [#637](https://github.com/mobxjs/mobx-react/pull/637) through [#641](https://github.com/mobxjs/mobx-react/pull/641) by [@Amareis](https://github.com/Amareis)
+- Fixed hoisting of statically declared members. Fixes [#678](https://github.com/mobxjs/mobx-react/issues/678) through [#682](https://github.com/mobxjs/mobx-react/pull/682) by [@meabed](https://github.com/meabed)
+
 ### 6.0.2
 
 -   Added missing types for `MobXProviderContext`, `useLocalStore` and `useAsObservableSource`. Fixes #679.
