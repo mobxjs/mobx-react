@@ -1,0 +1,8 @@
+[
+    {
+        "path": "dist/mobx-react.js",
+        "limit": "4 KB",
+        "webpack": false,
+        "running": false
+    }
+]
