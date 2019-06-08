@@ -35,7 +35,7 @@
   },
   "optionalDependencies": {
     "react-dom": "^16.8.0",
-    "react-native": "^0.59",
+    "react-native": "^0.59"
   },
   "devDependencies": {
     "@babel/core": "^7.1.0",
