@@ -239,6 +239,37 @@ Decorators are currently a stage-2 ESNext feature. How to enable them is documen
 See this [thread](https://www.reddit.com/r/reactjs/comments/4vnxg5/free_eggheadio_course_learn_mobx_react_in_30/d61oh0l).
 TL;DR: the conceptual distinction makes a lot of sense when using MobX as well, but use `observer` on all components.
 
+### Lifecycle method componentDidUpdate not firing
+
+Due to implementation change the V6 will no longer fire `componentDidUpdate` lifecycle method when observer enhanced component is rendered based on observable change in the `render` method. If you need this behavior, feel free to stick to V5.
+
+Possible workaround of the situation is wrapping `componentDidUpdate` into a separate component that will be rendered along-side observable code. The recommend approach is to refactor to a functional component with `React.useEffect` or `React.useLayoutEffect`.
+
+```jsx
+@observer
+class ListThatStaysAtBottom extends React.PureComponent {
+  render() {
+    return <React.Fragment>
+      <div>{list}</div>
+      <Lifecycle onRender={this.scrollToBottom} />
+    </React.Fragment>
+  }
+}
+
+// DO NOT use PureComponent here
+class Lifecycle extends React.Component {
+  componentDidMount() {
+    this.props.onRender()
+  }
+  componentDidUpdate() {
+    this.props.onRender()
+  }
+  render {
+    return null
+  }
+}
+```
+
 ### `PropTypes`
 
 MobX-react provides the following additional `PropTypes` which can be used to validate against MobX structures:

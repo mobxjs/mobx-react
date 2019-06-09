@@ -122,6 +122,8 @@ export function observer(componentClass) {
     return makeClassComponentObserver(componentClass)
 }
 
+let warnedAboutCDU = false
+
 function makeClassComponentObserver(componentClass) {
     const target = componentClass.prototype || componentClass
     if (target.componentWillReact)
@@ -132,6 +134,12 @@ function makeClassComponentObserver(componentClass) {
             throw new Error(
                 "It is not allowed to use shouldComponentUpdate in observer based components."
             )
+    }
+    if (target.componentDidUpdate && !warnedAboutCDU) {
+        console.warn(
+            "[mobx-react] components decorated with observer will no longer fire componentDidUpdate lifecycle method based on observable change. Please read more at https://github.com/mobxjs/mobx-react/blob/master/README.md#user-content-lifecycle-method-componentdidupdate-not-firing"
+        )
+        warnedAboutCDU = true
     }
     makeObservableProp(target, "props")
     makeObservableProp(target, "state")
