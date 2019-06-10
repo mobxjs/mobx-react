@@ -1,0 +1,106 @@
+version: 2.1
+
+executors:
+    my-executor:
+        docker:
+            - image: circleci/node:11
+              environment:
+                  CI: true
+        working_directory: ~/mobx-react
+
+jobs:
+    # mobx-react build
+    build:
+        executor: my-executor
+        steps:
+            - checkout
+
+            - restore_cache:
+                  name: restore .cache/yarn
+                  keys:
+                      - yarn-cache-{{ arch }}
+            - restore_cache:
+                  name: restore node_modules
+                  keys:
+                      - node-modules-{{ arch }}-{{ .Branch }}-{{ checksum "yarn.lock" }}
+                      - node-modules-{{ arch }}-{{ .Branch }}
+                      - node-modules-{{ arch }}
+
+            - run: yarn install --frozen-lockfile --cache-folder ~/.cache/yarn
+
+            - save_cache:
+                  name: cache .cache/yarn
+                  key: yarn-cache-{{ arch }}
+                  paths:
+                      - ~/.cache/yarn
+            - save_cache:
+                  name: cache node_modules
+                  key: node-modules-{{ arch }}-{{ .Branch }}-{{ checksum "yarn.lock" }}
+                  paths:
+                      - node_modules
+
+            - run: yarn build
+
+            - persist_to_workspace:
+                  root: .
+                  paths:
+                      - ./*
+
+    test-mobx-react:
+        executor: my-executor
+        steps:
+            - attach_workspace:
+                  at: .
+
+            - run: yarn test:ci
+            - store_test_results:
+                  path: ./test-results
+
+            - persist_to_workspace:
+                  root: .
+                  paths:
+                      - ./coverage
+
+    test-size:
+        executor: my-executor
+        steps:
+            - attach_workspace:
+                  at: .
+
+            - run: yarn size
+
+    # upload coverage
+    upload-coveralls:
+        executor: my-executor
+        steps:
+            - attach_workspace:
+                  at: .
+
+            # only run coveralls if the token is present (it is not present for fork PRs for security reasons)
+            - run:
+                  name: upload coveralls
+                  command: |
+                      if [[ -v COVERALLS_REPO_TOKEN ]]
+                      then
+                          cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+                          echo "Coveralls info uploaded"
+                      else
+                          echo "Warning - Coveralls info could NOT be uploaded since the COVERALLS_REPO_TOKEN was not available"
+                      fi
+
+workflows:
+    version: 2
+    build-and-test:
+        jobs:
+            - build
+
+            - test-mobx-react:
+                  requires:
+                      - build
+            - test-size:
+                  requires:
+                      - build
+
+            - upload-coveralls:
+                  requires:
+                      - test-mobx-react
