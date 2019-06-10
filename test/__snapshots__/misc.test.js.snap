@@ -6,6 +6,9 @@ Object {
   "infos": Array [],
   "warnings": Array [
     Array [
+      "[mobx-react] In the next major version (6.x) components decorated with observer will no longer fire componentDidUpdate lifecycle method based on observable change. Please read more at https://github.com/mobxjs/mobx-react/blob/master/README.md#user-content-lifecycle-method-componentdidupdate-not-firing",
+    ],
+    Array [
       "Use \`shouldComponentUpdate\` in an \`observer\` based component breaks the behavior of \`observer\` and might lead to unexpected results. Manually implementing \`sCU\` should not be needed when using mobx-react.",
     ],
   ],
