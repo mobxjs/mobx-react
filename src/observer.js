@@ -287,6 +287,8 @@ function makeObservableProp(target, propName) {
     })
 }
 
+let warnedAboutCDU = false
+
 /**
  * Observer function / decorator
  */
@@ -365,6 +367,14 @@ export function observer(arg1, arg2) {
     }
 
     const target = componentClass.prototype || componentClass
+
+    if (target.componentDidMount && !warnedAboutCDU) {
+        console.warn(
+            "[mobx-react] In the next major version (6.x) components decorated with observer will no longer fire componentDidUpdate lifecycle method based on observable change. Please read more at https://github.com/mobxjs/mobx-react/blob/master/README.md#user-content-lifecycle-method-componentdidupdate-not-firing"
+        )
+        warnedAboutCDU = true
+    }
+
     mixinLifecycleEvents(target)
     componentClass.isMobXReactObserver = true
     makeObservableProp(target, "props")
