@@ -53,7 +53,7 @@ Please check [mobx.js.org](https://mobx.js.org) for the general documentation. T
 Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
 
 When using component classes, `this.props` and `this.state` will be made observables, so the component will react to all changes in props and state that are used by `render`.
-Note that `observer` automatically applies `React.memo` to any functional component you pass to it, however Class component should extend `PureComponent` instead of `Component`
+Note that `observer` automatically applies `React.memo` to any functional component you pass to it, however class components should extend `PureComponent` instead of `Component`
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
