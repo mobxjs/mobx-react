@@ -73,3 +73,22 @@ export function copyStaticProperties(base, target) {
         }
     })
 }
+
+/**
+ * Helper to set `prop` to `this` as non-enumerable (hidden prop)
+ * @param target
+ * @param prop
+ * @param value
+ */
+export function setHiddenProp(target, prop, value) {
+    if (!Object.hasOwnProperty.call(target, prop)) {
+        Object.defineProperty(target, prop, {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value
+        })
+    } else {
+        target[prop] = value
+    }
+}

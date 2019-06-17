@@ -9,7 +9,8 @@ if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
 
 export { Observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
 
-export { observer, useStaticRendering } from "./observer"
+export { observer } from "./observer"
+export { useStaticRendering } from "./observerClass"
 
 export { Provider, MobXProviderContext } from "./Provider"
 export { inject } from "./inject"
