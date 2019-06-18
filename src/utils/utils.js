@@ -68,7 +68,7 @@ const hoistBlackList = {
 export function copyStaticProperties(base, target) {
     const protoProps = Object.getOwnPropertyNames(Object.getPrototypeOf(base))
     Object.getOwnPropertyNames(base).forEach(key => {
-        if (!hoistBlackList[key] && !protoProps.includes(key)) {
+        if (!hoistBlackList[key] && protoProps.indexOf(key) === -1) {
             Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key))
         }
     })
