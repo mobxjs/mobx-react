@@ -1,5 +1,4 @@
-import React from "react"
-import createClass from "create-react-class"
+import React, { Component } from "react"
 import ReactDOM from "react-dom"
 import * as mobx from "mobx"
 import { observer } from "../src"
@@ -21,7 +20,7 @@ test("issue mobx 405", () => {
     }
 
     const ExampleView = observer(
-        createClass({
+        class T extends Component {
             render() {
                 return (
                     <div>
@@ -34,7 +33,7 @@ test("issue mobx 405", () => {
                     </div>
                 )
             }
-        })
+        }
     )
 
     const exampleState = new ExampleState()
@@ -56,19 +55,21 @@ test("issue mobx 405", () => {
 test("#85 Should handle state changing in constructors", done => {
     const a = mobx.observable.box(2)
     const Child = observer(
-        createClass({
-            displayName: "Child",
-            getInitialState() {
+        class Child extends Component {
+            constructor(p) {
+                super(p)
                 a.set(3) // one shouldn't do this!
-                return {}
-            },
-            render: () => (
-                <div>
-                    child:
-                    {a.get()} -{" "}
-                </div>
-            )
-        })
+                this.state = {}
+            }
+            render() {
+                return (
+                    <div>
+                        child:
+                        {a.get()} -{" "}
+                    </div>
+                )
+            }
+        }
     )
     const ParentWrapper = observer(function Parent() {
         return (

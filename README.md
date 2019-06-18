@@ -310,9 +310,9 @@ The above example in ES5 would start like:
 ```javascript
 var Button = inject("color")(
     observer(
-        React.createClass({
+        class Button extends Component {
             /* ... etc ... */
-        })
+        }
     )
 )
 ```

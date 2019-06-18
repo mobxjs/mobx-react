@@ -1,6 +1,4 @@
-import React, { createElement } from "react"
-import createClass from "create-react-class"
-import ReactDOM from "react-dom"
+import React, { createElement, Component } from "react"
 import * as mobx from "mobx"
 import { observer } from "../src"
 import _ from "lodash"
@@ -51,8 +49,7 @@ const wizardModel = mobx.observable(
 /** RENDERS **/
 
 const Wizard = observer(
-    createClass({
-        displayName: "Wizard",
+    class Wizard extends Component {
         render() {
             return createElement(
                 "div",
@@ -71,15 +68,14 @@ const Wizard = observer(
                 </div>
             )
         }
-    })
+    }
 )
 
 const WizardSteps = observer(
-    createClass({
-        displayName: "WizardSteps",
+    class WizardSteps extends Component {
         componentWillMount() {
             this.renderCount = 0
-        },
+        }
         render() {
             var steps = _.map(this.props.steps, step =>
                 createElement(
@@ -90,18 +86,17 @@ const WizardSteps = observer(
             )
             return createElement("div", null, steps)
         }
-    })
+    }
 )
 
 const WizardStep = observer(
-    createClass({
-        displayName: "WizardStep",
+    class WizardStep extends Component {
         componentWillMount() {
             this.renderCount = 0
-        },
+        }
         componentWillUnmount() {
             // console.log("Unmounting!")
-        },
+        }
         render() {
             // weird test hack:
             if (this.props.tester === true) {
@@ -117,12 +112,12 @@ const WizardStep = observer(
                     ": isActive:" +
                     this.props.step.active
             )
-        },
-        modeClickHandler() {
+        }
+        modeClickHandler = () => {
             var step = this.props.step
             wizardModel.setActiveStep(step)
         }
-    })
+    }
 )
 
 /** END RENDERERS **/
@@ -170,22 +165,22 @@ test("verify prop changes are picked up", async () => {
     })
     const events = []
     const Child = observer(
-        createClass({
+        class Child extends Component {
             componentWillReceiveProps(nextProps) {
                 events.push(["receive", this.props.item.subid, nextProps.item.subid])
-            },
+            }
             componentWillUpdate(nextProps) {
                 events.push(["update", this.props.item.subid, nextProps.item.subid])
-            },
+            }
             render() {
                 events.push(["render", this.props.item.subid, this.props.item.text])
                 return <span>{this.props.item.text}</span>
             }
-        })
+        }
     )
 
     const Parent = observer(
-        createClass({
+        class Parent extends Component {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -195,7 +190,7 @@ test("verify prop changes are picked up", async () => {
                     </div>
                 )
             }
-        })
+        }
     )
 
     const Wrapper = () => <Parent />
@@ -256,7 +251,7 @@ test("verify props is reactive", async () => {
     const events = []
 
     const Child = observer(
-        createClass({
+        class Child extends Component {
             componentWillMount() {
                 events.push(["mount"])
                 mobx.extendObservable(this, {
@@ -265,13 +260,13 @@ test("verify props is reactive", async () => {
                         return this.props.item.label
                     }
                 })
-            },
+            }
             componentWillReceiveProps(nextProps) {
                 events.push(["receive", this.props.item.subid, nextProps.item.subid])
-            },
+            }
             componentWillUpdate(nextProps) {
                 events.push(["update", this.props.item.subid, nextProps.item.subid])
-            },
+            }
             render() {
                 events.push([
                     "render",
@@ -286,11 +281,11 @@ test("verify props is reactive", async () => {
                     </span>
                 )
             }
-        })
+        }
     )
 
     const Parent = observer(
-        createClass({
+        class Parent extends Component {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -300,7 +295,7 @@ test("verify props is reactive", async () => {
                     </div>
                 )
             }
-        })
+        }
     )
 
     const Wrapper = () => <Parent />
@@ -349,26 +344,26 @@ test("no re-render for shallow equal props", async () => {
     const events = []
 
     const Child = observer(
-        createClass({
+        class Child extends Component {
             componentWillMount() {
                 events.push(["mount"])
-            },
+            }
             componentWillReceiveProps(nextProps) {
                 events.push(["receive", this.props.item.subid, nextProps.item.subid])
-            },
+            }
 
             componentWillUpdate(nextProps) {
                 events.push(["update", this.props.item.subid, nextProps.item.subid])
-            },
+            }
             render() {
                 events.push(["render", this.props.item.subid, this.props.item.label])
                 return <span>{this.props.item.label}</span>
             }
-        })
+        }
     )
 
     const Parent = observer(
-        createClass({
+        class Parent extends Component {
             render() {
                 // "object has become observable!"
                 expect(mobx.isObservable(this.props.nonObservable)).toBeFalsy()
@@ -381,7 +376,7 @@ test("no re-render for shallow equal props", async () => {
                     </div>
                 )
             }
-        })
+        }
     )
 
     const Wrapper = () => <Parent nonObservable={{}} />
@@ -400,26 +395,26 @@ test("no re-render for shallow equal props", async () => {
 })
 
 test("lifecycle callbacks called with correct arguments", async () => {
-    var Component = observer(
-        createClass({
+    var Comp = observer(
+        class Comp extends Component {
             componentWillReceiveProps(nextProps) {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(nextProps.counter).toBe(1)
                 // "componentWillReceiveProps: this.props.counter === 1"
                 expect(this.props.counter).toBe(0)
-            },
+            }
             componentWillUpdate(nextProps, nextState) {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(nextProps.counter).toBe(1)
                 // "componentWillReceiveProps: this.props.counter === 1"
                 expect(this.props.counter).toBe(0)
-            },
+            }
             componentDidUpdate(prevProps, prevState) {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(prevProps.counter).toBe(0)
                 // "componentWillReceiveProps: this.props.counter === 1"
                 expect(this.props.counter).toBe(1)
-            },
+            }
             render() {
                 return (
                     <div>
@@ -428,19 +423,17 @@ test("lifecycle callbacks called with correct arguments", async () => {
                     </div>
                 )
             }
-        })
-    )
-    const Root = createClass({
-        getInitialState() {
-            return {}
-        },
-        onButtonClick() {
-            this.setState({ counter: (this.state.counter || 0) + 1 })
-        },
-        render() {
-            return <Component counter={this.state.counter || 0} onClick={this.onButtonClick} />
         }
-    })
+    )
+    const Root = class T extends Component {
+        state = {}
+        onButtonClick = () => {
+            this.setState({ counter: (this.state.counter || 0) + 1 })
+        }
+        render() {
+            return <Comp counter={this.state.counter || 0} onClick={this.onButtonClick} />
+        }
+    }
     await asyncReactDOMRender(<Root />, testRoot)
     testRoot.querySelector("#testButton").click()
 })

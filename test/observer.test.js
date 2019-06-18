@@ -1,10 +1,9 @@
-import createClass from "create-react-class"
-import * as mobx from "mobx"
 import React, { Component } from "react"
 import TestUtils from "react-dom/test-utils"
 import { inject, observer, Observer, useStaticRendering } from "../src"
 import { asyncReactDOMRender, createTestRoot, sleepHelper, withConsole } from "./"
 import renderer, { act } from "react-test-renderer"
+import * as mobx from "mobx"
 
 /**
  *  some test suite is too tedious
@@ -39,8 +38,8 @@ describe("nestedRendering", async () => {
 
     let todoListRenderings = 0
     const TodoList = observer(
-        createClass({
-            renderings: 0,
+        class TodoList extends Component {
+            renderings = 0
             render() {
                 todoListRenderings++
                 const todos = store.todos
@@ -53,7 +52,7 @@ describe("nestedRendering", async () => {
                     </div>
                 )
             }
-        })
+        }
     )
     beforeAll(async done => {
         // the side-effect in  does not views alive when using static rendering test suite
@@ -277,18 +276,22 @@ test("observer component can be injected", () => {
 
     inject("foo")(
         observer(
-            createClass({
-                render: () => null
-            })
+            class T extends Component {
+                render() {
+                    return null
+                }
+            }
         )
     )
 
     // N.B, the injected component will be observer since mobx-react 4.0!
     inject(() => {})(
         observer(
-            createClass({
-                render: () => null
-            })
+            class T extends Component {
+                render() {
+                    return null
+                }
+            }
         )
     )
 
@@ -298,17 +301,18 @@ test("observer component can be injected", () => {
 
 test("correctly wraps display name of child component", () => {
     const A = observer(
-        createClass({
-            displayName: "ObserverClass",
-            render: () => null
-        })
+        class ObserverClass extends Component {
+            render() {
+                return null
+            }
+        }
     )
     const B = observer(function StatelessObserver() {
         return null
     })
 
     const wrapper = renderer.create(<A />)
-    expect(wrapper.root.type.displayName).toEqual("ObserverClass")
+    expect(wrapper.root.type.name).toEqual("ObserverClass")
 
     const wrapper2 = renderer.create(<B />)
     expect(wrapper2.root.type.displayName).toEqual("StatelessObserver")
@@ -316,14 +320,14 @@ test("correctly wraps display name of child component", () => {
 
 describe("124 - react to changes in this.props via computed", () => {
     const Comp = observer(
-        createClass({
+        class T extends Component {
             componentWillMount() {
                 mobx.extendObservable(this, {
                     get computedProp() {
                         return this.props.x
                     }
                 })
-            },
+            }
             render() {
                 return (
                     <span>
@@ -332,13 +336,11 @@ describe("124 - react to changes in this.props via computed", () => {
                     </span>
                 )
             }
-        })
+        }
     )
 
-    const Parent = createClass({
-        getInitialState() {
-            return { v: 1 }
-        },
+    class Parent extends Component {
+        state = { v: 1 }
         render() {
             return (
                 <div onClick={() => this.setState({ v: 2 })}>
@@ -346,7 +348,7 @@ describe("124 - react to changes in this.props via computed", () => {
                 </div>
             )
         }
-    })
+    }
 
     beforeAll(async done => {
         await asyncReactDOMRender(<Parent />, testRoot)
@@ -427,20 +429,20 @@ test("should stop updating if error was thrown in render (#134)", () => {
 
 describe("should render component even if setState called with exactly the same props", () => {
     let renderCount = 0
-    const Component = observer(
-        createClass({
-            onClick() {
+    const Comp = observer(
+        class T extends Component {
+            onClick = () => {
                 this.setState({})
-            },
+            }
             render() {
                 renderCount++
                 return <div onClick={this.onClick} id="clickableDiv" />
             }
-        })
+        }
     )
 
     beforeAll(async done => {
-        await asyncReactDOMRender(<Component />, testRoot)
+        await asyncReactDOMRender(<Comp />, testRoot)
         done()
     })
 
@@ -467,7 +469,7 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
     let data = { y: 1 }
 
     @observer
-    class Component extends React.Component {
+    class Comp extends React.Component {
         @mobx.computed
         get computed() {
             // n.b: data.y would not rerender! shallowly new equal props are not stored
@@ -484,12 +486,12 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
     }
 
     const Parent = observer(
-        createClass({
+        class Parent extends Component {
             render() {
                 // this.props.odata.x;
-                return <Component data={this.props.data} odata={this.props.odata} />
+                return <Comp data={this.props.data} odata={this.props.odata} />
             }
-        })
+        }
     )
 
     function stuff() {

@@ -11,7 +11,6 @@ import {
     PropTypes,
     useLocalStore
 } from "../../src"
-import * as createClass from "create-react-class"
 
 @observer
 class T1 extends Component<{ pizza: number }, {}> {
@@ -19,24 +18,6 @@ class T1 extends Component<{ pizza: number }, {}> {
         return <div>{this.props.pizza}</div>
     }
 }
-
-const T2 = observer(
-    createClass({
-        getDefaultProps() {
-            return { cake: 7 }
-        },
-        render() {
-            return (
-                <div>
-                    <T1 pizza={this.props.cake} />
-                </div>
-            )
-        },
-        propTypes: {
-            zoem: PropTypes.arrayOrObservableArray
-        }
-    })
-)
 
 const T3 = observer((props: { hamburger: number }) => {
     return <T2 cake={props.hamburger} />
