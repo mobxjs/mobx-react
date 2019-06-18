@@ -75,6 +75,7 @@ export class Provider extends React.Component<any, {}> {}
 export const MobXProviderContext: React.Context<any>
 
 export function useStaticRendering(value: boolean): void
+export function isUsingStaticRendering(): boolean
 
 export const PropTypes: {
     observableArray: React.Requireable<any>

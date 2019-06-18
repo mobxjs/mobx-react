@@ -1,10 +1,11 @@
 import { PureComponent, Component } from "react"
 import { createAtom, _allowStateChanges, Reaction, $mobx } from "mobx"
-import { useStaticRendering as useStaticRenderingLite } from "mobx-react-lite"
+import {
+    useStaticRendering as useStaticRenderingLite,
+    isUsingStaticRendering
+} from "mobx-react-lite"
 
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
-
-let isUsingStaticRendering = false
 
 const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
@@ -12,7 +13,6 @@ const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
 
 export function useStaticRendering(useStaticRendering) {
-    isUsingStaticRendering = useStaticRendering
     useStaticRenderingLite(useStaticRendering)
 }
 
@@ -41,7 +41,7 @@ export function makeClassComponentObserver(componentClass) {
         return makeComponentReactive.call(this, baseRender)
     }
     patch(target, "componentWillUnmount", function() {
-        if (isUsingStaticRendering === true) return
+        if (isUsingStaticRendering() === true) return
         this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
         this[mobxIsUnmounted] = true
     })
@@ -49,7 +49,7 @@ export function makeClassComponentObserver(componentClass) {
 }
 
 function makeComponentReactive(render) {
-    if (isUsingStaticRendering === true) return render.call(this)
+    if (isUsingStaticRendering() === true) return render.call(this)
 
     function reactiveRender() {
         isRenderingPending = false
@@ -115,7 +115,7 @@ function makeComponentReactive(render) {
 }
 
 function observerSCU(nextProps, nextState) {
-    if (isUsingStaticRendering) {
+    if (isUsingStaticRendering()) {
         console.warn(
             "[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side."
         )
