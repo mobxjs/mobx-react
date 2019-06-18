@@ -23,13 +23,19 @@ export function makeClassComponentObserver(componentClass) {
     if (componentClass.__proto__ !== PureComponent) {
         if (!target.shouldComponentUpdate) target.shouldComponentUpdate = observerSCU
         else if (target.shouldComponentUpdate !== observerSCU)
+            // n.b. unequal check, instead of existence check, as @observer might be on superclass as well
             throw new Error(
                 "It is not allowed to use shouldComponentUpdate in observer based components."
             )
     }
 
+    // this.props and this.state are made observable, just to make sure @computed fields that
+    // are defined inside the component, and which rely on state or props, re-compute if state or props change
+    // (otherwise the computed wouldn't update and become stale on props change, since props are not observable)
+    // However, this solution is not without it's own problems: https://github.com/mobxjs/mobx-react/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3Aobservable-props-or-not+
     makeObservableProp(target, "props")
     makeObservableProp(target, "state")
+
     const baseRender = target.render
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
@@ -89,11 +95,7 @@ function makeComponentReactive(render) {
             // This unidiomatic React usage but React will correctly warn about this so we continue as usual
             // See #85 / Pull #44
             isRenderingPending = true
-            if (typeof this.componentWillReact === "function") this.componentWillReact() // TODO: wrap in action?
             if (this[mobxIsUnmounted] !== true) {
-                // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
-                // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
-                // However, people also claim this might happen during unit tests..
                 let hasError = true
                 try {
                     setHiddenProp(this, isForcingUpdateKey, true)
