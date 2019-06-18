@@ -2,7 +2,8 @@ import { PureComponent, Component } from "react"
 import { createAtom, _allowStateChanges, Reaction, $mobx } from "mobx"
 import { isUsingStaticRendering } from "mobx-react-lite"
 
-import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
+import { newSymbol, shallowEqual, setHiddenProp, preventWrites } from "./utils/utils"
+import { runDisposersOnWillUnmount } from "./disposeOnUnmount"
 
 const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
@@ -33,11 +34,14 @@ export function makeClassComponentObserver(componentClass) {
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
     }
-    patch(target, "componentWillUnmount", function() {
-        if (isUsingStaticRendering() === true) return
+    const baseUnmount = target.componentWillUnmount
+    target.componentWillUnmount = function mobxReactComponentWillUnmount() {
         this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
         this[mobxIsUnmounted] = true
-    })
+        runDisposersOnWillUnmount.call(this)
+        if (baseUnmount) baseUnmount.call(this)
+    }
+    preventWrites(target, "componentWillUnmount")
     return componentClass
 }
 
@@ -86,7 +90,13 @@ function makeComponentReactive(render) {
     })
     reaction.reactComponent = this
     reactiveRender[mobxAdminProperty] = reaction
-    this.render = reactiveRender
+
+    Object.defineProperty(this, "render", {
+        value: reactiveRender,
+        configurable: true,
+        enumerable: false
+    })
+    preventWrites(this, "render")
 
     function reactiveRender() {
         isRenderingPending = false

@@ -24,123 +24,6 @@ async function testComponent(C, afterMount, afterUnmount) {
     }
 }
 
-describe("without observer", () => {
-    test("class without componentWillUnmount", async () => {
-        class C extends React.Component {
-            @disposeOnUnmount
-            methodA = jest.fn()
-            @disposeOnUnmount
-            methodB = jest.fn()
-            @disposeOnUnmount
-            methodC = null
-            @disposeOnUnmount
-            methodD = undefined
-
-            render() {
-                return null
-            }
-        }
-
-        await testComponent(C)
-    })
-
-    test("class with componentWillUnmount in the prototype", async () => {
-        let called = 0
-
-        class C extends React.Component {
-            @disposeOnUnmount
-            methodA = jest.fn()
-            @disposeOnUnmount
-            methodB = jest.fn()
-            @disposeOnUnmount
-            methodC = null
-            @disposeOnUnmount
-            methodD = undefined
-
-            render() {
-                return null
-            }
-
-            componentWillUnmount() {
-                called++
-            }
-        }
-
-        await testComponent(
-            C,
-            () => {
-                expect(called).toBe(0)
-            },
-            () => {
-                expect(called).toBe(1)
-            }
-        )
-    })
-
-    test("class with componentWillUnmount as an arrow function", async () => {
-        let called = 0
-
-        class C extends React.Component {
-            @disposeOnUnmount
-            methodA = jest.fn()
-            @disposeOnUnmount
-            methodB = jest.fn()
-            @disposeOnUnmount
-            methodC = null
-            @disposeOnUnmount
-            methodD = undefined
-
-            render() {
-                return null
-            }
-
-            componentWillUnmount = () => {
-                called++
-            }
-        }
-
-        await testComponent(
-            C,
-            () => {
-                expect(called).toBe(0)
-            },
-            () => {
-                expect(called).toBe(1)
-            }
-        )
-    })
-
-    test("class without componentWillUnmount using non decorator version", async () => {
-        let methodC = jest.fn()
-        let methodD = jest.fn()
-        class C extends React.Component {
-            render() {
-                return null
-            }
-
-            methodA = disposeOnUnmount(this, jest.fn())
-            methodB = disposeOnUnmount(this, jest.fn())
-
-            constructor(props) {
-                super(props)
-                disposeOnUnmount(this, [methodC, methodD])
-            }
-        }
-
-        await testComponent(
-            C,
-            () => {
-                expect(methodC).not.toHaveBeenCalled()
-                expect(methodD).not.toHaveBeenCalled()
-            },
-            () => {
-                expect(methodC).toHaveBeenCalledTimes(1)
-                expect(methodD).toHaveBeenCalledTimes(1)
-            }
-        )
-    })
-})
-
 describe("with observer", () => {
     test("class without componentWillUnmount", async () => {
         @observer
@@ -181,40 +64,6 @@ describe("with observer", () => {
             }
 
             componentWillUnmount() {
-                called++
-            }
-        }
-
-        await testComponent(
-            C,
-            () => {
-                expect(called).toBe(0)
-            },
-            () => {
-                expect(called).toBe(1)
-            }
-        )
-    })
-
-    test("class with componentWillUnmount as an arrow function", async () => {
-        let called = 0
-
-        @observer
-        class C extends React.Component {
-            @disposeOnUnmount
-            methodA = jest.fn()
-            @disposeOnUnmount
-            methodB = jest.fn()
-            @disposeOnUnmount
-            methodC = null
-            @disposeOnUnmount
-            methodD = undefined
-
-            render() {
-                return null
-            }
-
-            componentWillUnmount = () => {
                 called++
             }
         }
@@ -335,40 +184,6 @@ it("componentDidMount should be different between components", async () => {
 
     await doTest(true)
     await doTest(false)
-})
-
-test("base cWU should not be called if overriden", async () => {
-    let baseCalled = 0
-    let dCalled = 0
-    let oCalled = 0
-
-    class C extends React.Component {
-        componentWillUnmount() {
-            baseCalled++
-        }
-
-        constructor() {
-            super()
-            this.componentWillUnmount = () => {
-                oCalled++
-            }
-        }
-
-        render() {
-            return null
-        }
-
-        @disposeOnUnmount
-        fn() {
-            dCalled++
-        }
-    }
-
-    await asyncReactDOMRender(<C />, testRoot)
-    await asyncReactDOMRender(null, testRoot)
-    expect(dCalled).toBe(1)
-    expect(oCalled).toBe(1)
-    expect(baseCalled).toBe(0)
 })
 
 test("should error on inheritance", async () => {

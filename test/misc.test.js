@@ -107,23 +107,22 @@ test("testIsComponentReactive", () => {
 })
 
 test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {
-    expect(
-        withConsole(() => {
-            const A = observer(
-                class A extends React.Component {
-                    render() {
-                        return null
-                    }
+    expect(() => {
+        const A = observer(
+            class A extends React.Component {
+                render() {
+                    return null
                 }
-            )
-
-            observer(
-                class B extends A {
-                    render() {
-                        return null
-                    }
+            }
+        )
+        observer(
+            class B extends A {
+                render() {
+                    return null
                 }
-            )
-        })
-    ).toMatchSnapshot()
+            }
+        )
+    }).toThrowErrorMatchingInlineSnapshot(
+        `"The property 'componentWillUnmount' should not be assigned or initialized. Did you try to use an arrow function or apply 'observer' to a sub and superclass?"`
+    )
 })
