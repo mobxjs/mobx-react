@@ -19,8 +19,24 @@ class T1 extends Component<{ pizza: number }, {}> {
     }
 }
 
+const T2 = observer(
+    class T2 extends Component<{ cake: number; zoem: any[] }> {
+        defaultProps = { cake: 7 }
+        render() {
+            return (
+                <div>
+                    <T1 pizza={this.props.cake} />
+                </div>
+            )
+        }
+        static propTypes = {
+            zoem: PropTypes.arrayOrObservableArray
+        }
+    }
+)
+
 const T3 = observer((props: { hamburger: number }) => {
-    return <T2 cake={props.hamburger} />
+    return <T2 cake={props.hamburger} zoem={[]} />
 })
 
 const T4 = ({ sandwich }: { sandwich: number }) => (
