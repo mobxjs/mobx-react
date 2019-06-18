@@ -501,7 +501,7 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
 
     const wrapper = renderer.create(<Parent odata={odata} data={data} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.rendered.join("")
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
     expect(contents()).toEqual("1-1-1")
     stuff()
@@ -549,7 +549,7 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
 
     const wrapper = renderer.create(<Parent odata={odata} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.join("")
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
     expect(renderCount).toBe(1)
     expect(contents()).toBe("1-1")
