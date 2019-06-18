@@ -817,3 +817,33 @@ test("computed properties react to props", async () => {
 
     expect(seen).toEqual(["parent", 0, "parent", 2])
 })
+
+test("#692 - componentDidUpdate is triggered", async () => {
+    let cDUCount = 0
+
+    @observer
+    class Test extends React.Component {
+        @mobx.observable
+        counter = 0
+
+        @mobx.action
+        inc = () => this.counter++
+
+        componentWillMount() {
+            setTimeout(() => this.inc(), 300)
+        }
+
+        render() {
+            return <p>{this.counter}</p>
+        }
+
+        componentDidUpdate() {
+            cDUCount++
+        }
+    }
+    TestUtils.renderIntoDocument(<Test />)
+    expect(cDUCount).toBe(0)
+
+    await sleepHelper(500)
+    expect(cDUCount).toBe(1)
+})
