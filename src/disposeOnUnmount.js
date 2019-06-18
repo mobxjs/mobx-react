@@ -1,27 +1,9 @@
 import * as React from "react"
-import { newSymbol } from "./utils/utils"
+import { patch, newSymbol } from "./utils/utils"
 
 const storeKey = newSymbol("disposeOnUnmount")
-const baseUnmountKey = newSymbol("originalOnUnmount")
-
-function checkFunc(prop) {
-    if (typeof prop !== "function") {
-        throw new Error(
-            "[mobx-react] disposeOnUnmount only works on functions such as disposers returned by reactions, autorun, etc."
-        )
-    }
-}
-
-function check(prop) {
-    if (Array.isArray(prop)) {
-        prop.map(checkFunc)
-    } else {
-        checkFunc(prop)
-    }
-}
 
 function runDisposersOnWillUnmount() {
-    if (this[baseUnmountKey]) this[baseUnmountKey]()
     if (!this[storeKey]) {
         // when disposeOnUnmount is only set to some instances of a component it will still patch the prototype
         return
@@ -30,7 +12,6 @@ function runDisposersOnWillUnmount() {
         const prop =
             typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
         if (prop !== undefined && prop !== null) {
-            check(prop)
             if (Array.isArray(prop)) prop.map(f => f())
             else prop()
         }
@@ -38,9 +19,9 @@ function runDisposersOnWillUnmount() {
     this[storeKey] = []
 }
 
-export function disposeOnUnmount(target, propertyKeyOrFunctionOrArray) {
-    if (Array.isArray(propertyKeyOrFunctionOrArray)) {
-        return propertyKeyOrFunctionOrArray.map(fn => disposeOnUnmount(target, fn))
+export function disposeOnUnmount(target, propertyKeyOrFunction) {
+    if (Array.isArray(propertyKeyOrFunction)) {
+        return propertyKeyOrFunction.map(fn => disposeOnUnmount(target, fn))
     }
 
     const c = Object.getPrototypeOf(target).constructor || Object.getPrototypeOf(target.constructor)
@@ -58,38 +39,29 @@ export function disposeOnUnmount(target, propertyKeyOrFunctionOrArray) {
         )
     }
 
-    if (typeof propertyKeyOrFunctionOrArray !== "string") {
-        check(propertyKeyOrFunctionOrArray)
+    if (
+        typeof propertyKeyOrFunction !== "string" &&
+        typeof propertyKeyOrFunction !== "function" &&
+        !Array.isArray(propertyKeyOrFunction)
+    ) {
+        throw new Error(
+            "[mobx-react] disposeOnUnmount only works if the parameter is either a property key or a function."
+        )
     }
 
     // add property key / function we want run (disposed) to the store
     const componentWasAlreadyModified = !!target[storeKey]
     const store = target[storeKey] || (target[storeKey] = [])
 
-    store.push(propertyKeyOrFunctionOrArray)
+    store.push(propertyKeyOrFunction)
 
     // tweak the component class componentWillUnmount if not done already
     if (!componentWasAlreadyModified) {
-        // make sure original definition is invoked
-        if (target.componentWillUnmount) target[baseUnmountKey] = target.componentWillUnmount
-
-        Object.defineProperty(target, "componentWillUnmount", {
-            get() {
-                return runDisposersOnWillUnmount
-            },
-            set(fn) {
-                // this will happen if componentWillUnmount is being assigned after patching the prototype
-                this[storeKey].push(fn)
-                // assigning a new local value to componentWillUnmount would hide the super implementation...
-                this[baseUnmountKey] = undefined
-            },
-            configurable: false,
-            enumerable: false
-        })
+        patch(target, "componentWillUnmount", runDisposersOnWillUnmount)
     }
 
     // return the disposer as is if invoked as a non decorator
-    if (typeof propertyKeyOrFunctionOrArray !== "string") {
-        return propertyKeyOrFunctionOrArray
+    if (typeof propertyKeyOrFunction !== "string") {
+        return propertyKeyOrFunction
     }
 }

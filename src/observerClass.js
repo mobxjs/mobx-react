@@ -2,7 +2,7 @@ import { PureComponent, Component } from "react"
 import { createAtom, _allowStateChanges, Reaction, $mobx } from "mobx"
 import { useStaticRendering as useStaticRenderingLite } from "mobx-react-lite"
 
-import { newSymbol, shallowEqual, setHiddenProp } from "./utils/utils"
+import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
 let isUsingStaticRendering = false
 
@@ -17,7 +17,7 @@ export function useStaticRendering(useStaticRendering) {
 }
 
 export function makeClassComponentObserver(componentClass) {
-    const target = componentClass.prototype || componentClass
+    const target = componentClass.prototype
     if (target.componentWillReact)
         throw new Error("The componentWillReact life-cycle event is no longer supported")
     if (componentClass.__proto__ !== PureComponent) {
@@ -34,13 +34,11 @@ export function makeClassComponentObserver(componentClass) {
     target.render = function() {
         return makeComponentReactive.call(this, baseRender)
     }
-    const baseWillUnmount = target.componentWillUnmount
-    target.componentWillUnmount = function() {
+    patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering === true) return
         this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
         this[mobxIsUnmounted] = true
-        if (baseWillUnmount) baseWillUnmount.call(this)
-    }
+    })
     return componentClass
 }
 
