@@ -441,3 +441,36 @@ describe("should works with arrays", async () => {
         await testComponent(C)
     })
 })
+
+it("runDisposersOnUnmount only runs disposers from the declaring instance", async () => {
+    class A extends React.Component {
+        @disposeOnUnmount
+        a = jest.fn()
+
+        b = jest.fn()
+
+        constructor() {
+            super()
+            disposeOnUnmount(this, this.b)
+        }
+
+        render() {
+            return null
+        }
+    }
+
+    const testRoot2 = createTestRoot()
+
+    const ref1 = React.createRef()
+    const ref2 = React.createRef()
+    await asyncReactDOMRender(<A ref={ref1} />, testRoot)
+    await asyncReactDOMRender(<A ref={ref2} />, testRoot2)
+    const inst1 = ref1.current
+    const inst2 = ref2.current
+    await asyncReactDOMRender(null, testRoot)
+
+    expect(inst1.a).toHaveBeenCalledTimes(1)
+    expect(inst1.b).toHaveBeenCalledTimes(1)
+    expect(inst2.a).toHaveBeenCalledTimes(0)
+    expect(inst2.b).toHaveBeenCalledTimes(0)
+})

@@ -1,14 +1,11 @@
 import * as React from "react"
 import { patch, newSymbol } from "./utils/utils"
 
-const storeKey = newSymbol("disposeOnUnmount")
+const protoStoreKey = newSymbol("disposeOnUnmountProto")
+const instStoreKey = newSymbol("disposeOnUnmountInst")
 
 function runDisposersOnWillUnmount() {
-    if (!this[storeKey]) {
-        // when disposeOnUnmount is only set to some instances of a component it will still patch the prototype
-        return
-    }
-    this[storeKey].forEach(propKeyOrFunction => {
+    ;[...(this[protoStoreKey] || []), ...(this[instStoreKey] || [])].forEach(propKeyOrFunction => {
         const prop =
             typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
         if (prop !== undefined && prop !== null) {
@@ -16,7 +13,6 @@ function runDisposersOnWillUnmount() {
             else prop()
         }
     })
-    this[storeKey] = []
 }
 
 export function disposeOnUnmount(target, propertyKeyOrFunction) {
@@ -49,9 +45,16 @@ export function disposeOnUnmount(target, propertyKeyOrFunction) {
         )
     }
 
+    // decorator's target is the prototype, so it doesn't have any instance properties like props
+    const isDecorator = typeof propertyKeyOrFunction === "string"
+
     // add property key / function we want run (disposed) to the store
-    const componentWasAlreadyModified = !!target[storeKey]
-    const store = target[storeKey] || (target[storeKey] = [])
+    const componentWasAlreadyModified = !!target[protoStoreKey] || !!target[instStoreKey]
+    const store = isDecorator
+        ? // decorators are added to the prototype store
+          target[protoStoreKey] || (target[protoStoreKey] = [])
+        : // functions are added to the instance store
+          target[instStoreKey] || (target[instStoreKey] = [])
 
     store.push(propertyKeyOrFunction)
 
