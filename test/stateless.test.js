@@ -1,6 +1,5 @@
-import React, { createElement } from "react"
+import React, { Component } from "react"
 import * as PropTypes from "prop-types"
-import createClass from "create-react-class"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
@@ -64,19 +63,21 @@ test("stateless component with context support", async () => {
 })
 
 test("component with observable propTypes", () => {
-    const Component = createClass({
-        render: () => null,
-        propTypes: {
+    class Comp extends Component {
+        render() {
+            return null
+        }
+        static propTypes = {
             a1: MRPropTypes.observableArray,
             a2: MRPropTypes.arrayOrObservableArray
         }
-    })
+    }
     const originalConsoleError = console.error
     const warnings = []
     console.error = msg => warnings.push(msg)
-    const firstWrapper = <Component a1={[]} a2={[]} />
+    const firstWrapper = <Comp a1={[]} a2={[]} />
     expect(warnings.length).toBe(1)
-    const secondWrapper = <Component a1={mobx.observable([])} a2={mobx.observable([])} />
+    const secondWrapper = <Comp a1={mobx.observable([])} a2={mobx.observable([])} />
     expect(warnings.length).toBe(1)
     console.error = originalConsoleError
 })

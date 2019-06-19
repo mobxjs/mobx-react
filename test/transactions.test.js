@@ -1,5 +1,4 @@
-import React from "react"
-import createClass from "create-react-class"
+import React, { Component } from "react"
 import ReactDOM from "react-dom"
 import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
@@ -25,9 +24,11 @@ test("mobx issue 50", async () => {
     let asText = ""
     mobx.autorun(() => (asText = [foo.a.get(), foo.b.get(), foo.c.get()].join(":")))
     const Test = mobxReact.observer(
-        createClass({
-            render: () => <div id="x">{[foo.a.get(), foo.b.get(), foo.c.get()].join(",")}</div>
-        })
+        class Test extends Component {
+            render() {
+                return <div id="x">{[foo.a.get(), foo.b.get(), foo.c.get()].join(",")}</div>
+            }
+        }
     )
 
     await asyncReactDOMRender(<Test />, testRoot)
