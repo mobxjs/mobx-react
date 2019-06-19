@@ -289,3 +289,156 @@ it("runDisposersOnUnmount only runs disposers from the declaring instance", asyn
     expect(inst2.a).toHaveBeenCalledTimes(0)
     expect(inst2.b).toHaveBeenCalledTimes(0)
 })
+
+describe("super calls should work", async () => {
+    async function doTest(baseObserver, cObserver) {
+        const events = []
+
+        const sharedMethod = jest.fn()
+
+        class BaseComponent extends React.Component {
+            @disposeOnUnmount
+            method0 = sharedMethod
+
+            @disposeOnUnmount
+            methodA = jest.fn()
+
+            componentDidMount() {
+                events.push("baseDidMount")
+            }
+
+            componentWillUnmount() {
+                events.push("baseWillUnmount")
+            }
+        }
+
+        class C extends BaseComponent {
+            @disposeOnUnmount
+            method0 = sharedMethod
+
+            @disposeOnUnmount
+            methodB = jest.fn()
+
+            componentDidMount() {
+                super.componentDidMount()
+                events.push("CDidMount")
+            }
+
+            componentWillUnmount() {
+                super.componentWillUnmount()
+                events.push("CWillUnmount")
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        if (baseObserver) {
+            BaseComponent = observer(BaseComponent)
+        }
+        if (cObserver) {
+            C = observer(C)
+        }
+
+        await testComponent(
+            C,
+            ref => {
+                expect(events).toEqual(["baseDidMount", "CDidMount"])
+                expect(sharedMethod).toHaveBeenCalledTimes(0)
+            },
+            ref => {
+                expect(events).toEqual([
+                    "baseDidMount",
+                    "CDidMount",
+                    "baseWillUnmount",
+                    "CWillUnmount"
+                ])
+                expect(sharedMethod).toHaveBeenCalledTimes(2)
+            }
+        )
+    }
+
+    it("base is observer", async () => {
+        await doTest(true, false)
+    })
+    it("C is observer", async () => {
+        await doTest(false, true)
+    })
+    it("both observers", async () => {
+        await doTest(true, true)
+    })
+})
+
+it("componentDidMount should be different between components", async () => {
+    async function doTest(withObserver) {
+        const events = []
+
+        class A extends React.Component {
+            componentDidMount() {
+                this.didMount = "A"
+                events.push("mountA")
+            }
+
+            componentWillUnmount() {
+                this.willUnmount = "A"
+                events.push("unmountA")
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        class B extends React.Component {
+            componentDidMount() {
+                this.didMount = "B"
+                events.push("mountB")
+            }
+
+            componentWillUnmount() {
+                this.willUnmount = "B"
+                events.push("unmountB")
+            }
+
+            render() {
+                return null
+            }
+        }
+
+        if (withObserver) {
+            A = observer(A)
+            B = observer(B)
+        }
+
+        const aRef = React.createRef()
+        await asyncReactDOMRender(<A ref={aRef} />, testRoot)
+        const caRef = aRef.current
+
+        expect(caRef.didMount).toBe("A")
+        expect(caRef.willUnmount).toBeUndefined()
+        expect(events).toEqual(["mountA"])
+
+        const bRef = React.createRef()
+        await asyncReactDOMRender(<B ref={bRef} />, testRoot)
+        const cbRef = bRef.current
+
+        expect(caRef.didMount).toBe("A")
+        expect(caRef.willUnmount).toBe("A")
+
+        expect(cbRef.didMount).toBe("B")
+        expect(cbRef.willUnmount).toBeUndefined()
+        expect(events).toEqual(["mountA", "unmountA", "mountB"])
+
+        await asyncReactDOMRender(null, testRoot)
+
+        expect(caRef.didMount).toBe("A")
+        expect(caRef.willUnmount).toBe("A")
+
+        expect(cbRef.didMount).toBe("B")
+        expect(cbRef.willUnmount).toBe("B")
+        expect(events).toEqual(["mountA", "unmountA", "mountB", "unmountB"])
+    }
+
+    await doTest(true)
+})
