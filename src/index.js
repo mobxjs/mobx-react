@@ -11,11 +11,11 @@ export {
     Observer,
     useAsObservableSource,
     useLocalStore,
-    isUsingStaticRendering
+    isUsingStaticRendering,
+    useStaticRendering
 } from "mobx-react-lite"
 
 export { observer } from "./observer"
-export { useStaticRendering } from "./observerClass"
 
 export { Provider, MobXProviderContext } from "./Provider"
 export { inject } from "./inject"

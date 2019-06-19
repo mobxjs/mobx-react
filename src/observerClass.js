@@ -1,9 +1,6 @@
 import { PureComponent, Component } from "react"
 import { createAtom, _allowStateChanges, Reaction, $mobx } from "mobx"
-import {
-    useStaticRendering as useStaticRenderingLite,
-    isUsingStaticRendering
-} from "mobx-react-lite"
+import { isUsingStaticRendering } from "mobx-react-lite"
 
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
@@ -11,10 +8,6 @@ const mobxAdminProperty = $mobx || "$mobx"
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
-
-export function useStaticRendering(useStaticRendering) {
-    useStaticRenderingLite(useStaticRendering)
-}
 
 export function makeClassComponentObserver(componentClass) {
     const target = componentClass.prototype
@@ -51,29 +44,6 @@ export function makeClassComponentObserver(componentClass) {
 function makeComponentReactive(render) {
     if (isUsingStaticRendering() === true) return render.call(this)
 
-    function reactiveRender() {
-        isRenderingPending = false
-        let exception = undefined
-        let rendering = undefined
-        reaction.track(() => {
-            try {
-                rendering = _allowStateChanges(false, baseRender)
-            } catch (e) {
-                exception = e
-            }
-        })
-        if (exception) {
-            throw exception
-        }
-        return rendering
-    }
-
-    // Generate friendly name for debugging
-    const initialName =
-        this.displayName ||
-        this.name ||
-        (this.constructor && (this.constructor.displayName || this.constructor.name)) ||
-        "<component>"
     /**
      * If props are shallowly modified, react will render anyway,
      * so atom.reportChanged() should not result in yet another re-render
@@ -85,8 +55,14 @@ function makeComponentReactive(render) {
      */
     setHiddenProp(this, isForcingUpdateKey, false)
 
-    // wire up reactive render
+    // Generate friendly name for debugging
+    const initialName =
+        this.displayName ||
+        this.name ||
+        (this.constructor && (this.constructor.displayName || this.constructor.name)) ||
+        "<component>"
     const baseRender = render.bind(this)
+
     let isRenderingPending = false
 
     const reaction = new Reaction(`${initialName}.render()`, () => {
@@ -111,6 +87,24 @@ function makeComponentReactive(render) {
     reaction.reactComponent = this
     reactiveRender[mobxAdminProperty] = reaction
     this.render = reactiveRender
+
+    function reactiveRender() {
+        isRenderingPending = false
+        let exception = undefined
+        let rendering = undefined
+        reaction.track(() => {
+            try {
+                rendering = _allowStateChanges(false, baseRender)
+            } catch (e) {
+                exception = e
+            }
+        })
+        if (exception) {
+            throw exception
+        }
+        return rendering
+    }
+
     return reactiveRender.call(this)
 }
 
