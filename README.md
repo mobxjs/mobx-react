@@ -103,7 +103,7 @@ class App extends React.Component {
 
 const person = observable({ name: "John" })
 
-React.render(<App person={person} />, document.body)
+ReactDOM.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
@@ -124,7 +124,7 @@ class App extends React.Component {
 
 const person = observable({ name: "John" })
 
-React.render(<App person={person} />, document.body)
+ReactDOM.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
