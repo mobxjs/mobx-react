@@ -1,5 +1,14 @@
 # MobX-React Changelog
 
+### 6.1.0
+
+-   Restored the classic implementation of `observer`: class based components are patched again, rather than wrapping them in `<Observer>`, see [#703](https://github.com/mobxjs/mobx-react/pull/703). Fixes:
+    -   `componentDidUpdate` not being triggered after a reactive render [#692](https://github.com/mobxjs/mobx-react/issues/692)
+    -   The appearance of an additional `<Observer>` component in the component tree, which complicates shallow testing [#699](https://github.com/mobxjs/mobx-react/issues/699)
+    -   Some regressions in `disposeOnUnmount` [#702](https://github.com/mobxjs/mobx-react/issues/702)
+    -   Note that dev tool support, and other constraints mentioned in the 6.0.0 release notes have not been restored.
+-   The function `useStaticRendering(value: boolean): void` from mobx-react-lite is now exposed
+
 ### 6.0.4
 
 -   Fixed IE 11 compatibility which was accidentally broken. Fixes [#698](https://github.com/mobxjs/mobx-react/issues/698)

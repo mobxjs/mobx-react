@@ -501,7 +501,7 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
 
     const wrapper = renderer.create(<Parent odata={odata} data={data} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.rendered.join("")
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
     expect(contents()).toEqual("1-1-1")
     stuff()
@@ -549,7 +549,7 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
 
     const wrapper = renderer.create(<Parent odata={odata} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.rendered.join("")
+    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
     expect(renderCount).toBe(1)
     expect(contents()).toBe("1-1")
@@ -816,4 +816,34 @@ test("computed properties react to props", async () => {
 `)
 
     expect(seen).toEqual(["parent", 0, "parent", 2])
+})
+
+test("#692 - componentDidUpdate is triggered", async () => {
+    let cDUCount = 0
+
+    @observer
+    class Test extends React.Component {
+        @mobx.observable
+        counter = 0
+
+        @mobx.action
+        inc = () => this.counter++
+
+        componentWillMount() {
+            setTimeout(() => this.inc(), 300)
+        }
+
+        render() {
+            return <p>{this.counter}</p>
+        }
+
+        componentDidUpdate() {
+            cDUCount++
+        }
+    }
+    TestUtils.renderIntoDocument(<Test />)
+    expect(cDUCount).toBe(0)
+
+    await sleepHelper(500)
+    expect(cDUCount).toBe(1)
 })
