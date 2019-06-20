@@ -11,6 +11,7 @@ function createStoreInjector(grabStoresFn, component, injectNames, makeReactive)
 
     class Injector extends Component {
         static contextType = MobXProviderContext
+        static displayName = displayName
 
         render() {
             const { forwardRef, ...props } = this.props
