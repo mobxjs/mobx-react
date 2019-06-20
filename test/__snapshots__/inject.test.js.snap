@@ -3,8 +3,8 @@
 exports[`inject based context warning is printed when changing stores 2`] = `
 Array [
   Array [
-    "The above error occurred in the <Provider> component:",
-    "    in Provider (created by A)",
+    "The above error occurred in the <MobXProvider> component:",
+    "    in MobXProvider (created by A)",
     "    in section (created by A)",
     "    in A",
     "",
