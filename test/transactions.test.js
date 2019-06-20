@@ -43,7 +43,7 @@ test("mobx issue 50", async () => {
     expect(document.getElementById("x").innerHTML).toBe("false,true,true")
 })
 
-test("React.render should respect transaction", async () => {
+test("ReactDOM.render should respect transaction", async () => {
     const testRoot = createTestRoot()
     const a = mobx.observable.box(2)
     const loaded = mobx.observable.box(false)
@@ -69,7 +69,7 @@ test("React.render should respect transaction", async () => {
     testRoot.parentNode.removeChild(testRoot)
 })
 
-test("React.render in transaction should succeed", async () => {
+test("ReactDOM.render in transaction should succeed", async () => {
     const testRoot = createTestRoot()
     const a = mobx.observable.box(2)
     const loaded = mobx.observable.box(false)
