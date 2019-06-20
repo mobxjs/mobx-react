@@ -7,6 +7,7 @@ export const MobXProviderContext = createContext({})
 
 export class Provider extends Component {
     static contextType = MobXProviderContext
+    static displayName = "MobXProvider"
 
     constructor(props, context) {
         super(props, context)
