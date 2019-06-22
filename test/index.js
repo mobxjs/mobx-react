@@ -19,6 +19,10 @@ export function createTestRoot() {
     return testRoot
 }
 
+export function cleanupTestRoot(testRoot) {
+    testRoot.parentNode.removeChild(testRoot)
+}
+
 export function sleepHelper(time) {
     return new Promise(resolve => {
         setTimeout(resolve, time)

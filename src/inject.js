@@ -1,41 +1,33 @@
 import React, { Component, createElement } from "react"
 import { observer } from "./observer"
-import { isStateless, copyStaticProperties } from "./utils/utils"
+import { copyStaticProperties } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"
 
 /**
  * Store Injection
  */
 function createStoreInjector(grabStoresFn, component, injectNames, makeReactive) {
-    let displayName = getInjectName(component, injectNames)
+    // Support forward refs
+    let Injector = React.forwardRef((props, ref) => {
+        const newProps = { ...props }
+        const context = React.useContext(MobXProviderContext)
+        Object.assign(newProps, grabStoresFn(context || {}, newProps) || {})
 
-    class Injector extends Component {
-        static contextType = MobXProviderContext
-
-        render() {
-            const { forwardRef, ...props } = this.props
-
-            Object.assign(props, grabStoresFn(this.context || {}, props) || {})
-
-            if (forwardRef && !isStateless(component)) {
-                props.ref = this.props.forwardRef
-            }
-
-            return createElement(component, props)
+        if (ref) {
+            newProps.ref = ref
         }
-    }
+
+        return createElement(component, newProps)
+    })
+
     if (makeReactive) Injector = observer(Injector)
     Injector.isMobxInjector = true // assigned late to suppress observer warning
 
-    // Support forward refs
-    const InjectHocRef = React.forwardRef((props, ref) =>
-        React.createElement(Injector, { ...props, forwardRef: ref })
-    )
     // Static fields from component should be visible on the generated Injector
-    copyStaticProperties(component, InjectHocRef)
-    InjectHocRef.wrappedComponent = component
-    InjectHocRef.displayName = displayName
-    return InjectHocRef
+    copyStaticProperties(component, Injector)
+    Injector.wrappedComponent = component
+    Injector.displayName = getInjectName(component, injectNames)
+    return Injector
 }
 
 function getInjectName(component, injectNames) {
