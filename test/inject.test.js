@@ -4,10 +4,8 @@ import ReactDOM from "react-dom"
 import * as mobx from "mobx"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
-import { createTestRoot, sleepHelper, withConsole } from "./index"
+import { createTestRoot, cleanupTestRoot, sleepHelper, withConsole } from "./index"
 import renderer, { act } from "react-test-renderer"
-
-const testRoot = createTestRoot()
 
 describe("inject based context", () => {
     test("basic context", () => {
@@ -391,8 +389,34 @@ describe("inject based context", () => {
                 <InjectedFancyComp ref={ref2} />
             </Provider>
         )
+
         expect(typeof ref2.current.doSomething).toBe("function")
         expect(ref2.current.didRender).toBe(true)
+    })
+
+    test("inject should work with components that use forwardRef", done => {
+        const FancyComp = React.forwardRef((_, ref) => {
+            return <div ref={ref} />
+        })
+
+        const InjectedFancyComp = inject("bla")(FancyComp)
+        const ref = React.createRef()
+
+        const testRoot = createTestRoot()
+
+        ReactDOM.render(
+            <Provider bla={42}>
+                <InjectedFancyComp ref={ref} />
+            </Provider>,
+            testRoot,
+            () => {
+                expect(ref.current).not.toBeNull()
+                expect(ref.current).toBeInstanceOf(HTMLDivElement)
+
+                cleanupTestRoot(testRoot)
+                done()
+            }
+        )
     })
 
     test("support static hoisting, wrappedComponent and ref forwarding", async () => {
@@ -610,6 +634,8 @@ describe("inject based context", () => {
             }
         }
 
+        const testRoot = createTestRoot()
+
         ReactDOM.render(
             <Provider state={state}>
                 <ListComponent items={items} />
@@ -632,14 +658,14 @@ describe("inject based context", () => {
                 expect(injectRender).toBe(18) // ideally, 9
                 expect(itemRender).toBe(9)
 
-                testRoot.parentNode.removeChild(testRoot)
+                cleanupTestRoot(testRoot)
                 done()
             }
         )
     })
 })
 
-test("#612 - mixed context types", () => {
+test("#612 - mixed context types", done => {
     const SomeContext = React.createContext(true)
 
     class MainCompClass extends React.Component {
@@ -668,5 +694,10 @@ test("#612 - mixed context types", () => {
         )
     }
 
-    ReactDOM.render(<App />, testRoot)
+    const testRoot = createTestRoot()
+
+    ReactDOM.render(<App />, testRoot, () => {
+        cleanupTestRoot(testRoot)
+        done()
+    })
 })

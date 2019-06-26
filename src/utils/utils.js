@@ -1,9 +1,3 @@
-export function isStateless(component) {
-    // `function() {}` has prototype, but `() => {}` doesn't
-    // `() => {}` via Babel has prototype too.
-    return !(component.prototype && component.prototype.render)
-}
-
 let symbolId = 0
 function createSymbol(name) {
     if (typeof Symbol === "function") {
