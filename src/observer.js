@@ -4,11 +4,16 @@ import { observer as observerLite, Observer } from "mobx-react-lite"
 
 import { makeClassComponentObserver } from "./observerClass"
 
-// Using react-is had some issues (and operates on elements, not on types), see #608 / #609
-const ReactForwardRefSymbol =
-    typeof forwardRef === "function" && forwardRef((_props, _ref) => {})["$$typeof"]
+const hasSymbol = typeof Symbol === "function" && Symbol.for
 
-const ReactMemoSymbol = typeof memo === "function" && memo(_props => {})["$$typeof"]
+// Using react-is had some issues (and operates on elements, not on types), see #608 / #609
+const ReactForwardRefSymbol = hasSymbol
+    ? Symbol.for("react.forward_ref")
+    : typeof forwardRef === "function" && forwardRef((_props, _ref) => {})["$$typeof"]
+
+const ReactMemoSymbol = hasSymbol
+    ? Symbol.for("react.memo")
+    : typeof memo === "function" && memo(_props => {})["$$typeof"]
 
 /**
  * Observer function / decorator
