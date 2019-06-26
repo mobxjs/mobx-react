@@ -934,10 +934,10 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/yargs@^12.0.9":
-  version "12.0.12"
-  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.12.tgz#45dd1d0638e8c8f153e87d296907659296873916"
-  integrity sha512-SOhuU4wNBxhhTHxYaiG5NY4HBhDIDnJF60GU+2LqHAdKKer86//e4yg69aENCtQ04n0ovz+tq2YPME5t5yp4pw==
+"@types/yargs@12.0.1", "@types/yargs@^12.0.9":
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.1.tgz#c5ce4ad64499010ae4dc2acd9b14d49749a44233"
+  integrity sha512-UVjo2oH79aRNcsDlFlnQ/iJ67Jd7j6uSg7jUJP/RZ/nUjAh5ElmnwlD5K/6eGgETJUgCHkiWn91B8JjXQ6ubAw==
 
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
