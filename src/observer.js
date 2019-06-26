@@ -1,4 +1,4 @@
-import React, { Component, forwardRef } from "react"
+import React, { Component, forwardRef, memo } from "react"
 import { _allowStateChanges } from "mobx"
 import { observer as observerLite, Observer } from "mobx-react-lite"
 
@@ -8,6 +8,8 @@ import { makeClassComponentObserver } from "./observerClass"
 const ReactForwardRefSymbol =
     typeof forwardRef === "function" && forwardRef((_props, _ref) => {})["$$typeof"]
 
+const ReactMemoSymbol = typeof memo === "function" && memo(_props => {})["$$typeof"]
+
 /**
  * Observer function / decorator
  */
@@ -16,6 +18,13 @@ export function observer(componentClass) {
         console.warn(
             "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
         )
+    }
+
+    if (ReactMemoSymbol && componentClass["$$typeof"] === ReactMemoSymbol) {
+        console.warn(
+            "Mobx observer: You are trying to use 'observer' on function component wrapped to either another observer or 'React.memo'. The observer already applies 'React.memo' for you."
+        )
+        return observer(componentClass.type)
     }
 
     // Unwrap forward refs into `<Observer>` component
