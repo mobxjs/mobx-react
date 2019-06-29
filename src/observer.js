@@ -26,10 +26,9 @@ export function observer(componentClass) {
     }
 
     if (ReactMemoSymbol && componentClass["$$typeof"] === ReactMemoSymbol) {
-        console.warn(
+        throw new Error(
             "Mobx observer: You are trying to use 'observer' on function component wrapped to either another observer or 'React.memo'. The observer already applies 'React.memo' for you."
         )
-        return observer(componentClass.type)
     }
 
     // Unwrap forward refs into `<Observer>` component
