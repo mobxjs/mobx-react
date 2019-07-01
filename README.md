@@ -7,6 +7,7 @@
 Package with React component wrapper for combining React with MobX.
 Exports the `observer` decorator and other utilities.
 For documentation, see the [MobX](https://mobxjs.github.io/mobx) project.
+There is also work-in-progress [user guide](https://mobx-react.js.org) for additional information.
 This package supports both React and React Native.
 
 ## Choosing your version
@@ -17,6 +18,8 @@ There are currently two actively maintained versions of mobx-react:
 | ----------- | ------------------------ | -------------------------------------------------------------------------------- |
 | v6          | 16.8.0 and higher        | Yes                                                                              |
 | v5          | 0.13 and higher          | No, but it is possible to use `<Observer>` sections inside hook based components |
+
+The user guide covers this [in a more detail](https://mobx-react.js.org/libraries). 
 
 The V5 documentation can be found in the [README_v5](README_v5.md).
 
@@ -130,6 +133,8 @@ person.name = "Mike" // will cause the Observer region to re-render
 
 ### `useLocalStore` hook
 
+[User guide](https://mobx-react.js.org/state-local)
+
 Local observable state can be introduced by using the `useLocalStore` hook, that runs once to create an observable store. A quick example would be:
 
 ```javascript
@@ -163,6 +168,8 @@ Note that in many cases it is possible to extract the initializer function to a 
 _Note: using `useLocalStore` is mostly beneficial for really complex local state, or to obtain more uniform code base. Note that using a local store might conflict with future React features like concurrent rendering._
 
 ### `useAsObservableSource` hook
+
+[User guide](https://mobx-react.js.org/state-outsourcing)
 
 The `useAsObservableSource` hook can be used to turn any set of values into an observable object that has a stable reference (the same object is returned every time from the hook).
 The goal of this hook is to trap React primitives such as props or state (which are not observable themselves) into a local, observable object
@@ -254,6 +261,8 @@ MobX-react provides the following additional `PropTypes` which can be used to va
 Use `import { PropTypes } from "mobx-react"` to import them, then use for example `PropTypes.observableArray`
 
 ### `Provider` and `inject`
+
+See also [the migration guide to React Hooks](https://mobx-react.js.org/recipes-migration).
 
 _Note: usually there is no need anymore to use `Provider` / `inject` in new code bases; most of its features are now covered by `React.createContext`._
 
@@ -428,6 +437,8 @@ public render() {
    // ...
 }
 ```
+
+By [migrating to React Hooks](https://mobx-react.js.org/recipes-migration) you can avoid problems with TypeScript.
 
 #### Testing store injection
 
