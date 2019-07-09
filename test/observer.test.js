@@ -3,6 +3,7 @@ import TestUtils from "react-dom/test-utils"
 import { inject, observer, Observer, useStaticRendering } from "../src"
 import { asyncReactDOMRender, createTestRoot, sleepHelper, withConsole } from "./"
 import renderer, { act } from "react-test-renderer"
+import { render, cleanup } from "@testing-library/react"
 import * as mobx from "mobx"
 
 /**
@@ -849,3 +850,16 @@ test("#692 - componentDidUpdate is triggered", async () => {
     await sleepHelper(500)
     expect(cDUCount).toBe(1)
 })
+
+// Not possible to properly test error catching (see ErrorCatcher)
+test.skip("#709 - applying observer on React.memo component", async () => {
+    const WithMemo = React.memo(() => {
+        return null
+    })
+
+    const Observed = observer(WithMemo)
+
+    render(<Observed />, { wrapper: ErrorCatcher })
+})
+
+afterEach(cleanup)
