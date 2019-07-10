@@ -112,16 +112,14 @@ describe("isObjectShallowModified detects when React will update the component",
         return <div>{store.count}</div>
     })
 
-    beforeAll(done => {
+    beforeAll(() => {
         useStaticRendering(false)
-        done()
     })
 
-    test("does not assume React will update due to NaN prop", async done => {
-        await asyncReactDOMRender(<Counter value={NaN} />, testRoot)
+    test("does not assume React will update due to NaN prop", () => {
+        render(<Counter value={NaN} />)
         store.count++
         expect(counterRenderings).toBe(2)
-        done()
     })
 })
 
@@ -717,8 +715,8 @@ describe("use Observer inject and render sugar should work  ", () => {
                 <Observer render={props => <span>{123}</span>} />
             </div>
         )
-        await asyncReactDOMRender(<Comp />, testRoot)
-        expect(testRoot.querySelector("span").innerHTML).toBe("123")
+        const { container } = render(<Comp />)
+        expect(container.textContent).toBe("123")
     })
 
     test("use children without inject should be correct", async () => {
@@ -727,8 +725,8 @@ describe("use Observer inject and render sugar should work  ", () => {
                 <Observer>{props => <span>{123}</span>}</Observer>
             </div>
         )
-        await asyncReactDOMRender(<Comp />, testRoot)
-        expect(testRoot.querySelector("span").innerHTML).toBe("123")
+        const { container } = render(<Comp />)
+        expect(container.textContent).toBe("123")
     })
 
     test("show error when using children and render at same time ", async () => {
@@ -742,7 +740,7 @@ describe("use Observer inject and render sugar should work  ", () => {
             </div>
         )
 
-        await asyncReactDOMRender(<Comp />, testRoot)
+        render(<Comp />)
         expect(msg.length).toBe(1)
         console.error = baseError
     })
