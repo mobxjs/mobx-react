@@ -1,12 +1,10 @@
 import React, { Component } from "react"
-import ReactDOM from "react-dom"
-import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import * as mobxReact from "../src"
-import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
+import { sleepHelper } from "./index"
+import { render, cleanup } from "@testing-library/react"
 
 test("mobx issue 50", async () => {
-    const testRoot = createTestRoot()
     const foo = {
         a: mobx.observable.box(true),
         b: mobx.observable.box(false),
@@ -31,7 +29,7 @@ test("mobx issue 50", async () => {
         }
     )
 
-    await asyncReactDOMRender(<Test />, testRoot)
+    render(<Test />)
 
     // In 3 seconds, flip a and b. This will change c.
     await sleepHelper(200)
@@ -44,7 +42,6 @@ test("mobx issue 50", async () => {
 })
 
 test("ReactDOM.render should respect transaction", async () => {
-    const testRoot = createTestRoot()
     const a = mobx.observable.box(2)
     const loaded = mobx.observable.box(false)
     const valuesSeen = []
@@ -55,7 +52,7 @@ test("ReactDOM.render should respect transaction", async () => {
         else return <div>loading</div>
     })
 
-    await asyncReactDOMRender(<Component />, testRoot)
+    const { container } = render(<Component />)
 
     mobx.transaction(() => {
         a.set(3)
@@ -64,13 +61,11 @@ test("ReactDOM.render should respect transaction", async () => {
     })
 
     await sleepHelper(400)
-    expect(testRoot.textContent.replace(/\s+/g, "")).toBe("4")
+    expect(container.textContent).toBe("4")
     expect(valuesSeen.sort()).toEqual([2, 4].sort())
-    testRoot.parentNode.removeChild(testRoot)
 })
 
 test("ReactDOM.render in transaction should succeed", async () => {
-    const testRoot = createTestRoot()
     const a = mobx.observable.box(2)
     const loaded = mobx.observable.box(false)
     const valuesSeen = []
@@ -80,15 +75,18 @@ test("ReactDOM.render in transaction should succeed", async () => {
         else return <div>loading</div>
     })
 
+    let container
+
     mobx.transaction(() => {
         a.set(3)
-        ReactDOM.render(<Component />, testRoot)
+        container = render(<Component />).container
         a.set(4)
         loaded.set(true)
     })
 
     await sleepHelper(400)
-    expect(testRoot.textContent.replace(/\s+/g, "")).toBe("4")
+    expect(container.textContent).toBe("4")
     expect(valuesSeen.sort()).toEqual([3, 4].sort())
-    testRoot.parentNode.removeChild(testRoot)
 })
+
+afterEach(cleanup)
