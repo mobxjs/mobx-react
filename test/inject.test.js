@@ -1,10 +1,10 @@
 import React, { Component } from "react"
 import * as PropTypes from "prop-types"
-import ReactDOM from "react-dom"
 import * as mobx from "mobx"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
-import { createTestRoot, cleanupTestRoot, sleepHelper, withConsole } from "./index"
+import { sleepHelper, withConsole } from "./index"
+import { render } from "@testing-library/react"
 import renderer, { act } from "react-test-renderer"
 
 describe("inject based context", () => {
@@ -394,7 +394,7 @@ describe("inject based context", () => {
         expect(ref2.current.didRender).toBe(true)
     })
 
-    test("inject should work with components that use forwardRef", done => {
+    test("inject should work with components that use forwardRef", () => {
         const FancyComp = React.forwardRef((_, ref) => {
             return <div ref={ref} />
         })
@@ -402,21 +402,14 @@ describe("inject based context", () => {
         const InjectedFancyComp = inject("bla")(FancyComp)
         const ref = React.createRef()
 
-        const testRoot = createTestRoot()
-
-        ReactDOM.render(
+        render(
             <Provider bla={42}>
                 <InjectedFancyComp ref={ref} />
-            </Provider>,
-            testRoot,
-            () => {
-                expect(ref.current).not.toBeNull()
-                expect(ref.current).toBeInstanceOf(HTMLDivElement)
-
-                cleanupTestRoot(testRoot)
-                done()
-            }
+            </Provider>
         )
+
+        expect(ref.current).not.toBeNull()
+        expect(ref.current).toBeInstanceOf(HTMLDivElement)
     })
 
     test("support static hoisting, wrappedComponent and ref forwarding", async () => {
@@ -557,7 +550,7 @@ describe("inject based context", () => {
 `)
     })
 
-    test("using a custom injector is not too reactive", done => {
+    test("using a custom injector is not too reactive", async () => {
         let listRender = 0
         let itemRender = 0
         let injectRender = 0
@@ -634,38 +627,31 @@ describe("inject based context", () => {
             }
         }
 
-        const testRoot = createTestRoot()
-
-        ReactDOM.render(
+        const { container } = render(
             <Provider state={state}>
                 <ListComponent items={items} />
-            </Provider>,
-            testRoot,
-            async () => {
-                expect(listRender).toBe(1)
-                expect(injectRender).toBe(6)
-                expect(itemRender).toBe(6)
-
-                testRoot.querySelectorAll(".hl_ItemB").forEach(e => e.click())
-                await sleepHelper(20)
-                expect(listRender).toBe(1)
-                expect(injectRender).toBe(12) // ideally, 7
-                expect(itemRender).toBe(7)
-
-                testRoot.querySelectorAll(".hl_ItemF").forEach(e => e.click())
-                await sleepHelper(20)
-                expect(listRender).toBe(1)
-                expect(injectRender).toBe(18) // ideally, 9
-                expect(itemRender).toBe(9)
-
-                cleanupTestRoot(testRoot)
-                done()
-            }
+            </Provider>
         )
+
+        expect(listRender).toBe(1)
+        expect(injectRender).toBe(6)
+        expect(itemRender).toBe(6)
+
+        container.querySelectorAll(".hl_ItemB").forEach(e => e.click())
+        await sleepHelper(20)
+        expect(listRender).toBe(1)
+        expect(injectRender).toBe(12) // ideally, 7
+        expect(itemRender).toBe(7)
+
+        container.querySelectorAll(".hl_ItemF").forEach(e => e.click())
+        await sleepHelper(20)
+        expect(listRender).toBe(1)
+        expect(injectRender).toBe(18) // ideally, 9
+        expect(itemRender).toBe(9)
     })
 })
 
-test("#612 - mixed context types", done => {
+test("#612 - mixed context types", () => {
     const SomeContext = React.createContext(true)
 
     class MainCompClass extends React.Component {
@@ -694,10 +680,5 @@ test("#612 - mixed context types", done => {
         )
     }
 
-    const testRoot = createTestRoot()
-
-    ReactDOM.render(<App />, testRoot, () => {
-        cleanupTestRoot(testRoot)
-        done()
-    })
+    render(<App />)
 })

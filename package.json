@@ -91,6 +91,9 @@
     ]
   },
   "jest": {
+    "setupFilesAfterEnv": [
+      "@testing-library/react/cleanup-after-each"
+    ],
     "testURL": "http://127.0.0.1/"
   },
   "husky": {

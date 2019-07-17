@@ -1,14 +1,10 @@
 import React, { Component } from "react"
 import * as PropTypes from "prop-types"
-import ReactDOM from "react-dom"
-import TestUtils from "react-dom/test-utils"
 import * as mobx from "mobx"
 import { observer, PropTypes as MRPropTypes } from "../src"
-import { createTestRoot, asyncReactDOMRender } from "./index"
+import { render } from "@testing-library/react"
 import renderer, { act } from "react-test-renderer"
 import { observable } from "mobx"
-
-const testRoot = createTestRoot()
 
 const StatelessComp = ({ testProp }) => <div>result: {testProp}</div>
 
@@ -38,8 +34,8 @@ describe("stateless component with propTypes", () => {
     })
 
     test("render test correct", async () => {
-        await asyncReactDOMRender(<StatelessCompObserver testProp="hello world" />, testRoot)
-        expect(testRoot.querySelector("div").innerHTML).toBe("result: hello world")
+        const { container } = render(<StatelessCompObserver testProp="hello world" />)
+        expect(container.textContent).toBe("result: hello world")
     })
 })
 
@@ -54,12 +50,12 @@ test("stateless component with context support", async () => {
 
     const ContextProvider = () => (
         <C.Provider value={{ testContext: "hello world" }}>
-            <StateLessCompWithContext />
+            <StateLessCompWithContextObserver />
         </C.Provider>
     )
 
-    await asyncReactDOMRender(<ContextProvider />, testRoot)
-    expect(testRoot.querySelector("div").innerHTML.replace(/\n/, "")).toBe("context: hello world")
+    const { container } = render(<ContextProvider />)
+    expect(container.textContent).toBe("context: hello world")
 })
 
 test("component with observable propTypes", () => {
