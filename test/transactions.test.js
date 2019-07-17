@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import * as mobx from "mobx"
 import * as mobxReact from "../src"
 import { sleepHelper } from "./index"
-import { render, cleanup } from "@testing-library/react"
+import { render } from "@testing-library/react"
 
 test("mobx issue 50", async () => {
     const foo = {
@@ -88,5 +88,3 @@ test("ReactDOM.render in transaction should succeed", async () => {
     expect(container.textContent).toBe("4")
     expect(valuesSeen.sort()).toEqual([3, 4].sort())
 })
-
-afterEach(cleanup)

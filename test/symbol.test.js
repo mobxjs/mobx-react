@@ -2,7 +2,7 @@ delete global.Symbol
 
 import React, { Component } from "react"
 import { observer } from "../src"
-import { render, cleanup } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import { newSymbol } from "../src/utils/utils"
 
 test("work without Symbol", async () => {
@@ -22,5 +22,3 @@ test("cache newSymbol created Symbols", () => {
 
     expect(symbol1).toEqual(symbol2)
 })
-
-afterEach(cleanup)

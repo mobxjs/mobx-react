@@ -4,7 +4,7 @@ import * as mobx from "mobx"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
 import { sleepHelper, withConsole } from "./index"
-import { render, cleanup } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import renderer, { act } from "react-test-renderer"
 
 describe("inject based context", () => {
@@ -682,5 +682,3 @@ test("#612 - mixed context types", () => {
 
     render(<App />)
 })
-
-afterEach(cleanup)

@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import * as PropTypes from "prop-types"
 import * as mobx from "mobx"
 import { observer, PropTypes as MRPropTypes } from "../src"
-import { render, cleanup } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import renderer, { act } from "react-test-renderer"
 import { observable } from "mobx"
 
@@ -109,5 +109,3 @@ describe("stateless component with forwardRef", () => {
         expect(component).toMatchSnapshot()
     })
 })
-
-afterEach(cleanup)
