@@ -1,1 +1,1 @@
-_extends mobx
+_extends: mobx
