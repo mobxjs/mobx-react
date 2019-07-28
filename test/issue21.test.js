@@ -2,9 +2,8 @@ import React, { createElement, Component } from "react"
 import * as mobx from "mobx"
 import { observer } from "../src"
 import _ from "lodash"
-import { createTestRoot, sleepHelper, asyncReactDOMRender } from "./index"
+import { render } from "@testing-library/react"
 
-const testRoot = createTestRoot()
 let topRenderCount = 0
 
 const wizardModel = mobx.observable(
@@ -124,18 +123,16 @@ const WizardStep = observer(
 
 const changeStep = stepNumber => wizardModel.setActiveStep(wizardModel.steps[stepNumber])
 
-test("verify issue 21", async () => {
-    await asyncReactDOMRender(<Wizard model={wizardModel} />, testRoot)
+test("verify issue 21", () => {
+    render(<Wizard model={wizardModel} />)
     expect(topRenderCount).toBe(1)
     changeStep(0)
-    await sleepHelper(100)
     expect(topRenderCount).toBe(2)
     changeStep(2)
-    await sleepHelper(100)
     expect(topRenderCount).toBe(3)
 })
 
-test("verify prop changes are picked up", async () => {
+test("verify prop changes are picked up", () => {
     function createItem(subid, label) {
         const res = mobx.observable(
             {
@@ -203,11 +200,10 @@ test("verify prop changes are picked up", async () => {
         this.setState({}) // trigger update
     }
 
-    await asyncReactDOMRender(<Wrapper />, testRoot)
+    const { container } = render(<Wrapper />)
     expect(events.sort()).toEqual([["compute", 1], ["render", 1, "1.1.hi.0"]].sort())
     events.splice(0)
-    testRoot.querySelector("#testDiv").click()
-    await sleepHelper(100)
+    container.querySelector("#testDiv").click()
     expect(events.sort()).toEqual(
         [
             ["compute", 1],
@@ -219,7 +215,7 @@ test("verify prop changes are picked up", async () => {
     )
 })
 
-test("verify props is reactive", async () => {
+test("verify props is reactive", () => {
     function createItem(subid, label) {
         const res = mobx.observable(
             {
@@ -307,14 +303,13 @@ test("verify props is reactive", async () => {
         })
     }
 
-    await asyncReactDOMRender(<Wrapper />, testRoot)
+    const { container } = render(<Wrapper />)
     expect(events.sort()).toEqual(
         [["mount"], ["compute", 1], ["computed label", 1], ["render", 1, "1.1.hi.0", "hi"]].sort()
     )
 
     events.splice(0)
-    testRoot.querySelector("#testDiv").click()
-    await sleepHelper(100)
+    container.querySelector("#testDiv").click()
     expect(events.sort()).toEqual(
         [
             ["compute", 1],
@@ -386,15 +381,14 @@ test("no re-render for shallow equal props", async () => {
         data.parentValue = 1 // rerender parent
     }
 
-    await asyncReactDOMRender(<Wrapper />, testRoot)
+    const { container } = render(<Wrapper />)
     expect(events.sort()).toEqual([["parent render", 0], ["mount"], ["render", 1, "hi"]].sort())
     events.splice(0)
-    testRoot.querySelector("#testDiv").click()
-    await sleepHelper(100)
+    container.querySelector("#testDiv").click()
     expect(events.sort()).toEqual([["parent render", 1], ["receive", 1, 1]].sort())
 })
 
-test("lifecycle callbacks called with correct arguments", async () => {
+test("lifecycle callbacks called with correct arguments", () => {
     var Comp = observer(
         class Comp extends Component {
             componentWillReceiveProps(nextProps) {
@@ -434,11 +428,11 @@ test("lifecycle callbacks called with correct arguments", async () => {
             return <Comp counter={this.state.counter || 0} onClick={this.onButtonClick} />
         }
     }
-    await asyncReactDOMRender(<Root />, testRoot)
-    testRoot.querySelector("#testButton").click()
+    const { container } = render(<Root />)
+    container.querySelector("#testButton").click()
 })
 
-test("verify props are reactive in componentWillMount and constructor", async () => {
+test("verify props are reactive in componentWillMount and constructor", () => {
     const prop1Values = []
     const prop2Values = []
     let componentWillMountCallsCount = 0
@@ -480,10 +474,10 @@ test("verify props are reactive in componentWillMount and constructor", async ()
         }
     )
 
-    await asyncReactDOMRender(<Component prop1="1" prop2="4" />, testRoot)
-    await asyncReactDOMRender(<Component prop1="2" prop2="3" />, testRoot)
-    await asyncReactDOMRender(<Component prop1="3" prop2="2" />, testRoot)
-    await asyncReactDOMRender(<Component prop1="4" prop2="1" />, testRoot)
+    const { container } = render(<Component prop1="1" prop2="4" />)
+    render(<Component prop1="2" prop2="3" />, { container })
+    render(<Component prop1="3" prop2="2" />, { container })
+    render(<Component prop1="4" prop2="1" />, { container })
     expect(constructorCallsCount).toEqual(1)
     expect(componentWillMountCallsCount).toEqual(1)
     expect(prop1Values).toEqual(["1", "2", "3", "4"])
