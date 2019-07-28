@@ -3,7 +3,7 @@ import * as PropTypes from "prop-types"
 import * as mobx from "mobx"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
-import { sleepHelper, withConsole } from "./index"
+import { withConsole } from "./index"
 import { render } from "@testing-library/react"
 import renderer, { act } from "react-test-renderer"
 
@@ -366,7 +366,7 @@ describe("inject based context", () => {
 `)
     })
 
-    test("inject forwards ref", async () => {
+    test("inject forwards ref", () => {
         class FancyComp extends React.Component {
             render() {
                 this.didRender = true
@@ -412,7 +412,7 @@ describe("inject based context", () => {
         expect(ref.current).toBeInstanceOf(HTMLDivElement)
     })
 
-    test("support static hoisting, wrappedComponent and ref forwarding", async () => {
+    test("support static hoisting, wrappedComponent and ref forwarding", () => {
         class B extends React.Component {
             render() {
                 this.testField = 1
@@ -550,7 +550,7 @@ describe("inject based context", () => {
 `)
     })
 
-    test("using a custom injector is not too reactive", async () => {
+    test("using a custom injector is not too reactive", () => {
         let listRender = 0
         let itemRender = 0
         let injectRender = 0
@@ -638,13 +638,11 @@ describe("inject based context", () => {
         expect(itemRender).toBe(6)
 
         container.querySelectorAll(".hl_ItemB").forEach(e => e.click())
-        await sleepHelper(20)
         expect(listRender).toBe(1)
         expect(injectRender).toBe(12) // ideally, 7
         expect(itemRender).toBe(7)
 
         container.querySelectorAll(".hl_ItemF").forEach(e => e.click())
-        await sleepHelper(20)
         expect(listRender).toBe(1)
         expect(injectRender).toBe(18) // ideally, 9
         expect(itemRender).toBe(9)
