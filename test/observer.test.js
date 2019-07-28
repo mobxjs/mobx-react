@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import TestUtils from "react-dom/test-utils"
 import { inject, observer, Observer, useStaticRendering } from "../src"
 import { asyncReactDOMRender, createTestRoot, sleepHelper, withConsole } from "./"
 import renderer, { act } from "react-test-renderer"
@@ -15,7 +14,7 @@ const testRoot = createTestRoot()
 const getDNode = (obj, prop) => mobx._getAdministration(obj, prop)
 
 /*
- use TestUtils.renderIntoDocument  will re-mounted the component  with with different props
+ use TestUtils.renderIntoDocument will re-mounted the component with different props
  some misunderstanding will be cause？
 */
 describe("nestedRendering", async () => {
@@ -262,7 +261,7 @@ test("changing state in render should fail", () => {
         }
         return <div>{data.get()}</div>
     })
-    TestUtils.renderIntoDocument(<Comp />)
+    render(<Comp />)
 
     data.set(3)
     mobx._resetGlobalState()
@@ -405,7 +404,7 @@ test("should stop updating if error was thrown in render (#134)", () => {
     )
 
     withConsole(() => {
-        TestUtils.renderIntoDocument(
+        render(
             <Outer>
                 <Comp />
             </Outer>
@@ -623,7 +622,7 @@ test("Observer should not re-render on shallow equal new props", () => {
     expect(contents()).toBe("1")
 })
 
-test("parent / childs render in the right order", done => {
+test("parent / childs render in the right order", () => {
     // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
     let events = []
 
@@ -670,14 +669,15 @@ test("parent / childs render in the right order", done => {
         return <span>Logged in as: {store.user.name}</span>
     })
 
-    const container = TestUtils.renderIntoDocument(<Parent />)
+    render(<Parent />)
 
     tryLogout()
     expect(events).toEqual(["parent", "child", "parent"])
-    done()
 })
 
 test("195 - async componentWillMount does not work", async () => {
+    jest.useFakeTimers()
+
     const renderedValues = []
 
     @observer
@@ -702,10 +702,12 @@ test("195 - async componentWillMount does not work", async () => {
             )
         }
     }
-    TestUtils.renderIntoDocument(<WillMount />)
+    render(<WillMount />)
 
-    await sleepHelper(500)
+    jest.runAllTimers()
     expect(renderedValues).toEqual([0, 1])
+
+    jest.useRealTimers()
 })
 
 describe("use Observer inject and render sugar should work  ", () => {
@@ -775,7 +777,9 @@ test("static on function components are hoisted", () => {
     expect(Comp2.foo).toBe(3)
 })
 
-test("computed properties react to props", async () => {
+test("computed properties react to props", () => {
+    jest.useFakeTimers()
+
     const seen = []
     @observer
     class Child extends React.Component {
@@ -809,7 +813,7 @@ test("computed properties react to props", async () => {
 </div>
 `)
 
-    await sleepHelper(200)
+    jest.runAllTimers()
     expect(wrapper.toJSON()).toMatchInlineSnapshot(`
 <div>
   2
@@ -817,9 +821,13 @@ test("computed properties react to props", async () => {
 `)
 
     expect(seen).toEqual(["parent", 0, "parent", 2])
+
+    jest.useRealTimers()
 })
 
-test("#692 - componentDidUpdate is triggered", async () => {
+test("#692 - componentDidUpdate is triggered", () => {
+    jest.useFakeTimers()
+
     let cDUCount = 0
 
     @observer
@@ -842,10 +850,10 @@ test("#692 - componentDidUpdate is triggered", async () => {
             cDUCount++
         }
     }
-    TestUtils.renderIntoDocument(<Test />)
+    render(<Test />)
     expect(cDUCount).toBe(0)
 
-    await sleepHelper(500)
+    jest.runAllTimers()
     expect(cDUCount).toBe(1)
 })
 
