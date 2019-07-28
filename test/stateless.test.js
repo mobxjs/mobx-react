@@ -39,7 +39,7 @@ describe("stateless component with propTypes", () => {
     })
 })
 
-test("stateless component with context support", async () => {
+test("stateless component with context support", () => {
     const C = React.createContext()
 
     const StateLessCompWithContext = (props, context) => (

@@ -5,7 +5,7 @@ import { observer } from "../src"
 import { render } from "@testing-library/react"
 import { newSymbol } from "../src/utils/utils"
 
-test("work without Symbol", async () => {
+test("work without Symbol", () => {
     const Component1 = observer(
         class extends Component {
             render() {

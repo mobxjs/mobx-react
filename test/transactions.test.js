@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import * as mobx from "mobx"
 import * as mobxReact from "../src"
-import { sleepHelper } from "./index"
 import { render } from "@testing-library/react"
 
 test("mobx issue 50", async () => {
@@ -31,17 +30,14 @@ test("mobx issue 50", async () => {
 
     render(<Test />)
 
-    // In 3 seconds, flip a and b. This will change c.
-    await sleepHelper(200)
+    // Flip a and b. This will change c.
     flipStuff()
 
-    await sleepHelper(400)
     expect(asText).toBe("false:true:true")
-    // console.log(document.getElementById("x").innerHTML)
     expect(document.getElementById("x").innerHTML).toBe("false,true,true")
 })
 
-test("ReactDOM.render should respect transaction", async () => {
+test("ReactDOM.render should respect transaction", () => {
     const a = mobx.observable.box(2)
     const loaded = mobx.observable.box(false)
     const valuesSeen = []
@@ -60,12 +56,11 @@ test("ReactDOM.render should respect transaction", async () => {
         loaded.set(true)
     })
 
-    await sleepHelper(400)
     expect(container.textContent).toBe("4")
     expect(valuesSeen.sort()).toEqual([2, 4].sort())
 })
 
-test("ReactDOM.render in transaction should succeed", async () => {
+test("ReactDOM.render in transaction should succeed", () => {
     const a = mobx.observable.box(2)
     const loaded = mobx.observable.box(false)
     const valuesSeen = []
@@ -84,7 +79,6 @@ test("ReactDOM.render in transaction should succeed", async () => {
         loaded.set(true)
     })
 
-    await sleepHelper(400)
     expect(container.textContent).toBe("4")
     expect(valuesSeen.sort()).toEqual([3, 4].sort())
 })
