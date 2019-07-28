@@ -43,6 +43,7 @@
     "@babel/plugin-proposal-decorators": "^7.1.0",
     "@babel/plugin-transform-react-jsx": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
+    "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^8.0.4",
     "@types/create-react-class": "^15.6.0",
     "@types/node": "^10.0.0",
@@ -92,7 +93,8 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "@testing-library/react/cleanup-after-each"
+      "@testing-library/react/cleanup-after-each",
+      "@testing-library/jest-dom/extend-expect"
     ],
     "testURL": "http://127.0.0.1/"
   },

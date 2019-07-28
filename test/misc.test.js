@@ -1,13 +1,11 @@
 import React, { Component } from "react"
-import ReactDOM from "react-dom"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { createTestRoot, withConsole } from "./index"
+import { withConsole } from "./index"
 import renderer, { act } from "react-test-renderer"
+import { render } from "@testing-library/react"
 
 const mobxAdminProperty = mobx.$mobx || "$mobx"
-
-const testRoot = createTestRoot()
 
 test("issue mobx 405", () => {
     function ExampleState() {
@@ -52,7 +50,7 @@ test("issue mobx 405", () => {
 `)
 })
 
-test("#85 Should handle state changing in constructors", done => {
+test("#85 Should handle state changing in constructors", () => {
     const a = mobx.observable.box(2)
     const Child = observer(
         class Child extends Component {
@@ -80,21 +78,14 @@ test("#85 Should handle state changing in constructors", done => {
             </span>
         )
     })
-    ReactDOM.render(<ParentWrapper />, testRoot, () => {
-        expect(testRoot.getElementsByTagName("span")[0].textContent).toBe("child:3 - parent:2")
-        a.set(5)
-        setTimeout(() => {
-            expect(testRoot.getElementsByTagName("span")[0].textContent).toBe("child:5 - parent:5")
-            a.set(7)
-            setTimeout(() => {
-                expect(testRoot.getElementsByTagName("span")[0].textContent).toBe(
-                    "child:7 - parent:7"
-                )
-                testRoot.parentNode.removeChild(testRoot)
-                done()
-            }, 10)
-        }, 10)
-    })
+    const { container } = render(<ParentWrapper />)
+    expect(container).toHaveTextContent("child:3 - parent:3")
+
+    a.set(5)
+    expect(container).toHaveTextContent("child:5 - parent:5")
+
+    a.set(7)
+    expect(container).toHaveTextContent("child:7 - parent:7")
 })
 
 test("testIsComponentReactive", () => {
