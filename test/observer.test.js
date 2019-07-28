@@ -709,7 +709,7 @@ test("195 - async componentWillMount does not work", async () => {
 })
 
 describe("use Observer inject and render sugar should work  ", () => {
-    test("use render without inject should be correct", async () => {
+    test("use render without inject should be correct", () => {
         const Comp = () => (
             <div>
                 <Observer render={props => <span>{123}</span>} />
@@ -719,7 +719,7 @@ describe("use Observer inject and render sugar should work  ", () => {
         expect(container.textContent).toBe("123")
     })
 
-    test("use children without inject should be correct", async () => {
+    test("use children without inject should be correct", () => {
         const Comp = () => (
             <div>
                 <Observer>{props => <span>{123}</span>}</Observer>
@@ -729,7 +729,7 @@ describe("use Observer inject and render sugar should work  ", () => {
         expect(container.textContent).toBe("123")
     })
 
-    test("show error when using children and render at same time ", async () => {
+    test("show error when using children and render at same time ", () => {
         const msg = []
         const baseError = console.error
         console.error = m => msg.push(m)
@@ -850,7 +850,7 @@ test("#692 - componentDidUpdate is triggered", async () => {
 })
 
 // Not possible to properly test error catching (see ErrorCatcher)
-test.skip("#709 - applying observer on React.memo component", async () => {
+test.skip("#709 - applying observer on React.memo component", () => {
     const WithMemo = React.memo(() => {
         return null
     })
