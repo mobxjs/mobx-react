@@ -2,7 +2,7 @@
 
 ### 6.1.2
 
--   Add reexport of `useObserver` from `mobx-react-lite` [#734]
+-   Add reexport of `useObserver` from `mobx-react-lite` [#734](https://github.com/mobxjs/mobx-react/issues/734)
 
 ### 6.1.1
 
