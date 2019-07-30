@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.1.2
+
+-   Add reexport of `useObserver` from `mobx-react-lite` [#734]
+
 ### 6.1.1
 
 -   Fixed issue where combining `@disposeOnUnmount` with `disposeOnUnmount` didn't clean up everything. Fixes [#666](https://github.com/mobxjs/mobx-react/issues/666) trough [#671](https://github.com/mobxjs/mobx-react/pull/671) by [@JabX](https://github.com/JabX)
