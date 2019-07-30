@@ -9,6 +9,7 @@ if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
 
 export {
     Observer,
+    useObserver,
     useAsObservableSource,
     useLocalStore,
     isUsingStaticRendering,
