@@ -3,7 +3,7 @@
 ### 6.1.1
 
 -   Fixed issue where combining `@disposeOnUnmount` with `disposeOnUnmount` didn't clean up everything. Fixes [#666](https://github.com/mobxjs/mobx-react/issues/666) trough [#671](https://github.com/mobxjs/mobx-react/pull/671) by [@JabX](https://github.com/JabX)
--   Fixed [#717](https://github.com/mobxjs/mobx-react/issues/717). Now `inject` works correctly with components that use `React.fowardRef`.
+-   Fixed [#717](https://github.com/mobxjs/mobx-react/issues/717). Now `inject` works correctly with components that use `React.forwardRef`.
 
 ### 6.1.0
 
