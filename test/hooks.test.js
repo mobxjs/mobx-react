@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react"
 import { observer, Observer, useLocalStore, useAsObservableSource } from "../src"
-import { sleepHelper } from "."
 import renderer, { act } from "react-test-renderer"
 
+afterEach(() => {
+    jest.useRealTimers()
+})
+
 test("computed properties react to props when using hooks", async () => {
+    jest.useFakeTimers()
+
     const seen = []
 
     const Child = ({ x }) => {
@@ -25,7 +30,7 @@ test("computed properties react to props when using hooks", async () => {
                 act(() => {
                     setState({ x: 2 })
                 })
-            }, 100)
+            })
         }, [])
         return <Child x={state.x} />
     }
@@ -40,7 +45,7 @@ test("computed properties react to props when using hooks", async () => {
 </div>
 `)
 
-    await sleepHelper(400)
+    jest.runAllTimers()
     expect(seen).toEqual(["parent", 0, "parent", 2])
     expect(wrapper.toJSON()).toMatchInlineSnapshot(`
 <div>
@@ -50,6 +55,8 @@ test("computed properties react to props when using hooks", async () => {
 })
 
 test("computed properties result in double render when using observer instead of Observer", async () => {
+    jest.useFakeTimers()
+
     const seen = []
 
     const Child = observer(({ x }) => {
@@ -87,7 +94,7 @@ test("computed properties result in double render when using observer instead of
 </div>
 `)
 
-    await sleepHelper(400)
+    jest.runAllTimers()
     expect(seen).toEqual([
         "parent",
         0,

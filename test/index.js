@@ -7,12 +7,6 @@ console.error = function(msg) {
     return origError.apply(this, arguments)
 }
 
-export function sleepHelper(time) {
-    return new Promise(resolve => {
-        setTimeout(resolve, time)
-    })
-}
-
 export function withConsole(fn) {
     const { warn, error, info } = global.console
     const warnings = []
