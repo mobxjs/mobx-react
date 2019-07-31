@@ -21,7 +21,7 @@ export class Provider extends Component {
         return createElement(
             MobXProviderContext.Provider,
             { value: this.state },
-            Children.only(this.props.children)
+            this.props.children
         )
     }
 
