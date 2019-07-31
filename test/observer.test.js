@@ -11,6 +11,10 @@ import * as mobx from "mobx"
 
 const getDNode = (obj, prop) => mobx._getAdministration(obj, prop)
 
+afterEach(() => {
+    jest.useRealTimers()
+})
+
 /*
  use TestUtils.renderIntoDocument will re-mounted the component with different props
  some misunderstanding will be cause？
@@ -732,8 +736,6 @@ test("195 - async componentWillMount does not work", () => {
 
     jest.runAllTimers()
     expect(renderedValues).toEqual([0, 1])
-
-    jest.useRealTimers()
 })
 
 describe("use Observer inject and render sugar should work  ", () => {
@@ -847,8 +849,6 @@ test("computed properties react to props", () => {
 `)
 
     expect(seen).toEqual(["parent", 0, "parent", 2])
-
-    jest.useRealTimers()
 })
 
 test("#692 - componentDidUpdate is triggered", () => {
