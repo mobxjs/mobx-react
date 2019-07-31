@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { inject, observer, Observer, useStaticRendering } from "../src"
-import { asyncReactDOMRender, createTestRoot, sleepHelper, withConsole } from "./"
+import { withConsole } from "./"
 import renderer, { act } from "react-test-renderer"
 import { render } from "@testing-library/react"
 import * as mobx from "mobx"
@@ -9,37 +9,24 @@ import * as mobx from "mobx"
  *  some test suite is too tedious
  */
 
-const testRoot = createTestRoot()
-
 const getDNode = (obj, prop) => mobx._getAdministration(obj, prop)
 
 /*
  use TestUtils.renderIntoDocument will re-mounted the component with different props
  some misunderstanding will be cause？
 */
-describe("nestedRendering", async () => {
-    const testRoot = createTestRoot()
+describe("nestedRendering", () => {
+    let store
 
-    // init element
-    const store = mobx.observable({
-        todos: [
-            {
-                title: "a",
-                completed: false
-            }
-        ]
-    })
-
-    let todoItemRenderings = 0
+    let todoItemRenderings
     const TodoItem = observer(function TodoItem(props) {
         todoItemRenderings++
         return <li>|{props.todo.title}</li>
     })
 
-    let todoListRenderings = 0
+    let todoListRenderings
     const TodoList = observer(
         class TodoList extends Component {
-            renderings = 0
             render() {
                 todoListRenderings++
                 const todos = store.todos
@@ -54,22 +41,34 @@ describe("nestedRendering", async () => {
             }
         }
     )
-    beforeAll(async done => {
-        // the side-effect in  does not views alive when using static rendering test suite
-        useStaticRendering(false)
-        await asyncReactDOMRender(<TodoList />, testRoot)
-        done()
+
+    beforeEach(() => {
+        todoItemRenderings = 0
+        todoListRenderings = 0
+        store = mobx.observable({
+            todos: [
+                {
+                    title: "a",
+                    completed: false
+                }
+            ]
+        })
     })
 
     test("first rendering", () => {
+        const { container } = render(<TodoList />)
+
         expect(todoListRenderings).toBe(1)
-        expect(testRoot.querySelectorAll("li").length).toBe(1)
-        expect(testRoot.querySelector("li").innerHTML).toBe("|a")
+        expect(container.querySelectorAll("li").length).toBe(1)
+        expect(container.querySelector("li")).toHaveTextContent("|a")
         expect(todoItemRenderings).toBe(1)
     })
 
     test("second rendering with inner store changed", () => {
+        render(<TodoList />)
+
         store.todos[0].title += "a"
+
         expect(todoListRenderings).toBe(1)
         expect(todoItemRenderings).toBe(2)
         expect(getDNode(store, "todos").observers.size).toBe(1)
@@ -77,27 +76,33 @@ describe("nestedRendering", async () => {
     })
 
     test("rerendering with outer store added", () => {
+        const { container } = render(<TodoList />)
+
         store.todos.push({
             title: "b",
             completed: true
         })
-        expect(testRoot.querySelectorAll("li").length).toBe(2)
+
+        expect(container.querySelectorAll("li").length).toBe(2)
         expect(
-            Array.from(testRoot.querySelectorAll("li"))
+            Array.from(container.querySelectorAll("li"))
                 .map(e => e.innerHTML)
                 .sort()
-        ).toEqual(["|aa", "|b"].sort())
+        ).toEqual(["|a", "|b"].sort())
         expect(todoListRenderings).toBe(2)
-        expect(todoItemRenderings).toBe(3)
+        expect(todoItemRenderings).toBe(2)
         expect(getDNode(store.todos[1], "title").observers.size).toBe(1)
         expect(getDNode(store.todos[1], "completed").observers.size).toBe(0)
     })
 
     test("rerendering with outer store pop", () => {
+        const { container } = render(<TodoList />)
+
         const oldTodo = store.todos.pop()
-        expect(todoListRenderings).toBe(3)
-        expect(todoItemRenderings).toBe(3)
-        expect(testRoot.querySelectorAll("li").length).toBe(1)
+
+        expect(todoListRenderings).toBe(2)
+        expect(todoItemRenderings).toBe(1)
+        expect(container.querySelectorAll("li").length).toBe(0)
         expect(getDNode(oldTodo, "title").observers.size).toBe(0)
         expect(getDNode(oldTodo, "completed").observers.size).toBe(0)
     })
@@ -111,27 +116,18 @@ describe("isObjectShallowModified detects when React will update the component",
         return <div>{store.count}</div>
     })
 
-    beforeAll(() => {
-        useStaticRendering(false)
-    })
-
     test("does not assume React will update due to NaN prop", () => {
         render(<Counter value={NaN} />)
+
         store.count++
+
         expect(counterRenderings).toBe(2)
     })
 })
 
 describe("keep views alive", () => {
-    let yCalcCount = 0
-    const data = mobx.observable({
-        x: 3,
-        get y() {
-            yCalcCount++
-            return this.x * 2
-        },
-        z: "hi"
-    })
+    let yCalcCount
+    let data
     const TestComponent = observer(function testComponent() {
         return (
             <div>
@@ -141,36 +137,53 @@ describe("keep views alive", () => {
         )
     })
 
-    beforeAll(async () => {
-        await asyncReactDOMRender(<TestComponent />, testRoot)
+    beforeEach(() => {
+        yCalcCount = 0
+        data = mobx.observable({
+            x: 3,
+            get y() {
+                yCalcCount++
+                return this.x * 2
+            },
+            z: "hi"
+        })
     })
 
     test("init state", () => {
+        const { container } = render(<TestComponent />)
+
         expect(yCalcCount).toBe(1)
-        expect(testRoot.querySelector("div").innerHTML).toBe("hi6")
+        expect(container).toHaveTextContent("hi6")
     })
 
     test("rerender should not need a recomputation of data.y", () => {
+        const { container } = render(<TestComponent />)
+
         data.z = "hello"
+
         expect(yCalcCount).toBe(1)
-        expect(testRoot.querySelector("div").innerHTML).toBe("hello6")
+        expect(container).toHaveTextContent("hello6")
     })
 })
 
 describe("does not views alive when using static rendering", () => {
-    useStaticRendering(true)
-    let renderCount = 0
-    const data = mobx.observable({
-        z: "hi"
-    })
+    let renderCount
+    let data
 
     const TestComponent = observer(function testComponent() {
         renderCount++
         return <div>{data.z}</div>
     })
 
-    beforeAll(async () => {
-        await asyncReactDOMRender(<TestComponent />, testRoot)
+    beforeAll(() => {
+        useStaticRendering(true)
+    })
+
+    beforeEach(() => {
+        renderCount = 0
+        data = mobx.observable({
+            z: "hi"
+        })
     })
 
     afterAll(() => {
@@ -178,15 +191,20 @@ describe("does not views alive when using static rendering", () => {
     })
 
     test("init state is correct", () => {
+        const { container } = render(<TestComponent />)
+
         expect(renderCount).toBe(1)
-        expect(testRoot.querySelector("div").innerHTML).toBe("hi")
+        expect(container).toHaveTextContent("hi")
     })
 
     test("no re-rendering on static rendering", () => {
+        const { container } = render(<TestComponent />)
+
         data.z = "hello"
+
         expect(getDNode(data, "z").observers.size).toBe(0)
         expect(renderCount).toBe(1)
-        expect(testRoot.querySelector("div").innerHTML).toBe("hi")
+        expect(container).toHaveTextContent("hi")
     })
 })
 
@@ -348,19 +366,17 @@ describe("124 - react to changes in this.props via computed", () => {
         }
     }
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Parent />, testRoot)
-        done()
-    })
-
     test("init state is correct", () => {
-        expect(testRoot.querySelector("span").innerHTML).toBe("x:1")
+        const { container } = render(<Parent />)
+
+        expect(container).toHaveTextContent("x:1")
     })
 
-    test("change after click", async () => {
-        testRoot.querySelector("div").click()
-        await sleepHelper(100)
-        expect(testRoot.querySelector("span").innerHTML).toBe("x:2")
+    test("change after click", () => {
+        const { container } = render(<Parent />)
+
+        container.querySelector("div").click()
+        expect(container).toHaveTextContent("x:2")
     })
 })
 
@@ -426,7 +442,7 @@ test("should stop updating if error was thrown in render (#134)", () => {
 })
 
 describe("should render component even if setState called with exactly the same props", () => {
-    let renderCount = 0
+    let renderCount
     const Comp = observer(
         class T extends Component {
             onClick = () => {
@@ -439,24 +455,31 @@ describe("should render component even if setState called with exactly the same 
         }
     )
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Comp />, testRoot)
-        done()
+    beforeEach(() => {
+        renderCount = 0
     })
 
     test("renderCount === 1", () => {
+        render(<Comp />)
+
         expect(renderCount).toBe(1)
     })
 
-    test("after click once renderCount === 2", async () => {
-        testRoot.querySelector("#clickableDiv").click()
-        sleepHelper(10)
+    test("after click once renderCount === 2", () => {
+        const { container } = render(<Comp />)
+
+        container.querySelector("#clickableDiv").click()
+
         expect(renderCount).toBe(2)
     })
 
-    test("after click twice renderCount === 3", async () => {
-        testRoot.querySelector("#clickableDiv").click()
-        sleepHelper(10)
+    test("after click twice renderCount === 3", () => {
+        const { container } = render(<Comp />)
+        const clickableDiv = container.querySelector("#clickableDiv")
+
+        clickableDiv.click()
+        clickableDiv.click()
+
         expect(renderCount).toBe(3)
     })
 })
@@ -564,29 +587,32 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
 })
 
 describe("Observer regions should react", () => {
-    const data = mobx.observable.box("hi")
+    let data
     const Comp = () => (
         <div>
-            <Observer>{() => <span>{data.get()}</span>}</Observer>
-            <li>{data.get()}</li>
+            <Observer>{() => <span data-testid="inside-of-observer">{data.get()}</span>}</Observer>
+            <span data-testid="outside-of-observer">{data.get()}</span>
         </div>
     )
 
-    beforeAll(async done => {
-        await asyncReactDOMRender(<Comp />, testRoot)
-        done()
+    beforeEach(() => {
+        data = mobx.observable.box("hi")
     })
 
     test("init state is correct", () => {
-        expect(testRoot.querySelector("span").innerHTML).toBe("hi")
-        expect(testRoot.querySelector("li").innerHTML).toBe("hi")
+        const { queryByTestId } = render(<Comp />)
+
+        expect(queryByTestId("inside-of-observer")).toHaveTextContent("hi")
+        expect(queryByTestId("outside-of-observer")).toHaveTextContent("hi")
     })
 
-    test("set the data to hello", async () => {
+    test("set the data to hello", () => {
+        const { queryByTestId } = render(<Comp />)
+
         data.set("hello")
-        await sleepHelper(10)
-        expect(testRoot.querySelector("span").innerHTML).toBe("hello")
-        expect(testRoot.querySelector("li").innerHTML).toBe("hi")
+
+        expect(queryByTestId("inside-of-observer")).toHaveTextContent("hello")
+        expect(queryByTestId("outside-of-observer")).toHaveTextContent("hi")
     })
 })
 
@@ -675,7 +701,7 @@ test("parent / childs render in the right order", () => {
     expect(events).toEqual(["parent", "child", "parent"])
 })
 
-test("195 - async componentWillMount does not work", async () => {
+test("195 - async componentWillMount does not work", () => {
     jest.useFakeTimers()
 
     const renderedValues = []
@@ -718,7 +744,7 @@ describe("use Observer inject and render sugar should work  ", () => {
             </div>
         )
         const { container } = render(<Comp />)
-        expect(container.textContent).toBe("123")
+        expect(container).toHaveTextContent("123")
     })
 
     test("use children without inject should be correct", () => {
@@ -728,7 +754,7 @@ describe("use Observer inject and render sugar should work  ", () => {
             </div>
         )
         const { container } = render(<Comp />)
-        expect(container.textContent).toBe("123")
+        expect(container).toHaveTextContent("123")
     })
 
     test("show error when using children and render at same time ", () => {
