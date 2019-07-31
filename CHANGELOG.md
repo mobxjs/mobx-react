@@ -3,6 +3,7 @@
 ### 6.1.2
 
 -   Add reexport of `useObserver` from `mobx-react-lite` [#734](https://github.com/mobxjs/mobx-react/issues/734)
+-   Add the ability to pass multiple children to Provider
 
 ### 6.1.1
 
