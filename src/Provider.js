@@ -45,5 +45,5 @@ function grabStores(from) {
 }
 
 function validStoreName(key) {
-    return !specialReactKeys[key] && key !== "suppressChangedStoreWarning"
+    return !specialReactKeys[key]
 }
