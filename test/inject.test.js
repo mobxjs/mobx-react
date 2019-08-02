@@ -127,62 +127,6 @@ describe("inject based context", () => {
         expect(wrapperC.root.children[0].type.displayName).toBe("inject(ComponentC)")
     })
 
-    test("overriding stores is supported", () => {
-        const C = inject("foo", "bar")(
-            observer(
-                class C extends Component {
-                    render() {
-                        return (
-                            <div>
-                                context:
-                                {this.props.foo}
-                                {this.props.bar}
-                            </div>
-                        )
-                    }
-                }
-            )
-        )
-        const B = () => <C />
-        const A = class A extends Component {
-            render() {
-                return (
-                    <Provider foo="bar" bar={1337}>
-                        <div>
-                            <span>
-                                <B />
-                            </span>
-                            <section>
-                                <Provider foo={42}>
-                                    <B />
-                                </Provider>
-                            </section>
-                        </div>
-                    </Provider>
-                )
-            }
-        }
-        const wrapper = renderer.create(<A />)
-        expect(wrapper).toMatchInlineSnapshot(`
-<div>
-  <span>
-    <div>
-      context:
-      bar
-      1337
-    </div>
-  </span>
-  <section>
-    <div>
-      context:
-      42
-      1337
-    </div>
-  </section>
-</div>
-`)
-    })
-
     // FIXME: see other comments related to error catching in React
     // test does work as expected when running manually
     test("store should be available", () => {
@@ -255,72 +199,6 @@ describe("inject based context", () => {
         )
         const B = () => <C a={2} b={2} />
         renderer.create(<B />)
-    })
-
-    test("warning is printed when changing stores", () => {
-        let msgs = []
-        const baseError = console.error
-        console.error = m => msgs.push(m.split("\n").slice(0, 7)) // drop stacktraces to avoid line number issues
-        const a = mobx.observable.box(3)
-        const C = inject("foo")(
-            observer(
-                class C extends Component {
-                    render() {
-                        return (
-                            <div>
-                                context:
-                                {this.props.foo}
-                            </div>
-                        )
-                    }
-                }
-            )
-        )
-        const B = observer(
-            class B extends Component {
-                render() {
-                    return <C />
-                }
-            }
-        )
-        const A = observer(
-            class A extends Component {
-                render() {
-                    return (
-                        <section>
-                            <span>{a.get()}</span>
-                            <Provider foo={a.get()}>
-                                <B />
-                            </Provider>
-                        </section>
-                    )
-                }
-            }
-        )
-        const wrapper = renderer.create(<A />)
-
-        expect(wrapper).toMatchInlineSnapshot(`
-<section>
-  <span>
-    3
-  </span>
-  <div>
-    context:
-    3
-  </div>
-</section>
-`)
-
-        expect(() => {
-            act(() => {
-                a.set(42)
-            })
-        }).toThrow(
-            "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
-        )
-        expect(msgs).toMatchSnapshot() // nobody caught the error of the rendering
-
-        console.error = baseError
     })
 
     test("custom storesToProps", () => {
