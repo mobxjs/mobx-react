@@ -4,6 +4,19 @@ import { render } from "@testing-library/react"
 import { MobXProviderContext } from "../src/Provider"
 
 describe("Provider", () => {
+    it("should work in a simple case", () => {
+        function A() {
+            return (
+                <Provider foo="bar">
+                    <MobXProviderContext.Consumer>{({ foo }) => foo}</MobXProviderContext.Consumer>
+                </Provider>
+            )
+        }
+
+        const { container } = render(<A />)
+        expect(container).toHaveTextContent("bar")
+    })
+
     it("should not provide the children prop", () => {
         function A() {
             return (
