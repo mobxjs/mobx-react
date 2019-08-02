@@ -1,5 +1,5 @@
 import React from "react"
-import { inject, Provider } from "../src"
+import { Provider } from "../src"
 import { render } from "@testing-library/react"
 import { MobXProviderContext } from "../src/Provider"
 
@@ -24,12 +24,13 @@ describe("Provider", () => {
     })
 
     it("supports overriding stores", () => {
-        const B = inject("overridable", "nonOverridable")(function({
-            overridable,
-            nonOverridable
-        }) {
-            return `${overridable} ${nonOverridable}`
-        })
+        function B() {
+            return (
+                <MobXProviderContext.Consumer>
+                    {({ overridable, nonOverridable }) => `${overridable} ${nonOverridable}`}
+                </MobXProviderContext.Consumer>
+            )
+        }
 
         function A() {
             return (
@@ -53,14 +54,11 @@ describe("Provider", () => {
     it("should throw an error when changing stores", () => {
         const baseError = console.error
         console.error = () => {}
-        const B = inject("foo")(function C({ foo }) {
-            return foo
-        })
 
         function A({ foo }) {
             return (
                 <Provider foo={foo}>
-                    <B />
+                    <MobXProviderContext.Consumer>{({ foo }) => foo}</MobXProviderContext.Consumer>
                 </Provider>
             )
         }
