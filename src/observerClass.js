@@ -114,15 +114,11 @@ function observerSCU(nextProps, nextState) {
             "[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side."
         )
     }
-    // update on any state changes (as is the default)
-    if (this.state !== nextState) {
-        return true
-    }
     // update if props are shallowly not equal, inspired by PureRenderMixin
     // we could return just 'false' here, and avoid the `skipRender` checks etc
     // however, it is nicer if lifecycle events are triggered like usually,
     // so we return true here if props are shallowly modified.
-    return !shallowEqual(this.props, nextProps)
+    return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState)
 }
 
 function makeObservableProp(target, propName) {
