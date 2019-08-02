@@ -1,8 +1,6 @@
 import { Children, Component, createContext, createElement } from "react"
 import { shallowEqual } from "./utils/utils"
 
-const specialReactKeys = { children: true, key: true, ref: true }
-
 export const MobXProviderContext = createContext({})
 
 export class Provider extends Component {
@@ -40,10 +38,6 @@ export class Provider extends Component {
 function grabStores(from) {
     const res = {}
     if (!from) return res
-    for (let key in from) if (validStoreName(key)) res[key] = from[key]
+    for (let key in from) if (key !== "children") res[key] = from[key]
     return res
-}
-
-function validStoreName(key) {
-    return !specialReactKeys[key]
 }
