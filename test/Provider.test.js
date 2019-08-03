@@ -2,6 +2,7 @@ import React from "react"
 import { Provider } from "../src"
 import { render } from "@testing-library/react"
 import { MobXProviderContext } from "../src/Provider"
+import withConsole from "./utils/withConsole"
 
 describe("Provider", () => {
     it("should work in a simple case", () => {
@@ -65,9 +66,6 @@ describe("Provider", () => {
     })
 
     it("should throw an error when changing stores", () => {
-        const baseError = console.error
-        console.error = () => {}
-
         function A({ foo }) {
             return (
                 <Provider foo={foo}>
@@ -78,12 +76,12 @@ describe("Provider", () => {
 
         const { rerender } = render(<A foo={1} />)
 
-        expect(() => {
-            rerender(<A foo={2} />)
-        }).toThrow(
-            "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
-        )
-
-        console.error = baseError
+        withConsole(() => {
+            expect(() => {
+                rerender(<A foo={2} />)
+            }).toThrow(
+                "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
+            )
+        })
     })
 })

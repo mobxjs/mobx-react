@@ -1,9 +1,9 @@
 import React, { Component } from "react"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import { withConsole } from "./index"
 import renderer, { act } from "react-test-renderer"
 import { render } from "@testing-library/react"
+import withConsole from "./utils/withConsole"
 
 const mobxAdminProperty = mobx.$mobx || "$mobx"
 
@@ -98,23 +98,23 @@ test("testIsComponentReactive", () => {
 })
 
 test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {
-    expect(
-        withConsole(() => {
-            const A = observer(
-                class A extends React.Component {
-                    render() {
-                        return null
-                    }
+    withConsole(() => {
+        const A = observer(
+            class A extends React.Component {
+                render() {
+                    return null
                 }
-            )
+            }
+        )
 
-            observer(
-                class B extends A {
-                    render() {
-                        return null
-                    }
+        observer(
+            class B extends A {
+                render() {
+                    return null
                 }
-            )
-        })
-    ).toMatchSnapshot()
+            }
+        )
+
+        expect(console.warn).not.toHaveBeenCalled()
+    })
 })

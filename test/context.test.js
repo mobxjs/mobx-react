@@ -1,8 +1,8 @@
 import React from "react"
 import * as mobx from "mobx"
 import { Provider, observer, inject } from "../src"
-import { withConsole } from "./"
 import TestRenderer from "react-test-renderer"
+import withConsole from "./utils/withConsole"
 
 test("no warnings in modern react", () => {
     const box = mobx.observable.box(3)
@@ -34,17 +34,19 @@ test("no warnings in modern react", () => {
         }
     }
 
-    expect(
-        withConsole(() => {
-            const testRenderer = TestRenderer.create(<App />)
-            expect(testRenderer.toJSON()).toMatchSnapshot()
+    const testRenderer = TestRenderer.create(<App />)
+    expect(testRenderer.toJSON()).toMatchSnapshot()
 
-            TestRenderer.act(() => {
-                box.set(4)
-            })
-            expect(testRenderer.toJSON()).toMatchSnapshot()
+    withConsole(["info", "warn", "error"], () => {
+        TestRenderer.act(() => {
+            box.set(4)
         })
-    ).toEqual({ errors: [], infos: [], warnings: [] })
+        expect(testRenderer.toJSON()).toMatchSnapshot()
+
+        expect(console.info).not.toHaveBeenCalled()
+        expect(console.warn).not.toHaveBeenCalled()
+        expect(console.error).not.toHaveBeenCalled()
+    })
 })
 
 test("getDerivedStateFromProps works #447", () => {
