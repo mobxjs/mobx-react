@@ -1,39 +1,30 @@
-import { Children, Component, createContext, createElement } from "react"
+import React from "react"
 import { shallowEqual } from "./utils/utils"
 
-export const MobXProviderContext = createContext({})
+export const MobXProviderContext = React.createContext({})
 
-export class Provider extends Component {
-    static contextType = MobXProviderContext
-    static displayName = "MobXProvider"
+export function Provider(props) {
+    const parentValue = React.useContext(MobXProviderContext)
+    const value = React.useRef({
+        ...parentValue,
+        ...grabStores(props)
+    }).current
 
-    constructor(props, context) {
-        super(props, context)
-        this.state = {
-            ...context,
-            ...grabStores(props)
+    if (process.env.NODE_ENV !== "production") {
+        const newValue = { ...value, ...grabStores(props) } // spread in previous state for the context based stores
+        if (!shallowEqual(value, newValue)) {
+            throw new Error(
+                "MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
+            )
         }
     }
 
-    render() {
-        return createElement(
-            MobXProviderContext.Provider,
-            { value: this.state },
-            this.props.children
-        )
-    }
-
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (process.env.NODE_ENV !== "production") {
-            const newStores = { ...prevState, ...grabStores(nextProps) } // spread in prevState for the context based stores
-            if (!shallowEqual(prevState, newStores))
-                throw new Error(
-                    "MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
-                )
-        }
-        return prevState // because they didn't change, remember!
-    }
+    return (
+        <MobXProviderContext.Provider value={value}>{props.children}</MobXProviderContext.Provider>
+    )
 }
+
+Provider.displayName = "MobXProvider"
 
 function grabStores(from) {
     const res = {}
