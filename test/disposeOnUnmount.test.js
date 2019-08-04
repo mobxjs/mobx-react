@@ -298,8 +298,10 @@ it("componentDidMount should be different between components", () => {
         }
 
         if (withObserver) {
+            /* eslint-disable no-class-assign */
             A = observer(A)
             B = observer(B)
+            /* eslint-enable no-class-assign */
         }
 
         const aRef = React.createRef()
@@ -376,11 +378,10 @@ test("should error on inheritance", () => {
     }
 
     expect(() => {
+        // eslint-disable-next-line no-unused-vars
         class B extends C {
             @disposeOnUnmount
-            fn() {
-                dCalled++
-            }
+            fn() {}
         }
     }).toThrow("disposeOnUnmount only supports direct subclasses")
 })

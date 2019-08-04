@@ -1,5 +1,5 @@
+/* eslint-disable react/display-name */
 import React, { Component, forwardRef, memo } from "react"
-import { _allowStateChanges } from "mobx"
 import { observer as observerLite, Observer } from "mobx-react-lite"
 
 import { makeClassComponentObserver } from "./observerClass"
@@ -9,11 +9,11 @@ const hasSymbol = typeof Symbol === "function" && Symbol.for
 // Using react-is had some issues (and operates on elements, not on types), see #608 / #609
 const ReactForwardRefSymbol = hasSymbol
     ? Symbol.for("react.forward_ref")
-    : typeof forwardRef === "function" && forwardRef((_props, _ref) => {})["$$typeof"]
+    : typeof forwardRef === "function" && forwardRef(() => {})["$$typeof"]
 
 const ReactMemoSymbol = hasSymbol
     ? Symbol.for("react.memo")
-    : typeof memo === "function" && memo(_props => {})["$$typeof"]
+    : typeof memo === "function" && memo(() => {})["$$typeof"]
 
 /**
  * Observer function / decorator
@@ -48,7 +48,7 @@ export function observer(componentClass) {
         typeof componentClass === "function" &&
         (!componentClass.prototype || !componentClass.prototype.render) &&
         !componentClass.isReactClass &&
-        !Component.isPrototypeOf(componentClass)
+        !Object.prototype.isPrototypeOf.call(Component, componentClass)
     ) {
         return observerLite(componentClass)
     }

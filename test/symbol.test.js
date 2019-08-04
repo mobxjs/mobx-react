@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 delete global.Symbol
 
 import React, { Component } from "react"

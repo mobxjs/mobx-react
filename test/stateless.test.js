@@ -26,6 +26,7 @@ describe("stateless component with propTypes", () => {
     const originalConsoleError = console.error
     let beenWarned = false
     console.error = () => (beenWarned = true)
+    // eslint-disable-next-line no-unused-vars
     const wrapper = <StatelessCompObserver testProp={10} />
     console.error = originalConsoleError
 
@@ -42,7 +43,7 @@ describe("stateless component with propTypes", () => {
 test("stateless component with context support", () => {
     const C = React.createContext()
 
-    const StateLessCompWithContext = (props, context) => (
+    const StateLessCompWithContext = () => (
         <C.Consumer>{value => <div>context: {value.testContext}</div>}</C.Consumer>
     )
 
@@ -71,8 +72,10 @@ test("component with observable propTypes", () => {
     const originalConsoleError = console.error
     const warnings = []
     console.error = msg => warnings.push(msg)
+    // eslint-disable-next-line no-unused-vars
     const firstWrapper = <Comp a1={[]} a2={[]} />
     expect(warnings.length).toBe(1)
+    // eslint-disable-next-line no-unused-vars
     const secondWrapper = <Comp a1={mobx.observable([])} a2={mobx.observable([])} />
     expect(warnings.length).toBe(1)
     console.error = originalConsoleError

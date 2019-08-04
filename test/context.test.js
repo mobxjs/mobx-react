@@ -97,14 +97,13 @@ test("no double runs for getDerivedStateFromProps", () => {
             super(props)
         }
 
-        static getDerivedStateFromProps(nextProps, prevState) {
+        static getDerivedStateFromProps() {
             derived++
             // console.log("PREVSTATE", nextProps)
             return null
         }
 
         render() {
-            const { data, store } = this.props
             return <div>Test-content</div>
         }
     }
@@ -112,7 +111,7 @@ test("no double runs for getDerivedStateFromProps", () => {
     //PREVSTATE
     //CONSTRUCTOR
     //PREVSTATE
-    let MainInjected = inject(({ store }) => ({
+    let MainInjected = inject(() => ({
         componentProp: "def"
     }))(Main)
     // Uncomment the following line to see default behaviour (without inject)
