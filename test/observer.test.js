@@ -1,9 +1,9 @@
 import React, { Component } from "react"
 import { inject, observer, Observer, useStaticRendering } from "../src"
-import { withConsole } from "./"
 import renderer, { act } from "react-test-renderer"
 import { render } from "@testing-library/react"
 import * as mobx from "mobx"
+import withConsole from "./utils/withConsole"
 
 /**
  *  some test suite is too tedious
@@ -422,27 +422,26 @@ test("should stop updating if error was thrown in render (#134)", () => {
             }
         }
     )
-
+    render(
+        <Outer>
+            <Comp />
+        </Outer>
+    )
+    expect(data.observers.size).toBe(1)
+    data.set(1)
+    expect(renderingsCount).toBe(2)
+    expect(lastOwnRenderCount).toBe(2)
     withConsole(() => {
-        render(
-            <Outer>
-                <Comp />
-            </Outer>
-        )
-        expect(data.observers.size).toBe(1)
-        data.set(1)
-        expect(renderingsCount).toBe(2)
-        expect(lastOwnRenderCount).toBe(2)
         data.set(2)
-        expect(data.observers.size).toBe(0)
-        data.set(3)
-        data.set(4)
-        data.set(2)
-        data.set(5)
-        expect(errors).toMatchSnapshot()
-        expect(lastOwnRenderCount).toBe(4)
-        expect(renderingsCount).toBe(4)
     })
+    expect(data.observers.size).toBe(0)
+    data.set(3)
+    data.set(4)
+    data.set(2)
+    data.set(5)
+    expect(errors).toMatchSnapshot()
+    expect(lastOwnRenderCount).toBe(4)
+    expect(renderingsCount).toBe(4)
 })
 
 describe("should render component even if setState called with exactly the same props", () => {

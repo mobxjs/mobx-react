@@ -3,9 +3,9 @@ import * as PropTypes from "prop-types"
 import * as mobx from "mobx"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
-import { withConsole } from "./index"
 import { render } from "@testing-library/react"
 import renderer, { act } from "react-test-renderer"
+import withConsole from "./utils/withConsole"
 
 describe("inject based context", () => {
     test("basic context", () => {
@@ -154,6 +154,7 @@ describe("inject based context", () => {
                 )
             }
         }
+
         withConsole(() => {
             expect(() => renderer.create(<A />)).toThrow(
                 /Store 'foo' is not available! Make sure it is provided by some Provider/
