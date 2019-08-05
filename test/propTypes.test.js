@@ -1,4 +1,3 @@
-import React from "react"
 import * as ReactPropTypes from "prop-types"
 import { PropTypes } from "../src"
 import { observable } from "mobx"

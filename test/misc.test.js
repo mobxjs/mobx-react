@@ -1,11 +1,9 @@
 import React, { Component } from "react"
 import * as mobx from "mobx"
 import { observer } from "../src"
-import renderer, { act } from "react-test-renderer"
+import renderer from "react-test-renderer"
 import { render } from "@testing-library/react"
 import withConsole from "./utils/withConsole"
-
-const mobxAdminProperty = mobx.$mobx || "$mobx"
 
 test("issue mobx 405", () => {
     function ExampleState() {

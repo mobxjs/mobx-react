@@ -1,4 +1,4 @@
-import React, { Component, createElement } from "react"
+import React, { createElement } from "react"
 import { observer } from "./observer"
 import { copyStaticProperties } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"

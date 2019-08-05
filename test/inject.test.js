@@ -256,14 +256,14 @@ describe("inject based context", () => {
         }
 
         const ref = React.createRef()
-        const component = renderer.create(<FancyComp ref={ref} />)
+        renderer.create(<FancyComp ref={ref} />)
         expect(typeof ref.current.doSomething).toBe("function")
         expect(ref.current.didRender).toBe(true)
 
         const InjectedFancyComp = inject("bla")(FancyComp)
         const ref2 = React.createRef()
 
-        const component2 = renderer.create(
+        renderer.create(
             <Provider bla={42}>
                 <InjectedFancyComp ref={ref2} />
             </Provider>
@@ -312,7 +312,7 @@ describe("inject based context", () => {
 
         const ref = React.createRef()
 
-        const wrapper = renderer.create(<C booh={42} ref={ref} />)
+        renderer.create(<C booh={42} ref={ref} />)
         expect(ref.current.testField).toBe(1)
     })
 

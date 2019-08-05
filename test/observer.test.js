@@ -488,7 +488,6 @@ describe("should render component even if setState called with exactly the same 
 })
 
 test("it rerenders correctly if some props are non-observables - 1", () => {
-    let renderCount = 0
     let odata = mobx.observable({ x: 1 })
     let data = { y: 1 }
 
@@ -500,7 +499,6 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
             return this.props.odata.x
         }
         render() {
-            renderCount++
             return (
                 <span onClick={stuff}>
                     {this.props.odata.x}-{this.props.data.y}-{this.computed}
@@ -565,13 +563,6 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
     function stuff() {
         odata.x++
     }
-
-    mobx.reaction(
-        () => odata.x,
-        v => {
-            // console.log(v)
-        }
-    )
 
     const wrapper = renderer.create(<Parent odata={odata} />)
 
@@ -741,7 +732,7 @@ describe("use Observer inject and render sugar should work  ", () => {
     test("use render without inject should be correct", () => {
         const Comp = () => (
             <div>
-                <Observer render={props => <span>{123}</span>} />
+                <Observer render={() => <span>{123}</span>} />
             </div>
         )
         const { container } = render(<Comp />)
@@ -751,7 +742,7 @@ describe("use Observer inject and render sugar should work  ", () => {
     test("use children without inject should be correct", () => {
         const Comp = () => (
             <div>
-                <Observer>{props => <span>{123}</span>}</Observer>
+                <Observer>{() => <span>{123}</span>}</Observer>
             </div>
         )
         const { container } = render(<Comp />)
@@ -890,5 +881,6 @@ test.skip("#709 - applying observer on React.memo component", () => {
 
     const Observed = observer(WithMemo)
 
+    // eslint-disable-next-line no-undef
     render(<Observed />, { wrapper: ErrorCatcher })
 })

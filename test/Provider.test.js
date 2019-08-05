@@ -24,7 +24,7 @@ describe("Provider", () => {
                 <Provider>
                     <MobXProviderContext.Consumer>
                         {stores =>
-                            stores.hasOwnProperty("children")
+                            Reflect.has(stores, "children")
                                 ? "children was provided"
                                 : "children was not provided"
                         }

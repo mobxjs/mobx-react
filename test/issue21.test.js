@@ -70,24 +70,6 @@ const Wizard = observer(
     }
 )
 
-const WizardSteps = observer(
-    class WizardSteps extends Component {
-        componentWillMount() {
-            this.renderCount = 0
-        }
-        render() {
-            var steps = _.map(this.props.steps, step =>
-                createElement(
-                    "div",
-                    { key: step.title },
-                    <WizardStep step={step} key={step.title} />
-                )
-            )
-            return createElement("div", null, steps)
-        }
-    }
-)
-
 const WizardStep = observer(
     class WizardStep extends Component {
         componentWillMount() {
@@ -397,13 +379,13 @@ test("lifecycle callbacks called with correct arguments", () => {
                 // "componentWillReceiveProps: this.props.counter === 1"
                 expect(this.props.counter).toBe(0)
             }
-            componentWillUpdate(nextProps, nextState) {
+            componentWillUpdate(nextProps) {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(nextProps.counter).toBe(1)
                 // "componentWillReceiveProps: this.props.counter === 1"
                 expect(this.props.counter).toBe(0)
             }
-            componentDidUpdate(prevProps, prevState) {
+            componentDidUpdate(prevProps) {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(prevProps.counter).toBe(0)
                 // "componentWillReceiveProps: this.props.counter === 1"
