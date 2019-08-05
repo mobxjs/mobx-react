@@ -474,10 +474,10 @@ test("verify props are reactive in componentWillMount and constructor", () => {
         }
     )
 
-    const { container } = render(<Component prop1="1" prop2="4" />)
-    render(<Component prop1="2" prop2="3" />, { container })
-    render(<Component prop1="3" prop2="2" />, { container })
-    render(<Component prop1="4" prop2="1" />, { container })
+    const { rerender } = render(<Component prop1="1" prop2="4" />)
+    rerender(<Component prop1="2" prop2="3" />)
+    rerender(<Component prop1="3" prop2="2" />)
+    rerender(<Component prop1="4" prop2="1" />)
     expect(constructorCallsCount).toEqual(1)
     expect(componentWillMountCallsCount).toEqual(1)
     expect(prop1Values).toEqual(["1", "2", "3", "4"])

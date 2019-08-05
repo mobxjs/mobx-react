@@ -303,7 +303,7 @@ it("componentDidMount should be different between components", () => {
         }
 
         const aRef = React.createRef()
-        const { container, unmount } = render(<A ref={aRef} />)
+        const { rerender, unmount } = render(<A ref={aRef} />)
         const caRef = aRef.current
 
         expect(caRef.didMount).toBe("A")
@@ -311,7 +311,7 @@ it("componentDidMount should be different between components", () => {
         expect(events).toEqual(["mountA"])
 
         const bRef = React.createRef()
-        render(<B ref={bRef} />, { container })
+        rerender(<B ref={bRef} />)
         const cbRef = bRef.current
 
         expect(caRef.didMount).toBe("A")
