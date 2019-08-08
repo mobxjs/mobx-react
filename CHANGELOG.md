@@ -5,6 +5,8 @@
 -   Add reexport of `useObserver` from `mobx-react-lite` [#734](https://github.com/mobxjs/mobx-react/issues/734)
 -   Add the ability to pass multiple children to Provider
 -   Fixed [#717](https://github.com/mobxjs/mobx-react/issues/717). Now `inject` works correctly with components that use `React.forwardRef`
+-   Observer checks for use of React.memo [#720](https://github.com/mobxjs/mobx-react/issues/720)
+-   Get rid of the redundant Injector wrapper [#716](https://github.com/mobxjs/mobx-react/pull/716)
 
 ### 6.1.1
 
