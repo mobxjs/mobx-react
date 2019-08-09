@@ -3,7 +3,13 @@
  */
 import * as React from "react"
 
-export { useAsObservableSource, useLocalStore, IObserverOptions, Observer } from "mobx-react-lite"
+export {
+    useObserver,
+    useAsObservableSource,
+    useLocalStore,
+    IObserverOptions,
+    Observer
+} from "mobx-react-lite"
 
 export type IReactComponent<P = any> =
     | React.StatelessComponent<P>
