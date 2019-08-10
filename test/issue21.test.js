@@ -72,9 +72,7 @@ const Wizard = observer(
 
 const WizardStep = observer(
     class WizardStep extends Component {
-        componentWillMount() {
-            this.renderCount = 0
-        }
+        renderCount = 0
         componentWillUnmount() {
             // console.log("Unmounting!")
         }
@@ -221,14 +219,13 @@ test("verify props is reactive", () => {
 
     const Child = observer(
         class Child extends Component {
-            componentWillMount() {
+            @mobx.computed
+            get computedLabel() {
+                events.push(["computed label", this.props.item.subid])
+                return this.props.item.label
+            }
+            componentDidMount() {
                 events.push(["mount"])
-                mobx.extendObservable(this, {
-                    get computedLabel() {
-                        events.push(["computed label", this.props.item.subid])
-                        return this.props.item.label
-                    }
-                })
             }
             componentDidUpdate(prevProps) {
                 events.push(["update", prevProps.item.subid, this.props.item.subid])
@@ -309,7 +306,7 @@ test("no re-render for shallow equal props", async () => {
 
     const Child = observer(
         class Child extends Component {
-            componentWillMount() {
+            componentDidMount() {
                 events.push(["mount"])
             }
             componentDidUpdate(prevProps) {
@@ -383,10 +380,8 @@ test("lifecycle callbacks called with correct arguments", () => {
     container.querySelector("#testButton").click()
 })
 
-test("verify props are reactive in componentWillMount and constructor", () => {
-    const prop1Values = []
-    const prop2Values = []
-    let componentWillMountCallsCount = 0
+test("verify props are reactive in constructor", () => {
+    const propValues = []
     let constructorCallsCount = 0
 
     const Component = observer(
@@ -394,20 +389,9 @@ test("verify props are reactive in componentWillMount and constructor", () => {
             constructor(props, context) {
                 super(props, context)
                 constructorCallsCount++
-                this.disposer1 = mobx.reaction(
-                    () => this.props.prop1,
-                    prop => prop1Values.push(prop),
-                    {
-                        fireImmediately: true
-                    }
-                )
-            }
-
-            componentWillMount() {
-                componentWillMountCallsCount++
-                this.disposer2 = mobx.reaction(
-                    () => this.props.prop2,
-                    prop => prop2Values.push(prop),
+                this.disposer = mobx.reaction(
+                    () => this.props.prop,
+                    prop => propValues.push(prop),
                     {
                         fireImmediately: true
                     }
@@ -415,8 +399,7 @@ test("verify props are reactive in componentWillMount and constructor", () => {
             }
 
             componentWillUnmount() {
-                this.disposer1()
-                this.disposer2()
+                this.disposer()
             }
 
             render() {
@@ -425,12 +408,10 @@ test("verify props are reactive in componentWillMount and constructor", () => {
         }
     )
 
-    const { rerender } = render(<Component prop1="1" prop2="4" />)
-    rerender(<Component prop1="2" prop2="3" />)
-    rerender(<Component prop1="3" prop2="2" />)
-    rerender(<Component prop1="4" prop2="1" />)
+    const { rerender } = render(<Component prop="1" />)
+    rerender(<Component prop="2" />)
+    rerender(<Component prop="3" />)
+    rerender(<Component prop="4" />)
     expect(constructorCallsCount).toEqual(1)
-    expect(componentWillMountCallsCount).toEqual(1)
-    expect(prop1Values).toEqual(["1", "2", "3", "4"])
-    expect(prop2Values).toEqual(["4", "3", "2", "1"])
+    expect(propValues).toEqual(["1", "2", "3", "4"])
 })
