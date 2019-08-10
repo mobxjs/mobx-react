@@ -341,12 +341,9 @@ test("correctly wraps display name of child component", () => {
 describe("124 - react to changes in this.props via computed", () => {
     const Comp = observer(
         class T extends Component {
-            componentWillMount() {
-                mobx.extendObservable(this, {
-                    get computedProp() {
-                        return this.props.x
-                    }
-                })
+            @mobx.computed
+            get computedProp() {
+                return this.props.x
             }
             render() {
                 return (
@@ -695,39 +692,6 @@ test("parent / childs render in the right order", () => {
     expect(events).toEqual(["parent", "child", "parent"])
 })
 
-test("195 - async componentWillMount does not work", () => {
-    jest.useFakeTimers()
-
-    const renderedValues = []
-
-    @observer
-    class WillMount extends React.Component {
-        @mobx.observable
-        counter = 0
-
-        @mobx.action
-        inc = () => this.counter++
-
-        componentWillMount() {
-            setTimeout(() => this.inc(), 300)
-        }
-
-        render() {
-            renderedValues.push(this.counter)
-            return (
-                <p>
-                    {this.counter}
-                    <button onClick={this.inc}>+</button>
-                </p>
-            )
-        }
-    }
-    render(<WillMount />)
-
-    jest.runAllTimers()
-    expect(renderedValues).toEqual([0, 1])
-})
-
 describe("use Observer inject and render sugar should work  ", () => {
     test("use render without inject should be correct", () => {
         const Comp = () => (
@@ -854,7 +818,8 @@ test("#692 - componentDidUpdate is triggered", () => {
         @mobx.action
         inc = () => this.counter++
 
-        componentWillMount() {
+        constructor() {
+            super()
             setTimeout(() => this.inc(), 300)
         }
 
