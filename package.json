@@ -47,7 +47,7 @@
     "@babel/plugin-transform-react-jsx": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
     "@testing-library/jest-dom": "^4.0.0",
-    "@testing-library/react": "^8.0.4",
+    "@testing-library/react": "^9.0.2",
     "@types/create-react-class": "^15.6.0",
     "@types/node": "^10.0.0",
     "@types/prop-types": "^15.5.2",
@@ -103,7 +103,6 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "@testing-library/react/cleanup-after-each",
       "@testing-library/jest-dom/extend-expect",
       "<rootDir>/jest.setup.js"
     ],
