@@ -148,8 +148,8 @@ test("verify prop changes are picked up", () => {
             componentWillReceiveProps(nextProps) {
                 events.push(["receive", this.props.item.subid, nextProps.item.subid])
             }
-            componentWillUpdate(nextProps) {
-                events.push(["update", this.props.item.subid, nextProps.item.subid])
+            componentDidUpdate(prevProps) {
+                events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
             render() {
                 events.push(["render", this.props.item.subid, this.props.item.text])
@@ -242,8 +242,8 @@ test("verify props is reactive", () => {
             componentWillReceiveProps(nextProps) {
                 events.push(["receive", this.props.item.subid, nextProps.item.subid])
             }
-            componentWillUpdate(nextProps) {
-                events.push(["update", this.props.item.subid, nextProps.item.subid])
+            componentDidUpdate(prevProps) {
+                events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
             render() {
                 events.push([
@@ -329,8 +329,8 @@ test("no re-render for shallow equal props", async () => {
                 events.push(["receive", this.props.item.subid, nextProps.item.subid])
             }
 
-            componentWillUpdate(nextProps) {
-                events.push(["update", this.props.item.subid, nextProps.item.subid])
+            componentDidUpdate(prevProps) {
+                events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
             render() {
                 events.push(["render", this.props.item.subid, this.props.item.label])
@@ -374,12 +374,6 @@ test("lifecycle callbacks called with correct arguments", () => {
     var Comp = observer(
         class Comp extends Component {
             componentWillReceiveProps(nextProps) {
-                // "componentWillReceiveProps: nextProps.counter === 1"
-                expect(nextProps.counter).toBe(1)
-                // "componentWillReceiveProps: this.props.counter === 1"
-                expect(this.props.counter).toBe(0)
-            }
-            componentWillUpdate(nextProps) {
                 // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(nextProps.counter).toBe(1)
                 // "componentWillReceiveProps: this.props.counter === 1"
