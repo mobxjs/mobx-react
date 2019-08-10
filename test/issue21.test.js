@@ -145,9 +145,6 @@ test("verify prop changes are picked up", () => {
     const events = []
     const Child = observer(
         class Child extends Component {
-            componentWillReceiveProps(nextProps) {
-                events.push(["receive", this.props.item.subid, nextProps.item.subid])
-            }
             componentDidUpdate(prevProps) {
                 events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
@@ -187,13 +184,7 @@ test("verify prop changes are picked up", () => {
     events.splice(0)
     container.querySelector("#testDiv").click()
     expect(events.sort()).toEqual(
-        [
-            ["compute", 1],
-            ["receive", 1, 2],
-            ["update", 1, 2],
-            ["compute", 2],
-            ["render", 2, "1.2.test.0"]
-        ].sort()
+        [["compute", 1], ["update", 1, 2], ["compute", 2], ["render", 2, "1.2.test.0"]].sort()
     )
 })
 
@@ -238,9 +229,6 @@ test("verify props is reactive", () => {
                         return this.props.item.label
                     }
                 })
-            }
-            componentWillReceiveProps(nextProps) {
-                events.push(["receive", this.props.item.subid, nextProps.item.subid])
             }
             componentDidUpdate(prevProps) {
                 events.push(["update", prevProps.item.subid, this.props.item.subid])
@@ -295,7 +283,6 @@ test("verify props is reactive", () => {
     expect(events.sort()).toEqual(
         [
             ["compute", 1],
-            ["receive", 1, 2],
             ["update", 1, 2],
             ["compute", 2],
             ["computed label", 2],
@@ -325,10 +312,6 @@ test("no re-render for shallow equal props", async () => {
             componentWillMount() {
                 events.push(["mount"])
             }
-            componentWillReceiveProps(nextProps) {
-                events.push(["receive", this.props.item.subid, nextProps.item.subid])
-            }
-
             componentDidUpdate(prevProps) {
                 events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
@@ -367,22 +350,14 @@ test("no re-render for shallow equal props", async () => {
     expect(events.sort()).toEqual([["parent render", 0], ["mount"], ["render", 1, "hi"]].sort())
     events.splice(0)
     container.querySelector("#testDiv").click()
-    expect(events.sort()).toEqual([["parent render", 1], ["receive", 1, 1]].sort())
+    expect(events.sort()).toEqual([["parent render", 1]].sort())
 })
 
 test("lifecycle callbacks called with correct arguments", () => {
     var Comp = observer(
         class Comp extends Component {
-            componentWillReceiveProps(nextProps) {
-                // "componentWillReceiveProps: nextProps.counter === 1"
-                expect(nextProps.counter).toBe(1)
-                // "componentWillReceiveProps: this.props.counter === 1"
-                expect(this.props.counter).toBe(0)
-            }
             componentDidUpdate(prevProps) {
-                // "componentWillReceiveProps: nextProps.counter === 1"
                 expect(prevProps.counter).toBe(0)
-                // "componentWillReceiveProps: this.props.counter === 1"
                 expect(this.props.counter).toBe(1)
             }
             render() {
