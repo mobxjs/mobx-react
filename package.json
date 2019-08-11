@@ -24,7 +24,10 @@
     "build": "yarn bundle && yarn copytypes && yarn makern",
     "copytypes": "shx cp src/index.d.ts dist/mobx-react.d.ts",
     "makern": "shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && yarn replace \"react-dom\" \"react-native\" dist/mobx-react.rn.module.js --silent",
-    "bundle": "microbundle  --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite --globals react-dom=ReactDOM,react=React,mobx-react-lite=mobxReactLite --name mobxReact",
+    "bundle": "yarn bundle-cjs-and-es && yarn bundle-umd",
+    "bundle-cjs-and-es": "yarn bundle-via-microbundle --format cjs,es --no-compress",
+    "bundle-umd": "yarn bundle-via-microbundle --format umd --globals react-dom=ReactDOM,react=React,mobx-react-lite=mobxReactLite --name mobxReact",
+    "bundle-via-microbundle": "microbundle --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite",
     "watch": "jest --watch"
   },
   "author": "Michel Weststrate",
