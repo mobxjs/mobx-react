@@ -308,9 +308,12 @@ Notes:
 
 -   It is possible to read the stores provided by `Provider` using `React.useContext`, by using the `MobXProviderContext` context that can be imported from `mobx-react`.
 -   If a component asks for a store and receives a store via a property with the same name, the property takes precedence. Use this to your advantage when testing!
--   Values provided through `Provider` should be final. Make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will throw an error.
 -   When using both `@inject` and `@observer`, make sure to apply them in the correct order: `observer` should be the inner decorator, `inject` the outer. There might be additional decorators in between.
 -   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
+
+#### "The set of provided stores has changed" error
+Values provided through `Provider` should be final. Make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will throw an error.
+This restriction exists mainly for legacy reasons. If you have a scenario where you need to modify the set of stores, please leave a comment about it in this issue https://github.com/mobxjs/mobx-react/issues/745. Or a preferred way is to [use React Context](https://mobx-react.js.org/recipes-context) directly which does not have this restriction.
 
 #### Inject as function
 
