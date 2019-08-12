@@ -79,9 +79,7 @@ describe("Provider", () => {
         withConsole(() => {
             expect(() => {
                 rerender(<A foo={2} />)
-            }).toThrow(
-                "The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
-            )
+            }).toThrow("The set of provided stores has changed.")
         })
     })
 })

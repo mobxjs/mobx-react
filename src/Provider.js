@@ -15,7 +15,7 @@ export function Provider({ children, ...stores }) {
         const newValue = { ...value, ...stores } // spread in previous state for the context based stores
         if (!shallowEqual(value, newValue)) {
             throw new Error(
-                "MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children"
+                "MobX Provider: The set of provided stores has changed. See: https://github.com/mobxjs/mobx-react#the-set-of-provided-stores-has-changed-error."
             )
         }
     }
