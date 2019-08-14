@@ -1,11 +1,11 @@
 import React from "react"
-import * as mobx from "mobx"
+import { observable } from "mobx"
 import { Provider, observer, inject } from "../src"
 import TestRenderer from "react-test-renderer"
 import withConsole from "./utils/withConsole"
 
 test("no warnings in modern react", () => {
-    const box = mobx.observable.box(3)
+    const box = observable.box(3)
     const Child = inject("store")(
         observer(
             class Child extends React.Component {

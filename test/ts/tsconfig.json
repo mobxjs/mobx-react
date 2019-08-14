@@ -1,6 +1,7 @@
 {
 	"version": "1.7.5",
 	"compilerOptions": {
+		"esModuleInterop": true,
 		"target": "es5",
 		"strict": true,
 		"experimentalDecorators": true,
