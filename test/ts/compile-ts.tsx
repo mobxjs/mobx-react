@@ -1,26 +1,25 @@
-import * as React from "react"
-import * as ReactDOM from "react-dom"
-import { Component } from "react"
-import * as ClassicPropTypes from "prop-types"
+import React from "react"
+import ReactDOM from "react-dom"
+import PropTypes from "prop-types"
 import {
     observer,
     Provider,
     inject,
     Observer,
     disposeOnUnmount,
-    PropTypes,
+    PropTypes as MRPropTypes,
     useLocalStore
 } from "../../src"
 
 @observer
-class T1 extends Component<{ pizza: number }, {}> {
+class T1 extends React.Component<{ pizza: number }, {}> {
     render() {
         return <div>{this.props.pizza}</div>
     }
 }
 
 const T2 = observer(
-    class T2 extends Component<{ cake: number; zoem: any[] }> {
+    class T2 extends React.Component<{ cake: number; zoem: any[] }> {
         defaultProps = { cake: 7 }
         render() {
             return (
@@ -30,7 +29,7 @@ const T2 = observer(
             )
         }
         static propTypes = {
-            zoem: PropTypes.arrayOrObservableArray
+            zoem: MRPropTypes.arrayOrObservableArray
         }
     }
 )
@@ -50,7 +49,7 @@ const T5 = observer(() => {
 })
 
 @observer
-class T6 extends Component<{}, {}> {
+class T6 extends React.Component<{}, {}> {
     render() {
         return (
             <span>
@@ -65,7 +64,7 @@ class T6 extends Component<{}, {}> {
 
 const x = React.createElement(T3, { hamburger: 4 })
 
-class T7 extends Component<{ pizza: number }, {}> {
+class T7 extends React.Component<{ pizza: number }, {}> {
     render() {
         return <div>{this.props.pizza}</div>
     }
@@ -74,7 +73,7 @@ React.createElement(observer(T7), { pizza: 4 })
 
 ReactDOM.render(<T5 />, document.body)
 
-class ProviderTest extends Component<any, any> {
+class ProviderTest extends React.Component<any, any> {
     render() {
         return (
             <Provider foo={32}>
@@ -85,7 +84,7 @@ class ProviderTest extends Component<any, any> {
 }
 
 @inject(() => ({ x: 3 }))
-class T11 extends Component<{ pizza: number; x?: number }, {}> {
+class T11 extends React.Component<{ pizza: number; x?: number }, {}> {
     render() {
         return (
             <div>
@@ -96,7 +95,7 @@ class T11 extends Component<{ pizza: number; x?: number }, {}> {
     }
 }
 
-class T15 extends Component<{ pizza: number; x?: number }, {}> {
+class T15 extends React.Component<{ pizza: number; x?: number }, {}> {
     render() {
         return (
             <div>
@@ -108,7 +107,7 @@ class T15 extends Component<{ pizza: number; x?: number }, {}> {
 }
 const T16 = inject(() => ({ x: 3 }))(T15)
 
-class T17 extends Component<{}, {}> {
+class T17 extends React.Component<{}, {}> {
     render() {
         return (
             <div>
@@ -124,7 +123,7 @@ class T17 extends Component<{}, {}> {
 }
 
 @inject("a", "b")
-class T12 extends Component<{ pizza: number }, {}> {
+class T12 extends React.Component<{ pizza: number }, {}> {
     render() {
         return <div>{this.props.pizza}</div>
     }
@@ -132,7 +131,7 @@ class T12 extends Component<{ pizza: number }, {}> {
 
 @inject("a", "b")
 @observer
-class T13 extends Component<{ pizza: number }, {}> {
+class T13 extends React.Component<{ pizza: number }, {}> {
     render() {
         return <div>{this.props.pizza}</div>
     }
@@ -143,7 +142,7 @@ const LoginContainer = inject((allStores, props) => ({
     z: 7
 }))(
     observer(
-        class _LoginContainer extends Component<
+        class _LoginContainer extends React.Component<
             {
                 x: string
                 store?: { y: boolean; z: number }
@@ -151,7 +150,7 @@ const LoginContainer = inject((allStores, props) => ({
             {}
         > {
             static contextTypes: React.ValidationMap<any> = {
-                router: ClassicPropTypes.func.isRequired
+                router: PropTypes.func.isRequired
             }
 
             render() {
@@ -172,7 +171,7 @@ ReactDOM.render(<LoginContainer x="test" />, document.body)
     store: { y: true, z: 2 }
 }))
 @observer
-class LoginContainer2 extends Component<
+class LoginContainer2 extends React.Component<
     {
         x: string
         store?: { y: boolean }
@@ -180,7 +179,7 @@ class LoginContainer2 extends Component<
     {}
 > {
     static contextTypes: React.ValidationMap<any> = {
-        router: ClassicPropTypes.func.isRequired
+        router: PropTypes.func.isRequired
     }
 
     render() {
@@ -196,20 +195,20 @@ class LoginContainer2 extends Component<
 
 ReactDOM.render(<LoginContainer2 x="test" />, document.body)
 
-class ObserverTest extends Component<any, any> {
+class ObserverTest extends React.Component<any, any> {
     render() {
         return <Observer>{() => <div>test</div>}</Observer>
     }
 }
 
-class ObserverTest2 extends Component<any, any> {
+class ObserverTest2 extends React.Component<any, any> {
     render() {
         return <Observer render={() => <div>test</div>} />
     }
 }
 
 @observer
-class ComponentWithoutPropsAndState extends Component<{}, {}> {
+class ComponentWithoutPropsAndState extends React.Component<{}, {}> {
     componentDidUpdate() {}
 
     render() {
@@ -232,9 +231,9 @@ App.wrappedComponent
 
 @inject("store")
 @observer
-class App2 extends Component<{ a: number }, {}> {}
+class App2 extends React.Component<{ a: number }, {}> {}
 
-class InjectSomeStores extends Component<{ x: any }, {}> {
+class InjectSomeStores extends React.Component<{ x: any }, {}> {
     render() {
         return <div>Hello World</div>
     }
@@ -243,7 +242,7 @@ class InjectSomeStores extends Component<{ x: any }, {}> {
 inject(({ x }) => ({ x }))(InjectSomeStores)
 
 {
-    class T extends Component<{ x: number }> {
+    class T extends React.Component<{ x: number }> {
         render() {
             return <div />
         }
@@ -255,7 +254,7 @@ inject(({ x }) => ({ x }))(InjectSomeStores)
 
 {
     // just to make sure it compiles
-    class DisposeOnUnmountComponent extends Component<{}> {
+    class DisposeOnUnmountComponent extends React.Component<{}> {
         @disposeOnUnmount
         methodA = () => {}
 

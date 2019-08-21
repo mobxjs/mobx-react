@@ -1,4 +1,4 @@
-import * as React from "react"
+import React from "react"
 import { disposeOnUnmount, observer } from "../src"
 import { render } from "@testing-library/react"
 

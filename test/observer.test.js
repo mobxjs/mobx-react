@@ -1,15 +1,22 @@
-import React, { Component } from "react"
+import React from "react"
 import { inject, observer, Observer, useStaticRendering } from "../src"
-import renderer, { act } from "react-test-renderer"
+import TestRenderer, { act } from "react-test-renderer"
 import { render } from "@testing-library/react"
-import * as mobx from "mobx"
+import {
+    _getAdministration,
+    _resetGlobalState,
+    action,
+    computed,
+    observable,
+    transaction
+} from "mobx"
 import withConsole from "./utils/withConsole"
 
 /**
  *  some test suite is too tedious
  */
 
-const getDNode = (obj, prop) => mobx._getAdministration(obj, prop)
+const getDNode = (obj, prop) => _getAdministration(obj, prop)
 
 afterEach(() => {
     jest.useRealTimers()
@@ -30,7 +37,7 @@ describe("nestedRendering", () => {
 
     let todoListRenderings
     const TodoList = observer(
-        class TodoList extends Component {
+        class TodoList extends React.Component {
             render() {
                 todoListRenderings++
                 const todos = store.todos
@@ -49,7 +56,7 @@ describe("nestedRendering", () => {
     beforeEach(() => {
         todoItemRenderings = 0
         todoListRenderings = 0
-        store = mobx.observable({
+        store = observable({
             todos: [
                 {
                     title: "a",
@@ -113,7 +120,7 @@ describe("nestedRendering", () => {
 })
 
 describe("isObjectShallowModified detects when React will update the component", () => {
-    const store = mobx.observable({ count: 0 })
+    const store = observable({ count: 0 })
     let counterRenderings = 0
     const Counter = observer(function TodoItem() {
         counterRenderings++
@@ -143,7 +150,7 @@ describe("keep views alive", () => {
 
     beforeEach(() => {
         yCalcCount = 0
-        data = mobx.observable({
+        data = observable({
             x: 3,
             get y() {
                 yCalcCount++
@@ -185,7 +192,7 @@ describe("does not views alive when using static rendering", () => {
 
     beforeEach(() => {
         renderCount = 0
-        data = mobx.observable({
+        data = observable({
             z: "hi"
         })
     })
@@ -214,7 +221,7 @@ describe("does not views alive when using static rendering", () => {
 
 test("issue 12", () => {
     const events = []
-    const data = mobx.observable({
+    const data = observable({
         selected: "coffee",
         items: [
             {
@@ -227,7 +234,7 @@ test("issue 12", () => {
     })
 
     /** Row Class */
-    class Row extends Component {
+    class Row extends React.Component {
         constructor(props) {
             super(props)
         }
@@ -255,11 +262,11 @@ test("issue 12", () => {
         )
     })
 
-    const wrapper = renderer.create(<Table />)
+    const wrapper = TestRenderer.create(<Table />)
     expect(wrapper.toJSON()).toMatchSnapshot()
 
     act(() => {
-        mobx.transaction(() => {
+        transaction(() => {
             data.items[1].name = "boe"
             data.items.splice(0, 2, { name: "soup" })
             data.selected = "tea"
@@ -270,7 +277,7 @@ test("issue 12", () => {
 })
 
 test("changing state in render should fail", () => {
-    const data = mobx.observable.box(2)
+    const data = observable.box(2)
     const Comp = observer(() => {
         if (data.get() === 3) {
             try {
@@ -286,7 +293,7 @@ test("changing state in render should fail", () => {
     render(<Comp />)
 
     data.set(3)
-    mobx._resetGlobalState()
+    _resetGlobalState()
 })
 
 test("observer component can be injected", () => {
@@ -296,7 +303,7 @@ test("observer component can be injected", () => {
 
     inject("foo")(
         observer(
-            class T extends Component {
+            class T extends React.Component {
                 render() {
                     return null
                 }
@@ -307,7 +314,7 @@ test("observer component can be injected", () => {
     // N.B, the injected component will be observer since mobx-react 4.0!
     inject(() => {})(
         observer(
-            class T extends Component {
+            class T extends React.Component {
                 render() {
                     return null
                 }
@@ -321,7 +328,7 @@ test("observer component can be injected", () => {
 
 test("correctly wraps display name of child component", () => {
     const A = observer(
-        class ObserverClass extends Component {
+        class ObserverClass extends React.Component {
             render() {
                 return null
             }
@@ -331,17 +338,17 @@ test("correctly wraps display name of child component", () => {
         return null
     })
 
-    const wrapper = renderer.create(<A />)
+    const wrapper = TestRenderer.create(<A />)
     expect(wrapper.root.type.name).toEqual("ObserverClass")
 
-    const wrapper2 = renderer.create(<B />)
+    const wrapper2 = TestRenderer.create(<B />)
     expect(wrapper2.root.type.displayName).toEqual("StatelessObserver")
 })
 
 describe("124 - react to changes in this.props via computed", () => {
     const Comp = observer(
-        class T extends Component {
-            @mobx.computed
+        class T extends React.Component {
+            @computed
             get computedProp() {
                 return this.props.x
             }
@@ -356,7 +363,7 @@ describe("124 - react to changes in this.props via computed", () => {
         }
     )
 
-    class Parent extends Component {
+    class Parent extends React.Component {
         state = { v: 1 }
         render() {
             return (
@@ -384,7 +391,7 @@ describe("124 - react to changes in this.props via computed", () => {
 // Test on skip: since all reactions are now run in batched updates, the original issues can no longer be reproduced
 //this test case should be deprecated?
 test("should stop updating if error was thrown in render (#134)", () => {
-    const data = mobx.observable.box(0)
+    const data = observable.box(0)
     let renderingsCount = 0
     let lastOwnRenderCount = 0
     const errors = []
@@ -444,7 +451,7 @@ test("should stop updating if error was thrown in render (#134)", () => {
 describe("should render component even if setState called with exactly the same props", () => {
     let renderCount
     const Comp = observer(
-        class T extends Component {
+        class T extends React.Component {
             onClick = () => {
                 this.setState({})
             }
@@ -485,12 +492,12 @@ describe("should render component even if setState called with exactly the same 
 })
 
 test("it rerenders correctly if some props are non-observables - 1", () => {
-    let odata = mobx.observable({ x: 1 })
+    let odata = observable({ x: 1 })
     let data = { y: 1 }
 
     @observer
     class Comp extends React.Component {
-        @mobx.computed
+        @computed
         get computed() {
             // n.b: data.y would not rerender! shallowly new equal props are not stored
             return this.props.odata.x
@@ -505,7 +512,7 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
     }
 
     const Parent = observer(
-        class Parent extends Component {
+        class Parent extends React.Component {
             render() {
                 // this.props.odata.x;
                 return <Comp data={this.props.data} odata={this.props.odata} />
@@ -520,7 +527,7 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
         })
     }
 
-    const wrapper = renderer.create(<Parent odata={odata} data={data} />)
+    const wrapper = TestRenderer.create(<Parent odata={odata} data={data} />)
 
     const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
@@ -533,11 +540,11 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
 
 test("it rerenders correctly if some props are non-observables - 2", () => {
     let renderCount = 0
-    let odata = mobx.observable({ x: 1 })
+    let odata = observable({ x: 1 })
 
     @observer
     class Component extends React.PureComponent {
-        @mobx.computed
+        @computed
         get computed() {
             return this.props.data.y // should recompute, since props.data is changed
         }
@@ -561,7 +568,7 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
         odata.x++
     }
 
-    const wrapper = renderer.create(<Parent odata={odata} />)
+    const wrapper = TestRenderer.create(<Parent odata={odata} />)
 
     const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
@@ -587,7 +594,7 @@ describe("Observer regions should react", () => {
     )
 
     beforeEach(() => {
-        data = mobx.observable.box("hi")
+        data = observable.box("hi")
     })
 
     test("init state is correct", () => {
@@ -611,7 +618,7 @@ test("Observer should not re-render on shallow equal new props", () => {
     let childRendering = 0
     let parentRendering = 0
     const data = { x: 1 }
-    const odata = mobx.observable({ y: 1 })
+    const odata = observable({ y: 1 })
 
     const Child = observer(({ data }) => {
         childRendering++
@@ -623,7 +630,7 @@ test("Observer should not re-render on shallow equal new props", () => {
         return <Child data={data} />
     })
 
-    const wrapper = renderer.create(<Parent />)
+    const wrapper = TestRenderer.create(<Parent />)
 
     const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
 
@@ -644,14 +651,14 @@ test("parent / childs render in the right order", () => {
     let events = []
 
     class User {
-        @mobx.observable
+        @observable
         name = "User's name"
     }
 
     class Store {
-        @mobx.observable
+        @observable
         user = new User()
-        @mobx.action
+        @action
         logout() {
             this.user = null
         }
@@ -765,7 +772,7 @@ test("computed properties react to props", () => {
     const seen = []
     @observer
     class Child extends React.Component {
-        @mobx.computed
+        @computed
         get getPropX() {
             return this.props.x
         }
@@ -788,7 +795,7 @@ test("computed properties react to props", () => {
         }
     }
 
-    const wrapper = renderer.create(<Parent />)
+    const wrapper = TestRenderer.create(<Parent />)
     expect(wrapper.toJSON()).toMatchInlineSnapshot(`
 <div>
   0
@@ -812,10 +819,10 @@ test("#692 - componentDidUpdate is triggered", () => {
 
     @observer
     class Test extends React.Component {
-        @mobx.observable
+        @observable
         counter = 0
 
-        @mobx.action
+        @action
         inc = () => this.counter++
 
         constructor() {

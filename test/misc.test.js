@@ -1,13 +1,13 @@
-import React, { Component } from "react"
-import * as mobx from "mobx"
+import React from "react"
+import { extendObservable, isObservable, observable } from "mobx"
 import { observer } from "../src"
-import renderer from "react-test-renderer"
+import TestRenderer from "react-test-renderer"
 import { render } from "@testing-library/react"
 import withConsole from "./utils/withConsole"
 
 test("issue mobx 405", () => {
     function ExampleState() {
-        mobx.extendObservable(this, {
+        extendObservable(this, {
             name: "test",
             get greetings() {
                 return "Hello my name is " + this.name
@@ -16,7 +16,7 @@ test("issue mobx 405", () => {
     }
 
     const ExampleView = observer(
-        class T extends Component {
+        class T extends React.Component {
             render() {
                 return (
                     <div>
@@ -33,7 +33,7 @@ test("issue mobx 405", () => {
     )
 
     const exampleState = new ExampleState()
-    const wrapper = renderer.create(<ExampleView exampleState={exampleState} />)
+    const wrapper = TestRenderer.create(<ExampleView exampleState={exampleState} />)
     expect(wrapper.toJSON()).toMatchInlineSnapshot(`
 <div>
   <input
@@ -49,9 +49,9 @@ test("issue mobx 405", () => {
 })
 
 test("#85 Should handle state changing in constructors", () => {
-    const a = mobx.observable.box(2)
+    const a = observable.box(2)
     const Child = observer(
-        class Child extends Component {
+        class Child extends React.Component {
             constructor(p) {
                 super(p)
                 a.set(3) // one shouldn't do this!
@@ -88,11 +88,11 @@ test("#85 Should handle state changing in constructors", () => {
 
 test("testIsComponentReactive", () => {
     const C = observer(() => null)
-    const wrapper = renderer.create(<C />)
+    const wrapper = TestRenderer.create(<C />)
     const instance = wrapper.getInstance()
 
     // instance is something different then the rendering reaction!
-    expect(mobx.isObservable(instance)).toBeFalsy()
+    expect(isObservable(instance)).toBeFalsy()
 })
 
 test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {

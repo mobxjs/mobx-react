@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react"
+import React from "react"
 import { observer, Observer, useLocalStore, useAsObservableSource } from "../src"
-import renderer, { act } from "react-test-renderer"
+import TestRenderer, { act } from "react-test-renderer"
 
 afterEach(() => {
     jest.useRealTimers()
@@ -23,9 +23,9 @@ test("computed properties react to props when using hooks", async () => {
     }
 
     const Parent = () => {
-        const [state, setState] = useState({ x: 0 })
+        const [state, setState] = React.useState({ x: 0 })
         seen.push("parent")
-        useEffect(() => {
+        React.useEffect(() => {
             setTimeout(() => {
                 act(() => {
                     setState({ x: 2 })
@@ -37,7 +37,7 @@ test("computed properties react to props when using hooks", async () => {
 
     let wrapper
     act(() => {
-        wrapper = renderer.create(<Parent />)
+        wrapper = TestRenderer.create(<Parent />)
     })
     expect(wrapper.toJSON()).toMatchInlineSnapshot(`
 <div>
@@ -72,9 +72,9 @@ test("computed properties result in double render when using observer instead of
     })
 
     const Parent = () => {
-        const [state, setState] = useState({ x: 0 })
+        const [state, setState] = React.useState({ x: 0 })
         seen.push("parent")
-        useEffect(() => {
+        React.useEffect(() => {
             setTimeout(() => {
                 act(() => {
                     setState({ x: 2 })
@@ -86,7 +86,7 @@ test("computed properties result in double render when using observer instead of
 
     let wrapper
     act(() => {
-        wrapper = renderer.create(<Parent />)
+        wrapper = TestRenderer.create(<Parent />)
     })
     expect(wrapper.toJSON()).toMatchInlineSnapshot(`
 <div>

@@ -1,9 +1,8 @@
-import React, { Component } from "react"
-import * as PropTypes from "prop-types"
-import * as mobx from "mobx"
+import React from "react"
+import PropTypes from "prop-types"
 import { observer, PropTypes as MRPropTypes } from "../src"
 import { render } from "@testing-library/react"
-import renderer, { act } from "react-test-renderer"
+import TestRenderer, { act } from "react-test-renderer"
 import { observable } from "mobx"
 
 const StatelessComp = ({ testProp }) => <div>result: {testProp}</div>
@@ -60,7 +59,7 @@ test("stateless component with context support", () => {
 })
 
 test("component with observable propTypes", () => {
-    class Comp extends Component {
+    class Comp extends React.Component {
         render() {
             return null
         }
@@ -76,7 +75,7 @@ test("component with observable propTypes", () => {
     const firstWrapper = <Comp a1={[]} a2={[]} />
     expect(warnings.length).toBe(1)
     // eslint-disable-next-line no-unused-vars
-    const secondWrapper = <Comp a1={mobx.observable([])} a2={mobx.observable([])} />
+    const secondWrapper = <Comp a1={observable([])} a2={observable([])} />
     expect(warnings.length).toBe(1)
     console.error = originalConsoleError
 })
@@ -96,14 +95,14 @@ describe("stateless component with forwardRef", () => {
     )
 
     test("render test correct", () => {
-        const component = renderer.create(
+        const component = TestRenderer.create(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )
         expect(component).toMatchSnapshot()
     })
 
     test("is reactive", () => {
-        const component = renderer.create(
+        const component = TestRenderer.create(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )
         act(() => {

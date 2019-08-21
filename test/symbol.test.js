@@ -1,14 +1,14 @@
 // eslint-disable-next-line no-undef
 delete global.Symbol
 
-import React, { Component } from "react"
+import React from "react"
 import { observer } from "../src"
 import { render } from "@testing-library/react"
 import { newSymbol } from "../src/utils/utils"
 
 test("work without Symbol", () => {
     const Component1 = observer(
-        class extends Component {
+        class extends React.Component {
             render() {
                 return null
             }

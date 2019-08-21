@@ -1,12 +1,12 @@
-import React, { createElement, Component } from "react"
-import * as mobx from "mobx"
+import React, { createElement } from "react"
+import { computed, isObservable, observable, reaction, transaction } from "mobx"
 import { observer } from "../src"
 import _ from "lodash"
 import { render } from "@testing-library/react"
 
 let topRenderCount = 0
 
-const wizardModel = mobx.observable(
+const wizardModel = observable(
     {
         steps: [
             {
@@ -34,21 +34,21 @@ const wizardModel = mobx.observable(
         },
         setActiveStep(modeToActivate) {
             const self = this
-            mobx.transaction(() => {
+            transaction(() => {
                 _.find(self.steps, "active").active = false
                 modeToActivate.active = true
             })
         }
     },
     {
-        activateNextStep: mobx.observable.ref
+        activateNextStep: observable.ref
     }
 )
 
 /** RENDERS **/
 
 const Wizard = observer(
-    class Wizard extends Component {
+    class Wizard extends React.Component {
         render() {
             return createElement(
                 "div",
@@ -71,7 +71,7 @@ const Wizard = observer(
 )
 
 const WizardStep = observer(
-    class WizardStep extends Component {
+    class WizardStep extends React.Component {
         renderCount = 0
         componentWillUnmount() {
             // console.log("Unmounting!")
@@ -114,7 +114,7 @@ test("verify issue 21", () => {
 
 test("verify prop changes are picked up", () => {
     function createItem(subid, label) {
-        const res = mobx.observable(
+        const res = observable(
             {
                 id: 1,
                 label: label,
@@ -137,12 +137,12 @@ test("verify prop changes are picked up", () => {
         res.subid = subid // non reactive
         return res
     }
-    const data = mobx.observable({
+    const data = observable({
         items: [createItem(1, "hi")]
     })
     const events = []
     const Child = observer(
-        class Child extends Component {
+        class Child extends React.Component {
             componentDidUpdate(prevProps) {
                 events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
@@ -154,7 +154,7 @@ test("verify prop changes are picked up", () => {
     )
 
     const Parent = observer(
-        class Parent extends Component {
+        class Parent extends React.Component {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -170,7 +170,7 @@ test("verify prop changes are picked up", () => {
     const Wrapper = () => <Parent />
 
     function changeStuff() {
-        mobx.transaction(() => {
+        transaction(() => {
             data.items[0].label = "hello" // schedules state change for Child
             data.items[0] = createItem(2, "test") // Child should still receive new prop!
         })
@@ -188,7 +188,7 @@ test("verify prop changes are picked up", () => {
 
 test("verify props is reactive", () => {
     function createItem(subid, label) {
-        const res = mobx.observable(
+        const res = observable(
             {
                 id: 1,
                 label: label,
@@ -212,14 +212,14 @@ test("verify props is reactive", () => {
         return res
     }
 
-    const data = mobx.observable({
+    const data = observable({
         items: [createItem(1, "hi")]
     })
     const events = []
 
     const Child = observer(
-        class Child extends Component {
-            @mobx.computed
+        class Child extends React.Component {
+            @computed
             get computedLabel() {
                 events.push(["computed label", this.props.item.subid])
                 return this.props.item.label
@@ -248,7 +248,7 @@ test("verify props is reactive", () => {
     )
 
     const Parent = observer(
-        class Parent extends Component {
+        class Parent extends React.Component {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -264,7 +264,7 @@ test("verify props is reactive", () => {
     const Wrapper = () => <Parent />
 
     function changeStuff() {
-        mobx.transaction(() => {
+        transaction(() => {
             // components start rendeirng a new item, but computed is still based on old value
             data.items = [createItem(2, "test")]
         })
@@ -290,7 +290,7 @@ test("verify props is reactive", () => {
 
 test("no re-render for shallow equal props", async () => {
     function createItem(subid, label) {
-        const res = mobx.observable({
+        const res = observable({
             id: 1,
             label: label
         })
@@ -298,14 +298,14 @@ test("no re-render for shallow equal props", async () => {
         return res
     }
 
-    const data = mobx.observable({
+    const data = observable({
         items: [createItem(1, "hi")],
         parentValue: 0
     })
     const events = []
 
     const Child = observer(
-        class Child extends Component {
+        class Child extends React.Component {
             componentDidMount() {
                 events.push(["mount"])
             }
@@ -320,10 +320,10 @@ test("no re-render for shallow equal props", async () => {
     )
 
     const Parent = observer(
-        class Parent extends Component {
+        class Parent extends React.Component {
             render() {
                 // "object has become observable!"
-                expect(mobx.isObservable(this.props.nonObservable)).toBeFalsy()
+                expect(isObservable(this.props.nonObservable)).toBeFalsy()
                 events.push(["parent render", data.parentValue])
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -352,7 +352,7 @@ test("no re-render for shallow equal props", async () => {
 
 test("lifecycle callbacks called with correct arguments", () => {
     var Comp = observer(
-        class Comp extends Component {
+        class Comp extends React.Component {
             componentDidUpdate(prevProps) {
                 expect(prevProps.counter).toBe(0)
                 expect(this.props.counter).toBe(1)
@@ -367,7 +367,7 @@ test("lifecycle callbacks called with correct arguments", () => {
             }
         }
     )
-    const Root = class T extends Component {
+    const Root = class T extends React.Component {
         state = {}
         onButtonClick = () => {
             this.setState({ counter: (this.state.counter || 0) + 1 })
@@ -389,13 +389,9 @@ test("verify props are reactive in constructor", () => {
             constructor(props, context) {
                 super(props, context)
                 constructorCallsCount++
-                this.disposer = mobx.reaction(
-                    () => this.props.prop,
-                    prop => propValues.push(prop),
-                    {
-                        fireImmediately: true
-                    }
-                )
+                this.disposer = reaction(() => this.props.prop, prop => propValues.push(prop), {
+                    fireImmediately: true
+                })
             }
 
             componentWillUnmount() {
