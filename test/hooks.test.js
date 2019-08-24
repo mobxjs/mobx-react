@@ -1,6 +1,6 @@
 import React from "react"
 import { observer, Observer, useLocalStore, useAsObservableSource } from "../src"
-import TestRenderer, { act } from "react-test-renderer"
+import { render, act } from "@testing-library/react"
 
 afterEach(() => {
     jest.useRealTimers()
@@ -35,23 +35,12 @@ test("computed properties react to props when using hooks", async () => {
         return <Child x={state.x} />
     }
 
-    let wrapper
-    act(() => {
-        wrapper = TestRenderer.create(<Parent />)
-    })
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
-<div>
-  0
-</div>
-`)
+    const { container } = render(<Parent />)
+    expect(container).toHaveTextContent(0)
 
     jest.runAllTimers()
     expect(seen).toEqual(["parent", 0, "parent", 2])
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
-<div>
-  2
-</div>
-`)
+    expect(container).toHaveTextContent(2)
 })
 
 test("computed properties result in double render when using observer instead of Observer", async () => {
@@ -84,15 +73,8 @@ test("computed properties result in double render when using observer instead of
         return <Child x={state.x} />
     }
 
-    let wrapper
-    act(() => {
-        wrapper = TestRenderer.create(<Parent />)
-    })
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
-<div>
-  0
-</div>
-`)
+    const { container } = render(<Parent />)
+    expect(container).toHaveTextContent(0)
 
     jest.runAllTimers()
     expect(seen).toEqual([
@@ -102,9 +84,5 @@ test("computed properties result in double render when using observer instead of
         2,
         2 // should contain "2" only once! But with hooks, one update is scheduled based the fact that props change, the other because the observable source changed.
     ])
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
-<div>
-  2
-</div>
-`)
+    expect(container).toHaveTextContent(2)
 })
