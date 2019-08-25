@@ -72,7 +72,6 @@
     "prop-types": "^15.6.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "react-test-renderer": "^16.9.0",
     "replace": "^1.1.0",
     "request": "^2.83.0",
     "shelljs": "^0.8.3",
