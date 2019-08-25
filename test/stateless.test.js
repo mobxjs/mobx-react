@@ -1,8 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import { observer, PropTypes as MRPropTypes } from "../src"
-import { render } from "@testing-library/react"
-import TestRenderer, { act } from "react-test-renderer"
+import { render, act } from "@testing-library/react"
 import { observable } from "mobx"
 
 const StatelessComp = ({ testProp }) => <div>result: {testProp}</div>
@@ -95,19 +94,19 @@ describe("stateless component with forwardRef", () => {
     )
 
     test("render test correct", () => {
-        const component = TestRenderer.create(
+        const { container } = render(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )
-        expect(component).toMatchSnapshot()
+        expect(container).toMatchSnapshot()
     })
 
     test("is reactive", () => {
-        const component = TestRenderer.create(
+        const { container } = render(
             <ForwardRefCompObserver testProp="hello world" ref={React.createRef()} />
         )
         act(() => {
             a.x++
         })
-        expect(component).toMatchSnapshot()
+        expect(container).toMatchSnapshot()
     })
 })

@@ -2,22 +2,26 @@
 
 exports[`stateless component with forwardRef is reactive 1`] = `
 <div>
-  result: 
-  hello world
-  , 
-  got ref
-  , a.x: 
-  2
+  <div>
+    result: 
+    hello world
+    , 
+    got ref
+    , a.x: 
+    2
+  </div>
 </div>
 `;
 
 exports[`stateless component with forwardRef render test correct 1`] = `
 <div>
-  result: 
-  hello world
-  , 
-  got ref
-  , a.x: 
-  1
+  <div>
+    result: 
+    hello world
+    , 
+    got ref
+    , a.x: 
+    1
+  </div>
 </div>
 `;
