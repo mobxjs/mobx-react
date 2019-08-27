@@ -1,8 +1,8 @@
 import React from "react"
 import { observable } from "mobx"
 import { Provider, observer, inject } from "../src"
-import TestRenderer from "react-test-renderer"
 import withConsole from "./utils/withConsole"
+import { render, act } from "@testing-library/react"
 
 test("no warnings in modern react", () => {
     const box = observable.box(3)
@@ -34,14 +34,14 @@ test("no warnings in modern react", () => {
         }
     }
 
-    const testRenderer = TestRenderer.create(<App />)
-    expect(testRenderer.toJSON()).toMatchSnapshot()
+    const { container } = render(<App />)
+    expect(container).toHaveTextContent("42 + 3")
 
     withConsole(["info", "warn", "error"], () => {
-        TestRenderer.act(() => {
+        act(() => {
             box.set(4)
         })
-        expect(testRenderer.toJSON()).toMatchSnapshot()
+        expect(container).toHaveTextContent("42 + 4")
 
         expect(console.info).not.toHaveBeenCalled()
         expect(console.warn).not.toHaveBeenCalled()
@@ -80,8 +80,8 @@ test("getDerivedStateFromProps works #447", () => {
         </Provider>
     )
 
-    const testRenderer = TestRenderer.create(<App />)
-    expect(testRenderer.toJSON()).toMatchSnapshot()
+    const { container } = render(<App />)
+    expect(container).toHaveTextContent("One 3")
 })
 
 test("no double runs for getDerivedStateFromProps", () => {
@@ -127,7 +127,7 @@ test("no double runs for getDerivedStateFromProps", () => {
         </Provider>
     )
 
-    const testRenderer = TestRenderer.create(<App />)
-    expect(testRenderer.toJSON()).toMatchSnapshot()
+    const { container } = render(<App />)
+    expect(container).toHaveTextContent("Test-content")
     expect(derived).toBe(1)
 })

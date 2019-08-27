@@ -2,8 +2,7 @@ import React from "react"
 import PropTypes from "prop-types"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
-import { render } from "@testing-library/react"
-import TestRenderer, { act } from "react-test-renderer"
+import { render, act } from "@testing-library/react"
 import withConsole from "./utils/withConsole"
 
 describe("inject based context", () => {
@@ -28,13 +27,8 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        const wrapper = TestRenderer.create(<A />)
-        expect(wrapper).toMatchInlineSnapshot(`
-<div>
-  context:
-  bar
-</div>
-`)
+        const { container } = render(<A />)
+        expect(container).toHaveTextContent("context:bar")
     })
 
     test("props override context", () => {
@@ -60,13 +54,8 @@ describe("inject based context", () => {
                 )
             }
         }
-        const wrapper = TestRenderer.create(<A />)
-        expect(wrapper).toMatchInlineSnapshot(`
-<div>
-  context:
-  42
-</div>
-`)
+        const { container } = render(<A />)
+        expect(container).toHaveTextContent("context:42")
     })
 
     test("wraps displayName of original component", () => {
@@ -106,24 +95,9 @@ describe("inject based context", () => {
                 }
             }
         )
-        const wrapperA = TestRenderer.create(
-            <Provider foo="foo">
-                <A />
-            </Provider>
-        )
-        expect(wrapperA.root.children[0].type.displayName).toBe("inject-with-foo(ComponentA)")
-        const wrapperB = TestRenderer.create(
-            <Provider foo="foo">
-                <B />
-            </Provider>
-        )
-        expect(wrapperB.root.children[0].type.displayName).toBe("inject(ComponentB)")
-        const wrapperC = TestRenderer.create(
-            <Provider>
-                <C />
-            </Provider>
-        )
-        expect(wrapperC.root.children[0].type.displayName).toBe("inject(ComponentC)")
+        expect(A.displayName).toBe("inject-with-foo(ComponentA)")
+        expect(B.displayName).toBe("inject(ComponentB)")
+        expect(C.displayName).toBe("inject(ComponentC)")
     })
 
     // FIXME: see other comments related to error catching in React
@@ -155,7 +129,7 @@ describe("inject based context", () => {
         }
 
         withConsole(() => {
-            expect(() => TestRenderer.create(<A />)).toThrow(
+            expect(() => render(<A />)).toThrow(
                 /Store 'foo' is not available! Make sure it is provided by some Provider/
             )
         })
@@ -177,13 +151,8 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C foo="bar" />
-        const wrapper = TestRenderer.create(<B />)
-        expect(wrapper).toMatchInlineSnapshot(`
-<div>
-  context:
-  bar
-</div>
-`)
+        const { container } = render(<B />)
+        expect(container).toHaveTextContent("context:bar")
     })
 
     test("inject merges (and overrides) props", () => {
@@ -198,7 +167,7 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C a={2} b={2} />
-        TestRenderer.create(<B />)
+        render(<B />)
     })
 
     test("custom storesToProps", () => {
@@ -234,14 +203,8 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        const wrapper = TestRenderer.create(<A />)
-        expect(wrapper).toMatchInlineSnapshot(`
-<div>
-  context:
-  bar
-  84
-</div>
-`)
+        const { container } = render(<A />)
+        expect(container).toHaveTextContent("context:bar84")
     })
 
     test("inject forwards ref", () => {
@@ -255,14 +218,14 @@ describe("inject based context", () => {
         }
 
         const ref = React.createRef()
-        TestRenderer.create(<FancyComp ref={ref} />)
+        render(<FancyComp ref={ref} />)
         expect(typeof ref.current.doSomething).toBe("function")
         expect(ref.current.didRender).toBe(true)
 
         const InjectedFancyComp = inject("bla")(FancyComp)
         const ref2 = React.createRef()
 
-        TestRenderer.create(
+        render(
             <Provider bla={42}>
                 <InjectedFancyComp ref={ref2} />
             </Provider>
@@ -311,7 +274,7 @@ describe("inject based context", () => {
 
         const ref = React.createRef()
 
-        TestRenderer.create(<C booh={42} ref={ref} />)
+        render(<C booh={42} ref={ref} />)
         expect(ref.current.testField).toBe(1)
     })
 
@@ -346,7 +309,7 @@ describe("inject based context", () => {
                 <B />
             </Provider>
         )
-        TestRenderer.create(<A />)
+        render(<A />)
         expect(msg.length).toBe(2)
         expect(msg[0].split("\n")[0]).toBe(
             "Warning: Failed prop type: The prop `x` is marked as required in `inject-with-foo(C)`, but its value is `undefined`."
@@ -411,21 +374,13 @@ describe("inject based context", () => {
                 <User />
             </Provider>
         )
-        const wrapper = TestRenderer.create(<App />)
+        const { container } = render(<App />)
+        expect(container).toHaveTextContent("Noa")
 
-        expect(wrapper).toMatchInlineSnapshot(`
-<h1>
-  Noa
-</h1>
-`)
         act(() => {
             user.name = "Veria"
         })
-        expect(wrapper).toMatchInlineSnapshot(`
-<h1>
-  Veria
-</h1>
-`)
+        expect(container).toHaveTextContent("Veria")
     })
 
     test("using a custom injector is not too reactive", () => {
