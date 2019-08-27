@@ -1,7 +1,6 @@
 import React from "react"
 import { inject, observer, Observer, useStaticRendering } from "../src"
-import TestRenderer, { act } from "react-test-renderer"
-import { render } from "@testing-library/react"
+import { render, act } from "@testing-library/react"
 import {
     _getAdministration,
     _resetGlobalState,
@@ -262,8 +261,8 @@ test("issue 12", () => {
         )
     })
 
-    const wrapper = TestRenderer.create(<Table />)
-    expect(wrapper.toJSON()).toMatchSnapshot()
+    const { container } = render(<Table />)
+    expect(container).toMatchSnapshot()
 
     act(() => {
         transaction(() => {
@@ -272,7 +271,7 @@ test("issue 12", () => {
             data.selected = "tea"
         })
     })
-    expect(wrapper.toJSON()).toMatchSnapshot()
+    expect(container).toMatchSnapshot()
     expect(events).toEqual(["table", "row: coffee", "row: tea", "table", "row: soup"])
 })
 
@@ -338,11 +337,8 @@ test("correctly wraps display name of child component", () => {
         return null
     })
 
-    const wrapper = TestRenderer.create(<A />)
-    expect(wrapper.root.type.name).toEqual("ObserverClass")
-
-    const wrapper2 = TestRenderer.create(<B />)
-    expect(wrapper2.root.type.displayName).toEqual("StatelessObserver")
+    expect(A.name).toEqual("ObserverClass")
+    expect(B.displayName).toEqual("StatelessObserver")
 })
 
 describe("124 - react to changes in this.props via computed", () => {
@@ -527,15 +523,13 @@ test("it rerenders correctly if some props are non-observables - 1", () => {
         })
     }
 
-    const wrapper = TestRenderer.create(<Parent odata={odata} data={data} />)
+    const { container } = render(<Parent odata={odata} data={data} />)
 
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
-
-    expect(contents()).toEqual("1-1-1")
+    expect(container).toHaveTextContent("1-1-1")
     stuff()
-    expect(contents()).toEqual("2-2-2")
+    expect(container).toHaveTextContent("2-2-2")
     stuff()
-    expect(contents()).toEqual("3-3-3")
+    expect(container).toHaveTextContent("3-3-3")
 })
 
 test("it rerenders correctly if some props are non-observables - 2", () => {
@@ -568,20 +562,18 @@ test("it rerenders correctly if some props are non-observables - 2", () => {
         odata.x++
     }
 
-    const wrapper = TestRenderer.create(<Parent odata={odata} />)
-
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
+    const { container } = render(<Parent odata={odata} />)
 
     expect(renderCount).toBe(1)
-    expect(contents()).toBe("1-1")
+    expect(container).toHaveTextContent("1-1")
 
     act(() => stuff())
     expect(renderCount).toBe(2)
-    expect(contents()).toBe("2-2")
+    expect(container).toHaveTextContent("2-2")
 
     act(() => stuff())
     expect(renderCount).toBe(3)
-    expect(contents()).toBe("3-3")
+    expect(container).toHaveTextContent("3-3")
 })
 
 describe("Observer regions should react", () => {
@@ -630,20 +622,18 @@ test("Observer should not re-render on shallow equal new props", () => {
         return <Child data={data} />
     })
 
-    const wrapper = TestRenderer.create(<Parent />)
-
-    const contents = () => wrapper.toTree().rendered.rendered.rendered.join("")
+    const { container } = render(<Parent />)
 
     expect(parentRendering).toBe(1)
     expect(childRendering).toBe(1)
-    expect(contents()).toBe("1")
+    expect(container).toHaveTextContent("1")
 
     act(() => {
         odata.y++
     })
     expect(parentRendering).toBe(2)
     expect(childRendering).toBe(1)
-    expect(contents()).toBe("1")
+    expect(container).toHaveTextContent("1")
 })
 
 test("parent / childs render in the right order", () => {
@@ -795,19 +785,11 @@ test("computed properties react to props", () => {
         }
     }
 
-    const wrapper = TestRenderer.create(<Parent />)
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
-<div>
-  0
-</div>
-`)
+    const { container } = render(<Parent />)
+    expect(container).toHaveTextContent(0)
 
     jest.runAllTimers()
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
-<div>
-  2
-</div>
-`)
+    expect(container).toHaveTextContent(2)
 
     expect(seen).toEqual(["parent", 0, "parent", 2])
 })

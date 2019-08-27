@@ -2,23 +2,27 @@
 
 exports[`issue 12 1`] = `
 <div>
-  <span>
-    coffee
-    !
-  </span>
-  <span>
-    tea
-    
-  </span>
+  <div>
+    <span>
+      coffee
+      !
+    </span>
+    <span>
+      tea
+      
+    </span>
+  </div>
 </div>
 `;
 
 exports[`issue 12 2`] = `
 <div>
-  <span>
-    soup
-    
-  </span>
+  <div>
+    <span>
+      soup
+      
+    </span>
+  </div>
 </div>
 `;
 

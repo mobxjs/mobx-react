@@ -1,7 +1,6 @@
 import React from "react"
-import { extendObservable, isObservable, observable } from "mobx"
+import { extendObservable, observable } from "mobx"
 import { observer } from "../src"
-import TestRenderer from "react-test-renderer"
 import { render } from "@testing-library/react"
 import withConsole from "./utils/withConsole"
 
@@ -33,17 +32,18 @@ test("issue mobx 405", () => {
     )
 
     const exampleState = new ExampleState()
-    const wrapper = TestRenderer.create(<ExampleView exampleState={exampleState} />)
-    expect(wrapper.toJSON()).toMatchInlineSnapshot(`
+    const { container } = render(<ExampleView exampleState={exampleState} />)
+    expect(container).toMatchInlineSnapshot(`
 <div>
-  <input
-    onChange={[Function]}
-    type="text"
-    value="test"
-  />
-  <span>
-    Hello my name is test
-  </span>
+  <div>
+    <input
+      type="text"
+      value="test"
+    />
+    <span>
+      Hello my name is test
+    </span>
+  </div>
 </div>
 `)
 })
@@ -84,15 +84,6 @@ test("#85 Should handle state changing in constructors", () => {
 
     a.set(7)
     expect(container).toHaveTextContent("child:7 - parent:7")
-})
-
-test("testIsComponentReactive", () => {
-    const C = observer(() => null)
-    const wrapper = TestRenderer.create(<C />)
-    const instance = wrapper.getInstance()
-
-    // instance is something different then the rendering reaction!
-    expect(isObservable(instance)).toBeFalsy()
 })
 
 test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {
