@@ -15,7 +15,7 @@ const rl = readline.createInterface({
 function run(command, options) {
     const continueOnErrors = options && options.continueOnErrors
     const ret = shell.exec(command, options)
-    if (!continueOnErrors && ret.code) {
+    if (!continueOnErrors && ret.code !== 0) {
         shell.exit(1)
     }
     return ret
@@ -30,7 +30,7 @@ async function prompt(question, defaultValue) {
     return new Promise(resolve => {
         rl.question(`${question} [${defaultValue}]: `, answer => {
             answer = answer && answer.trim()
-            resolve(answer || defaultValue)
+            resolve(answer ? answer : defaultValue)
         })
     })
 }
@@ -58,7 +58,7 @@ async function main() {
         //package is registered in npm?
         var publishedPackageInfo = JSON.parse(npmInfoRet.stdout)
         if (
-            publishedPackageInfo.versions === version ||
+            publishedPackageInfo.versions == version ||
             publishedPackageInfo.versions.includes(version)
         ) {
             exit(2, "Version " + pkg.version + " is already published to npm")
