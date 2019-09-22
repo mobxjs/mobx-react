@@ -13,7 +13,7 @@ export function makeClassComponentObserver(componentClass) {
     const target = componentClass.prototype
     if (target.componentWillReact)
         throw new Error("The componentWillReact life-cycle event is no longer supported")
-    if (componentClass.__proto__ !== PureComponent) {
+    if (!(target instanceof PureComponent)) {
         if (!target.shouldComponentUpdate) target.shouldComponentUpdate = observerSCU
         else if (target.shouldComponentUpdate !== observerSCU)
             // n.b. unequal check, instead of existence check, as @observer might be on superclass as well
