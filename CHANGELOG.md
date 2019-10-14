@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.1.4
+
+-   Update dependency mobx-react-lite@1.4.2 which includes fix for [RN Fast Refresh](https://github.com/mobxjs/mobx-react-lite/issues/226)
+
 ### 6.1.2 / 6.1.3
 
 -   Add reexport of `useObserver` from `mobx-react-lite` [#734](https://github.com/mobxjs/mobx-react/issues/734)
