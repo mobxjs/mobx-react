@@ -19,7 +19,7 @@ There are currently two actively maintained versions of mobx-react:
 | v6          | 16.8.0 and higher        | Yes                                                                              |
 | v5          | 0.13 and higher          | No, but it is possible to use `<Observer>` sections inside hook based components |
 
-The user guide covers this [in a more detail](https://mobx-react.js.org/libraries). 
+The user guide covers this [in a more detail](https://mobx-react.js.org/libraries).
 
 The V5 documentation can be found in the [README_v5](README_v5.md).
 
@@ -319,6 +319,7 @@ Notes:
 -   The original component wrapped by `inject` is available as the `wrappedComponent` property of the created higher order component.
 
 #### "The set of provided stores has changed" error
+
 Values provided through `Provider` should be final. Make sure that if you put things in `context` that might change over time, that they are `@observable` or provide some other means to listen to changes, like callbacks. However, if your stores will change over time, like an observable value of another store, MobX will throw an error.
 This restriction exists mainly for legacy reasons. If you have a scenario where you need to modify the set of stores, please leave a comment about it in this issue https://github.com/mobxjs/mobx-react/issues/745. Or a preferred way is to [use React Context](https://mobx-react.js.org/recipes-context) directly which does not have this restriction.
 
@@ -520,6 +521,36 @@ And the dependency tree of a component can now be inspected by the standard devt
 
 ![hooks.png](hooks.png)
 
+## Observer batching
+
+[Check out the elaborate explanation](https://github.com/mobxjs/mobx-react/pull/787#issuecomment-573599793).
+
+In short without observer batching the React doesn't guarantee the order component rendering in some cases. We highly recommend that you configure batching to avoid these random surprises.
+
+Import one of these before any React rendering is happening, typically `index.js/ts`. For Jest tests you can utilize [setupFilesAfterEnv](https://jestjs.io/docs/en/configuration#setupfilesafterenv-array).
+
+**React DOM:**
+
+> import 'mobx-react/batchingForReactDom'
+
+**React Native:**
+
+> import 'mobx-react/batchingForReactNative'
+
+### Opt-out
+
+To opt-out from batching in some specific cases, simply import the following to silence the warning.
+
+> import 'mobx-react/batchingOptOut'
+
+### Custom batched updates
+
+Above imports are for a convenience to utilize standard versions of batching. If you for some reason have customized version of batched updates, you can do the following instead.
+
+```js
+import { observerBatching } from "mobx-react"
+observerBatching(customBatchedUpdates)
+
 ## FAQ
 
 **Should I use `observer` for each component?**
@@ -535,14 +566,19 @@ See also [Do child components need `@observer`?](https://github.com/mobxjs/mobx/
 The following warning will appear if you trigger a re-rendering between instantiating and rendering a component:
 
 ```
+
 Warning: forceUpdate(...): Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state.`
+
 ```
 
 -- or --
 
 ```
+
 Warning: setState(...): Cannot update during an existing state transition (such as within `render` or another component's constructor). Render methods should be a pure function of props and state; constructor side-effects are an anti-pattern, but can be moved to `componentWillMount`.
+
 ```
 
 Usually this means that (another) component is trying to modify observables used by this components in their `constructor` or `getInitialState` methods.
 This violates the React Lifecycle, `componentWillMount` should be used instead if state needs to be modified before mounting.
+```

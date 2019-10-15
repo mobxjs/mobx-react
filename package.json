@@ -89,7 +89,7 @@
     "typescript": "^3.7.0"
   },
   "dependencies": {
-    "mobx-react-lite": "^1.4.2"
+    "mobx-react-lite": "2"
   },
   "files": [
     "dist"
