@@ -10,6 +10,7 @@ import {
     transaction
 } from "mobx"
 import withConsole from "./utils/withConsole"
+import { mobxAdminPropertyForRender } from "../src/observerClass"
 
 /**
  *  some test suite is too tedious
@@ -837,4 +838,28 @@ test.skip("#709 - applying observer on React.memo component", () => {
 
     // eslint-disable-next-line no-undef
     render(<Observed />, { wrapper: ErrorCatcher })
+})
+
+test("#797 - replacing this.render should not break disposing of reaction", () => {
+    @observer
+    class Component extends React.Component {
+        render() {
+            return <div />
+        }
+        swapRenderFunc() {
+            this.render = () => {
+                return <span />
+            }
+        }
+    }
+
+    const compRef = React.createRef()
+    const { unmount } = render(<Component ref={compRef} />)
+
+    const reaction = compRef.current[mobxAdminPropertyForRender]
+    expect(reaction.isDisposed).toEqual(false)
+
+    compRef.current.swapRenderFunc()
+    unmount()
+    expect(reaction.isDisposed).toEqual(true)
 })

@@ -1,10 +1,11 @@
 import { PureComponent, Component } from "react"
-import { createAtom, _allowStateChanges, Reaction, $mobx } from "mobx"
+import { createAtom, _allowStateChanges, Reaction } from "mobx"
 import { isUsingStaticRendering } from "mobx-react-lite"
 
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
-const mobxAdminProperty = $mobx || "$mobx"
+export const mobxAdminPropertyForRender =
+    typeof Symbol !== "undefined" ? Symbol("mobx administration - render") : "$mobx_render"
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
@@ -35,7 +36,7 @@ export function makeClassComponentObserver(componentClass) {
     }
     patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering() === true) return
-        this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
+        this[mobxAdminPropertyForRender] && this[mobxAdminPropertyForRender].dispose()
         this[mobxIsUnmounted] = true
     })
     return componentClass
@@ -85,7 +86,7 @@ function makeComponentReactive(render) {
         }
     })
     reaction.reactComponent = this
-    reactiveRender[mobxAdminProperty] = reaction
+    this[mobxAdminPropertyForRender] = reaction
     this.render = reactiveRender
 
     function reactiveRender() {
