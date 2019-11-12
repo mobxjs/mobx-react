@@ -35,10 +35,27 @@ export function makeClassComponentObserver(componentClass) {
     }
     patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering() === true) return
-        this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
+        if (this.render[mobxAdminProperty]) {
+            this.render[mobxAdminProperty].dispose()
+        } else {
+            const displayName = getDisplayName(this)
+            console.warn(
+                `The render function for an observer component (${displayName}) was modified after MobX attached. This is not supported, since the new function can't be triggered by MobX.`
+            )
+        }
         this[mobxIsUnmounted] = true
     })
     return componentClass
+}
+
+// Generates a friendly name for debugging
+function getDisplayName(comp) {
+    return (
+        comp.displayName ||
+        comp.name ||
+        (comp.constructor && (comp.constructor.displayName || comp.constructor.name)) ||
+        "<component>"
+    )
 }
 
 function makeComponentReactive(render) {
@@ -55,12 +72,7 @@ function makeComponentReactive(render) {
      */
     setHiddenProp(this, isForcingUpdateKey, false)
 
-    // Generate friendly name for debugging
-    const initialName =
-        this.displayName ||
-        this.name ||
-        (this.constructor && (this.constructor.displayName || this.constructor.name)) ||
-        "<component>"
+    const initialName = getDisplayName(this)
     const baseRender = render.bind(this)
 
     let isRenderingPending = false

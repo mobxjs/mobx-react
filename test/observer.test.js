@@ -838,3 +838,33 @@ test.skip("#709 - applying observer on React.memo component", () => {
     // eslint-disable-next-line no-undef
     render(<Observed />, { wrapper: ErrorCatcher })
 })
+
+test("#797 - replacing this.render should trigger a warning", () => {
+    @observer
+    class Component extends React.Component {
+        render() {
+            return <div />
+        }
+        swapRenderFunc() {
+            this.render = () => {
+                return <span />
+            }
+        }
+    }
+
+    const compRef = React.createRef()
+    const { unmount } = render(<Component ref={compRef} />)
+    compRef.current.swapRenderFunc()
+
+    const msg = []
+    const warn_orig = console.warn
+    console.warn = m => msg.push(m)
+
+    unmount()
+
+    expect(msg.length).toBe(1)
+    expect(msg[0]).toBe(
+        `The render function for an observer component (Component) was modified after MobX attached. This is not supported, since the new function can't be triggered by MobX.`
+    )
+    console.warn = warn_orig
+})
