@@ -4,8 +4,7 @@ import { isUsingStaticRendering } from "mobx-react-lite"
 
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
-export const mobxAdminPropertyForRender =
-    typeof Symbol !== "undefined" ? Symbol("mobx administration - render") : "$mobx_render"
+export const mobxAdminKeyForRender = newSymbol("mobx administration for render")
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
@@ -36,7 +35,7 @@ export function makeClassComponentObserver(componentClass) {
     }
     patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering() === true) return
-        this[mobxAdminPropertyForRender] && this[mobxAdminPropertyForRender].dispose()
+        this[mobxAdminKeyForRender] && this[mobxAdminKeyForRender].dispose()
         this[mobxIsUnmounted] = true
     })
     return componentClass
@@ -86,7 +85,7 @@ function makeComponentReactive(render) {
         }
     })
     reaction.reactComponent = this
-    this[mobxAdminPropertyForRender] = reaction
+    this[mobxAdminKeyForRender] = reaction
     this.render = reactiveRender
 
     function reactiveRender() {

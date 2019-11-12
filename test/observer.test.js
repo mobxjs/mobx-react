@@ -10,7 +10,7 @@ import {
     transaction
 } from "mobx"
 import withConsole from "./utils/withConsole"
-import { mobxAdminPropertyForRender } from "../src/observerClass"
+import { mobxAdminKeyForRender } from "../src/observerClass"
 
 /**
  *  some test suite is too tedious
@@ -856,7 +856,7 @@ test("#797 - replacing this.render should not break disposing of reaction", () =
     const compRef = React.createRef()
     const { unmount } = render(<Component ref={compRef} />)
 
-    const reaction = compRef.current[mobxAdminPropertyForRender]
+    const reaction = compRef.current[mobxAdminKeyForRender]
     expect(reaction.isDisposed).toEqual(false)
 
     compRef.current.swapRenderFunc()
