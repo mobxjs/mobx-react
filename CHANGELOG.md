@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+### 6.1.5
+
+-   Fixed that component-class would not dispose reaction if render() was hot-swapped. Fixes: [#797](https://github.com/mobxjs/mobx-react/issues/797)
+
+Resolves #797.
+
 ### 6.1.4
 
 -   Update dependency mobx-react-lite@1.4.2 which includes fix for [RN Fast Refresh](https://github.com/mobxjs/mobx-react-lite/issues/226)
