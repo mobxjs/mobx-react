@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.1.5
+
+-   Added warning for attempting to modify a component class' render function after a MobX reaction has already attached. Helps prevent memory leaks as in: [#797](https://github.com/mobxjs/mobx-react/issues/797)
+
 ### 6.1.4
 
 -   Update dependency mobx-react-lite@1.4.2 which includes fix for [RN Fast Refresh](https://github.com/mobxjs/mobx-react-lite/issues/226)
