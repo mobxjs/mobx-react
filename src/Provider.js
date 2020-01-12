@@ -11,7 +11,7 @@ export function Provider({ children, ...stores }) {
         ...stores
     }).current
 
-    if (process.env.NODE_ENV !== "production") {
+    if (process && typeof process.env !== "undefined" && process.env.NODE_ENV !== "production") {
         const newValue = { ...value, ...stores } // spread in previous state for the context based stores
         if (!shallowEqual(value, newValue)) {
             throw new Error(
