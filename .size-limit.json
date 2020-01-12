@@ -1,6 +1,6 @@
 [
     {
-        "path": "dist/mobx-react.js",
+        "path": "dist/mobx-react.umd.js",
         "limit": "4 KB",
         "webpack": false,
         "running": false
