@@ -2,7 +2,8 @@
 
 ### 6.1.5
 
--   Added warning for attempting to modify a component class' render function after a MobX reaction has already attached. Helps prevent memory leaks as in: [#797](https://github.com/mobxjs/mobx-react/issues/797)
+- Added check if `process.env` is available, fixes [#801](https://github.com/mobxjs/mobx-react/issues/801) through [#812](https://github.com/mobxjs/mobx-react/pull/812) by [@ynejati](https://github.com/ynejati)
+- Added warning if component's `render` method is accidentally overwritten. [#799](https://github.com/mobxjs/mobx-react/pull/799) by [@Venryx](https://github.com/Venryx). Helps prevent memory leaks as in: [#797](https://github.com/mobxjs/mobx-react/issues/797)
 
 ### 6.1.4
 
