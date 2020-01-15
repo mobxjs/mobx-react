@@ -1,12 +1,17 @@
-/* eslint-disable react/prop-types */
-import React from "react"
+import * as React from "react"
 import { shallowEqual } from "./utils/utils"
+import { IValueMap } from "./inject"
 
-export const MobXProviderContext = React.createContext({})
+export const MobXProviderContext: React.Context<any> = React.createContext({})
 
-export function Provider({ children, ...stores }) {
-    const parentValue = React.useContext(MobXProviderContext)
-    const value = React.useRef({
+export interface ProviderProps extends IValueMap {
+    children: React.ReactNode
+}
+
+export function Provider(props: ProviderProps): React.ReactElement {
+    const { children, ...stores } = props
+    const parentValue: any = React.useContext(MobXProviderContext)
+    const value: React.MutableRefObject<any> = React.useRef({
         ...parentValue,
         ...stores
     }).current

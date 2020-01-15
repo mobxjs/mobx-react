@@ -4,16 +4,18 @@ import { isUsingStaticRendering } from "mobx-react-lite"
 
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
-const mobxAdminProperty = $mobx || "$mobx"
-const mobxIsUnmounted = newSymbol("isUnmounted")
-const skipRenderKey = newSymbol("skipRender")
-const isForcingUpdateKey = newSymbol("isForcingUpdate")
+const mobxAdminProperty: string | symbol = $mobx || "$mobx"
+const mobxIsUnmounted: string | symbol = newSymbol("isUnmounted")
+const skipRenderKey: string | symbol = newSymbol("skipRender")
+const isForcingUpdateKey: string | symbol = newSymbol("isForcingUpdate")
 
-export function makeClassComponentObserver(componentClass) {
-    const target = componentClass.prototype
+export function makeClassComponentObserver(
+    componentClass: React.ComponentClass<any, any>
+): React.ComponentClass<any, any> {
+    const target: any = componentClass.prototype
     if (target.componentWillReact)
         throw new Error("The componentWillReact life-cycle event is no longer supported")
-    if (componentClass.__proto__ !== PureComponent) {
+    if (componentClass["__proto__"] !== PureComponent) {
         if (!target.shouldComponentUpdate) target.shouldComponentUpdate = observerSCU
         else if (target.shouldComponentUpdate !== observerSCU)
             // n.b. unequal check, instead of existence check, as @observer might be on superclass as well
@@ -29,11 +31,11 @@ export function makeClassComponentObserver(componentClass) {
     makeObservableProp(target, "props")
     makeObservableProp(target, "state")
 
-    const baseRender = target.render
-    target.render = function() {
+    const baseRender: () => any = target.render
+    target.render = function(): any {
         return makeComponentReactive.call(this, baseRender)
     }
-    patch(target, "componentWillUnmount", function() {
+    patch(target, "componentWillUnmount", function(): void {
         if (isUsingStaticRendering() === true) return
         if (this.render[mobxAdminProperty]) {
             this.render[mobxAdminProperty].dispose()
@@ -49,7 +51,7 @@ export function makeClassComponentObserver(componentClass) {
 }
 
 // Generates a friendly name for debugging
-function getDisplayName(comp) {
+function getDisplayName(comp: any) {
     return (
         comp.displayName ||
         comp.name ||
@@ -58,7 +60,7 @@ function getDisplayName(comp) {
     )
 }
 
-function makeComponentReactive(render) {
+function makeComponentReactive(render: any) {
     if (isUsingStaticRendering() === true) return render.call(this)
 
     /**
@@ -75,16 +77,16 @@ function makeComponentReactive(render) {
     const initialName = getDisplayName(this)
     const baseRender = render.bind(this)
 
-    let isRenderingPending = false
+    let isRenderingPending: boolean = false
 
-    const reaction = new Reaction(`${initialName}.render()`, () => {
+    const reaction: Reaction = new Reaction(`${initialName}.render()`, () => {
         if (!isRenderingPending) {
             // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
             // This unidiomatic React usage but React will correctly warn about this so we continue as usual
             // See #85 / Pull #44
             isRenderingPending = true
             if (this[mobxIsUnmounted] !== true) {
-                let hasError = true
+                let hasError: boolean = true
                 try {
                     setHiddenProp(this, isForcingUpdateKey, true)
                     if (!this[skipRenderKey]) Component.prototype.forceUpdate.call(this)
@@ -96,14 +98,15 @@ function makeComponentReactive(render) {
             }
         }
     })
-    reaction.reactComponent = this
+    // TODO: Property reactComponent does not exist on type Reaction
+    reaction["reactComponent"] = this
     reactiveRender[mobxAdminProperty] = reaction
     this.render = reactiveRender
 
-    function reactiveRender() {
+    function reactiveRender(): any {
         isRenderingPending = false
-        let exception = undefined
-        let rendering = undefined
+        let exception: any = undefined
+        let rendering: any = undefined
         reaction.track(() => {
             try {
                 rendering = _allowStateChanges(false, baseRender)
@@ -120,7 +123,7 @@ function makeComponentReactive(render) {
     return reactiveRender.call(this)
 }
 
-function observerSCU(nextProps, nextState) {
+function observerSCU(nextProps: React.Props<any>, nextState: any): boolean {
     if (isUsingStaticRendering()) {
         console.warn(
             "[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side."
@@ -137,10 +140,10 @@ function observerSCU(nextProps, nextState) {
     return !shallowEqual(this.props, nextProps)
 }
 
-function makeObservableProp(target, propName) {
-    const valueHolderKey = newSymbol(`reactProp_${propName}_valueHolder`)
-    const atomHolderKey = newSymbol(`reactProp_${propName}_atomHolder`)
-    function getAtom() {
+function makeObservableProp(target: any, propName: string): void {
+    const valueHolderKey: string | symbol = newSymbol(`reactProp_${propName}_valueHolder`)
+    const atomHolderKey: string | symbol = newSymbol(`reactProp_${propName}_atomHolder`)
+    function getAtom(): any {
         if (!this[atomHolderKey]) {
             setHiddenProp(this, atomHolderKey, createAtom("reactive " + propName))
         }
@@ -149,11 +152,11 @@ function makeObservableProp(target, propName) {
     Object.defineProperty(target, propName, {
         configurable: true,
         enumerable: true,
-        get: function() {
+        get: function(): any {
             getAtom.call(this).reportObserved()
             return this[valueHolderKey]
         },
-        set: function set(v) {
+        set: function set(v: any): void {
             if (!this[isForcingUpdateKey] && !shallowEqual(this[valueHolderKey], v)) {
                 setHiddenProp(this, valueHolderKey, v)
                 setHiddenProp(this, skipRenderKey, true)

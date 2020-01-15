@@ -1,5 +1,5 @@
-let symbolId = 0
-function createSymbol(name) {
+let symbolId: number = 0
+function createSymbol(name: string): symbol | string {
     if (typeof Symbol === "function") {
         return Symbol(name)
     }
@@ -8,32 +8,32 @@ function createSymbol(name) {
     return symbol
 }
 
-const createdSymbols = {}
-export function newSymbol(name) {
+const createdSymbols: object = {}
+export function newSymbol(name: string): symbol | string {
     if (!createdSymbols[name]) {
         createdSymbols[name] = createSymbol(name)
     }
     return createdSymbols[name]
 }
 
-export function shallowEqual(objA, objB) {
+export function shallowEqual(objA: any, objB: any): boolean {
     //From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
     if (is(objA, objB)) return true
     if (typeof objA !== "object" || objA === null || typeof objB !== "object" || objB === null) {
         return false
     }
-    const keysA = Object.keys(objA)
-    const keysB = Object.keys(objB)
+    const keysA: Array<string> = Object.keys(objA)
+    const keysB: Array<string> = Object.keys(objB)
     if (keysA.length !== keysB.length) return false
     for (let i = 0; i < keysA.length; i++) {
-        if (!hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
+        if (!Object.hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
             return false
         }
     }
     return true
 }
 
-function is(x, y) {
+function is(x: any, y: any): boolean {
     // From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
     if (x === y) {
         return x !== 0 || 1 / x === 1 / y
@@ -43,7 +43,7 @@ function is(x, y) {
 }
 
 // based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js
-const hoistBlackList = {
+const hoistBlackList: any = {
     $$typeof: 1,
     render: 1,
     compare: 1,
@@ -59,11 +59,11 @@ const hoistBlackList = {
     propTypes: 1
 }
 
-export function copyStaticProperties(base, target) {
-    const protoProps = Object.getOwnPropertyNames(Object.getPrototypeOf(base))
-    Object.getOwnPropertyNames(base).forEach(key => {
+export function copyStaticProperties(base: object, target: object): void {
+    const protoProps: Array<string> = Object.getOwnPropertyNames(Object.getPrototypeOf(base))
+    Object.getOwnPropertyNames(base).forEach((key: string) => {
         if (!hoistBlackList[key] && protoProps.indexOf(key) === -1) {
-            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key))
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key)!)
         }
     })
 }
@@ -74,7 +74,7 @@ export function copyStaticProperties(base, target) {
  * @param prop
  * @param value
  */
-export function setHiddenProp(target, prop, value) {
+export function setHiddenProp(target: object, prop: any, value: any): void {
     if (!Object.hasOwnProperty.call(target, prop)) {
         Object.defineProperty(target, prop, {
             enumerable: false,
@@ -91,10 +91,16 @@ export function setHiddenProp(target, prop, value) {
  * Utilities for patching componentWillUnmount, to make sure @disposeOnUnmount works correctly icm with user defined hooks
  * and the handler provided by mobx-react
  */
-const mobxMixins = newSymbol("patchMixins")
-const mobxPatchedDefinition = newSymbol("patchedDefinition")
+const mobxMixins: symbol | string = newSymbol("patchMixins")
+const mobxPatchedDefinition: symbol | string = newSymbol("patchedDefinition")
 
-function getMixins(target, methodName) {
+export interface Mixins {
+    [_: string]: any
+    locks: number
+    methods: Array<Function>
+}
+
+function getMixins(target: object, methodName: string): Mixins {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
     const methodMixins = (mixins[methodName] = mixins[methodName] || {})
     methodMixins.locks = methodMixins.locks || 0
@@ -102,12 +108,12 @@ function getMixins(target, methodName) {
     return methodMixins
 }
 
-function wrapper(realMethod, mixins, ...args) {
+function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>): any {
     // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
     mixins.locks++
 
     try {
-        let retVal
+        let retVal: any
         if (realMethod !== undefined && realMethod !== null) {
             retVal = realMethod.apply(this, args)
         }
@@ -116,35 +122,38 @@ function wrapper(realMethod, mixins, ...args) {
     } finally {
         mixins.locks--
         if (mixins.locks === 0) {
-            mixins.methods.forEach(mx => {
+            mixins.methods.forEach((mx: Function) => {
                 mx.apply(this, args)
             })
         }
     }
 }
 
-function wrapFunction(realMethod, mixins) {
-    const fn = function(...args) {
+function wrapFunction(realMethod: Function, mixins: Mixins): (...args: Array<any>) => any {
+    const fn: (...args: Array<any>) => any = function(...args: Array<any>) {
         wrapper.call(this, realMethod, mixins, ...args)
     }
     return fn
 }
 
-export function patch(target, methodName, mixinMethod) {
-    const mixins = getMixins(target, methodName)
+export function patch(target: object, methodName: string, mixinMethod: Function): void {
+    const mixins: Mixins = getMixins(target, methodName)
 
     if (mixins.methods.indexOf(mixinMethod) < 0) {
         mixins.methods.push(mixinMethod)
     }
 
-    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
+    const oldDefinition: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+        target,
+        methodName
+    )
     if (oldDefinition && oldDefinition[mobxPatchedDefinition]) {
         // already patched definition, do not repatch
         return
     }
 
-    const originalMethod = target[methodName]
-    const newDefinition = createDefinition(
+    const originalMethod: Function = target[methodName]
+    const newDefinition: Defintion = createDefinition(
         target,
         methodName,
         oldDefinition ? oldDefinition.enumerable : undefined,
@@ -154,16 +163,29 @@ export function patch(target, methodName, mixinMethod) {
 
     Object.defineProperty(target, methodName, newDefinition)
 }
+interface Defintion {
+    [x: number]: boolean
+    get: () => (...args: Array<any>) => any
+    set(value: any): void
+    configurable: boolean
+    enumerable: any
+}
 
-function createDefinition(target, methodName, enumerable, mixins, originalMethod) {
-    let wrappedFunc = wrapFunction(originalMethod, mixins)
+function createDefinition(
+    target: object,
+    methodName: string,
+    enumerable: any,
+    mixins: Mixins,
+    originalMethod: Function
+): Defintion {
+    let wrappedFunc: (...args: Array<any>) => any = wrapFunction(originalMethod, mixins)
 
     return {
         [mobxPatchedDefinition]: true,
-        get: function() {
+        get: function(): (...args: Array<any>) => any {
             return wrappedFunc
         },
-        set: function(value) {
+        set: function(value: Function): void {
             if (this === target) {
                 wrappedFunc = wrapFunction(value, mixins)
             } else {

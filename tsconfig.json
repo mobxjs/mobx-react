@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+      "rootDir": "src",
+      "target": "es6",
+      "jsx": "react",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "downlevelIteration": true,
+      "alwaysStrict": true,
+      "outDir": "lib",
+      "sourceMap": false,
+      "declaration": true,
+      "removeComments": false,
+      "strict": true,
+      "noImplicitReturns": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": false,
+      "noImplicitAny": false,
+      "noImplicitThis": false,
+      "experimentalDecorators": true,
+      "lib": ["es6"]
+  },
+  "include": ["src/**/*.ts"]
+}

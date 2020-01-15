@@ -1,38 +1,52 @@
-import React, { createElement } from "react"
+import * as React from "react"
 import { observer } from "./observer"
 import { copyStaticProperties } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"
+import { IReactComponent } from "./index"
+
+export type IValueMap = { [key: string]: any }
+export type IStoresToProps<
+    S extends IValueMap = {},
+    P extends IValueMap = {},
+    I extends IValueMap = {},
+    C extends IValueMap = {}
+> = (stores: S, nextProps: P, context?: C) => I
 
 /**
  * Store Injection
  */
-function createStoreInjector(grabStoresFn, component, injectNames, makeReactive) {
+function createStoreInjector(
+    grabStoresFn: IStoresToProps,
+    component: IReactComponent<any>,
+    injectNames: string,
+    makeReactive: boolean
+): IReactComponent<any> {
     // Support forward refs
-    let Injector = React.forwardRef((props, ref) => {
-        const newProps = { ...props }
-        const context = React.useContext(MobXProviderContext)
+    let Injector: IReactComponent<any> = React.forwardRef((props, ref) => {
+        const newProps: React.PropsWithRef<any> = { ...props }
+        const context: any = React.useContext(MobXProviderContext)
         Object.assign(newProps, grabStoresFn(context || {}, newProps) || {})
 
         if (ref) {
             newProps.ref = ref
         }
 
-        return createElement(component, newProps)
+        return React.createElement(component, newProps)
     })
 
     if (makeReactive) Injector = observer(Injector)
-    Injector.isMobxInjector = true // assigned late to suppress observer warning
+    Injector["isMobxInjector"] = true // assigned late to suppress observer warning
 
     // Static fields from component should be visible on the generated Injector
     copyStaticProperties(component, Injector)
-    Injector.wrappedComponent = component
+    Injector["wrappedComponent"] = component
     Injector.displayName = getInjectName(component, injectNames)
     return Injector
 }
 
-function getInjectName(component, injectNames) {
-    let displayName
-    const componentName =
+function getInjectName(component: IReactComponent<any>, injectNames: string): string {
+    let displayName: string
+    const componentName: string =
         component.displayName ||
         component.name ||
         (component.constructor && component.constructor.name) ||
@@ -42,8 +56,10 @@ function getInjectName(component, injectNames) {
     return displayName
 }
 
-function grabStoresByName(storeNames) {
-    return function(baseStores, nextProps) {
+function grabStoresByName(
+    storeNames: Array<string>
+): (baseStores: any, nextProps: React.PropsWithRef<any>) => React.PropsWithRef<any> | undefined {
+    return function(baseStores: any, nextProps: React.PropsWithRef<any>) {
         storeNames.forEach(function(storeName) {
             if (
                 storeName in nextProps // prefer props over stores
@@ -61,20 +77,33 @@ function grabStoresByName(storeNames) {
     }
 }
 
+export type IWrappedComponent<P> = {
+    wrappedComponent: IReactComponent<P>
+}
+
+export function inject(
+    ...stores: string[]
+): <T extends IReactComponent<any>>(
+    target: T
+) => T & (T extends IReactComponent<infer P> ? IWrappedComponent<P> : never)
+export function inject<S, P, I, C>(
+    fn: IStoresToProps<S, P, I, C>
+): <T extends IReactComponent>(target: T) => T & IWrappedComponent<P>
+
 /**
  * higher order component that injects stores to a child.
  * takes either a varargs list of strings, which are stores read from the context,
  * or a function that manually maps the available stores from the context to props:
  * storesToProps(mobxStores, props, context) => newProps
  */
-export function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames) {
+export function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames: Array<any>) {
     let grabStoresFn
     if (typeof arguments[0] === "function") {
         grabStoresFn = arguments[0]
-        return componentClass =>
+        return (componentClass: React.ComponentClass<any, any>) =>
             createStoreInjector(grabStoresFn, componentClass, grabStoresFn.name, true)
     } else {
-        return componentClass =>
+        return (componentClass: React.ComponentClass<any, any>) =>
             createStoreInjector(
                 grabStoresByName(storeNames),
                 componentClass,
