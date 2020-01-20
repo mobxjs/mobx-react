@@ -1,10 +1,10 @@
 import * as React from "react"
 import { observer } from "./observer"
 import { copyStaticProperties } from "./utils/utils"
-import { MobXProviderContext } from "./Provider"
+import { MobXProviderContext, TProviderShape } from "./Provider"
 import { IReactComponent } from "./index"
 
-export type IValueMap = { [key: string]: any }
+export type IValueMap = Record<string, any>
 export type IStoresToProps<
     S extends IValueMap = {},
     P extends IValueMap = {},
@@ -24,7 +24,7 @@ function createStoreInjector(
     // Support forward refs
     let Injector: IReactComponent<any> = React.forwardRef((props, ref) => {
         const newProps: React.PropsWithRef<any> = { ...props }
-        const context: any = React.useContext(MobXProviderContext)
+        const context: TProviderShape = React.useContext(MobXProviderContext)
         Object.assign(newProps, grabStoresFn(context || {}, newProps) || {})
 
         if (ref) {
@@ -45,8 +45,8 @@ function createStoreInjector(
 }
 
 function getInjectName(component: IReactComponent<any>, injectNames: string): string {
-    let displayName: string
-    const componentName: string =
+    let displayName
+    const componentName =
         component.displayName ||
         component.name ||
         (component.constructor && component.constructor.name) ||
@@ -58,8 +58,11 @@ function getInjectName(component: IReactComponent<any>, injectNames: string): st
 
 function grabStoresByName(
     storeNames: Array<string>
-): (baseStores: any, nextProps: React.PropsWithRef<any>) => React.PropsWithRef<any> | undefined {
-    return function(baseStores: any, nextProps: React.PropsWithRef<any>) {
+): (
+    baseStores: Record<string, any>,
+    nextProps: React.PropsWithRef<any>
+) => React.PropsWithRef<any> | undefined {
+    return function(baseStores: Record<string, any>, nextProps: React.PropsWithRef<any>) {
         storeNames.forEach(function(storeName) {
             if (
                 storeName in nextProps // prefer props over stores
@@ -97,9 +100,8 @@ export function inject<S, P, I, C>(
  * storesToProps(mobxStores, props, context) => newProps
  */
 export function inject(/* fn(stores, nextProps) or ...storeNames */ ...storeNames: Array<any>) {
-    let grabStoresFn
     if (typeof arguments[0] === "function") {
-        grabStoresFn = arguments[0]
+        let grabStoresFn = arguments[0]
         return (componentClass: React.ComponentClass<any, any>) =>
             createStoreInjector(grabStoresFn, componentClass, grabStoresFn.name, true)
     } else {

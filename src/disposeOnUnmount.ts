@@ -1,8 +1,10 @@
 import * as React from "react"
 import { patch, newSymbol } from "./utils/utils"
 
-const protoStoreKey: string | symbol = newSymbol("disposeOnUnmountProto")
-const instStoreKey: string | symbol = newSymbol("disposeOnUnmountInst")
+type Disposer = () => void
+
+const protoStoreKey = newSymbol("disposeOnUnmountProto")
+const instStoreKey = newSymbol("disposeOnUnmountInst")
 
 function runDisposersOnWillUnmount(): void {
     ;[...(this[protoStoreKey] || []), ...(this[instStoreKey] || [])].forEach(
@@ -17,8 +19,6 @@ function runDisposersOnWillUnmount(): void {
     )
 }
 
-type Disposer = () => void
-
 export function disposeOnUnmount(target: React.Component<any, any>, propertyKey: PropertyKey): void
 export function disposeOnUnmount<TF extends Disposer | Array<Disposer>>(
     target: React.Component<any, any>,
@@ -28,14 +28,13 @@ export function disposeOnUnmount<TF extends Disposer | Array<Disposer>>(
 export function disposeOnUnmount(
     target: React.Component<any, any>,
     propertyKeyOrFunction: PropertyKey | Disposer | Array<Disposer>
-): any {
+): PropertyKey | Disposer | Array<Disposer> | void {
     if (Array.isArray(propertyKeyOrFunction)) {
         return propertyKeyOrFunction.map((fn: Disposer) => disposeOnUnmount(target, fn))
     }
 
-    const c: Function | object =
-        Object.getPrototypeOf(target).constructor || Object.getPrototypeOf(target.constructor)
-    const c2: Function | object = Object.getPrototypeOf(target.constructor)
+    const c = Object.getPrototypeOf(target).constructor || Object.getPrototypeOf(target.constructor)
+    const c2 = Object.getPrototypeOf(target.constructor)
     if (
         !(
             c === React.Component ||
@@ -60,11 +59,11 @@ export function disposeOnUnmount(
     }
 
     // decorator's target is the prototype, so it doesn't have any instance properties like props
-    const isDecorator: boolean = typeof propertyKeyOrFunction === "string"
+    const isDecorator = typeof propertyKeyOrFunction === "string"
 
     // add property key / function we want run (disposed) to the store
-    const componentWasAlreadyModified: boolean = !!target[protoStoreKey] || !!target[instStoreKey]
-    const store: Array<any> = isDecorator
+    const componentWasAlreadyModified = !!target[protoStoreKey] || !!target[instStoreKey]
+    const store = isDecorator
         ? // decorators are added to the prototype store
           target[protoStoreKey] || (target[protoStoreKey] = [])
         : // functions are added to the instance store

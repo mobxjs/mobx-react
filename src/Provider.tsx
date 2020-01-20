@@ -2,19 +2,23 @@ import * as React from "react"
 import { shallowEqual } from "./utils/utils"
 import { IValueMap } from "./inject"
 
-export const MobXProviderContext: React.Context<any> = React.createContext({})
+export type TProviderShape = Record<string, any>
+export const MobXProviderContext: React.Context<TProviderShape> = React.createContext({})
 
 export interface ProviderProps extends IValueMap {
     children: React.ReactNode
 }
 
-export function Provider(props: ProviderProps): React.ReactElement {
+export function Provider(props: ProviderProps) {
     const { children, ...stores } = props
-    const parentValue: any = React.useContext(MobXProviderContext)
-    const value: React.MutableRefObject<any> = React.useRef({
-        ...parentValue,
-        ...stores
-    }).current
+    const parentValue: TProviderShape = React.useContext(MobXProviderContext)
+    const mutableProviderRef: React.MutableRefObject<TProviderShape> = React.useRef<TProviderShape>(
+        {
+            ...parentValue,
+            ...stores
+        }
+    )
+    const value: TProviderShape = mutableProviderRef.current
 
     if (process && typeof process.env !== "undefined" && process.env.NODE_ENV !== "production") {
         const newValue = { ...value, ...stores } // spread in previous state for the context based stores

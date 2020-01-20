@@ -1,7 +1,7 @@
 import { isObservableArray, isObservableObject, isObservableMap, untracked } from "mobx"
 
 // Copied from React.PropTypes
-function createChainableTypeChecker(validator: React.Validator<any>): React.Requireable<any> {
+function createChainableTypeChecker(validator: React.Validator<any>): React.Validator<any> {
     function checkType(
         isRequired: boolean,
         props: any,
@@ -36,10 +36,10 @@ function createChainableTypeChecker(validator: React.Validator<any>): React.Requ
         })
     }
 
-    const chainedCheckType: React.Validator<any> = checkType.bind(null, false)
-    // Add isRequired to satisfy Requireable
-    chainedCheckType["isRequired"] = checkType.bind(null, true)
-    return chainedCheckType as React.Requireable<any>
+    const chainedCheckType: any = checkType.bind(null, false)
+    // Add isRequired to satisfy Requirable
+    chainedCheckType.isRequired = checkType.bind(null, true)
+    return chainedCheckType
 }
 
 // Copied from React.PropTypes
@@ -97,126 +97,120 @@ function getPreciseType(propValue: any): string {
 function createObservableTypeCheckerCreator(
     allowNativeType: any,
     mobxType: any
-): React.Requireable<any> {
-    return createChainableTypeChecker(function(
-        props: any,
-        propName: string,
-        componentName: string,
-        location: string,
-        propFullName: string
-    ) {
-        return untracked(() => {
-            if (allowNativeType) {
-                if (getPropType(props[propName]) === mobxType.toLowerCase()) return null
-            }
-            let mobxChecker: Function
-            switch (mobxType) {
-                case "Array":
-                    mobxChecker = isObservableArray
-                    break
-                case "Object":
-                    mobxChecker = isObservableObject
-                    break
-                case "Map":
-                    mobxChecker = isObservableMap
-                    break
-                default:
-                    throw new Error(`Unexpected mobxType: ${mobxType}`)
-            }
-            const propValue = props[propName]
-            if (!mobxChecker(propValue)) {
-                const preciseType = getPreciseType(propValue)
-                const nativeTypeExpectationMessage = allowNativeType
-                    ? " or javascript `" + mobxType.toLowerCase() + "`"
-                    : ""
-                return new Error(
-                    "Invalid prop `" +
-                        propFullName +
-                        "` of type `" +
-                        preciseType +
-                        "` supplied to" +
-                        " `" +
-                        componentName +
-                        "`, expected `mobx.Observable" +
-                        mobxType +
-                        "`" +
-                        nativeTypeExpectationMessage +
-                        "."
-                )
-            }
-            return null
-        })
-    })
+): React.Validator<any> {
+    return createChainableTypeChecker(
+        (
+            props: any,
+            propName: string,
+            componentName: string,
+            location: string,
+            propFullName: string
+        ) => {
+            return untracked(() => {
+                if (allowNativeType) {
+                    if (getPropType(props[propName]) === mobxType.toLowerCase()) return null
+                }
+                let mobxChecker: Function
+                switch (mobxType) {
+                    case "Array":
+                        mobxChecker = isObservableArray
+                        break
+                    case "Object":
+                        mobxChecker = isObservableObject
+                        break
+                    case "Map":
+                        mobxChecker = isObservableMap
+                        break
+                    default:
+                        throw new Error(`Unexpected mobxType: ${mobxType}`)
+                }
+                const propValue = props[propName]
+                if (!mobxChecker(propValue)) {
+                    const preciseType = getPreciseType(propValue)
+                    const nativeTypeExpectationMessage = allowNativeType
+                        ? " or javascript `" + mobxType.toLowerCase() + "`"
+                        : ""
+                    return new Error(
+                        "Invalid prop `" +
+                            propFullName +
+                            "` of type `" +
+                            preciseType +
+                            "` supplied to" +
+                            " `" +
+                            componentName +
+                            "`, expected `mobx.Observable" +
+                            mobxType +
+                            "`" +
+                            nativeTypeExpectationMessage +
+                            "."
+                    )
+                }
+                return null
+            })
+        }
+    )
 }
 
 function createObservableArrayOfTypeChecker(
     allowNativeType: boolean,
     typeChecker: React.Validator<any>
 ) {
-    return createChainableTypeChecker(function(
-        props: any,
-        propName: string,
-        componentName: string,
-        location: string,
-        propFullName: string
-    ) {
-        return untracked(() => {
-            if (typeof typeChecker !== "function") {
-                return new Error(
-                    "Property `" +
-                        propFullName +
-                        "` of component `" +
-                        componentName +
-                        "` has " +
-                        "invalid PropType notation."
-                )
-            } else {
-                let error = createObservableTypeCheckerCreator(allowNativeType, "Array")(
-                    props,
-                    propName,
-                    componentName,
-                    location,
-                    propFullName
-                )
-
-                if (error instanceof Error) return error
-                const propValue = props[propName]
-                for (let i = 0; i < propValue.length; i++) {
-                    error = (typeChecker as React.Validator<any>)(
-                        propValue,
-                        `${i}`,
+    return createChainableTypeChecker(
+        (
+            props: any,
+            propName: string,
+            componentName: string,
+            location: string,
+            propFullName: string
+        ) => {
+            return untracked(() => {
+                if (typeof typeChecker !== "function") {
+                    return new Error(
+                        "Property `" +
+                            propFullName +
+                            "` of component `" +
+                            componentName +
+                            "` has " +
+                            "invalid PropType notation."
+                    )
+                } else {
+                    let error = createObservableTypeCheckerCreator(allowNativeType, "Array")(
+                        props,
+                        propName,
                         componentName,
                         location,
-                        propFullName + "[" + i + "]"
+                        propFullName
                     )
-                    if (error instanceof Error) return error
-                }
 
-                return null
-            }
-        })
-    })
+                    if (error instanceof Error) return error
+                    const propValue = props[propName]
+                    for (let i = 0; i < propValue.length; i++) {
+                        error = (typeChecker as React.Validator<any>)(
+                            propValue,
+                            `${i}`,
+                            componentName,
+                            location,
+                            propFullName + "[" + i + "]"
+                        )
+                        if (error instanceof Error) return error
+                    }
+
+                    return null
+                }
+            })
+        }
+    )
 }
 
-const observableArray: React.Requireable<any> = createObservableTypeCheckerCreator(false, "Array")
-const observableArrayOf: (
-    validator: React.Validator<any>
-) => React.Requireable<any> = createObservableArrayOfTypeChecker.bind(null, false)
-const observableMap: React.Requireable<any> = createObservableTypeCheckerCreator(false, "Map")
-const observableObject: React.Requireable<any> = createObservableTypeCheckerCreator(false, "Object")
-const arrayOrObservableArray: React.Requireable<any> = createObservableTypeCheckerCreator(
-    true,
-    "Array"
-)
-const arrayOrObservableArrayOf: (
-    validator: React.Validator<any>
-) => React.Requireable<any> = createObservableArrayOfTypeChecker.bind(null, true)
-const objectOrObservableObject: React.Requireable<any> = createObservableTypeCheckerCreator(
-    true,
-    "Object"
-)
+const observableArray = createObservableTypeCheckerCreator(false, "Array")
+const observableArrayOf = createObservableArrayOfTypeChecker.bind(null, false)
+const observableMap = createObservableTypeCheckerCreator(false, "Map")
+const observableObject = createObservableTypeCheckerCreator(false, "Object")
+const arrayOrObservableArray = createObservableTypeCheckerCreator(true, "Array")
+const arrayOrObservableArrayOf = createObservableArrayOfTypeChecker.bind(null, true)
+const objectOrObservableObject = createObservableTypeCheckerCreator(true, "Object")
 
-export const PropTypes: PropTypes = {
+export const PropTypes = {
     observableArray,
     observableArrayOf,
     observableMap,
@@ -224,14 +218,4 @@ export const PropTypes: PropTypes = {
     arrayOrObservableArray,
     arrayOrObservableArrayOf,
     objectOrObservableObject
-}
-
-export interface PropTypes {
-    observableArray: React.Requireable<any>
-    observableArrayOf: (validator: React.Validator<any>) => React.Requireable<any>
-    observableMap: React.Requireable<any>
-    observableObject: React.Requireable<any>
-    arrayOrObservableArray: React.Requireable<any>
-    arrayOrObservableArrayOf: (validator: React.Validator<any>) => React.Requireable<any>
-    objectOrObservableObject: React.Requireable<any>
 }

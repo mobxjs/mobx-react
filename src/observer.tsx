@@ -7,11 +7,11 @@ import { IReactComponent } from "./index"
 const hasSymbol: false | ((key: string) => symbol) = typeof Symbol === "function" && Symbol.for
 
 // Using react-is had some issues (and operates on elements, not on types), see #608 / #609
-const ReactForwardRefSymbol: false | symbol = hasSymbol
+const ReactForwardRefSymbol = hasSymbol
     ? Symbol.for("react.forward_ref")
     : typeof React.forwardRef === "function" && React.forwardRef((props: any) => null)["$$typeof"]
 
-const ReactMemoSymbol: false | symbol = hasSymbol
+const ReactMemoSymbol = hasSymbol
     ? Symbol.for("react.memo")
     : typeof React.memo === "function" && React.memo((props: any) => null)["$$typeof"]
 
@@ -35,7 +35,7 @@ export function observer(component: IReactComponent<any>): IReactComponent<any> 
     // we need to unwrap the render, because it is the inner render that needs to be tracked,
     // not the ForwardRef HoC
     if (ReactForwardRefSymbol && component["$$typeof"] === ReactForwardRefSymbol) {
-        const baseRender: any = component["render"]
+        const baseRender = component["render"]
         if (typeof baseRender !== "function")
             throw new Error("render property of ForwardRef was not a function")
         return React.forwardRef(function ObserverForwardRef() {

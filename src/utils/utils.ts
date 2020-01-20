@@ -1,4 +1,4 @@
-let symbolId: number = 0
+let symbolId = 0
 function createSymbol(name: string): symbol | string {
     if (typeof Symbol === "function") {
         return Symbol(name)
@@ -8,7 +8,7 @@ function createSymbol(name: string): symbol | string {
     return symbol
 }
 
-const createdSymbols: object = {}
+const createdSymbols = {}
 export function newSymbol(name: string): symbol | string {
     if (!createdSymbols[name]) {
         createdSymbols[name] = createSymbol(name)
@@ -22,8 +22,8 @@ export function shallowEqual(objA: any, objB: any): boolean {
     if (typeof objA !== "object" || objA === null || typeof objB !== "object" || objB === null) {
         return false
     }
-    const keysA: Array<string> = Object.keys(objA)
-    const keysB: Array<string> = Object.keys(objB)
+    const keysA = Object.keys(objA)
+    const keysB = Object.keys(objB)
     if (keysA.length !== keysB.length) return false
     for (let i = 0; i < keysA.length; i++) {
         if (!Object.hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
@@ -43,7 +43,7 @@ function is(x: any, y: any): boolean {
 }
 
 // based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js
-const hoistBlackList: any = {
+const hoistBlackList = {
     $$typeof: 1,
     render: 1,
     compare: 1,
@@ -60,8 +60,8 @@ const hoistBlackList: any = {
 }
 
 export function copyStaticProperties(base: object, target: object): void {
-    const protoProps: Array<string> = Object.getOwnPropertyNames(Object.getPrototypeOf(base))
-    Object.getOwnPropertyNames(base).forEach((key: string) => {
+    const protoProps = Object.getOwnPropertyNames(Object.getPrototypeOf(base))
+    Object.getOwnPropertyNames(base).forEach(key => {
         if (!hoistBlackList[key] && protoProps.indexOf(key) === -1) {
             Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key)!)
         }
@@ -91,8 +91,8 @@ export function setHiddenProp(target: object, prop: any, value: any): void {
  * Utilities for patching componentWillUnmount, to make sure @disposeOnUnmount works correctly icm with user defined hooks
  * and the handler provided by mobx-react
  */
-const mobxMixins: symbol | string = newSymbol("patchMixins")
-const mobxPatchedDefinition: symbol | string = newSymbol("patchedDefinition")
+const mobxMixins = newSymbol("patchMixins")
+const mobxPatchedDefinition = newSymbol("patchedDefinition")
 
 export interface Mixins {
     [_: string]: any
@@ -108,7 +108,7 @@ function getMixins(target: object, methodName: string): Mixins {
     return methodMixins
 }
 
-function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>): any {
+function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>) {
     // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
     mixins.locks++
 
@@ -178,14 +178,14 @@ function createDefinition(
     mixins: Mixins,
     originalMethod: Function
 ): Defintion {
-    let wrappedFunc: (...args: Array<any>) => any = wrapFunction(originalMethod, mixins)
+    let wrappedFunc = wrapFunction(originalMethod, mixins)
 
     return {
         [mobxPatchedDefinition]: true,
-        get: function(): (...args: Array<any>) => any {
+        get: function() {
             return wrappedFunc
         },
-        set: function(value: Function): void {
+        set: function(value: Function) {
             if (this === target) {
                 wrappedFunc = wrapFunction(value, mixins)
             } else {
