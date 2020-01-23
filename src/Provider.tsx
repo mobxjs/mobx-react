@@ -14,7 +14,7 @@ export function Provider(props: ProviderProps) {
     const mutableProviderRef = React.useRef({ ...parentValue, ...stores })
     const value = mutableProviderRef.current
 
-    if (process && typeof process.env !== "undefined" && process.env.NODE_ENV !== "production") {
+    if (__DEV__) {
         const newValue = { ...value, ...stores } // spread in previous state for the context based stores
         if (!shallowEqual(value, newValue)) {
             throw new Error(
