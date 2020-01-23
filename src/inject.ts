@@ -23,8 +23,8 @@ function createStoreInjector(
 ): IReactComponent<any> {
     // Support forward refs
     let Injector: IReactComponent<any> = React.forwardRef((props, ref) => {
-        const newProps: React.PropsWithRef<any> = { ...props }
-        const context: TProviderShape = React.useContext(MobXProviderContext)
+        const newProps = { ...props }
+        const context = React.useContext(MobXProviderContext)
         Object.assign(newProps, grabStoresFn(context || {}, newProps) || {})
 
         if (ref) {
@@ -59,10 +59,10 @@ function getInjectName(component: IReactComponent<any>, injectNames: string): st
 function grabStoresByName(
     storeNames: Array<string>
 ): (
-    baseStores: Record<string, any>,
-    nextProps: React.PropsWithRef<any>
+    baseStores: TProviderShape,
+    nextProps: React.Props<any>
 ) => React.PropsWithRef<any> | undefined {
-    return function(baseStores: Record<string, any>, nextProps: React.PropsWithRef<any>) {
+    return function(baseStores, nextProps) {
         storeNames.forEach(function(storeName) {
             if (
                 storeName in nextProps // prefer props over stores
@@ -85,7 +85,7 @@ export type IWrappedComponent<P> = {
 }
 
 export function inject(
-    ...stores: string[]
+    ...stores: Array<string>
 ): <T extends IReactComponent<any>>(
     target: T
 ) => T & (T extends IReactComponent<infer P> ? IWrappedComponent<P> : never)

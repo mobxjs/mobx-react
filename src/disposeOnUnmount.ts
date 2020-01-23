@@ -6,17 +6,15 @@ type Disposer = () => void
 const protoStoreKey = newSymbol("disposeOnUnmountProto")
 const instStoreKey = newSymbol("disposeOnUnmountInst")
 
-function runDisposersOnWillUnmount(): void {
-    ;[...(this[protoStoreKey] || []), ...(this[instStoreKey] || [])].forEach(
-        (propKeyOrFunction: PropertyKey | Function) => {
-            const prop: Array<Function> | Function =
-                typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
-            if (prop !== undefined && prop !== null) {
-                if (Array.isArray(prop)) prop.map((f: Function) => f())
-                else prop()
-            }
+function runDisposersOnWillUnmount() {
+    ;[...(this[protoStoreKey] || []), ...(this[instStoreKey] || [])].forEach(propKeyOrFunction => {
+        const prop =
+            typeof propKeyOrFunction === "string" ? this[propKeyOrFunction] : propKeyOrFunction
+        if (prop !== undefined && prop !== null) {
+            if (Array.isArray(prop)) prop.map(f => f())
+            else prop()
         }
-    )
+    })
 }
 
 export function disposeOnUnmount(target: React.Component<any, any>, propertyKey: PropertyKey): void
@@ -30,7 +28,7 @@ export function disposeOnUnmount(
     propertyKeyOrFunction: PropertyKey | Disposer | Array<Disposer>
 ): PropertyKey | Disposer | Array<Disposer> | void {
     if (Array.isArray(propertyKeyOrFunction)) {
-        return propertyKeyOrFunction.map((fn: Disposer) => disposeOnUnmount(target, fn))
+        return propertyKeyOrFunction.map(fn => disposeOnUnmount(target, fn))
     }
 
     const c = Object.getPrototypeOf(target).constructor || Object.getPrototypeOf(target.constructor)

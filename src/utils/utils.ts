@@ -94,8 +94,7 @@ export function setHiddenProp(target: object, prop: any, value: any): void {
 const mobxMixins = newSymbol("patchMixins")
 const mobxPatchedDefinition = newSymbol("patchedDefinition")
 
-export interface Mixins {
-    [_: string]: any
+export interface Mixins extends Record<string, any> {
     locks: number
     methods: Array<Function>
 }
@@ -113,7 +112,7 @@ function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>) {
     mixins.locks++
 
     try {
-        let retVal: any
+        let retVal
         if (realMethod !== undefined && realMethod !== null) {
             retVal = realMethod.apply(this, args)
         }
@@ -122,7 +121,7 @@ function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>) {
     } finally {
         mixins.locks--
         if (mixins.locks === 0) {
-            mixins.methods.forEach((mx: Function) => {
+            mixins.methods.forEach(mx => {
                 mx.apply(this, args)
             })
         }
@@ -130,30 +129,27 @@ function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>) {
 }
 
 function wrapFunction(realMethod: Function, mixins: Mixins): (...args: Array<any>) => any {
-    const fn: (...args: Array<any>) => any = function(...args: Array<any>) {
+    const fn = function(...args: Array<any>) {
         wrapper.call(this, realMethod, mixins, ...args)
     }
     return fn
 }
 
 export function patch(target: object, methodName: string, mixinMethod: Function): void {
-    const mixins: Mixins = getMixins(target, methodName)
+    const mixins = getMixins(target, methodName)
 
     if (mixins.methods.indexOf(mixinMethod) < 0) {
         mixins.methods.push(mixinMethod)
     }
 
-    const oldDefinition: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
-        target,
-        methodName
-    )
+    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName)
     if (oldDefinition && oldDefinition[mobxPatchedDefinition]) {
         // already patched definition, do not repatch
         return
     }
 
-    const originalMethod: Function = target[methodName]
-    const newDefinition: Defintion = createDefinition(
+    const originalMethod = target[methodName]
+    const newDefinition = createDefinition(
         target,
         methodName,
         oldDefinition ? oldDefinition.enumerable : undefined,
@@ -185,7 +181,7 @@ function createDefinition(
         get: function() {
             return wrappedFunc
         },
-        set: function(value: Function) {
+        set: function(value) {
             if (this === target) {
                 wrappedFunc = wrapFunction(value, mixins)
             } else {

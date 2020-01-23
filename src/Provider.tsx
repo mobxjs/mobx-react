@@ -11,14 +11,9 @@ export interface ProviderProps extends IValueMap {
 
 export function Provider(props: ProviderProps) {
     const { children, ...stores } = props
-    const parentValue: TProviderShape = React.useContext(MobXProviderContext)
-    const mutableProviderRef: React.MutableRefObject<TProviderShape> = React.useRef<TProviderShape>(
-        {
-            ...parentValue,
-            ...stores
-        }
-    )
-    const value: TProviderShape = mutableProviderRef.current
+    const parentValue = React.useContext(MobXProviderContext)
+    const mutableProviderRef = React.useRef({ ...parentValue, ...stores })
+    const value = mutableProviderRef.current
 
     if (process && typeof process.env !== "undefined" && process.env.NODE_ENV !== "production") {
         const newValue = { ...value, ...stores } // spread in previous state for the context based stores
