@@ -1,5 +1,5 @@
 let symbolId = 0
-function createSymbol(name) {
+function createSymbol(name: string): symbol | string {
     if (typeof Symbol === "function") {
         return Symbol(name)
     }
@@ -9,14 +9,14 @@ function createSymbol(name) {
 }
 
 const createdSymbols = {}
-export function newSymbol(name) {
+export function newSymbol(name: string): symbol | string {
     if (!createdSymbols[name]) {
         createdSymbols[name] = createSymbol(name)
     }
     return createdSymbols[name]
 }
 
-export function shallowEqual(objA, objB) {
+export function shallowEqual(objA: any, objB: any): boolean {
     //From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
     if (is(objA, objB)) return true
     if (typeof objA !== "object" || objA === null || typeof objB !== "object" || objB === null) {
@@ -26,14 +26,14 @@ export function shallowEqual(objA, objB) {
     const keysB = Object.keys(objB)
     if (keysA.length !== keysB.length) return false
     for (let i = 0; i < keysA.length; i++) {
-        if (!hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
+        if (!Object.hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
             return false
         }
     }
     return true
 }
 
-function is(x, y) {
+function is(x: any, y: any): boolean {
     // From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
     if (x === y) {
         return x !== 0 || 1 / x === 1 / y
@@ -59,11 +59,11 @@ const hoistBlackList = {
     propTypes: 1
 }
 
-export function copyStaticProperties(base, target) {
+export function copyStaticProperties(base: object, target: object): void {
     const protoProps = Object.getOwnPropertyNames(Object.getPrototypeOf(base))
     Object.getOwnPropertyNames(base).forEach(key => {
         if (!hoistBlackList[key] && protoProps.indexOf(key) === -1) {
-            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key))
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key)!)
         }
     })
 }
@@ -74,7 +74,7 @@ export function copyStaticProperties(base, target) {
  * @param prop
  * @param value
  */
-export function setHiddenProp(target, prop, value) {
+export function setHiddenProp(target: object, prop: any, value: any): void {
     if (!Object.hasOwnProperty.call(target, prop)) {
         Object.defineProperty(target, prop, {
             enumerable: false,
@@ -94,7 +94,12 @@ export function setHiddenProp(target, prop, value) {
 const mobxMixins = newSymbol("patchMixins")
 const mobxPatchedDefinition = newSymbol("patchedDefinition")
 
-function getMixins(target, methodName) {
+export interface Mixins extends Record<string, any> {
+    locks: number
+    methods: Array<Function>
+}
+
+function getMixins(target: object, methodName: string): Mixins {
     const mixins = (target[mobxMixins] = target[mobxMixins] || {})
     const methodMixins = (mixins[methodName] = mixins[methodName] || {})
     methodMixins.locks = methodMixins.locks || 0
@@ -102,7 +107,7 @@ function getMixins(target, methodName) {
     return methodMixins
 }
 
-function wrapper(realMethod, mixins, ...args) {
+function wrapper(realMethod: Function, mixins: Mixins, ...args: Array<any>) {
     // locks are used to ensure that mixins are invoked only once per invocation, even on recursive calls
     mixins.locks++
 
@@ -123,14 +128,14 @@ function wrapper(realMethod, mixins, ...args) {
     }
 }
 
-function wrapFunction(realMethod, mixins) {
-    const fn = function(...args) {
+function wrapFunction(realMethod: Function, mixins: Mixins): (...args: Array<any>) => any {
+    const fn = function(...args: Array<any>) {
         wrapper.call(this, realMethod, mixins, ...args)
     }
     return fn
 }
 
-export function patch(target, methodName, mixinMethod) {
+export function patch(target: object, methodName: string, mixinMethod: Function): void {
     const mixins = getMixins(target, methodName)
 
     if (mixins.methods.indexOf(mixinMethod) < 0) {
@@ -155,7 +160,13 @@ export function patch(target, methodName, mixinMethod) {
     Object.defineProperty(target, methodName, newDefinition)
 }
 
-function createDefinition(target, methodName, enumerable, mixins, originalMethod) {
+function createDefinition(
+    target: object,
+    methodName: string,
+    enumerable: any,
+    mixins: Mixins,
+    originalMethod: Function
+): PropertyDescriptor {
     let wrappedFunc = wrapFunction(originalMethod, mixins)
 
     return {

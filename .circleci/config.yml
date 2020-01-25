@@ -46,13 +46,13 @@ jobs:
                   paths:
                       - ./*
 
-    test-mobx-react:
+    test-coverage:
         executor: my-executor
         steps:
             - attach_workspace:
                   at: .
 
-            - run: yarn test:ci
+            - run: yarn test:coverage
             - store_test_results:
                   path: ./test-results
 
@@ -67,7 +67,7 @@ jobs:
             - attach_workspace:
                   at: .
 
-            - run: yarn size
+            - run: yarn test:size
 
     # upload coverage
     upload-coveralls:
@@ -94,7 +94,7 @@ workflows:
         jobs:
             - build
 
-            - test-mobx-react:
+            - test-coverage:
                   requires:
                       - build
             - test-size:
@@ -103,4 +103,4 @@ workflows:
 
             - upload-coveralls:
                   requires:
-                      - test-mobx-react
+                      - test-coverage

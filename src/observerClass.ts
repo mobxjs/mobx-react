@@ -9,11 +9,13 @@ const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
 
-export function makeClassComponentObserver(componentClass) {
+export function makeClassComponentObserver(
+    componentClass: React.ComponentClass<any, any>
+): React.ComponentClass<any, any> {
     const target = componentClass.prototype
     if (target.componentWillReact)
         throw new Error("The componentWillReact life-cycle event is no longer supported")
-    if (componentClass.__proto__ !== PureComponent) {
+    if (componentClass["__proto__"] !== PureComponent) {
         if (!target.shouldComponentUpdate) target.shouldComponentUpdate = observerSCU
         else if (target.shouldComponentUpdate !== observerSCU)
             // n.b. unequal check, instead of existence check, as @observer might be on superclass as well
@@ -49,7 +51,7 @@ export function makeClassComponentObserver(componentClass) {
 }
 
 // Generates a friendly name for debugging
-function getDisplayName(comp) {
+function getDisplayName(comp: any) {
     return (
         comp.displayName ||
         comp.name ||
@@ -58,7 +60,7 @@ function getDisplayName(comp) {
     )
 }
 
-function makeComponentReactive(render) {
+function makeComponentReactive(render: any) {
     if (isUsingStaticRendering() === true) return render.call(this)
 
     /**
@@ -96,7 +98,8 @@ function makeComponentReactive(render) {
             }
         }
     })
-    reaction.reactComponent = this
+
+    reaction["reactComponent"] = this
     reactiveRender[mobxAdminProperty] = reaction
     this.render = reactiveRender
 
@@ -120,7 +123,7 @@ function makeComponentReactive(render) {
     return reactiveRender.call(this)
 }
 
-function observerSCU(nextProps, nextState) {
+function observerSCU(nextProps: React.Props<any>, nextState: any): boolean {
     if (isUsingStaticRendering()) {
         console.warn(
             "[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side."
@@ -137,7 +140,7 @@ function observerSCU(nextProps, nextState) {
     return !shallowEqual(this.props, nextProps)
 }
 
-function makeObservableProp(target, propName) {
+function makeObservableProp(target: any, propName: string): void {
     const valueHolderKey = newSymbol(`reactProp_${propName}_valueHolder`)
     const atomHolderKey = newSymbol(`reactProp_${propName}_atomHolder`)
     function getAtom() {

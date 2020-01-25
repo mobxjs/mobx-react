@@ -1,5 +1,7 @@
-import * as React from "react"
+import React from "react"
 import { patch, newSymbol } from "./utils/utils"
+
+type Disposer = () => void
 
 const protoStoreKey = newSymbol("disposeOnUnmountProto")
 const instStoreKey = newSymbol("disposeOnUnmountInst")
@@ -15,7 +17,16 @@ function runDisposersOnWillUnmount() {
     })
 }
 
-export function disposeOnUnmount(target, propertyKeyOrFunction) {
+export function disposeOnUnmount(target: React.Component<any, any>, propertyKey: PropertyKey): void
+export function disposeOnUnmount<TF extends Disposer | Array<Disposer>>(
+    target: React.Component<any, any>,
+    fn: TF
+): TF
+
+export function disposeOnUnmount(
+    target: React.Component<any, any>,
+    propertyKeyOrFunction: PropertyKey | Disposer | Array<Disposer>
+): PropertyKey | Disposer | Array<Disposer> | void {
     if (Array.isArray(propertyKeyOrFunction)) {
         return propertyKeyOrFunction.map(fn => disposeOnUnmount(target, fn))
     }

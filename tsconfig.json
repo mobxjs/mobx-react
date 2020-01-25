@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "lib": ["esnext", "dom"],
+        "jsx": "react",
+        "outDir": "dist",
+        "downlevelIteration": true,
+        "alwaysStrict": true,
+        "sourceMap": false,
+        "declaration": true,
+        "removeComments": false,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "noUnusedParameters": false,
+        "suppressImplicitAnyIndexErrors": true,
+        "esModuleInterop": true
+    },
+    "include": ["src/**/*.ts", "test/**/*.ts"]
+}

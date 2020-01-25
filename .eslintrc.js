@@ -1,13 +1,7 @@
 module.exports = {
-    extends: ["eslint:recommended", "plugin:prettier/recommended", "plugin:react/recommended"],
-    parser: "babel-eslint",
-    parserOptions: {
-        ecmaVersion: 2018,
-        sourceType: "module",
-        ecmaFeatures: {
-            jsx: true
-        }
-    },
+    parser: "@typescript-eslint/parser",
+    plugins: ["@typescript-eslint"],
+    extends: "eslint:recommended",
     env: {
         browser: true,
         es6: true
@@ -15,10 +9,24 @@ module.exports = {
     globals: {
         process: "readonly"
     },
-    plugins: ["react"],
+    parserOptions: {
+        ecmaVersion: 6,
+        sourceType: "module"
+    },
     settings: {
         react: {
             version: "detect"
         }
-    }
+    },
+    overrides: [
+        {
+            files: ["**/*.ts"],
+            rules: {
+                // Things that don't play nicely with TS:
+                "require-yield": "off",
+                "no-unused-vars": "off",
+                "no-extra-semi": "off"
+            }
+        }
+    ]
 }

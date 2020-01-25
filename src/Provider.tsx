@@ -1,15 +1,18 @@
-/* eslint-disable react/prop-types */
 import React from "react"
 import { shallowEqual } from "./utils/utils"
+import { IValueMap } from "./types/IValueMap"
 
-export const MobXProviderContext = React.createContext({})
+export const MobXProviderContext = React.createContext<IValueMap>({})
 
-export function Provider({ children, ...stores }) {
+export interface ProviderProps extends IValueMap {
+    children: React.ReactNode
+}
+
+export function Provider(props: ProviderProps) {
+    const { children, ...stores } = props
     const parentValue = React.useContext(MobXProviderContext)
-    const value = React.useRef({
-        ...parentValue,
-        ...stores
-    }).current
+    const mutableProviderRef = React.useRef({ ...parentValue, ...stores })
+    const value = mutableProviderRef.current
 
     if (process && typeof process.env !== "undefined" && process.env.NODE_ENV !== "production") {
         const newValue = { ...value, ...stores } // spread in previous state for the context based stores
