@@ -1,4 +1,4 @@
-import * as React from "react"
+import React from "react"
 import { observer } from "./observer"
 import { copyStaticProperties } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"
@@ -70,10 +70,6 @@ function grabStoresByName(
         })
         return nextProps
     }
-}
-
-export type IWrappedComponent<P> = {
-    wrappedComponent: IReactComponent<P>
 }
 
 export function inject(

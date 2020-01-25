@@ -8,7 +8,8 @@ function createChainableTypeChecker(validator: React.Validator<any>): React.Vali
         propName: string,
         componentName: string,
         location: string,
-        propFullName: string
+        propFullName: string,
+        ...rest: any[]
     ) {
         return untracked(() => {
             componentName = componentName || "<<anonymous>>"
@@ -31,7 +32,8 @@ function createChainableTypeChecker(validator: React.Validator<any>): React.Vali
                 }
                 return null
             } else {
-                return validator(props, propName, componentName, location, propFullName)
+                // @ts-ignore rest arg is necessary for some React internals - fails tests otherwise
+                return validator(props, propName, componentName, location, propFullName, ...rest)
             }
         })
     }
@@ -147,43 +149,46 @@ function createObservableArrayOfTypeChecker(
     allowNativeType: boolean,
     typeChecker: React.Validator<any>
 ) {
-    return createChainableTypeChecker((props, propName, componentName, location, propFullName) => {
-        return untracked(() => {
-            if (typeof typeChecker !== "function") {
-                return new Error(
-                    "Property `" +
-                        propFullName +
-                        "` of component `" +
-                        componentName +
-                        "` has " +
-                        "invalid PropType notation."
-                )
-            } else {
-                let error = createObservableTypeCheckerCreator(allowNativeType, "Array")(
-                    props,
-                    propName,
-                    componentName,
-                    location,
-                    propFullName
-                )
-
-                if (error instanceof Error) return error
-                const propValue = props[propName]
-                for (let i = 0; i < propValue.length; i++) {
-                    error = (typeChecker as React.Validator<any>)(
-                        propValue,
-                        `${i}`,
+    return createChainableTypeChecker(
+        (props, propName, componentName, location, propFullName, ...rest) => {
+            return untracked(() => {
+                if (typeof typeChecker !== "function") {
+                    return new Error(
+                        "Property `" +
+                            propFullName +
+                            "` of component `" +
+                            componentName +
+                            "` has " +
+                            "invalid PropType notation."
+                    )
+                } else {
+                    let error = createObservableTypeCheckerCreator(allowNativeType, "Array")(
+                        props,
+                        propName,
                         componentName,
                         location,
-                        propFullName + "[" + i + "]"
+                        propFullName
                     )
-                    if (error instanceof Error) return error
-                }
 
-                return null
-            }
-        })
-    })
+                    if (error instanceof Error) return error
+                    const propValue = props[propName]
+                    for (let i = 0; i < propValue.length; i++) {
+                        error = (typeChecker as React.Validator<any>)(
+                            propValue,
+                            i as any,
+                            componentName,
+                            location,
+                            propFullName + "[" + i + "]",
+                            ...rest
+                        )
+                        if (error instanceof Error) return error
+                    }
+
+                    return null
+                }
+            })
+        }
+    )
 }
 
 const observableArray = createObservableTypeCheckerCreator(false, "Array")
