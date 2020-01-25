@@ -2,7 +2,7 @@ import * as React from "react"
 import { observer as observerLite, Observer } from "mobx-react-lite"
 
 import { makeClassComponentObserver } from "./observerClass"
-import { IReactComponent } from "./index"
+import { IReactComponent } from "./types/IReactComponent"
 
 const hasSymbol = typeof Symbol === "function" && Symbol.for
 

@@ -19,11 +19,7 @@ export {
 export { observer } from "./observer"
 
 export { MobXProviderContext, Provider, ProviderProps } from "./Provider"
-export { inject, IStoresToProps, IValueMap, IWrappedComponent } from "./inject"
+export { inject } from "./inject"
 export { disposeOnUnmount } from "./disposeOnUnmount"
 export { PropTypes } from "./propTypes"
-
-export type IReactComponent<P = any> =
-    | React.ClassicComponentClass<P>
-    | React.ComponentClass<P>
-    | React.StatelessComponent<P>
+export { IWrappedComponent } from "./IWrappedComponent"

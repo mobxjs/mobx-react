@@ -2,15 +2,10 @@ import * as React from "react"
 import { observer } from "./observer"
 import { copyStaticProperties } from "./utils/utils"
 import { MobXProviderContext } from "./Provider"
-import { IReactComponent } from "./index"
-
-export type IValueMap = Record<string, any>
-export type IStoresToProps<
-    S extends IValueMap = {},
-    P extends IValueMap = {},
-    I extends IValueMap = {},
-    C extends IValueMap = {}
-> = (stores: S, nextProps: P, context?: C) => I
+import { IReactComponent } from "./types/IReactComponent"
+import { IValueMap } from "./types/IValueMap"
+import { IWrappedComponent } from "./types/IWrappedComponent"
+import { IStoresToProps } from "./types/IStoresToProps"
 
 /**
  * Store Injection

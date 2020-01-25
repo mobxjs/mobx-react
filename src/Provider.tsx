@@ -1,8 +1,8 @@
 import * as React from "react"
 import { shallowEqual } from "./utils/utils"
-import { IValueMap } from "./inject"
+import { IValueMap } from "./types/IValueMap"
 
-export const MobXProviderContext: React.Context<IValueMap> = React.createContext({})
+export const MobXProviderContext = React.createContext<IValueMap>({})
 
 export interface ProviderProps extends IValueMap {
     children: React.ReactNode
