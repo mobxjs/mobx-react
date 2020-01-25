@@ -4,7 +4,7 @@ import { observer as observerLite, Observer } from "mobx-react-lite"
 import { makeClassComponentObserver } from "./observerClass"
 import { IReactComponent } from "./index"
 
-const hasSymbol: false | ((key: string) => symbol) = typeof Symbol === "function" && Symbol.for
+const hasSymbol = typeof Symbol === "function" && Symbol.for
 
 // Using react-is had some issues (and operates on elements, not on types), see #608 / #609
 const ReactForwardRefSymbol = hasSymbol

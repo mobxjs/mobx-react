@@ -2,8 +2,7 @@ import * as React from "react"
 import { shallowEqual } from "./utils/utils"
 import { IValueMap } from "./inject"
 
-export type TProviderShape = Record<string, any>
-export const MobXProviderContext: React.Context<TProviderShape> = React.createContext({})
+export const MobXProviderContext: React.Context<IValueMap> = React.createContext({})
 
 export interface ProviderProps extends IValueMap {
     children: React.ReactNode

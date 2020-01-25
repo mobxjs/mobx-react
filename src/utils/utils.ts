@@ -159,13 +159,6 @@ export function patch(target: object, methodName: string, mixinMethod: Function)
 
     Object.defineProperty(target, methodName, newDefinition)
 }
-interface Defintion {
-    [x: number]: boolean
-    get: () => (...args: Array<any>) => any
-    set(value: any): void
-    configurable: boolean
-    enumerable: any
-}
 
 function createDefinition(
     target: object,
@@ -173,7 +166,7 @@ function createDefinition(
     enumerable: any,
     mixins: Mixins,
     originalMethod: Function
-): Defintion {
+): PropertyDescriptor {
     let wrappedFunc = wrapFunction(originalMethod, mixins)
 
     return {

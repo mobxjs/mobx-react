@@ -1,7 +1,7 @@
 import * as React from "react"
 import { observer } from "./observer"
 import { copyStaticProperties } from "./utils/utils"
-import { MobXProviderContext, TProviderShape } from "./Provider"
+import { MobXProviderContext } from "./Provider"
 import { IReactComponent } from "./index"
 
 export type IValueMap = Record<string, any>
@@ -58,10 +58,7 @@ function getInjectName(component: IReactComponent<any>, injectNames: string): st
 
 function grabStoresByName(
     storeNames: Array<string>
-): (
-    baseStores: TProviderShape,
-    nextProps: React.Props<any>
-) => React.PropsWithRef<any> | undefined {
+): (baseStores: IValueMap, nextProps: React.Props<any>) => React.PropsWithRef<any> | undefined {
     return function(baseStores, nextProps) {
         storeNames.forEach(function(storeName) {
             if (
