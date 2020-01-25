@@ -1,4 +1,4 @@
-import * as React from "react"
+import React from "react"
 import { patch, newSymbol } from "./utils/utils"
 
 type Disposer = () => void

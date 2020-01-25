@@ -15,19 +15,21 @@
     "url": "https://github.com/mobxjs/mobx-react.git"
   },
   "scripts": {
+    "test": "jest",
+    "watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "test:types": "yarn tsc --noEmit",
+    "test:check": "yarn test:types && yarn lint",
+    "test:ts": "tsc -p test/ts",
+    "test:coverage": "jest -i --coverage",
+    "test:size": "size-limit",
+    "build": "yarn bundle && yarn makern",
     "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
-    "lint": "eslint .",
-    "test": "jest && yarn test:ts",
-    "test:ts": "tsc -p test/ts*",
-    "test:ci": "jest -i --coverage && yarn test:ts && yarn lint",
-    "size": "size-limit",
-    "build": "yarn bundle && yarn copytypes && yarn makern",
     "makern": "shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && yarn replace \"react-dom\" \"react-native\" dist/mobx-react.rn.module.js --silent",
     "bundle": "yarn bundle-cjs-and-es && yarn bundle-umd",
     "bundle-cjs-and-es": "yarn bundle-via-microbundle --format cjs,es --no-compress",
     "bundle-umd": "yarn bundle-via-microbundle --format umd --globals react-dom=ReactDOM,react=React,mobx-react-lite=mobxReactLite --name mobxReact",
-    "bundle-via-microbundle": "microbundle --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite",
-    "watch": "jest --watch"
+    "bundle-via-microbundle": "microbundle --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -52,6 +54,7 @@
     "@testing-library/react": "^9.0.2",
     "@types/create-react-class": "^15.6.0",
     "@types/node": "^10.0.0",
+    "@types/jest": "^24.9.1",
     "@types/prop-types": "^15.5.2",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
@@ -73,7 +76,7 @@
     "microbundle": "^0.11.0",
     "mobx": "^5.0.0",
     "prettier": "^1.7.2",
-    "prop-types": "^15.6.0",
+    "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "replace": "^1.1.0",
@@ -106,21 +109,32 @@
     ]
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.test.json"
+      }
+    },
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest",
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/\\./"
+    ],
+    "watchPathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
     "setupFilesAfterEnv": [
-      "@testing-library/jest-dom/extend-expect",
       "<rootDir>/jest.setup.ts"
     ],
     "testURL": "http://127.0.0.1/"
-  },
-  "transform": {
-    "^.+\\.tsx?$": "ts-jest",
-    "^.+\\.jsx?$": "babel-jest"
-  },
-  "moduleFileExtensions": [
-    "ts",
-    "tsx",
-    "js",
-    "jsx",
-    "json"
-  ]
+  }
 }

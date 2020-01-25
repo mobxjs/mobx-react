@@ -46,7 +46,7 @@ jobs:
                   paths:
                       - ./*
 
-    test-mobx-react:
+    test-coverage:
         executor: my-executor
         steps:
             - attach_workspace:
@@ -94,7 +94,7 @@ workflows:
         jobs:
             - build
 
-            - test-mobx-react:
+            - test-coverage:
                   requires:
                       - build
             - test-size:
