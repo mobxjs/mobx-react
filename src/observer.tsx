@@ -40,7 +40,7 @@ export function observer<T extends IReactComponent>(component: T): T {
             throw new Error("render property of ForwardRef was not a function")
         return React.forwardRef(function ObserverForwardRef() {
             return <Observer>{() => baseRender.apply(undefined, arguments)}</Observer>
-        }) as any
+        }) as T
     }
 
     // Function component
