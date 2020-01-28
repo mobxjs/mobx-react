@@ -18,7 +18,7 @@ const ReactMemoSymbol = hasSymbol
 /**
  * Observer function / decorator
  */
-export function observer(component: IReactComponent<any>): IReactComponent<any> {
+export function observer<T extends IReactComponent>(component: T): T {
     if (component["isMobxInjector"] === true) {
         console.warn(
             "Mobx observer: You are trying to use 'observer' on a component that already has 'inject'. Please apply 'observer' before applying 'inject'"
@@ -40,7 +40,7 @@ export function observer(component: IReactComponent<any>): IReactComponent<any> 
             throw new Error("render property of ForwardRef was not a function")
         return React.forwardRef(function ObserverForwardRef() {
             return <Observer>{() => baseRender.apply(undefined, arguments)}</Observer>
-        })
+        }) as T
     }
 
     // Function component
@@ -50,8 +50,8 @@ export function observer(component: IReactComponent<any>): IReactComponent<any> 
         !component["isReactClass"] &&
         !Object.prototype.isPrototypeOf.call(React.Component, component)
     ) {
-        return observerLite(component as React.StatelessComponent<any>)
+        return observerLite(component as React.StatelessComponent<any>) as T
     }
 
-    return makeClassComponentObserver(component as React.ComponentClass<any, any>)
+    return makeClassComponentObserver(component as React.ComponentClass<any, any>) as T
 }
