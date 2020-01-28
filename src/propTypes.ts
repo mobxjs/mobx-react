@@ -1,7 +1,7 @@
 import { isObservableArray, isObservableObject, isObservableMap, untracked } from "mobx"
 
 // Copied from React.PropTypes
-function createChainableTypeChecker(validator: React.Validator<any>): React.Validator<any> {
+function createChainableTypeChecker(validator: React.Validator<any>): React.Requireable<any> {
     function checkType(
         isRequired: boolean,
         props: any,
@@ -99,7 +99,7 @@ function getPreciseType(propValue: any): string {
 function createObservableTypeCheckerCreator(
     allowNativeType: any,
     mobxType: any
-): React.Validator<any> {
+): React.Requireable<any> {
     return createChainableTypeChecker((props, propName, componentName, location, propFullName) => {
         return untracked(() => {
             if (allowNativeType) {
