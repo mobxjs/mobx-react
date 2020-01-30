@@ -18,7 +18,7 @@ describe("stateless component with propTypes", () => {
 
     test("default property value should be propagated", () => {
         expect(StatelessComp.defaultProps.testProp).toBe("default value for prop testProp")
-        expect(StatelessCompObserver.defaultProps.testProp).toBe("default value for prop testProp")
+        expect(StatelessCompObserver.defaultProps!.testProp).toBe("default value for prop testProp")
     })
 
     const originalConsoleError = console.error
@@ -39,7 +39,7 @@ describe("stateless component with propTypes", () => {
 })
 
 test("stateless component with context support", () => {
-    const C = React.createContext()
+    const C = React.createContext<any>({})
 
     const StateLessCompWithContext = () => (
         <C.Consumer>{value => <div>context: {value.testContext}</div>}</C.Consumer>
@@ -68,7 +68,7 @@ test("component with observable propTypes", () => {
         }
     }
     const originalConsoleError = console.error
-    const warnings = []
+    const warnings: Array<any> = []
     console.error = msg => warnings.push(msg)
     // eslint-disable-next-line no-unused-vars
     const firstWrapper = <Comp a1={[]} a2={[]} />

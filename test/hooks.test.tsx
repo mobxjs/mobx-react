@@ -9,7 +9,7 @@ afterEach(() => {
 test("computed properties react to props when using hooks", async () => {
     jest.useFakeTimers()
 
-    const seen = []
+    const seen: Array<string> = []
 
     const Child = ({ x }) => {
         const props = useAsObservableSource({ x })
@@ -19,7 +19,9 @@ test("computed properties react to props when using hooks", async () => {
             }
         }))
 
-        return <Observer>{() => (seen.push(store.getPropX), <div>{store.getPropX}</div>)}</Observer>
+        return (
+            <Observer>{() => (seen.push(store.getPropX), (<div>{store.getPropX}</div>))}</Observer>
+        )
     }
 
     const Parent = () => {
@@ -36,17 +38,17 @@ test("computed properties react to props when using hooks", async () => {
     }
 
     const { container } = render(<Parent />)
-    expect(container).toHaveTextContent(0)
+    expect(container).toHaveTextContent("0")
 
     jest.runAllTimers()
     expect(seen).toEqual(["parent", 0, "parent", 2])
-    expect(container).toHaveTextContent(2)
+    expect(container).toHaveTextContent("2")
 })
 
 test("computed properties result in double render when using observer instead of Observer", async () => {
     jest.useFakeTimers()
 
-    const seen = []
+    const seen: Array<string> = []
 
     const Child = observer(({ x }) => {
         const props = useAsObservableSource({ x })
@@ -74,7 +76,7 @@ test("computed properties result in double render when using observer instead of
     }
 
     const { container } = render(<Parent />)
-    expect(container).toHaveTextContent(0)
+    expect(container).toHaveTextContent("0")
 
     jest.runAllTimers()
     expect(seen).toEqual([
@@ -84,5 +86,5 @@ test("computed properties result in double render when using observer instead of
         2,
         2 // should contain "2" only once! But with hooks, one update is scheduled based the fact that props change, the other because the observable source changed.
     ])
-    expect(container).toHaveTextContent(2)
+    expect(container).toHaveTextContent("2")
 })

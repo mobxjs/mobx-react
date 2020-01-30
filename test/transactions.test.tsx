@@ -34,13 +34,13 @@ test("mobx issue 50", async () => {
     flipStuff()
 
     expect(asText).toBe("false:true:true")
-    expect(document.getElementById("x").innerHTML).toBe("false,true,true")
+    expect(document.getElementById("x")!.innerHTML).toBe("false,true,true")
 })
 
 test("ReactDOM.render should respect transaction", () => {
     const a = observable.box(2)
     const loaded = observable.box(false)
-    const valuesSeen = []
+    const valuesSeen: Array<number> = []
 
     const Component = observer(() => {
         valuesSeen.push(a.get())
@@ -63,7 +63,7 @@ test("ReactDOM.render should respect transaction", () => {
 test("ReactDOM.render in transaction should succeed", () => {
     const a = observable.box(2)
     const loaded = observable.box(false)
-    const valuesSeen = []
+    const valuesSeen: Array<number> = []
     const Component = observer(() => {
         valuesSeen.push(a.get())
         if (loaded.get()) return <div>{a.get()}</div>

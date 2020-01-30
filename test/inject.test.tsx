@@ -3,13 +3,13 @@ import PropTypes from "prop-types"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
 import { render, act } from "@testing-library/react"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
 
 describe("inject based context", () => {
     test("basic context", () => {
         const C = inject("foo")(
             observer(
-                class X extends React.Component {
+                class X extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -33,7 +33,7 @@ describe("inject based context", () => {
 
     test("props override context", () => {
         const C = inject("foo")(
-            class T extends React.Component {
+            class T extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -45,7 +45,7 @@ describe("inject based context", () => {
             }
         )
         const B = () => <C foo={42} />
-        const A = class T extends React.Component {
+        const A = class T extends React.Component<any, any> {
             render() {
                 return (
                     <Provider foo="bar">
@@ -60,7 +60,7 @@ describe("inject based context", () => {
 
     test("wraps displayName of original component", () => {
         const A = inject("foo")(
-            class ComponentA extends React.Component {
+            class ComponentA extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -72,7 +72,7 @@ describe("inject based context", () => {
             }
         )
         const B = inject()(
-            class ComponentB extends React.Component {
+            class ComponentB extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -84,7 +84,7 @@ describe("inject based context", () => {
             }
         )
         const C = inject(() => ({}))(
-            class ComponentC extends React.Component {
+            class ComponentC extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -105,7 +105,7 @@ describe("inject based context", () => {
     test("store should be available", () => {
         const C = inject("foo")(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -118,7 +118,7 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C />
-        const A = class A extends React.Component {
+        const A = class A extends React.Component<any, any> {
             render() {
                 return (
                     <Provider baz={42}>
@@ -138,7 +138,7 @@ describe("inject based context", () => {
     test("store is not required if prop is available", () => {
         const C = inject("foo")(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -158,7 +158,7 @@ describe("inject based context", () => {
     test("inject merges (and overrides) props", () => {
         const C = inject(() => ({ a: 1 }))(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         expect(this.props).toEqual({ a: 1, b: 2 })
                         return null
@@ -180,7 +180,7 @@ describe("inject based context", () => {
             }
         })(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -193,7 +193,7 @@ describe("inject based context", () => {
                 }
             )
         )
-        const B = class B extends React.Component {
+        const B = class B extends React.Component<any, any> {
             render() {
                 return <C baz={42} />
             }
@@ -208,7 +208,8 @@ describe("inject based context", () => {
     })
 
     test("inject forwards ref", () => {
-        class FancyComp extends React.Component {
+        class FancyComp extends React.Component<any, any> {
+            didRender
             render() {
                 this.didRender = true
                 return null
@@ -217,10 +218,10 @@ describe("inject based context", () => {
             doSomething() {}
         }
 
-        const ref = React.createRef()
+        const ref = React.createRef<FancyComp>()
         render(<FancyComp ref={ref} />)
-        expect(typeof ref.current.doSomething).toBe("function")
-        expect(ref.current.didRender).toBe(true)
+        expect(typeof ref.current!.doSomething).toBe("function")
+        expect(ref.current!.didRender).toBe(true)
 
         const InjectedFancyComp = inject("bla")(FancyComp)
         const ref2 = React.createRef()
@@ -254,7 +255,7 @@ describe("inject based context", () => {
     })
 
     test("support static hoisting, wrappedComponent and ref forwarding", () => {
-        class B extends React.Component {
+        class B extends React.Component<any, any> {
             render() {
                 this.testField = 1
                 return null
@@ -284,7 +285,7 @@ describe("inject based context", () => {
         console.error = m => msg.push(m)
 
         const C = inject(["foo"])(
-            class C extends React.Component {
+            class C extends React.Component<any, any> {
                 render() {
                     expect(this.props.y).toEqual(3)
 
@@ -326,7 +327,7 @@ describe("inject based context", () => {
         console.warn = m => (msg = m)
 
         const C = inject(["foo"])(
-            class C extends React.Component {
+            class C extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -348,7 +349,7 @@ describe("inject based context", () => {
         const baseWarn = console.warn
         console.warn = m => (msg = m)
         const C = inject(["foo"])(
-            class C extends React.Component {
+            class C extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -485,7 +486,7 @@ describe("inject based context", () => {
 test("#612 - mixed context types", () => {
     const SomeContext = React.createContext(true)
 
-    class MainCompClass extends React.Component {
+    class MainCompClass extends React.Component<any, any> {
         static contextType = SomeContext
         render() {
             let active = this.context

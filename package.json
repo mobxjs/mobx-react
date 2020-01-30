@@ -17,10 +17,10 @@
   "scripts": {
     "test": "jest",
     "watch": "jest --watch",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint .",
     "test:types": "yarn tsc --noEmit",
     "test:check": "yarn test:types && yarn lint",
-    "test:ts": "tsc -p test/ts",
+    "test:ts": "tsc -p test",
     "test:coverage": "jest -i --coverage",
     "test:size": "size-limit",
     "build": "yarn bundle && yarn makern",

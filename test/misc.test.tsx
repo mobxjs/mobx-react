@@ -2,7 +2,7 @@ import React from "react"
 import { extendObservable, observable } from "mobx"
 import { observer } from "../src"
 import { render } from "@testing-library/react"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
 
 test("issue mobx 405", () => {
     function ExampleState() {

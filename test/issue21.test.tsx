@@ -178,11 +178,21 @@ test("verify prop changes are picked up", () => {
     }
 
     const { container } = render(<Wrapper />)
-    expect(events.sort()).toEqual([["compute", 1], ["render", 1, "1.1.hi.0"]].sort())
+    expect(events.sort()).toEqual(
+        [
+            ["compute", 1],
+            ["render", 1, "1.1.hi.0"]
+        ].sort()
+    )
     events.splice(0)
     container.querySelector("#testDiv").click()
     expect(events.sort()).toEqual(
-        [["compute", 1], ["update", 1, 2], ["compute", 2], ["render", 2, "1.2.test.0"]].sort()
+        [
+            ["compute", 1],
+            ["update", 1, 2],
+            ["compute", 2],
+            ["render", 2, "1.2.test.0"]
+        ].sort()
     )
 })
 
@@ -389,9 +399,13 @@ test("verify props are reactive in constructor", () => {
             constructor(props, context) {
                 super(props, context)
                 constructorCallsCount++
-                this.disposer = reaction(() => this.props.prop, prop => propValues.push(prop), {
-                    fireImmediately: true
-                })
+                this.disposer = reaction(
+                    () => this.props.prop,
+                    prop => propValues.push(prop),
+                    {
+                        fireImmediately: true
+                    }
+                )
             }
 
             componentWillUnmount() {

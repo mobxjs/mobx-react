@@ -1,12 +1,20 @@
 import React from "react"
 import { disposeOnUnmount, observer } from "../src"
 import { render } from "@testing-library/react"
+import { MockedComponentClass } from "react-dom/test-utils"
 
-function testComponent(C, afterMount, afterUnmount) {
-    const ref = React.createRef()
+interface ClassC extends MockedComponentClass {
+    methodA?: any
+    methodB?: any
+    methodC?: any
+    methodD?: any
+}
+
+function testComponent(C: ClassC, afterMount?: Function, afterUnmount?: Function) {
+    const ref = React.createRef<ClassC>()
     const { unmount } = render(<C ref={ref} />)
 
-    let cref = ref.current
+    let cref = ref.current!
     expect(cref.methodA).not.toHaveBeenCalled()
     expect(cref.methodB).not.toHaveBeenCalled()
     if (afterMount) {
@@ -263,9 +271,12 @@ describe("with observer", () => {
 
 it("componentDidMount should be different between components", () => {
     function doTest(withObserver) {
-        const events = []
+        const events: Array<string> = []
 
         class A extends React.Component {
+            didMount
+            willUnmount
+
             componentDidMount() {
                 this.didMount = "A"
                 events.push("mountA")
@@ -282,6 +293,9 @@ it("componentDidMount should be different between components", () => {
         }
 
         class B extends React.Component {
+            didMount
+            willUnmount
+
             componentDidMount() {
                 this.didMount = "B"
                 events.push("mountB")
@@ -298,23 +312,23 @@ it("componentDidMount should be different between components", () => {
         }
 
         if (withObserver) {
-            /* eslint-disable no-class-assign */
+            // @ts-ignore
             A = observer(A)
+            // @ts-ignore
             B = observer(B)
-            /* eslint-enable no-class-assign */
         }
 
-        const aRef = React.createRef()
+        const aRef = React.createRef<A>()
         const { rerender, unmount } = render(<A ref={aRef} />)
-        const caRef = aRef.current
+        const caRef = aRef.current!
 
         expect(caRef.didMount).toBe("A")
         expect(caRef.willUnmount).toBeUndefined()
         expect(events).toEqual(["mountA"])
 
-        const bRef = React.createRef()
+        const bRef = React.createRef<B>()
         rerender(<B ref={bRef} />)
-        const cbRef = bRef.current
+        const cbRef = bRef.current!
 
         expect(caRef.didMount).toBe("A")
         expect(caRef.willUnmount).toBe("A")
@@ -347,8 +361,8 @@ test("base cWU should not be called if overriden", () => {
             baseCalled++
         }
 
-        constructor() {
-            super()
+        constructor(props) {
+            super(props)
             this.componentWillUnmount = () => {
                 oCalled++
             }
@@ -394,8 +408,9 @@ test("should error on inheritance - 2", () => {
     }
 
     class B extends C {
-        constructor() {
-            super()
+        fn
+        constructor(props) {
+            super(props)
             expect(() => {
                 this.fn = disposeOnUnmount(this, function() {})
             }).toThrow("disposeOnUnmount only supports direct subclasses")
@@ -405,8 +420,8 @@ test("should error on inheritance - 2", () => {
     render(<B />)
 })
 
-describe("should works with arrays", () => {
-    test("as function", () => {
+describe("should work with arrays", () => {
+    test("as a function", () => {
         class C extends React.Component {
             methodA = jest.fn()
             methodB = jest.fn()
@@ -423,7 +438,7 @@ describe("should works with arrays", () => {
         testComponent(C)
     })
 
-    test("as decorator", () => {
+    test("as a decorator", () => {
         class C extends React.Component {
             methodA = jest.fn()
             methodB = jest.fn()
@@ -447,8 +462,8 @@ it("runDisposersOnUnmount only runs disposers from the declaring instance", () =
 
         b = jest.fn()
 
-        constructor() {
-            super()
+        constructor(props) {
+            super(props)
             disposeOnUnmount(this, this.b)
         }
 
@@ -457,12 +472,12 @@ it("runDisposersOnUnmount only runs disposers from the declaring instance", () =
         }
     }
 
-    const ref1 = React.createRef()
-    const ref2 = React.createRef()
+    const ref1 = React.createRef<A>()
+    const ref2 = React.createRef<A>()
     const { unmount } = render(<A ref={ref1} />)
     render(<A ref={ref2} />)
-    const inst1 = ref1.current
-    const inst2 = ref2.current
+    const inst1 = ref1.current!
+    const inst2 = ref2.current!
     unmount()
 
     expect(inst1.a).toHaveBeenCalledTimes(1)

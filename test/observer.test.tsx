@@ -9,7 +9,7 @@ import {
     observable,
     transaction
 } from "mobx"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
 
 /**
  *  some test suite is too tedious
@@ -121,7 +121,7 @@ describe("nestedRendering", () => {
 describe("isObjectShallowModified detects when React will update the component", () => {
     const store = observable({ count: 0 })
     let counterRenderings = 0
-    const Counter = observer(function TodoItem() {
+    const Counter: React.FunctionComponent<any> = observer(function TodoItem() {
         counterRenderings++
         return <div>{store.count}</div>
     })
@@ -219,7 +219,7 @@ describe("does not views alive when using static rendering", () => {
 })
 
 test("issue 12", () => {
-    const events = []
+    const events: Array<any> = []
     const data = observable({
         selected: "coffee",
         items: [
@@ -233,7 +233,7 @@ test("issue 12", () => {
     })
 
     /** Row Class */
-    class Row extends React.Component {
+    class Row extends React.Component<any, any> {
         constructor(props) {
             super(props)
         }
@@ -296,7 +296,7 @@ test("changing state in render should fail", () => {
 })
 
 test("observer component can be injected", () => {
-    const msg = []
+    const msg: Array<any> = []
     const baseWarn = console.warn
     console.warn = m => msg.push(m)
 
@@ -333,7 +333,7 @@ test("correctly wraps display name of child component", () => {
             }
         }
     )
-    const B = observer(function StatelessObserver() {
+    const B: React.FunctionComponent<any> = observer(function StatelessObserver() {
         return null
     })
 
@@ -342,22 +342,22 @@ test("correctly wraps display name of child component", () => {
 })
 
 describe("124 - react to changes in this.props via computed", () => {
-    const Comp = observer(
-        class T extends React.Component {
-            @computed
-            get computedProp() {
-                return this.props.x
-            }
-            render() {
-                return (
-                    <span>
-                        x:
-                        {this.computedProp}
-                    </span>
-                )
-            }
+    class T extends React.Component<any, any> {
+        @computed
+        get computedProp() {
+            return this.props.x
         }
-    )
+        render() {
+            return (
+                <span>
+                    x:
+                    {this.computedProp}
+                </span>
+            )
+        }
+    }
+
+    const Comp = observer(T)
 
     class Parent extends React.Component {
         state = { v: 1 }
@@ -379,7 +379,7 @@ describe("124 - react to changes in this.props via computed", () => {
     test("change after click", () => {
         const { container } = render(<Parent />)
 
-        container.querySelector("div").click()
+        container.querySelector("div")!.click()
         expect(container).toHaveTextContent("x:2")
     })
 })
@@ -390,7 +390,7 @@ test("should stop updating if error was thrown in render (#134)", () => {
     const data = observable.box(0)
     let renderingsCount = 0
     let lastOwnRenderCount = 0
-    const errors = []
+    const errors: Array<any> = []
 
     class Outer extends React.Component {
         state = { hasError: false }
@@ -852,11 +852,11 @@ test("#797 - replacing this.render should trigger a warning", () => {
         }
     }
 
-    const compRef = React.createRef()
+    const compRef = React.createRef<Component>()
     const { unmount } = render(<Component ref={compRef} />)
     compRef.current.swapRenderFunc()
 
-    const msg = []
+    const msg: Array<string> = []
     const warn_orig = console.warn
     console.warn = m => msg.push(m)
 
