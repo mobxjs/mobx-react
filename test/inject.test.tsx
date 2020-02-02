@@ -398,8 +398,8 @@ describe("inject based context", () => {
         let injectRender = 0
 
         function connect(): IReactComponent {
-            // @ts-ignore
             return (component: IReactComponent) =>
+                // @ts-ignore
                 inject.apply(this, arguments)(observer(component))
         }
 
@@ -442,7 +442,6 @@ describe("inject based context", () => {
             }
         }
 
-        // TS does not like this
         // @ts-ignore
         @connect(({ state }, { item }) => {
             injectRender++

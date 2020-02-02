@@ -1,7 +1,7 @@
 module.exports = {
     parser: "@typescript-eslint/parser",
-    plugins: ["@typescript-eslint", "react/recommended"],
-    extends: "eslint:recommended",
+    plugins: ["@typescript-eslint", "react"],
+    extends: ["eslint:recommended", "plugin:react/recommended"],
     env: {
         browser: true,
         es6: true
@@ -20,7 +20,7 @@ module.exports = {
     },
     overrides: [
         {
-            files: ["**/*.ts"],
+            files: ["**/*.ts", "**/*.tsx"],
             rules: {
                 // Things that don't play nicely with TS:
                 "require-yield": "off",

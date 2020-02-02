@@ -313,8 +313,10 @@ it("componentDidMount should be different between components", () => {
 
         if (withObserver) {
             // @ts-ignore
+            // eslint-disable-next-line no-class-assign
             A = observer(A)
             // @ts-ignore
+            // eslint-disable-next-line no-class-assign
             B = observer(B)
         }
 

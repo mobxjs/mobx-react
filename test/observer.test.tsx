@@ -840,10 +840,8 @@ test.skip("#709 - applying observer on React.memo component", () => {
     })
 
     const Observed = observer(WithMemo)
-
-    // eslint-disable-next-line no-undef
     // @ts-ignore
-    // No import?
+    // eslint-disable-next-line no-undef
     render(<Observed />, { wrapper: ErrorCatcher })
 })
 

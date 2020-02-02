@@ -9,10 +9,12 @@ const hasSymbol = typeof Symbol === "function" && Symbol.for
 // Using react-is had some issues (and operates on elements, not on types), see #608 / #609
 const ReactForwardRefSymbol = hasSymbol
     ? Symbol.for("react.forward_ref")
+    // eslint-disable-next-line react/display-name
     : typeof React.forwardRef === "function" && React.forwardRef((props: any) => null)["$$typeof"]
 
 const ReactMemoSymbol = hasSymbol
     ? Symbol.for("react.memo")
+    // eslint-disable-next-line react/display-name
     : typeof React.memo === "function" && React.memo((props: any) => null)["$$typeof"]
 
 /**
