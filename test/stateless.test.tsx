@@ -14,7 +14,7 @@ StatelessComp.defaultProps = {
 }
 
 describe("stateless component with propTypes", () => {
-    const StatelessCompObserver = observer(StatelessComp)
+    const StatelessCompObserver: React.FunctionComponent<any> = observer(StatelessComp)
 
     test("default property value should be propagated", () => {
         expect(StatelessComp.defaultProps.testProp).toBe("default value for prop testProp")
@@ -83,7 +83,7 @@ describe("stateless component with forwardRef", () => {
     const a = observable({
         x: 1
     })
-    const ForwardRefCompObserver = observer(
+    const ForwardRefCompObserver: React.ForwardRefExoticComponent<any> = observer(
         React.forwardRef(({ testProp }, ref) => {
             return (
                 <div>

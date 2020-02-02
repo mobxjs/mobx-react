@@ -6,6 +6,7 @@ import { withConsole } from "./utils/withConsole"
 
 test("issue mobx 405", () => {
     function ExampleState() {
+        // @ts-ignore
         extendObservable(this, {
             name: "test",
             get greetings() {
@@ -15,7 +16,7 @@ test("issue mobx 405", () => {
     }
 
     const ExampleView = observer(
-        class T extends React.Component {
+        class T extends React.Component<any, any> {
             render() {
                 return (
                     <div>
