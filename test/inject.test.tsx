@@ -291,7 +291,7 @@ describe("inject based context", () => {
         const baseError = console.error
         console.error = m => msg.push(m)
 
-        const C: React.ComponentClass<any> = inject(...["foo"])(
+        const C: React.ComponentClass<any> = inject("foo")(
             class C extends React.Component<any, any> {
                 render() {
                     expect(this.props.y).toEqual(3)
@@ -334,7 +334,7 @@ describe("inject based context", () => {
         const baseWarn = console.warn
         console.warn = m => (msg = m)
 
-        const C: React.ComponentClass = inject(...["foo"])(
+        const C: React.ComponentClass = inject("foo")(
             class C extends React.Component<any, any> {
                 render() {
                     return (
@@ -356,7 +356,7 @@ describe("inject based context", () => {
         let msg = []
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const C = inject(...["foo"])(
+        const C = inject("foo")(
             class C extends React.Component<any, any> {
                 render() {
                     return (

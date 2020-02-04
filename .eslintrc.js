@@ -23,6 +23,7 @@ module.exports = {
             files: ["**/*.ts", "**/*.tsx"],
             rules: {
                 // Things that don't play nicely with TS:
+                "react/display-name": "off",
                 "require-yield": "off",
                 "no-unused-vars": "off",
                 "no-extra-semi": "off"

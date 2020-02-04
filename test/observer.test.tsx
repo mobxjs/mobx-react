@@ -10,7 +10,6 @@ import {
     transaction
 } from "mobx"
 import { withConsole } from "./utils/withConsole"
-import "@testing-library/jest-dom/extend-expect"
 /**
  *  some test suite is too tedious
  */
