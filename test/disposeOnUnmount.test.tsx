@@ -14,17 +14,17 @@ function testComponent(C: ClassC, afterMount?: Function, afterUnmount?: Function
     const ref = React.createRef<ClassC>()
     const { unmount } = render(<C ref={ref} />)
 
-    let cref = ref.current!
-    expect(cref.methodA).not.toHaveBeenCalled()
-    expect(cref.methodB).not.toHaveBeenCalled()
+    let cref = ref.current
+    expect(cref?.methodA).not.toHaveBeenCalled()
+    expect(cref?.methodB).not.toHaveBeenCalled()
     if (afterMount) {
         afterMount(cref)
     }
 
     unmount()
 
-    expect(cref.methodA).toHaveBeenCalledTimes(1)
-    expect(cref.methodB).toHaveBeenCalledTimes(1)
+    expect(cref?.methodA).toHaveBeenCalledTimes(1)
+    expect(cref?.methodB).toHaveBeenCalledTimes(1)
     if (afterUnmount) {
         afterUnmount(cref)
     }
@@ -322,30 +322,30 @@ it("componentDidMount should be different between components", () => {
 
         const aRef = React.createRef<A>()
         const { rerender, unmount } = render(<A ref={aRef} />)
-        const caRef = aRef.current!
+        const caRef = aRef.current
 
-        expect(caRef.didMount).toBe("A")
-        expect(caRef.willUnmount).toBeUndefined()
+        expect(caRef?.didMount).toBe("A")
+        expect(caRef?.willUnmount).toBeUndefined()
         expect(events).toEqual(["mountA"])
 
         const bRef = React.createRef<B>()
         rerender(<B ref={bRef} />)
-        const cbRef = bRef.current!
+        const cbRef = bRef.current
 
-        expect(caRef.didMount).toBe("A")
-        expect(caRef.willUnmount).toBe("A")
+        expect(caRef?.didMount).toBe("A")
+        expect(caRef?.willUnmount).toBe("A")
 
-        expect(cbRef.didMount).toBe("B")
-        expect(cbRef.willUnmount).toBeUndefined()
+        expect(cbRef?.didMount).toBe("B")
+        expect(cbRef?.willUnmount).toBeUndefined()
         expect(events).toEqual(["mountA", "unmountA", "mountB"])
 
         unmount()
 
-        expect(caRef.didMount).toBe("A")
-        expect(caRef.willUnmount).toBe("A")
+        expect(caRef?.didMount).toBe("A")
+        expect(caRef?.willUnmount).toBe("A")
 
-        expect(cbRef.didMount).toBe("B")
-        expect(cbRef.willUnmount).toBe("B")
+        expect(cbRef?.didMount).toBe("B")
+        expect(cbRef?.willUnmount).toBe("B")
         expect(events).toEqual(["mountA", "unmountA", "mountB", "unmountB"])
     }
 
@@ -478,12 +478,12 @@ it("runDisposersOnUnmount only runs disposers from the declaring instance", () =
     const ref2 = React.createRef<A>()
     const { unmount } = render(<A ref={ref1} />)
     render(<A ref={ref2} />)
-    const inst1 = ref1.current!
-    const inst2 = ref2.current!
+    const inst1 = ref1.current
+    const inst2 = ref2.current
     unmount()
 
-    expect(inst1.a).toHaveBeenCalledTimes(1)
-    expect(inst1.b).toHaveBeenCalledTimes(1)
-    expect(inst2.a).toHaveBeenCalledTimes(0)
-    expect(inst2.b).toHaveBeenCalledTimes(0)
+    expect(inst1?.a).toHaveBeenCalledTimes(1)
+    expect(inst1?.b).toHaveBeenCalledTimes(1)
+    expect(inst2?.a).toHaveBeenCalledTimes(0)
+    expect(inst2?.b).toHaveBeenCalledTimes(0)
 })

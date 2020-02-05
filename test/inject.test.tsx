@@ -6,7 +6,6 @@ import { IValueMap } from "../src/types/IValueMap"
 import { render, act } from "@testing-library/react"
 import { withConsole } from "./utils/withConsole"
 import { IReactComponent } from "../src/types/IReactComponent"
-import "@testing-library/jest-dom/extend-expect"
 
 describe("inject based context", () => {
     test("basic context", () => {

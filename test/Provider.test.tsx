@@ -4,8 +4,6 @@ import { render } from "@testing-library/react"
 import { MobXProviderContext } from "../src/Provider"
 import { withConsole } from "./utils/withConsole"
 
-import "@testing-library/jest-dom/extend-expect"
-
 describe("Provider", () => {
     it("should work in a simple case", () => {
         function A() {
