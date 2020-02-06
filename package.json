@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "6.1.5",
+  "version": "6.1.6",
   "description": "React bindings for MobX. Create fully reactive components.",
   "source": "src/index.ts",
   "main": "dist/mobx-react.js",
