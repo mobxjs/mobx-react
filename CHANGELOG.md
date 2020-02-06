@@ -3,6 +3,7 @@
 ### 6.1.6
 
 - Fix an issue with class components & observableRequiresReaction. [#806](https://github.com/mobxjs/mobx-react/issues/806) through [#829](https://github.com/mobxjs/mobx-react/pull/829)
+- Use TSDX for building to mitigate issues with accessing `process.env` [#821](https://github.com/mobxjs/mobx-react/pull/821)
 
 ### 6.1.5
 
