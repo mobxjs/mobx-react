@@ -1,4 +1,8 @@
 import "@testing-library/jest-dom/extend-expect"
+
+// @ts-ignore
+global.__DEV__ = true
+
 // Uglyness to find missing 'act' more easily
 // 14-2-19 / React 16.8.1, temporarily work around, as error message misses a stack-trace
 Error.stackTraceLimit = Infinity
