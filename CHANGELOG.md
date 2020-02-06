@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.1.6
+
+- Fix an issue with class components & observableRequiresReaction. [#806](https://github.com/mobxjs/mobx-react/issues/806) through [#829](https://github.com/mobxjs/mobx-react/pull/829)
+
 ### 6.1.5
 
 - Added check if `process.env` is available, fixes [#801](https://github.com/mobxjs/mobx-react/issues/801) through [#812](https://github.com/mobxjs/mobx-react/pull/812) by [@ynejati](https://github.com/ynejati)

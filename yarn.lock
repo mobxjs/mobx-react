@@ -6484,10 +6484,10 @@ mobx-react-lite@^1.4.2:
   resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-1.5.2.tgz#c4395b0568b9cb16f07669d8869cc4efa1b8656d"
   integrity sha512-PyZmARqqWtpuQaAoHF5pKX7h6TKNLwq6vtovm4zZvG6sEbMRHHSqioGXSeQbpRmG8Kw8uln3q/W1yMO5IfL5Sg==
 
-mobx@^5.0.0:
-  version "5.15.3"
-  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.3.tgz#1915beae35c8b6dc37f2add78bf3231fb0bc55bf"
-  integrity sha512-aKpzjJ11rRXMtoxIYIq8eaVB7qtB2C3L6PCwhVWSJrsfF5E38TjFqmvglmVEZ3HEEISeKx/UJ4XJ1n29smQlEw==
+mobx@^5.15.4:
+  version "5.15.4"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.4.tgz#9da1a84e97ba624622f4e55a0bf3300fb931c2ab"
+  integrity sha512-xRFJxSU2Im3nrGCdjSuOTFmxVDGeqOHL+TyADCGbT0k4HHqGmx5u2yaHNryvoORpI4DfbzjJ5jPmuv+d7sioFw==
 
 module-details-from-path@^1.0.3:
   version "1.0.3"
