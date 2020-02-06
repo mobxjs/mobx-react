@@ -24,6 +24,7 @@
     "test:coverage": "jest -i --coverage",
     "test:size": "size-limit",
     "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
+    "release": "node publish.js",
     "build": "tsdx build --name mobxReact --format cjs,esm,umd",
     "postbuild": "yarn makern && yarn v6compat",
     "makern": "shx cp dist/mobxreact.esm.js dist/mobx-react.rn.module.js && yarn replace \"react-dom\" \"react-native\" dist/mobx-react.rn.module.js --silent",
