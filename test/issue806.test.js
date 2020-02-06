@@ -8,7 +8,17 @@ import withConsole from "./utils/withConsole";
 @observer
 class Issue806Component extends React.Component {
     render() {
-        return null;
+        return <span>
+            {this.props.a}
+            <Issue806Component2 propA={this.props.a} propB={this.props.b} />
+        </span>;
+    }
+}
+
+@observer
+class Issue806Component2 extends React.Component {
+    render() {
+        return <span>{this.props.propA} - {this.props.propB}</span>;
     }
 }
 
@@ -22,7 +32,7 @@ test("verify issue 806", () => {
     });
 
     withConsole(["warn"], () => {
-        render(<Issue806Component />);
+        render(<Issue806Component a={"a prop value"} b={"b prop value"} x={x} />);
         expect(console.warn).not.toHaveBeenCalled()
     })
 

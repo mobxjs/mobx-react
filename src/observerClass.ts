@@ -153,9 +153,17 @@ function makeObservableProp(target: any, propName: string): void {
         configurable: true,
         enumerable: true,
         get: function() {
-            const prevReadState = _allowStateReadsStart(true);
+            let prevReadState = false;
+
+            if (_allowStateReadsStart && _allowStateReadsEnd) {
+                prevReadState = _allowStateReadsStart(true);
+            }
             getAtom.call(this).reportObserved()
-            _allowStateReadsEnd(prevReadState);
+
+            if (_allowStateReadsStart && _allowStateReadsEnd) {
+                _allowStateReadsEnd(prevReadState);
+            }
+
             return this[valueHolderKey]
         },
         set: function set(v) {
