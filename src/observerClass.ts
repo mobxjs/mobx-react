@@ -1,5 +1,5 @@
 import { PureComponent, Component } from "react"
-import { createAtom, _allowStateChanges, Reaction, $mobx } from "mobx"
+import { createAtom, _allowStateChanges, Reaction, $mobx, _allowStateReadsStart, _allowStateReadsEnd } from "mobx"
 import { isUsingStaticRendering } from "mobx-react-lite"
 
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
@@ -153,7 +153,9 @@ function makeObservableProp(target: any, propName: string): void {
         configurable: true,
         enumerable: true,
         get: function() {
+            const prevReadState = _allowStateReadsStart(true);
             getAtom.call(this).reportObserved()
+            _allowStateReadsEnd(prevReadState);
             return this[valueHolderKey]
         },
         set: function set(v) {

@@ -41,7 +41,7 @@
     "@types/yargs": "12.0.1"
   },
   "peerDependencies": {
-    "mobx": "^4.0.0 || ^5.0.0",
+    "mobx": "^5.15.4 || ^4.15.4",
     "react": "^16.8.0 || 16.9.0-alpha.0"
   },
   "devDependencies": {
@@ -53,8 +53,8 @@
     "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^9.0.2",
     "@types/create-react-class": "^15.6.0",
-    "@types/node": "^10.0.0",
     "@types/jest": "^24.9.1",
+    "@types/node": "^10.0.0",
     "@types/prop-types": "^15.5.2",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
@@ -74,7 +74,7 @@
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
     "microbundle": "^0.11.0",
-    "mobx": "^5.0.0",
+    "mobx": "^5.15.4",
     "prettier": "^1.7.2",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
