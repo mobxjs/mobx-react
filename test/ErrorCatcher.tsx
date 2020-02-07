@@ -1,7 +1,13 @@
 import React from "react"
 
+interface ErrorCatcherState {
+    hasError: boolean
+}
+
 // FIXME: saddly, this does not work as hoped, see: https://github.com/facebook/react/issues/10474#issuecomment-332810203
-export default class ErrorCatcher extends React.Component {
+export default class ErrorCatcher extends React.Component<any, Readonly<ErrorCatcherState>> {
+    static lastError
+    static getError
     constructor(props) {
         super(props)
         this.state = { hasError: false }

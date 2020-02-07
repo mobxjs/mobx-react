@@ -2,14 +2,16 @@
 	"version": "1.7.5",
 	"compilerOptions": {
 		"esModuleInterop": true,
-		"target": "es5",
-		"strict": true,
 		"experimentalDecorators": true,
 		"jsx": "react",
-		"noEmit": true,
-		"rootDir": "../../",
+		"lib": ["es6", "dom"],
 		"module": "commonjs",
-		"lib": ["es6", "dom"]
+		"noEmit": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": false,
+		"rootDir": "../../",
+		"strict": true,
+		"target": "es5",
 	},
 	"exclude": [
 

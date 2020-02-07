@@ -2,10 +2,11 @@ import React from "react"
 import { extendObservable, observable } from "mobx"
 import { observer } from "../src"
 import { render } from "@testing-library/react"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
 
 test("issue mobx 405", () => {
     function ExampleState() {
+        // @ts-ignore
         extendObservable(this, {
             name: "test",
             get greetings() {
@@ -15,7 +16,7 @@ test("issue mobx 405", () => {
     }
 
     const ExampleView = observer(
-        class T extends React.Component {
+        class T extends React.Component<any, any> {
             render() {
                 return (
                     <div>

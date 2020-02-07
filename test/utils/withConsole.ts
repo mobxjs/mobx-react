@@ -1,11 +1,22 @@
-import mockConsole from "jest-mock-console"
+import mockConsole, { MockObj } from "jest-mock-console"
 
-export default function withConsole(settings, fn) {
-    if (typeof settings === "function") {
-        fn = settings
-        settings = undefined
+export function withConsole(fn: Function): void
+export function withConsole(settings: MockObj, fn: Function): void
+export function withConsole(props: Array<ConsoleProps>, fn: Function): void
+
+export function withConsole(...args: Array<any>): void {
+    let settings
+    let fn
+    if (typeof args[0] === "function") {
+        fn = args[0]
+    } else if (Array.isArray(args[0]) || typeof args[0] === "object") {
+        settings = args[0]
+
+        if (typeof args[1] === "function") {
+            fn = args[1]
+        }
     }
     const restoreConsole = mockConsole(settings)
-    fn()
+    fn && fn()
     restoreConsole()
 }

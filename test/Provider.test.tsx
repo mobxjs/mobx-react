@@ -2,7 +2,7 @@ import React from "react"
 import { Provider } from "../src"
 import { render } from "@testing-library/react"
 import { MobXProviderContext } from "../src/Provider"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
 
 describe("Provider", () => {
     it("should work in a simple case", () => {

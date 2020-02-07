@@ -9,7 +9,7 @@ import {
     disposeOnUnmount,
     PropTypes as MRPropTypes,
     useLocalStore
-} from "../../src"
+} from "../src"
 
 @observer
 class T1 extends React.Component<{ pizza: number }, {}> {

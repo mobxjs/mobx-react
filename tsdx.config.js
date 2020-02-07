@@ -1,5 +1,5 @@
 module.exports = {
-    rollup(config, options) {
+    rollup(config) {
         return {
             ...config,
             output: {

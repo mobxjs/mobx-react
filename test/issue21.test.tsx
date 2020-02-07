@@ -1,5 +1,5 @@
 import React, { createElement } from "react"
-import { computed, isObservable, observable, reaction, transaction } from "mobx"
+import { computed, isObservable, observable, reaction, transaction, IReactionDisposer } from "mobx"
 import { observer } from "../src"
 import _ from "lodash"
 import { render } from "@testing-library/react"
@@ -31,6 +31,7 @@ const wizardModel = observable(
                 return false
             }
             this.setActiveStep(nextStep)
+            return true
         },
         setActiveStep(modeToActivate) {
             const self = this
@@ -39,7 +40,7 @@ const wizardModel = observable(
                 modeToActivate.active = true
             })
         }
-    },
+    } as any,
     {
         activateNextStep: observable.ref
     }
@@ -48,7 +49,7 @@ const wizardModel = observable(
 /** RENDERS **/
 
 const Wizard = observer(
-    class Wizard extends React.Component {
+    class Wizard extends React.Component<any, any> {
         render() {
             return createElement(
                 "div",
@@ -71,7 +72,7 @@ const Wizard = observer(
 )
 
 const WizardStep = observer(
-    class WizardStep extends React.Component {
+    class WizardStep extends React.Component<any, any> {
         renderCount = 0
         componentWillUnmount() {
             // console.log("Unmounting!")
@@ -116,6 +117,7 @@ test("verify prop changes are picked up", () => {
     function createItem(subid, label) {
         const res = observable(
             {
+                subid,
                 id: 1,
                 label: label,
                 get text() {
@@ -127,7 +129,7 @@ test("verify prop changes are picked up", () => {
                         "." +
                         this.label +
                         "." +
-                        data.items.indexOf(this)
+                        data.items.indexOf(this as any)
                     )
                 }
             },
@@ -140,9 +142,9 @@ test("verify prop changes are picked up", () => {
     const data = observable({
         items: [createItem(1, "hi")]
     })
-    const events = []
+    const events: Array<any> = []
     const Child = observer(
-        class Child extends React.Component {
+        class Child extends React.Component<any, any> {
             componentDidUpdate(prevProps) {
                 events.push(["update", prevProps.item.subid, this.props.item.subid])
             }
@@ -154,7 +156,7 @@ test("verify prop changes are picked up", () => {
     )
 
     const Parent = observer(
-        class Parent extends React.Component {
+        class Parent extends React.Component<any, any> {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
@@ -174,15 +176,28 @@ test("verify prop changes are picked up", () => {
             data.items[0].label = "hello" // schedules state change for Child
             data.items[0] = createItem(2, "test") // Child should still receive new prop!
         })
+
+        // @ts-ignore
         this.setState({}) // trigger update
     }
 
     const { container } = render(<Wrapper />)
-    expect(events.sort()).toEqual([["compute", 1], ["render", 1, "1.1.hi.0"]].sort())
-    events.splice(0)
-    container.querySelector("#testDiv").click()
     expect(events.sort()).toEqual(
-        [["compute", 1], ["update", 1, 2], ["compute", 2], ["render", 2, "1.2.test.0"]].sort()
+        [
+            ["compute", 1],
+            ["render", 1, "1.1.hi.0"]
+        ].sort()
+    )
+    events.splice(0)
+    let testDiv = container.querySelector("#testDiv")! as HTMLElement
+    testDiv.click()
+    expect(events.sort()).toEqual(
+        [
+            ["compute", 1],
+            ["update", 1, 2],
+            ["compute", 2],
+            ["render", 2, "1.2.test.0"]
+        ].sort()
     )
 })
 
@@ -190,6 +205,7 @@ test("verify props is reactive", () => {
     function createItem(subid, label) {
         const res = observable(
             {
+                subid,
                 id: 1,
                 label: label,
                 get text() {
@@ -201,7 +217,7 @@ test("verify props is reactive", () => {
                         "." +
                         this.label +
                         "." +
-                        data.items.indexOf(this)
+                        data.items.indexOf(this as any)
                     )
                 }
             },
@@ -215,45 +231,40 @@ test("verify props is reactive", () => {
     const data = observable({
         items: [createItem(1, "hi")]
     })
-    const events = []
+    const events: Array<any> = []
 
-    const Child = observer(
-        class Child extends React.Component {
-            @computed
-            get computedLabel() {
-                events.push(["computed label", this.props.item.subid])
-                return this.props.item.label
-            }
-            componentDidMount() {
-                events.push(["mount"])
-            }
-            componentDidUpdate(prevProps) {
-                events.push(["update", prevProps.item.subid, this.props.item.subid])
-            }
-            render() {
-                events.push([
-                    "render",
-                    this.props.item.subid,
-                    this.props.item.text,
-                    this.computedLabel
-                ])
-                return (
-                    <span>
-                        {this.props.item.text}
-                        {this.computedLabel}
-                    </span>
-                )
-            }
+    class Child extends React.Component<any, any> {
+        @computed
+        get computedLabel() {
+            events.push(["computed label", this.props.item.subid])
+            return this.props.item.label
         }
-    )
+        componentDidMount() {
+            events.push(["mount"])
+        }
+        componentDidUpdate(prevProps) {
+            events.push(["update", prevProps.item.subid, this.props.item.subid])
+        }
+        render() {
+            events.push(["render", this.props.item.subid, this.props.item.text, this.computedLabel])
+            return (
+                <span>
+                    {this.props.item.text}
+                    {this.computedLabel}
+                </span>
+            )
+        }
+    }
+
+    const ChildAsObserver = observer(Child)
 
     const Parent = observer(
-        class Parent extends React.Component {
+        class Parent extends React.Component<any, any> {
             render() {
                 return (
                     <div onClick={changeStuff.bind(this)} id="testDiv">
                         {data.items.map(item => (
-                            <Child key="fixed" item={item} />
+                            <ChildAsObserver key="fixed" item={item} />
                         ))}
                     </div>
                 )
@@ -276,7 +287,9 @@ test("verify props is reactive", () => {
     )
 
     events.splice(0)
-    container.querySelector("#testDiv").click()
+    let testDiv = container.querySelector("#testDiv") as HTMLElement
+    testDiv.click()
+
     expect(events.sort()).toEqual(
         [
             ["compute", 1],
@@ -291,6 +304,7 @@ test("verify props is reactive", () => {
 test("no re-render for shallow equal props", async () => {
     function createItem(subid, label) {
         const res = observable({
+            subid,
             id: 1,
             label: label
         })
@@ -302,10 +316,10 @@ test("no re-render for shallow equal props", async () => {
         items: [createItem(1, "hi")],
         parentValue: 0
     })
-    const events = []
+    const events: Array<Array<any>> = []
 
     const Child = observer(
-        class Child extends React.Component {
+        class Child extends React.Component<any, any> {
             componentDidMount() {
                 events.push(["mount"])
             }
@@ -320,7 +334,7 @@ test("no re-render for shallow equal props", async () => {
     )
 
     const Parent = observer(
-        class Parent extends React.Component {
+        class Parent extends React.Component<any, any> {
             render() {
                 // "object has become observable!"
                 expect(isObservable(this.props.nonObservable)).toBeFalsy()
@@ -346,13 +360,14 @@ test("no re-render for shallow equal props", async () => {
     const { container } = render(<Wrapper />)
     expect(events.sort()).toEqual([["parent render", 0], ["mount"], ["render", 1, "hi"]].sort())
     events.splice(0)
-    container.querySelector("#testDiv").click()
+    let testDiv = container.querySelector("#testDiv") as HTMLElement
+    testDiv.click()
     expect(events.sort()).toEqual([["parent render", 1]].sort())
 })
 
 test("lifecycle callbacks called with correct arguments", () => {
     var Comp = observer(
-        class Comp extends React.Component {
+        class Comp extends React.Component<any, any> {
             componentDidUpdate(prevProps) {
                 expect(prevProps.counter).toBe(0)
                 expect(this.props.counter).toBe(1)
@@ -367,8 +382,8 @@ test("lifecycle callbacks called with correct arguments", () => {
             }
         }
     )
-    const Root = class T extends React.Component {
-        state = {}
+    const Root = class T extends React.Component<any, any> {
+        state = { counter: 0 }
         onButtonClick = () => {
             this.setState({ counter: (this.state.counter || 0) + 1 })
         }
@@ -377,21 +392,27 @@ test("lifecycle callbacks called with correct arguments", () => {
         }
     }
     const { container } = render(<Root />)
-    container.querySelector("#testButton").click()
+    let testButton = container.querySelector("#testButton") as HTMLElement
+    testButton.click()
 })
 
 test("verify props are reactive in constructor", () => {
-    const propValues = []
+    const propValues: Array<any> = []
     let constructorCallsCount = 0
 
     const Component = observer(
-        class Component extends React.Component {
+        class Component extends React.Component<any, any> {
+            disposer: IReactionDisposer
             constructor(props, context) {
                 super(props, context)
                 constructorCallsCount++
-                this.disposer = reaction(() => this.props.prop, prop => propValues.push(prop), {
-                    fireImmediately: true
-                })
+                this.disposer = reaction(
+                    () => this.props.prop,
+                    prop => propValues.push(prop),
+                    {
+                        fireImmediately: true
+                    }
+                )
             }
 
             componentWillUnmount() {

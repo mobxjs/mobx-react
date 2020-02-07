@@ -17,7 +17,7 @@ function typeCheckFail(declaration, value, message) {
     const propTypes = { testProp: declaration }
 
     const compId = "testComponent" + ++testComponentId
-    PropTypes.checkPropTypes(propTypes, props, "prop", compId, null)
+    PropTypes.checkPropTypes(propTypes, props, "prop", compId)
 
     error = error.replace(compId, "testComponent")
     expect(error).toBe("Warning: Failed prop type: " + message)
@@ -36,48 +36,29 @@ function typeCheckFailRequiredValues(declaration) {
     const unspecifiedMsg = /but its value is `undefined`\./
 
     const props1 = { testProp: null }
-    PropTypes.checkPropTypes(
-        propTypes,
-        props1,
-        "testProp",
-        "testComponent" + ++testComponentId,
-        null
-    )
+    PropTypes.checkPropTypes(propTypes, props1, "testProp", "testComponent" + ++testComponentId)
     expect(specifiedButIsNullMsg.test(error)).toBeTruthy()
 
     error = ""
     const props2 = { testProp: undefined }
-    PropTypes.checkPropTypes(
-        propTypes,
-        props2,
-        "testProp",
-        "testComponent" + ++testComponentId,
-        null
-    )
+    PropTypes.checkPropTypes(propTypes, props2, "testProp", "testComponent" + ++testComponentId)
     expect(unspecifiedMsg.test(error)).toBeTruthy()
 
     error = ""
     const props3 = {}
-    PropTypes.checkPropTypes(
-        propTypes,
-        props3,
-        "testProp",
-        "testComponent" + ++testComponentId,
-        null
-    )
+    PropTypes.checkPropTypes(propTypes, props3, "testProp", "testComponent" + ++testComponentId)
     expect(unspecifiedMsg.test(error)).toBeTruthy()
 
     console.error = baseError
 }
 
-function typeCheckPass(declaration, value) {
+function typeCheckPass(declaration: any, value?: any) {
     const props = { testProp: value }
     const error = PropTypes.checkPropTypes(
         { testProp: declaration },
         props,
         "testProp",
-        "testComponent" + ++testComponentId,
-        null
+        "testComponent" + ++testComponentId
     )
     expect(error).toBeUndefined()
 }
@@ -96,29 +77,23 @@ test("Valid values", () => {
 })
 
 test("should be implicitly optional and not warn", () => {
-    typeCheckPass(MRPropTypes.observableArray, undefined)
-    typeCheckPass(MRPropTypes.observableArrayOf(PropTypes.string), undefined)
-    typeCheckPass(MRPropTypes.arrayOrObservableArray, undefined)
-    typeCheckPass(MRPropTypes.arrayOrObservableArrayOf(PropTypes.string), undefined)
-    typeCheckPass(MRPropTypes.observableObject, undefined)
-    typeCheckPass(MRPropTypes.objectOrObservableObject, undefined)
-    typeCheckPass(MRPropTypes.observableMap, undefined)
+    typeCheckPass(MRPropTypes.observableArray)
+    typeCheckPass(MRPropTypes.observableArrayOf(PropTypes.string))
+    typeCheckPass(MRPropTypes.arrayOrObservableArray)
+    typeCheckPass(MRPropTypes.arrayOrObservableArrayOf(PropTypes.string))
+    typeCheckPass(MRPropTypes.observableObject)
+    typeCheckPass(MRPropTypes.objectOrObservableObject)
+    typeCheckPass(MRPropTypes.observableMap)
 })
 
 test("should warn for missing required values, function (test)", () => {
-    typeCheckFailRequiredValues(MRPropTypes.observableArray.isRequired, undefined)
-    typeCheckFailRequiredValues(
-        MRPropTypes.observableArrayOf(PropTypes.string).isRequired,
-        undefined
-    )
-    typeCheckFailRequiredValues(MRPropTypes.arrayOrObservableArray.isRequired, undefined)
-    typeCheckFailRequiredValues(
-        MRPropTypes.arrayOrObservableArrayOf(PropTypes.string).isRequired,
-        undefined
-    )
-    typeCheckFailRequiredValues(MRPropTypes.observableObject.isRequired, undefined)
-    typeCheckFailRequiredValues(MRPropTypes.objectOrObservableObject.isRequired, undefined)
-    typeCheckFailRequiredValues(MRPropTypes.observableMap.isRequired, undefined)
+    typeCheckFailRequiredValues(MRPropTypes.observableArray.isRequired)
+    typeCheckFailRequiredValues(MRPropTypes.observableArrayOf(PropTypes.string).isRequired)
+    typeCheckFailRequiredValues(MRPropTypes.arrayOrObservableArray.isRequired)
+    typeCheckFailRequiredValues(MRPropTypes.arrayOrObservableArrayOf(PropTypes.string).isRequired)
+    typeCheckFailRequiredValues(MRPropTypes.observableObject.isRequired)
+    typeCheckFailRequiredValues(MRPropTypes.objectOrObservableObject.isRequired)
+    typeCheckFailRequiredValues(MRPropTypes.observableMap.isRequired)
 })
 
 test("should fail date and regexp correctly", () => {
@@ -207,7 +182,7 @@ test("observableArrayOf", () => {
             "`testComponent`, expected `string`."
     )
     typeCheckFail(
-        MRPropTypes.observableArrayOf({ foo: MRPropTypes.string }),
+        MRPropTypes.observableArrayOf({ foo: (MRPropTypes as any).string } as any),
         { foo: "bar" },
         "Property `testProp` of component `testComponent` has invalid PropType notation."
     )
@@ -232,8 +207,9 @@ test("arrayOrObservableArrayOf", () => {
         "Invalid prop `testProp[0]` of type `number` supplied to " +
             "`testComponent`, expected `string`."
     )
+    // TODO:
     typeCheckFail(
-        MRPropTypes.arrayOrObservableArrayOf({ foo: MRPropTypes.string }),
+        MRPropTypes.arrayOrObservableArrayOf({ foo: (MRPropTypes as any).string } as any),
         { foo: "bar" },
         "Property `testProp` of component `testComponent` has invalid PropType notation."
     )

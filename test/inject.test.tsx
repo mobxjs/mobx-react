@@ -2,14 +2,16 @@ import React from "react"
 import PropTypes from "prop-types"
 import { action, observable } from "mobx"
 import { observer, inject, Provider } from "../src"
+import { IValueMap } from "../src/types/IValueMap"
 import { render, act } from "@testing-library/react"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
+import { IReactComponent } from "../src/types/IReactComponent"
 
 describe("inject based context", () => {
     test("basic context", () => {
         const C = inject("foo")(
             observer(
-                class X extends React.Component {
+                class X extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -33,7 +35,7 @@ describe("inject based context", () => {
 
     test("props override context", () => {
         const C = inject("foo")(
-            class T extends React.Component {
+            class T extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -45,7 +47,7 @@ describe("inject based context", () => {
             }
         )
         const B = () => <C foo={42} />
-        const A = class T extends React.Component {
+        const A = class T extends React.Component<any, any> {
             render() {
                 return (
                     <Provider foo="bar">
@@ -59,8 +61,8 @@ describe("inject based context", () => {
     })
 
     test("wraps displayName of original component", () => {
-        const A = inject("foo")(
-            class ComponentA extends React.Component {
+        const A: React.ComponentClass = inject("foo")(
+            class ComponentA extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -71,8 +73,8 @@ describe("inject based context", () => {
                 }
             }
         )
-        const B = inject()(
-            class ComponentB extends React.Component {
+        const B: React.ComponentClass = inject()(
+            class ComponentB extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -83,8 +85,8 @@ describe("inject based context", () => {
                 }
             }
         )
-        const C = inject(() => ({}))(
-            class ComponentC extends React.Component {
+        const C: React.ComponentClass = inject(() => ({}))(
+            class ComponentC extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -105,7 +107,7 @@ describe("inject based context", () => {
     test("store should be available", () => {
         const C = inject("foo")(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -118,7 +120,7 @@ describe("inject based context", () => {
             )
         )
         const B = () => <C />
-        const A = class A extends React.Component {
+        const A = class A extends React.Component<any, any> {
             render() {
                 return (
                     <Provider baz={42}>
@@ -138,7 +140,7 @@ describe("inject based context", () => {
     test("store is not required if prop is available", () => {
         const C = inject("foo")(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -158,7 +160,7 @@ describe("inject based context", () => {
     test("inject merges (and overrides) props", () => {
         const C = inject(() => ({ a: 1 }))(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         expect(this.props).toEqual({ a: 1, b: 2 })
                         return null
@@ -171,7 +173,7 @@ describe("inject based context", () => {
     })
 
     test("custom storesToProps", () => {
-        const C = inject((stores, props) => {
+        const C = inject((stores: IValueMap, props: any) => {
             expect(stores).toEqual({ foo: "bar" })
             expect(props).toEqual({ baz: 42 })
             return {
@@ -180,7 +182,7 @@ describe("inject based context", () => {
             }
         })(
             observer(
-                class C extends React.Component {
+                class C extends React.Component<any, any> {
                     render() {
                         return (
                             <div>
@@ -193,7 +195,7 @@ describe("inject based context", () => {
                 }
             )
         )
-        const B = class B extends React.Component {
+        const B = class B extends React.Component<any, any> {
             render() {
                 return <C baz={42} />
             }
@@ -208,7 +210,8 @@ describe("inject based context", () => {
     })
 
     test("inject forwards ref", () => {
-        class FancyComp extends React.Component {
+        class FancyComp extends React.Component<any, any> {
+            didRender
             render() {
                 this.didRender = true
                 return null
@@ -217,13 +220,13 @@ describe("inject based context", () => {
             doSomething() {}
         }
 
-        const ref = React.createRef()
+        const ref = React.createRef<FancyComp>()
         render(<FancyComp ref={ref} />)
-        expect(typeof ref.current.doSomething).toBe("function")
-        expect(ref.current.didRender).toBe(true)
+        expect(typeof ref.current?.doSomething).toBe("function")
+        expect(ref.current?.didRender).toBe(true)
 
         const InjectedFancyComp = inject("bla")(FancyComp)
-        const ref2 = React.createRef()
+        const ref2 = React.createRef<FancyComp>()
 
         render(
             <Provider bla={42}>
@@ -231,17 +234,17 @@ describe("inject based context", () => {
             </Provider>
         )
 
-        expect(typeof ref2.current.doSomething).toBe("function")
-        expect(ref2.current.didRender).toBe(true)
+        expect(typeof ref2.current?.doSomething).toBe("function")
+        expect(ref2.current?.didRender).toBe(true)
     })
 
     test("inject should work with components that use forwardRef", () => {
-        const FancyComp = React.forwardRef((_, ref) => {
+        const FancyComp = React.forwardRef((_: any, ref: React.Ref<HTMLDivElement>) => {
             return <div ref={ref} />
         })
 
         const InjectedFancyComp = inject("bla")(FancyComp)
-        const ref = React.createRef()
+        const ref = React.createRef<HTMLDivElement>()
 
         render(
             <Provider bla={42}>
@@ -254,37 +257,41 @@ describe("inject based context", () => {
     })
 
     test("support static hoisting, wrappedComponent and ref forwarding", () => {
-        class B extends React.Component {
+        class B extends React.Component<any, any> {
+            static foo
+            static bar
+            testField
+
             render() {
                 this.testField = 1
                 return null
             }
         }
-        B.propTypes = {
+        ;(B as React.ComponentClass).propTypes = {
             x: PropTypes.object
         }
-        B.bla = 17
-        B.bla2 = {}
+        B.foo = 17
+        B.bar = {}
         const C = inject("booh")(B)
         expect(C.wrappedComponent).toBe(B)
-        expect(B.bla).toBe(17)
-        expect(C.bla).toBe(17)
-        expect(C.bla2 === B.bla2).toBeTruthy()
-        expect(Object.keys(C.wrappedComponent.propTypes)).toEqual(["x"])
+        expect(B.foo).toBe(17)
+        expect(C.foo).toBe(17)
+        expect(C.bar === B.bar).toBeTruthy()
+        expect(Object.keys(C.wrappedComponent.propTypes!)).toEqual(["x"])
 
-        const ref = React.createRef()
+        const ref = React.createRef<B>()
 
         render(<C booh={42} ref={ref} />)
-        expect(ref.current.testField).toBe(1)
+        expect(ref.current?.testField).toBe(1)
     })
 
     test("propTypes and defaultProps are forwarded", () => {
-        const msg = []
+        const msg: Array<string> = []
         const baseError = console.error
         console.error = m => msg.push(m)
 
-        const C = inject(["foo"])(
-            class C extends React.Component {
+        const C: React.ComponentClass<any> = inject("foo")(
+            class C extends React.Component<any, any> {
                 render() {
                     expect(this.props.y).toEqual(3)
 
@@ -297,6 +304,7 @@ describe("inject based context", () => {
             x: PropTypes.func.isRequired,
             z: PropTypes.string.isRequired
         }
+        // @ts-ignore
         C.wrappedComponent.propTypes = {
             a: PropTypes.func.isRequired
         }
@@ -325,8 +333,8 @@ describe("inject based context", () => {
         const baseWarn = console.warn
         console.warn = m => (msg = m)
 
-        const C = inject(["foo"])(
-            class C extends React.Component {
+        const C: React.ComponentClass = inject("foo")(
+            class C extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -347,8 +355,8 @@ describe("inject based context", () => {
         let msg = []
         const baseWarn = console.warn
         console.warn = m => (msg = m)
-        const C = inject(["foo"])(
-            class C extends React.Component {
+        const C = inject("foo")(
+            class C extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -388,8 +396,10 @@ describe("inject based context", () => {
         let itemRender = 0
         let injectRender = 0
 
-        function connect() {
-            return component => inject.apply(this, arguments)(observer(component))
+        function connect(): IReactComponent {
+            return (component: IReactComponent) =>
+                // @ts-ignore
+                inject.apply(this, arguments)(observer(component))
         }
 
         class State {
@@ -416,7 +426,7 @@ describe("inject based context", () => {
 
         const state = new State()
 
-        class ListComponent extends React.PureComponent {
+        class ListComponent extends React.PureComponent<any> {
             render() {
                 listRender++
                 const { items } = this.props
@@ -431,6 +441,7 @@ describe("inject based context", () => {
             }
         }
 
+        // @ts-ignore
         @connect(({ state }, { item }) => {
             injectRender++
             if (injectRender > 6) {
@@ -443,7 +454,7 @@ describe("inject based context", () => {
                 highlight: state.highlight
             }
         })
-        class ItemComponent extends React.PureComponent {
+        class ItemComponent extends React.PureComponent<any> {
             highlight = () => {
                 const { item, highlight } = this.props
                 highlight(item)
@@ -470,12 +481,12 @@ describe("inject based context", () => {
         expect(injectRender).toBe(6)
         expect(itemRender).toBe(6)
 
-        container.querySelectorAll(".hl_ItemB").forEach(e => e.click())
+        container.querySelectorAll(".hl_ItemB").forEach((e: Element) => (e as HTMLElement).click())
         expect(listRender).toBe(1)
         expect(injectRender).toBe(12) // ideally, 7
         expect(itemRender).toBe(7)
 
-        container.querySelectorAll(".hl_ItemF").forEach(e => e.click())
+        container.querySelectorAll(".hl_ItemF").forEach((e: Element) => (e as HTMLElement).click())
         expect(listRender).toBe(1)
         expect(injectRender).toBe(18) // ideally, 9
         expect(itemRender).toBe(9)
@@ -485,7 +496,7 @@ describe("inject based context", () => {
 test("#612 - mixed context types", () => {
     const SomeContext = React.createContext(true)
 
-    class MainCompClass extends React.Component {
+    class MainCompClass extends React.Component<any, any> {
         static contextType = SomeContext
         render() {
             let active = this.context
@@ -493,7 +504,7 @@ test("#612 - mixed context types", () => {
         }
     }
 
-    const MainComp = inject(stores => ({
+    const MainComp = inject((stores: any) => ({
         value: stores.appState.value
     }))(MainCompClass)
 

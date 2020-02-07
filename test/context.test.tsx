@@ -1,14 +1,15 @@
 import React from "react"
 import { observable } from "mobx"
 import { Provider, observer, inject } from "../src"
-import withConsole from "./utils/withConsole"
+import { withConsole } from "./utils/withConsole"
 import { render, act } from "@testing-library/react"
+import { any } from "prop-types"
 
 test("no warnings in modern react", () => {
     const box = observable.box(3)
     const Child = inject("store")(
         observer(
-            class Child extends React.Component {
+            class Child extends React.Component<any, any> {
                 render() {
                     return (
                         <div>
@@ -50,7 +51,7 @@ test("no warnings in modern react", () => {
 })
 
 test("getDerivedStateFromProps works #447", () => {
-    class Main extends React.Component {
+    class Main extends React.Component<any, any> {
         static getDerivedStateFromProps(nextProps, prevState) {
             return {
                 count: prevState.count + 1
@@ -87,7 +88,7 @@ test("getDerivedStateFromProps works #447", () => {
 test("no double runs for getDerivedStateFromProps", () => {
     let derived = 0
     @observer
-    class Main extends React.Component {
+    class Main extends React.Component<any, any> {
         state = {
             activePropertyElementMap: {}
         }
