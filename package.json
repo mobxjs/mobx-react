@@ -1,15 +1,15 @@
 {
   "name": "mobx-react",
-  "version": "6.1.6",
+  "version": "6.1.7",
   "description": "React bindings for MobX. Create fully reactive components.",
   "source": "src/index.ts",
-  "main": "dist/mobx-react.js",
-  "jsnext:main": "dist/mobx-react.module.js",
-  "umd:main": "dist/mobx-react.umd.js",
-  "unpkg": "dist/mobx-react.umd.js",
-  "module": "dist/mobx-react.module.js",
-  "react-native": "dist/mobx-react.rn.module.js",
-  "types": "dist/mobx-react.d.ts",
+  "main": "dist/index.js",
+  "umd:main": "dist/mobxreact.umd.production.min.js",
+  "unpkg": "dist/mobxreact.umd.production.min.js",
+  "jsnext:main": "dist/mobxreact.esm.js",
+  "module": "dist/mobxreact.esm.js",
+  "react-native": "dist/mobxreact.rn.module.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mobxjs/mobx-react.git"
@@ -23,13 +23,12 @@
     "test:ts": "tsc -p test",
     "test:coverage": "jest -i --coverage",
     "test:size": "size-limit",
-    "build": "yarn bundle && yarn makern",
     "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
-    "makern": "shx cp dist/mobx-react.module.js dist/mobx-react.rn.module.js && yarn replace \"react-dom\" \"react-native\" dist/mobx-react.rn.module.js --silent",
-    "bundle": "yarn bundle-cjs-and-es && yarn bundle-umd",
-    "bundle-cjs-and-es": "yarn bundle-via-microbundle --format cjs,es --no-compress",
-    "bundle-umd": "yarn bundle-via-microbundle --format umd --globals react-dom=ReactDOM,react=React,mobx-react-lite=mobxReactLite --name mobxReact",
-    "bundle-via-microbundle": "microbundle --jsx React.createElement --external mobx,react,react-dom,mobx-react-lite"
+    "release": "node publish.js",
+    "build": "tsdx build --name mobxReact --format cjs,esm,umd",
+    "postbuild": "yarn makern && yarn v6compat",
+    "makern": "shx cp dist/mobxreact.esm.js dist/mobxreact.rn.module.js && yarn replace \"react-dom\" \"react-native\" dist/mobxreact.rn.module.js --silent",
+    "v6compat": "shx cp dist/mobxreact.umd.production.min.js dist/mobx-react.umd.js"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -73,7 +72,6 @@
     "jest-mock-console": "^1.0.0",
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
-    "microbundle": "^0.11.0",
     "mobx": "^5.15.4",
     "prettier": "^1.7.2",
     "prop-types": "^15.7.2",
@@ -85,7 +83,9 @@
     "shx": "^0.3.2",
     "size-limit": "^1.3.2",
     "ts-jest": "^25.2.0",
-    "typescript": "^3.3.3333"
+    "tsdx": "0.12.3",
+    "tslib": "1.10.0",
+    "typescript": "^3.7.0"
   },
   "dependencies": {
     "mobx-react-lite": "^1.4.2"

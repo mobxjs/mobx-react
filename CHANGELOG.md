@@ -1,13 +1,14 @@
 # MobX-React Changelog
 
-### 6.1.6
+### 6.1.6 / 6.1.7
 
-- Fix an issue with class components & observableRequiresReaction. [#806](https://github.com/mobxjs/mobx-react/issues/806) through [#829](https://github.com/mobxjs/mobx-react/pull/829)
+-   Fix an issue with class components & observableRequiresReaction. [#806](https://github.com/mobxjs/mobx-react/issues/806) through [#829](https://github.com/mobxjs/mobx-react/pull/829)
+-   Use TSDX for building to mitigate issues with accessing `process.env` [#821](https://github.com/mobxjs/mobx-react/pull/821)
 
 ### 6.1.5
 
-- Added check if `process.env` is available, fixes [#801](https://github.com/mobxjs/mobx-react/issues/801) through [#812](https://github.com/mobxjs/mobx-react/pull/812) by [@ynejati](https://github.com/ynejati)
-- Added warning if component's `render` method is accidentally overwritten. [#799](https://github.com/mobxjs/mobx-react/pull/799) by [@Venryx](https://github.com/Venryx). Helps prevent memory leaks as in: [#797](https://github.com/mobxjs/mobx-react/issues/797)
+-   Added check if `process.env` is available, fixes [#801](https://github.com/mobxjs/mobx-react/issues/801) through [#812](https://github.com/mobxjs/mobx-react/pull/812) by [@ynejati](https://github.com/ynejati)
+-   Added warning if component's `render` method is accidentally overwritten. [#799](https://github.com/mobxjs/mobx-react/pull/799) by [@Venryx](https://github.com/Venryx). Helps prevent memory leaks as in: [#797](https://github.com/mobxjs/mobx-react/issues/797)
 
 ### 6.1.4
 

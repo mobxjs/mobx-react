@@ -46,7 +46,7 @@ export function makeClassComponentObserver(
         if (isUsingStaticRendering() === true) return
         if (this.render[mobxAdminProperty]) {
             this.render[mobxAdminProperty].dispose()
-        } else if (process.env.NODE_ENV !== "production") {
+        } else if (__DEV__) {
             const displayName = getDisplayName(this)
             console.warn(
                 `The render function for an observer component (${displayName}) was modified after MobX attached. This is not supported, since the new function can't be triggered by MobX.`
