@@ -4,7 +4,8 @@ module.exports = {
     extends: ["eslint:recommended", "plugin:react/recommended"],
     env: {
         browser: true,
-        es6: true
+        es6: true,
+        node: true
     },
     globals: {
         process: "readonly"
