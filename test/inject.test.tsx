@@ -397,9 +397,10 @@ describe("inject based context", () => {
         let injectRender = 0
 
         function connect(): IReactComponent {
+            const args = arguments;
             return (component: IReactComponent) =>
                 // @ts-ignore
-                inject.apply(this, arguments)(observer(component))
+                inject.apply(this, args)(observer(component))
         }
 
         class State {
