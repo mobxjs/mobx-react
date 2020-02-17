@@ -182,7 +182,7 @@ Use `useLocalStore` instead if you want to create local, observable, mutable, st
 
 Warning: \_the return value of `useAsObservableSource` should never be deconstructed! So, don't write: `const {multiplier} = useAsObservableSource({ multiplier })`!\_useObservable
 
-The following example combines all concepts mentioned so far: `useLocalStore` to create a local store, and `useAsObservableProps` to make the props observable, so that it can be uses savely in `store.multiplied`:
+The following example combines all concepts mentioned so far: `useLocalStore` to create a local store, and `useAsObservableProps` to make the props observable, so that it can be uses safely in `store.multiplied`:
 
 ```typescript
 import { observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
