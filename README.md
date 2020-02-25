@@ -51,12 +51,19 @@ For greenfield projects you might want to consider to use [mobx-react-lite](http
 
 Please check [mobx.js.org](https://mobx.js.org) for the general documentation. The documentation below highlights some specifics.
 
-### `observer(componentClass)`
+### `observer(component)`
 
-Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by `render` and automatically re-renders the component when one of these values changes.
+Function (and decorator) that converts a React component definition, React component class, or stand-alone render function, into a reactive component. A converted component will track which observables are used by its effective `render` and automatically re-render the component when one of these values changes.
+
+#### Functional Components
+
+`React.memo` is automatically applied to functional components provided to `observer`. `Observer` does not accept a functional component already wrapped in `React.memo`, or an `observer`, in order to avoid consequences that might arise as a result of wrapping it twice.
+
+#### Class Components
 
 When using component classes, `this.props` and `this.state` will be made observables, so the component will react to all changes in props and state that are used by `render`.
-Note that `observer` automatically applies `React.memo` to any functional component you pass to it, however class components should extend `PureComponent` instead of `Component`
+
+`ShouldComponentUpdate` is not supported. As such, it is recommended that class components extend `React.PureComponent`. `Observer` will automatically patch none pure class components with an internal implementation of `React.PureComponent` if necessary.
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 
