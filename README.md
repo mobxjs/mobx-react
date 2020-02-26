@@ -57,13 +57,13 @@ Function (and decorator) that converts a React component definition, React compo
 
 #### Functional Components
 
-`React.memo` is automatically applied to functional components provided to `observer`. `Observer` does not accept a functional component already wrapped in `React.memo`, or an `observer`, in order to avoid consequences that might arise as a result of wrapping it twice.
+`React.memo` is automatically applied to functional components provided to `observer`. `observer` does not accept a functional component already wrapped in `React.memo`, or an `observer`, in order to avoid consequences that might arise as a result of wrapping it twice.
 
 #### Class Components
 
 When using component classes, `this.props` and `this.state` will be made observables, so the component will react to all changes in props and state that are used by `render`.
 
-`ShouldComponentUpdate` is not supported. As such, it is recommended that class components extend `React.PureComponent`. `Observer` will automatically patch none pure class components with an internal implementation of `React.PureComponent` if necessary.
+`shouldComponentUpdate` is not supported. As such, it is recommended that class components extend `React.PureComponent`. `observer` will automatically patch none pure class components with an internal implementation of `React.PureComponent` if necessary.
 
 See the [MobX](https://mobxjs.github.io/mobx/refguide/observer-component.html) documentation for more details.
 

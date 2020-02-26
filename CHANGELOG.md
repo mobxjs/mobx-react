@@ -74,7 +74,7 @@
 **Improvements**
 
 -   Hook based components are now supported by mobx-react (in fact, the package is now implemented using hooks)
--   Class based `observer` components are now _recommended_ to extend `React.PureComponent`. Functional `observer` components are now automatically wrapped in `React.memo` internally. See section in [README](https://github.com/mobxjs/mobx-react/blob/master/README.md#observercomponentclass) for more details.
+-   Class based `observer` components are now _recommended_ to extend `React.PureComponent`. Functional `observer` components are now automatically wrapped in `React.memo` internally. See section in [README](https://mobx.js.org/README.html#observercomponentclass) for more details.
 -   For `observer` based components, there will now be an additional `Observer` component in the tree.
 -   Two new hooks have been exposed, in case you want to manage local state in observable: `useLocalStore` and `useAsObservableSource`.
 -   `MobXProviderContext` is now exposed from the package, in case you want to consume the context used by `Provider` with a `useContext` hook.
