@@ -27,7 +27,7 @@ export function observer<T extends IReactComponent>(component: T): T {
 
     if (ReactMemoSymbol && component["$$typeof"] === ReactMemoSymbol) {
         throw new Error(
-            "Mobx observer: You are trying to use 'observer' on function component wrapped to either another observer or 'React.memo'. The observer already applies 'React.memo' for you."
+            "Mobx observer: You are trying to use 'observer' on a function component wrapped in either another observer or 'React.memo'. The observer already applies 'React.memo' for you."
         )
     }
 
