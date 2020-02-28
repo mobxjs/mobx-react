@@ -20,6 +20,13 @@ export function makeClassComponentObserver(
     componentClass: React.ComponentClass<any, any>
 ): React.ComponentClass<any, any> {
     const target = componentClass.prototype
+    if (componentClass["isMobXReactObserver"] === true) {
+        console.warn(
+            `The provided component class (${getDisplayName(this)}) is already an observer component.`
+        );
+        return componentClass;
+    }
+
     if (target.componentWillReact)
         throw new Error("The componentWillReact life-cycle event is no longer supported")
     if (componentClass["__proto__"] !== PureComponent) {
@@ -31,6 +38,7 @@ export function makeClassComponentObserver(
             )
     }
 
+    componentClass["isMobXReactObserver"] = true
     // this.props and this.state are made observable, just to make sure @computed fields that
     // are defined inside the component, and which rely on state or props, re-compute if state or props change
     // (otherwise the computed wouldn't update and become stale on props change, since props are not observable)
