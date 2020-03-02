@@ -12,6 +12,7 @@ import { isUsingStaticRendering } from "mobx-react-lite"
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
+const mobxObserverProperty = newSymbol("isMobXReactObserver");
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
@@ -20,11 +21,22 @@ export function makeClassComponentObserver(
     componentClass: React.ComponentClass<any, any>
 ): React.ComponentClass<any, any> {
     const target = componentClass.prototype
-    if (componentClass["isMobXReactObserver"] === true) {
-        console.warn(
-            `The provided component class (${getDisplayName(this)}) is already an observer component.`
-        );
-        return componentClass;
+
+    if (__DEV__) {
+        if (componentClass[mobxObserverProperty] && this.render[mobxAdminProperty]) {
+            console.warn(
+                `The provided component class (${getDisplayName(this)}) is already an observer component.`
+            );
+            return componentClass;
+        } else if (componentClass[mobxObserverProperty]) {
+            console.warn(
+                `The reactive render of an observer class component (${getDisplayName(this)}) 
+                was overriden after MobX attached. This may result in a memory leak if the 
+                overriden reactive render is not properly disposed.`
+            )
+        } else {
+            componentClass[mobxObserverProperty] = true;
+        }
     }
 
     if (target.componentWillReact)
@@ -38,7 +50,6 @@ export function makeClassComponentObserver(
             )
     }
 
-    componentClass["isMobXReactObserver"] = true
     // this.props and this.state are made observable, just to make sure @computed fields that
     // are defined inside the component, and which rely on state or props, re-compute if state or props change
     // (otherwise the computed wouldn't update and become stale on props change, since props are not observable)
@@ -52,14 +63,7 @@ export function makeClassComponentObserver(
     }
     patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering() === true) return
-        if (this.render[mobxAdminProperty]) {
-            this.render[mobxAdminProperty].dispose()
-        } else if (__DEV__) {
-            const displayName = getDisplayName(this)
-            console.warn(
-                `The render function for an observer component (${displayName}) was modified after MobX attached. This is not supported, since the new function can't be triggered by MobX.`
-            )
-        }
+        this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
         this[mobxIsUnmounted] = true
     })
     return componentClass
