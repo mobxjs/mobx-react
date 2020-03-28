@@ -12,7 +12,7 @@ import { isUsingStaticRendering } from "mobx-react-lite"
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
-const mobxObserverProperty = newSymbol("isMobXReactObserver");
+const mobxObserverProperty = newSymbol("isMobXReactObserver")
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
@@ -23,19 +23,14 @@ export function makeClassComponentObserver(
     const target = componentClass.prototype
 
     if (__DEV__) {
-        if (componentClass[mobxObserverProperty] && this.render[mobxAdminProperty]) {
+        if (componentClass[mobxObserverProperty]) {
+            const displayName = getDisplayName(this)
             console.warn(
-                `The provided component class (${getDisplayName(this)}) is already an observer component.`
-            );
-            return componentClass;
-        } else if (componentClass[mobxObserverProperty]) {
-            console.warn(
-                `The reactive render of an observer class component (${getDisplayName(this)}) 
-                was overriden after MobX attached. This may result in a memory leak if the 
-                overriden reactive render is not properly disposed.`
+                `The provided component class (${displayName}) 
+                 has already been declared as an observer component.`
             )
-        } else {
-            componentClass[mobxObserverProperty] = true;
+        } else if (!componentClass[mobxObserverProperty]) {
+            componentClass[mobxObserverProperty] = true
         }
     }
 
@@ -63,8 +58,18 @@ export function makeClassComponentObserver(
     }
     patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering() === true) return
-        this.render[mobxAdminProperty] && this.render[mobxAdminProperty].dispose()
+        this.render[mobxAdminProperty]?.dispose()
         this[mobxIsUnmounted] = true
+
+        if (__DEV__ && !this.render[mobxAdminProperty]) {
+            // Render may have been hot-swapped and/or overriden by a subclass.
+            const displayName = getDisplayName(this)
+            console.warn(
+                `The reactive render of an observer class component (${displayName}) 
+                was overriden after MobX attached. This may result in a memory leak if the 
+                overriden reactive render was not properly disposed.`
+            )
+        }
     })
     return componentClass
 }

@@ -2,7 +2,6 @@ import React from "react"
 import { extendObservable, observable } from "mobx"
 import { observer } from "../src"
 import { render } from "@testing-library/react"
-import { withConsole } from "./utils/withConsole"
 
 test("issue mobx 405", () => {
     function ExampleState() {
@@ -85,26 +84,4 @@ test("#85 Should handle state changing in constructors", () => {
 
     a.set(7)
     expect(container).toHaveTextContent("child:7 - parent:7")
-})
-
-test("Do not warn about custom shouldComponentUpdate when it is the one provided by ReactiveMixin", () => {
-    withConsole(() => {
-        const A = observer(
-            class A extends React.Component {
-                render() {
-                    return null
-                }
-            }
-        )
-
-        observer(
-            class B extends A {
-                render() {
-                    return null
-                }
-            }
-        )
-
-        expect(console.warn).not.toHaveBeenCalled()
-    })
 })
