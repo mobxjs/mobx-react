@@ -8,7 +8,7 @@
   "unpkg": "dist/mobxreact.umd.production.min.js",
   "jsnext:main": "dist/mobxreact.esm.js",
   "module": "dist/mobxreact.esm.js",
-  "react-native": "dist/mobxreact.rn.module.js",
+  "react-native": "dist/mobxreact.esm.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "repository": {
@@ -27,8 +27,7 @@
     "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
     "release": "node publish.js",
     "build": "tsdx build --name mobxReact --format cjs,esm,umd",
-    "postbuild": "yarn makern && yarn v6compat",
-    "makern": "shx cp dist/mobxreact.esm.js dist/mobxreact.rn.module.js && yarn replace \"react-dom\" \"react-native\" dist/mobxreact.rn.module.js --silent",
+    "postbuild": "yarn v6compat",
     "v6compat": "shx cp dist/mobxreact.umd.production.min.js dist/mobx-react.umd.js"
   },
   "author": "Michel Weststrate",
@@ -92,7 +91,8 @@
     "mobx-react-lite": "2"
   },
   "files": [
-    "dist"
+    "dist",
+    "batching*"
   ],
   "keywords": [
     "mobx",
