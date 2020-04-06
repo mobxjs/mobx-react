@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+### 6.2.0
+
+-   Updated to latest mobx-react-lite V2 for compatibility with `React.StrictMode`.
+-   Observer batching (see more [in the docs](https://github.com/mobxjs/mobx-react-lite/#observer-batching)).
+-   Possibly breaking change, the `dist/mobxreact.rn.module.js` is no longer available, use `dist/mobxreact.esm.js` instead.
+
 ### 6.1.6 / 6.1.7
 
 -   Fix an issue with class components & observableRequiresReaction. [#806](https://github.com/mobxjs/mobx-react/issues/806) through [#829](https://github.com/mobxjs/mobx-react/pull/829)
