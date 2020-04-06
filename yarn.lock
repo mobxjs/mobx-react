@@ -7189,10 +7189,10 @@ mkdirp@0.5.1, mkdirp@0.x, mkdirp@^0.5.1, mkdirp@~0.5.1:
   dependencies:
     minimist "0.0.8"
 
-mobx-react-lite@^1.4.2:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-1.5.2.tgz#c4395b0568b9cb16f07669d8869cc4efa1b8656d"
-  integrity sha512-PyZmARqqWtpuQaAoHF5pKX7h6TKNLwq6vtovm4zZvG6sEbMRHHSqioGXSeQbpRmG8Kw8uln3q/W1yMO5IfL5Sg==
+mobx-react-lite@2:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-2.0.0.tgz#52ee837a81b4a4cd02fe4a2e6e9433da89b6f9a5"
+  integrity sha512-IrA0WR8f15hq1BLnNfgtQQ0Gp9zRASLZxXEVfiJv8uTwj1K/wN7vHAJtr9YJyBFia0W6QUAXFPP0PHdV0M/L9g==
 
 mobx@^5.15.4:
   version "5.15.4"
