@@ -1,11 +1,8 @@
-import { configure, observable } from "mobx"
+import { observable } from "mobx"
 import { Component } from "react"
-import { unstable_batchedUpdates as rdBatched } from "react-dom"
 
 if (!Component) throw new Error("mobx-react requires React to be available")
 if (!observable) throw new Error("mobx-react requires mobx to be available")
-
-if (typeof rdBatched === "function") configure({ reactionScheduler: rdBatched })
 
 export {
     Observer,
