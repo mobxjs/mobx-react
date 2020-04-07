@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.2.1
+
+-   Remove auto configured observer batching using react-dom. Fixes: [#852](https://github.com/mobxjs/mobx-react/issues/852).
+
 ### 6.2.0
 
 -   Updated to latest mobx-react-lite V2 for compatibility with `React.StrictMode`.
