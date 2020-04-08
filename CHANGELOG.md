@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.2.2
+
+-   Observer batching imports are kept in production builds as side effects ([see issue](https://github.com/mobxjs/mobx-react-lite/issues/273))
+
 ### 6.2.1
 
 -   Remove auto configured observer batching using react-dom. Fixes: [#852](https://github.com/mobxjs/mobx-react/issues/852).

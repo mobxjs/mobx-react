@@ -10,7 +10,7 @@
   "module": "dist/mobxreact.esm.js",
   "react-native": "dist/mobxreact.esm.js",
   "types": "dist/index.d.ts",
-  "sideEffects": false,
+  "sideEffects": ["batching*"],
   "repository": {
     "type": "git",
     "url": "https://github.com/mobxjs/mobx-react.git"
