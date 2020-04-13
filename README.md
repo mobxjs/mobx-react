@@ -161,7 +161,7 @@ const Todo = () => {
             {todo.title} {todo.done ? "[DONE]" : "[TODO]"}
         </h1>
     ))
-})
+}
 ```
 
 When using `useLocalStore`, all properties of the returned object will be made observable automatically, getters will be turned into computed properties, and methods will be bound to the store and apply mobx transactions automatically. If new class instances are returned from the initializer, they will be kept as is.
