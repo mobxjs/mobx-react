@@ -22,16 +22,14 @@ export function makeClassComponentObserver(
 ): React.ComponentClass<any, any> {
     const target = componentClass.prototype
 
-    if (__DEV__) {
-        if (componentClass[mobxObserverProperty]) {
-            const displayName = getDisplayName(this)
-            console.warn(
-                `The provided component class (${displayName}) 
-                 has already been declared as an observer component.`
-            )
-        } else if (!componentClass[mobxObserverProperty]) {
-            componentClass[mobxObserverProperty] = true
-        }
+    if (componentClass[mobxObserverProperty]) {
+        const displayName = getDisplayName(this)
+        console.warn(
+            `The provided component class (${displayName}) 
+                has already been declared as an observer component.`
+        )
+    } else {
+        componentClass[mobxObserverProperty] = true
     }
 
     if (target.componentWillReact)
@@ -61,7 +59,7 @@ export function makeClassComponentObserver(
         this.render[mobxAdminProperty]?.dispose()
         this[mobxIsUnmounted] = true
 
-        if (__DEV__ && !this.render[mobxAdminProperty]) {
+        if (!this.render[mobxAdminProperty]) {
             // Render may have been hot-swapped and/or overriden by a subclass.
             const displayName = getDisplayName(this)
             console.warn(
