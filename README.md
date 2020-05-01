@@ -550,6 +550,7 @@ Above imports are for a convenience to utilize standard versions of batching. If
 ```js
 import { observerBatching } from "mobx-react"
 observerBatching(customBatchedUpdates)
+```
 
 ## FAQ
 
@@ -581,4 +582,3 @@ Warning: setState(...): Cannot update during an existing state transition (such 
 
 Usually this means that (another) component is trying to modify observables used by this components in their `constructor` or `getInitialState` methods.
 This violates the React Lifecycle, `componentWillMount` should be used instead if state needs to be modified before mounting.
-```
