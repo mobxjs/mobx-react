@@ -61,7 +61,7 @@ Function (and decorator) that converts a React component definition, React compo
 
 #### Class Components
 
-When using component classes, `this.props` and `this.state` will be made observables, so the component will react to all changes in props and state that are used by `render`.
+When using component classes, `this.props` and `this.state` will work like the standard react way, so the component will react to all changes in props and updates in state that are used by `render`.
 
 `shouldComponentUpdate` is not supported. As such, it is recommended that class components extend `React.PureComponent`. The `observer` will automatically patch non-pure class components with an internal implementation of `React.PureComponent` if necessary.
 
