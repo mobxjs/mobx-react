@@ -1,7 +1,7 @@
 [
     {
         "path": "dist/mobxreact.umd.production.min.js",
-        "limit": "4 KB",
+        "limit": "4.1 KB",
         "webpack": false,
         "running": false
     }

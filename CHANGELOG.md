@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.2.3
+
+-   Log warning if class component is already an observer to prevent memory leaks.  [#839](https://github.com/mobxjs/mobx-react/issues/839)
+
 ### 6.2.2
 
 -   Observer batching imports are kept in production builds as side effects ([see issue](https://github.com/mobxjs/mobx-react-lite/issues/273))

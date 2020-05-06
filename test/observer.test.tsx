@@ -845,6 +845,7 @@ test.skip("#709 - applying observer on React.memo component", () => {
 })
 
 test("#797 - replacing this.render should trigger a warning", () => {
+    const warn = jest.spyOn(global.console, "warn")
     @observer
     class Component extends React.Component {
         render() {
@@ -860,16 +861,20 @@ test("#797 - replacing this.render should trigger a warning", () => {
     const compRef = React.createRef<Component>()
     const { unmount } = render(<Component ref={compRef} />)
     compRef.current?.swapRenderFunc()
-
-    const msg: Array<string> = []
-    const warn_orig = console.warn
-    console.warn = m => msg.push(m)
-
     unmount()
 
-    expect(msg.length).toBe(1)
-    expect(msg[0]).toBe(
-        `The render function for an observer component (Component) was modified after MobX attached. This is not supported, since the new function can't be triggered by MobX.`
-    )
-    console.warn = warn_orig
+    expect(warn).toHaveBeenCalled()
+})
+
+test("Redeclaring an existing observer component as an observer should log a warning", () => {
+    const warn = jest.spyOn(global.console, "warn")
+    @observer
+    class AlreadyObserver extends React.Component<any, any> {
+        render() {
+            return <div />
+        }
+    }
+
+    observer(AlreadyObserver)
+    expect(warn).toHaveBeenCalled()
 })

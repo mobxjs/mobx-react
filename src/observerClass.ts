@@ -12,6 +12,7 @@ import { isUsingStaticRendering } from "mobx-react-lite"
 import { newSymbol, shallowEqual, setHiddenProp, patch } from "./utils/utils"
 
 const mobxAdminProperty = $mobx || "$mobx"
+const mobxObserverProperty = newSymbol("isMobXReactObserver")
 const mobxIsUnmounted = newSymbol("isUnmounted")
 const skipRenderKey = newSymbol("skipRender")
 const isForcingUpdateKey = newSymbol("isForcingUpdate")
@@ -20,6 +21,17 @@ export function makeClassComponentObserver(
     componentClass: React.ComponentClass<any, any>
 ): React.ComponentClass<any, any> {
     const target = componentClass.prototype
+
+    if (componentClass[mobxObserverProperty]) {
+        const displayName = getDisplayName(this)
+        console.warn(
+            `The provided component class (${displayName}) 
+                has already been declared as an observer component.`
+        )
+    } else {
+        componentClass[mobxObserverProperty] = true
+    }
+
     if (target.componentWillReact)
         throw new Error("The componentWillReact life-cycle event is no longer supported")
     if (componentClass["__proto__"] !== PureComponent) {
@@ -44,15 +56,18 @@ export function makeClassComponentObserver(
     }
     patch(target, "componentWillUnmount", function() {
         if (isUsingStaticRendering() === true) return
-        if (this.render[mobxAdminProperty]) {
-            this.render[mobxAdminProperty].dispose()
-        } else if (__DEV__) {
+        this.render[mobxAdminProperty]?.dispose()
+        this[mobxIsUnmounted] = true
+
+        if (!this.render[mobxAdminProperty]) {
+            // Render may have been hot-swapped and/or overriden by a subclass.
             const displayName = getDisplayName(this)
             console.warn(
-                `The render function for an observer component (${displayName}) was modified after MobX attached. This is not supported, since the new function can't be triggered by MobX.`
+                `The reactive render of an observer class component (${displayName}) 
+                was overriden after MobX attached. This may result in a memory leak if the 
+                overriden reactive render was not properly disposed.`
             )
         }
-        this[mobxIsUnmounted] = true
     })
     return componentClass
 }

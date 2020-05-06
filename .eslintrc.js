@@ -8,7 +8,8 @@ module.exports = {
         node: true
     },
     globals: {
-        process: "readonly"
+        process: "readonly",
+        __DEV__: "readonly"
     },
     parserOptions: {
         ecmaVersion: 6,
