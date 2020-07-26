@@ -31,14 +31,18 @@ export function disposeOnUnmount(
         return propertyKeyOrFunction.map(fn => disposeOnUnmount(target, fn))
     }
 
-    const c = Object.getPrototypeOf(target).constructor || Object.getPrototypeOf(target.constructor)
+    const c = Object.getPrototypeOf(target).constructor
     const c2 = Object.getPrototypeOf(target.constructor)
+    // Special case for react-hot-loader
+    const c3 = Object.getPrototypeOf(Object.getPrototypeOf(target))
     if (
         !(
             c === React.Component ||
             c === React.PureComponent ||
             c2 === React.Component ||
-            c2 === React.PureComponent
+            c2 === React.PureComponent ||
+            c3 === React.Component ||
+            c3 === React.PureComponent
         )
     ) {
         throw new Error(

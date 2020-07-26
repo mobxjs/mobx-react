@@ -3,6 +3,7 @@
 ### 6.2.3
 
 -   Log warning if class component is already an observer to prevent memory leaks.  [#839](https://github.com/mobxjs/mobx-react/issues/839)
+-   Fix disposeOnUnmount when using react-hot-loader.  [#725](https://github.com/mobxjs/mobx-react/issues/725)
 
 ### 6.2.2
 
