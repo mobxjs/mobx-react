@@ -23,7 +23,7 @@ export function makeClassComponentObserver(
     const target = componentClass.prototype
 
     if (componentClass[mobxObserverProperty]) {
-        const displayName = getDisplayName(this)
+        const displayName = getDisplayName(target)
         console.warn(
             `The provided component class (${displayName}) 
                 has already been declared as an observer component.`
