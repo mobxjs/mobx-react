@@ -521,37 +521,6 @@ And the dependency tree of a component can now be inspected by the standard devt
 
 ![hooks.png](hooks.png)
 
-## Observer batching
-
-[Check out the elaborate explanation](https://github.com/mobxjs/mobx-react/pull/787#issuecomment-573599793).
-
-In short without observer batching the React doesn't guarantee the order component rendering in some cases. We highly recommend that you configure batching to avoid these random surprises.
-
-Import one of these before any React rendering is happening, typically `index.js/ts`. For Jest tests you can utilize [setupFilesAfterEnv](https://jestjs.io/docs/en/configuration#setupfilesafterenv-array).
-
-**React DOM:**
-
-> import 'mobx-react/batchingForReactDom'
-
-**React Native:**
-
-> import 'mobx-react/batchingForReactNative'
-
-### Opt-out
-
-To opt-out from batching in some specific cases, simply import the following to silence the warning.
-
-> import 'mobx-react/batchingOptOut'
-
-### Custom batched updates
-
-Above imports are for a convenience to utilize standard versions of batching. If you for some reason have customized version of batched updates, you can do the following instead.
-
-```js
-import { observerBatching } from "mobx-react"
-observerBatching(customBatchedUpdates)
-```
-
 ## FAQ
 
 **Should I use `observer` for each component?**

@@ -1,5 +1,4 @@
 import "@testing-library/jest-dom/extend-expect"
-import "mobx-react-lite/batchingForReactDom"
 
 // @ts-ignore
 global.__DEV__ = true

@@ -1,5 +1,9 @@
 # MobX-React Changelog
 
+### 6.3.0
+
+- Updated mobx-react-lite to 2.2.0 which removes the need to manually configure batching. Fixes [#859](https://github.com/mobxjs/mobx-react/issues/859)
+
 ### 6.2.4
 
 -  Fix error thrown in the already defined observer class component warning message when attempting to get the components display name.  [#887](https://github.com/mobxjs/mobx-react/issues/887)
