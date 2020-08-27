@@ -396,7 +396,7 @@ describe("inject based context", () => {
         let itemRender = 0
         let injectRender = 0
 
-        function connect(): IReactComponent {
+        function connect() {
             const args = arguments
             return (component: IReactComponent) =>
                 // @ts-ignore

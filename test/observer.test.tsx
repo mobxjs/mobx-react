@@ -95,7 +95,7 @@ describe("nestedRendering", () => {
         expect(container.querySelectorAll("li").length).toBe(2)
         expect(
             Array.from(container.querySelectorAll("li"))
-                .map(e => e.innerHTML)
+                .map((e: any) => e.innerHTML)
                 .sort()
         ).toEqual(["|a", "|b"].sort())
         expect(todoListRenderings).toBe(2)
