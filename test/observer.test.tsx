@@ -2,19 +2,18 @@ import React from "react"
 import { inject, observer, Observer, useStaticRendering } from "../src"
 import { render, act } from "@testing-library/react"
 import {
-    _getAdministration,
+    getObserverTree,
     _resetGlobalState,
     action,
     computed,
     observable,
-    transaction
+    transaction,
+    makeObservable
 } from "mobx"
 import { withConsole } from "./utils/withConsole"
 /**
  *  some test suite is too tedious
  */
-
-const getDNode = (obj, prop) => _getAdministration(obj, prop)
 
 afterEach(() => {
     jest.useRealTimers()
@@ -80,8 +79,8 @@ describe("nestedRendering", () => {
 
         expect(todoListRenderings).toBe(1)
         expect(todoItemRenderings).toBe(2)
-        expect(getDNode(store, "todos").observers.size).toBe(1)
-        expect(getDNode(store.todos[0], "title").observers.size).toBe(1)
+        expect(getObserverTree(store, "todos").observers!.length).toBe(1)
+        expect(getObserverTree(store.todos[0], "title").observers!.length).toBe(1)
     })
 
     test("rerendering with outer store added", () => {
@@ -100,8 +99,8 @@ describe("nestedRendering", () => {
         ).toEqual(["|a", "|b"].sort())
         expect(todoListRenderings).toBe(2)
         expect(todoItemRenderings).toBe(2)
-        expect(getDNode(store.todos[1], "title").observers.size).toBe(1)
-        expect(getDNode(store.todos[1], "completed").observers.size).toBe(0)
+        expect(getObserverTree(store.todos[1], "title").observers!.length).toBe(1)
+        expect(getObserverTree(store.todos[1], "completed").observers).toBe(undefined)
     })
 
     test("rerendering with outer store pop", () => {
@@ -112,8 +111,8 @@ describe("nestedRendering", () => {
         expect(todoListRenderings).toBe(2)
         expect(todoItemRenderings).toBe(1)
         expect(container.querySelectorAll("li").length).toBe(0)
-        expect(getDNode(oldTodo, "title").observers.size).toBe(0)
-        expect(getDNode(oldTodo, "completed").observers.size).toBe(0)
+        expect(getObserverTree(oldTodo, "title").observers).toBe(undefined)
+        expect(getObserverTree(oldTodo, "completed").observers).toBe(undefined)
     })
 })
 
@@ -211,7 +210,7 @@ describe("does not views alive when using static rendering", () => {
 
         data.z = "hello"
 
-        expect(getDNode(data, "z").observers.size).toBe(0)
+        expect(getObserverTree(data, "z").observers).toBe(undefined)
         expect(renderCount).toBe(1)
         expect(container).toHaveTextContent("hi")
     })
@@ -429,7 +428,7 @@ test("should stop updating if error was thrown in render (#134)", () => {
 
     // Check this
     // @ts-ignore
-    expect(data.observers.size).toBe(1)
+    expect(getObserverTree(data).observers!.length).toBe(1)
     data.set(1)
     expect(renderingsCount).toBe(2)
     expect(lastOwnRenderCount).toBe(2)
@@ -438,7 +437,7 @@ test("should stop updating if error was thrown in render (#134)", () => {
     })
 
     // @ts-ignore
-    expect(data.observers.size).toBe(0)
+    expect(getObserverTree(data).observers).toBe(undefined)
     data.set(3)
     data.set(4)
     data.set(2)
@@ -657,6 +656,9 @@ test("parent / childs render in the right order", () => {
         logout() {
             this.user = null
         }
+        constructor() {
+            makeObservable(this)
+        }
     }
 
     function tryLogout() {
@@ -814,6 +816,7 @@ test("#692 - componentDidUpdate is triggered", () => {
 
         constructor(props) {
             super(props)
+            makeObservable(this)
             setTimeout(() => this.inc(), 300)
         }
 

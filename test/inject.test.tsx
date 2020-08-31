@@ -1,6 +1,6 @@
 import React from "react"
 import PropTypes from "prop-types"
-import { action, observable } from "mobx"
+import { action, observable, makeObservable } from "mobx"
 import { observer, inject, Provider } from "../src"
 import { IValueMap } from "../src/types/IValueMap"
 import { render, act } from "@testing-library/react"
@@ -413,6 +413,10 @@ describe("inject based context", () => {
             @action
             highlight = item => {
                 this.highlighted = item
+            }
+
+            constructor() {
+                makeObservable(this)
             }
         }
 

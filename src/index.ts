@@ -12,6 +12,7 @@ export {
     isUsingStaticRendering,
     useStaticRendering,
     observerBatching,
+    useLocalObservable
 } from "mobx-react-lite"
 
 export { observer } from "./observer"
