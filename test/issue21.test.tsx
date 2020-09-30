@@ -1,5 +1,5 @@
 import React, { createElement } from "react"
-import { computed, isObservable, observable, reaction, transaction, IReactionDisposer } from "mobx"
+import { computed, isObservable, observable, reaction, transaction, IReactionDisposer, makeObservable } from "mobx"
 import { observer } from "../src"
 import _ from "lodash"
 import { render } from "@testing-library/react"
@@ -234,6 +234,11 @@ test("verify props is reactive", () => {
     const events: Array<any> = []
 
     class Child extends React.Component<any, any> {
+        constructor(p) {
+            super(p)
+            makeObservable(this)
+        }
+
         @computed
         get computedLabel() {
             events.push(["computed label", this.props.item.subid])

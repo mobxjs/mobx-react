@@ -14,18 +14,13 @@ This package supports both React and React Native.
 
 There are currently two actively maintained versions of mobx-react:
 
-| NPM Version | Supported React versions | Supports hook based components                                                   |
-| ----------- | ------------------------ | -------------------------------------------------------------------------------- |
-| v6          | 16.8.0 and higher        | Yes                                                                              |
-| v5          | 0.13 and higher          | No, but it is possible to use `<Observer>` sections inside hook based components |
+| NPM Version | Support MobX version | Supported React versions | Supports hook based components                                                   |
+| ----------- | -------------------- | ------------------------ | -------------------------------------------------------------------------------- |
+| v7          | 6.\*                 | 16.8+                    | Yes                                                                              |
+| v6          | 4._ / 5._            | 16.8+                    | Yes                                                                              |
+| v5          | 4._ / 5._            | 0.13+                    | No, but it is possible to use `<Observer>` sections inside hook based components |
 
-The user guide covers this [in a more detail](https://mobx-react.js.org/libraries).
-
-The V5 documentation can be found in the [README_v5](README_v5.md).
-
-Both mobx-react 5 and 6 are compatible with mobx 4 and 5
-
-Version 6 is a repackage of the [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
+mobx-react 6 / 7 is a repackage of the smaller [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
 
 -   Support for class based components for `observer` and `@observer`
 -   `Provider / inject` to pass stores around (but consider to use `React.createContext` instead)
@@ -43,13 +38,13 @@ import { observer } from "mobx-react"
 ```
 
 This package provides the bindings for MobX and React.
-See the [official documentation](http://mobxjs.github.io/mobx/intro/overview.html) for how to get started.
+See the [official documentation](https://mobx.js.org/react/react-integration.html) for how to get started.
 
 For greenfield projects you might want to consider to use [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite), if you intend to only use function based components. `React.createContext` can be used to pass stores around.
 
 ## API documentation
 
-Please check [mobx.js.org](https://mobx.js.org) for the general documentation. The documentation below highlights some specifics.
+Please check [mobx.js.org](https://mobx.js.org/) for the general documentation. The documentation below highlights some specifics.
 
 ### `observer(component)`
 
@@ -138,17 +133,17 @@ ReactDOM.render(<App person={person} />, document.body)
 person.name = "Mike" // will cause the Observer region to re-render
 ```
 
-### `useLocalStore` hook
+### `useLocalObservable` hook
 
 [User guide](https://mobx-react.js.org/state-local)
 
-Local observable state can be introduced by using the `useLocalStore` hook, that runs once to create an observable store. A quick example would be:
+Local observable state can be introduced by using the `useLocalObservable` hook, that runs once to create an observable store. A quick example would be:
 
 ```javascript
-import { useLocalStore, useObserver } from "mobx-react-lite"
+import { useLocalObservable, Observer } from "mobx-react-lite"
 
 const Todo = () => {
-    const todo = useLocalStore(() => ({
+    const todo = useLocalObservable(() => ({
         title: "Test",
         done: true,
         toggle() {
@@ -156,85 +151,38 @@ const Todo = () => {
         }
     }))
 
-    return useObserver(() => (
-        <h1 onClick={todo.toggle}>
-            {todo.title} {todo.done ? "[DONE]" : "[TODO]"}
-        </h1>
-    ))
+    return (
+        <Observer>
+            {() => (
+                <h1 onClick={todo.toggle}>
+                    {todo.title} {todo.done ? "[DONE]" : "[TODO]"}
+                </h1>
+            )}
+        </Observer>
+    )
 }
 ```
 
-When using `useLocalStore`, all properties of the returned object will be made observable automatically, getters will be turned into computed properties, and methods will be bound to the store and apply mobx transactions automatically. If new class instances are returned from the initializer, they will be kept as is.
+When using `useLocalObservable`, all properties of the returned object will be made observable automatically, getters will be turned into computed properties, and methods will be bound to the store and apply mobx transactions automatically. If new class instances are returned from the initializer, they will be kept as is.
 
 It is important to realize that the store is created only once! It is not possible to specify dependencies to force re-creation, _nor should you directly be referring to props for the initializer function_, as changes in those won't propagate.
 
-Instead, if your store needs to refer to props (or `useState` based local state), the `useLocalStore` should be combined with the `useAsObservableSource` hook, see below.
+Instead, if your store needs to refer to props (or `useState` based local state), the `useLocalObservable` should be combined with the `useAsObservableSource` hook, see below.
 
 Note that in many cases it is possible to extract the initializer function to a function outside the component definition. Which makes it possible to test the store itself in a more straight-forward manner, and avoids creating the initializer closure on each re-render.
 
-_Note: using `useLocalStore` is mostly beneficial for really complex local state, or to obtain more uniform code base. Note that using a local store might conflict with future React features like concurrent rendering._
+_Note: using `useLocalObservable` is mostly beneficial for really complex local state, or to obtain more uniform code base. Note that using a local store might conflict with future React features like concurrent rendering._
 
-### `useAsObservableSource` hook
-
-[User guide](https://mobx-react.js.org/state-outsourcing)
-
-The `useAsObservableSource` hook can be used to turn any set of values into an observable object that has a stable reference (the same object is returned every time from the hook).
-The goal of this hook is to trap React primitives such as props or state (which are not observable themselves) into a local, observable object
-so that the `store` or any reactions created by the component can safely refer to it, and get notified if any of the values change.
-
-The value passed to `useAsObservableSource` should always be an object, and is made only shallowly observable.
-
-The object returned by `useAsObservableSource`, although observable, should be considered read-only for all practical purposes.
-Use `useLocalStore` instead if you want to create local, observable, mutable, state.
-
-Warning: \_the return value of `useAsObservableSource` should never be deconstructed! So, don't write: `const {multiplier} = useAsObservableSource({ multiplier })`!\_useObservable
-
-The following example combines all concepts mentioned so far: `useLocalStore` to create a local store, and `useAsObservableProps` to make the props observable, so that it can be uses safely in `store.multiplied`:
-
-```typescript
-import { observer, useAsObservableSource, useLocalStore } from "mobx-react-lite"
-
-interface CounterProps {
-    multiplier: number
-}
-
-export const Counter = observer(function Counter(props: CounterProps) {
-    const observableProps = useAsObservableSource(props)
-    const store = useLocalStore(() => ({
-        count: 10,
-        get multiplied() {
-            return observableProps.multiplier * this.count
-        },
-        inc() {
-            this.count += 1
-        }
-    }))
-
-    return (
-        <div>
-            Multiplied count: <span>{store.multiplied}</span>
-            <button id="inc" onClick={store.inc}>
-                Increment
-            </button>
-        </div>
-    )
-})
-```
-
-Note that we cannot directly use `props.multiplier` in `multiplied` in the above example, it would not cause the `multiplied` to be invalidated, as it is not observable. Recreating the local store would also not have the desired state, as it would be a shame if it lost its local state such as `count`.
-
-_Performance tip: for optimal performance it is recommend to not use `useAsObservableSource` together on the same component as `observer`, as it might trigger double renderings. In those cases, use `<Observer>` instead._
-
-### Server Side Rendering with `useStaticRendering`
+### Server Side Rendering with `enableStaticRendering`
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
 Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
-To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering.
+To avoid leaking memory, call `enableStaticRendering(true)` when using server side rendering.
 
 ```javascript
-import { useStaticRendering } from "mobx-react"
+import { enableStaticRendering } from "mobx-react"
 
-useStaticRendering(true)
+enableStaticRendering(true)
 ```
 
 This makes sure the component won't try to react to any future data changes.

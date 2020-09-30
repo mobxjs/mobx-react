@@ -42,7 +42,7 @@
     "@types/yargs": "12.0.1"
   },
   "peerDependencies": {
-    "mobx": "^5.15.4 || ^4.15.4",
+    "mobx": "^6.0.0",
     "react": "^16.8.0 || 16.9.0-alpha.0"
   },
   "devDependencies": {
@@ -74,7 +74,7 @@
     "jest-mock-console": "^1.0.0",
     "lint-staged": "^7.0.5",
     "lodash": "^4.17.4",
-    "mobx": "^5.15.4",
+    "mobx": "^6.0.0",
     "prettier": "^1.7.2",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
@@ -90,7 +90,7 @@
     "typescript": "^3.7.0"
   },
   "dependencies": {
-    "mobx-react-lite": ">=2.2.0"
+    "mobx-react-lite": "^3.0.0"
   },
   "files": [
     "dist",
