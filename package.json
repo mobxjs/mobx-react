@@ -1,6 +1,6 @@
 {
   "name": "mobx-react",
-  "version": "6.3.0",
+  "version": "6.3.1",
   "description": "React bindings for MobX. Create fully reactive components.",
   "source": "src/index.ts",
   "main": "dist/index.js",
@@ -90,7 +90,7 @@
     "typescript": "^3.7.0"
   },
   "dependencies": {
-    "mobx-react-lite": ">=2.2.0"
+    "mobx-react-lite": "^2.2.0"
   },
   "files": [
     "dist",
