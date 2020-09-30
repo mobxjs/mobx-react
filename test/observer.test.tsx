@@ -1,5 +1,5 @@
 import React from "react"
-import { inject, observer, Observer, useStaticRendering } from "../src"
+import { inject, observer, Observer, enableStaticRendering } from "../src"
 import { render, act } from "@testing-library/react"
 import {
     getObserverTree,
@@ -184,7 +184,7 @@ describe("does not views alive when using static rendering", () => {
     })
 
     beforeAll(() => {
-        useStaticRendering(true)
+        enableStaticRendering(true)
     })
 
     beforeEach(() => {
@@ -195,7 +195,7 @@ describe("does not views alive when using static rendering", () => {
     })
 
     afterAll(() => {
-        useStaticRendering(false)
+        enableStaticRendering(false)
     })
 
     test("init state is correct", () => {

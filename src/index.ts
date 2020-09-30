@@ -11,6 +11,7 @@ export {
     useLocalStore,
     isUsingStaticRendering,
     useStaticRendering,
+    enableStaticRendering,
     observerBatching,
     useLocalObservable
 } from "mobx-react-lite"

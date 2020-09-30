@@ -173,16 +173,16 @@ Note that in many cases it is possible to extract the initializer function to a 
 
 _Note: using `useLocalObservable` is mostly beneficial for really complex local state, or to obtain more uniform code base. Note that using a local store might conflict with future React features like concurrent rendering._
 
-### Server Side Rendering with `useStaticRendering`
+### Server Side Rendering with `enableStaticRendering`
 
 When using server side rendering, normal lifecycle hooks of React components are not fired, as the components are rendered only once.
 Since components are never unmounted, `observer` components would in this case leak memory when being rendered server side.
-To avoid leaking memory, call `useStaticRendering(true)` when using server side rendering.
+To avoid leaking memory, call `enableStaticRendering(true)` when using server side rendering.
 
 ```javascript
-import { useStaticRendering } from "mobx-react"
+import { enableStaticRendering } from "mobx-react"
 
-useStaticRendering(true)
+enableStaticRendering(true)
 ```
 
 This makes sure the component won't try to react to any future data changes.
