@@ -20,7 +20,7 @@ There are currently two actively maintained versions of mobx-react:
 | v6          | 4._ / 5._            | 16.8+                    | Yes                                                                              |
 | v5          | 4._ / 5._            | 0.13+                    | No, but it is possible to use `<Observer>` sections inside hook based components |
 
-mobx-react 6 / 7 is a repackage of the maller [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
+mobx-react 6 / 7 is a repackage of the smaller [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) package + following features from the `mobx-react@5` package added:
 
 -   Support for class based components for `observer` and `@observer`
 -   `Provider / inject` to pass stores around (but consider to use `React.createContext` instead)
