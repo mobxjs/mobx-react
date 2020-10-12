@@ -27,7 +27,7 @@
     "test:coverage": "jest -i --coverage",
     "test:size": "size-limit",
     "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
-    "release": "node publish.js",
+    "release": "yarn build && yarn changeset publish",
     "build": "tsdx build --name mobxReact --format cjs,esm,umd",
     "postbuild": "yarn v6compat",
     "v6compat": "shx cp dist/mobxreact.umd.production.min.js dist/mobx-react.umd.js"
@@ -51,6 +51,8 @@
     "@babel/plugin-proposal-decorators": "^7.1.0",
     "@babel/plugin-transform-react-jsx": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
+    "@changesets/changelog-github": "^0.2.7",
+    "@changesets/cli": "^2.11.0",
     "@testing-library/jest-dom": "^5.1.1",
     "@testing-library/react": "^9.4.0",
     "@types/create-react-class": "^15.6.0",
