@@ -43,7 +43,7 @@ import { observer } from "mobx-react"
 ```
 
 This package provides the bindings for MobX and React.
-See the [official documentation](https://mobx.js.org/react/react-integration.html) for how to get started.
+See the [official documentation](https://mobx.js.org/react-integration.html) for how to get started.
 
 For greenfield projects you might want to consider to use [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite), if you intend to only use function based components. `React.createContext` can be used to pass stores around.
 
