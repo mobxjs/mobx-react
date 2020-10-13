@@ -2,16 +2,16 @@
 
 ### 6.3.0
 
-- Updated mobx-react-lite to 2.2.0 which removes the need to manually configure batching. Fixes [#859](https://github.com/mobxjs/mobx-react/issues/859)
+-   Updated mobx-react-lite to 2.2.0 which removes the need to manually configure batching. Fixes [#859](https://github.com/mobxjs/mobx-react/issues/859)
 
 ### 6.2.4
 
--  Fix error thrown in the already defined observer class component warning message when attempting to get the components display name.  [#887](https://github.com/mobxjs/mobx-react/issues/887)
+-   Fix error thrown in the already defined observer class component warning message when attempting to get the components display name. [#887](https://github.com/mobxjs/mobx-react/issues/887)
 
 ### 6.2.3
 
--   Log warning if class component is already an observer to prevent memory leaks.  [#839](https://github.com/mobxjs/mobx-react/issues/839)
--   Fix disposeOnUnmount when using react-hot-loader.  [#725](https://github.com/mobxjs/mobx-react/issues/725)
+-   Log warning if class component is already an observer to prevent memory leaks. [#839](https://github.com/mobxjs/mobx-react/issues/839)
+-   Fix disposeOnUnmount when using react-hot-loader. [#725](https://github.com/mobxjs/mobx-react/issues/725)
 
 ### 6.2.2
 

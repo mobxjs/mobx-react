@@ -1,0 +1,5 @@
+{
+    "changelog": ["@changesets/changelog-github", { "repo": "mobxjs/mobx-react" }],
+    "commit": false,
+    "access": "public"
+}

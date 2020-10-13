@@ -15,7 +15,6 @@
 ### Code change checklist
 
 -   [ ] Added/updated unit tests
--   [ ] Updated changelog
 -   [ ] Updated `README` if applicable
 
 <!--
