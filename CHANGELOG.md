@@ -1,5 +1,11 @@
 # MobX-React Changelog
 
+## 6.3.1
+
+### Patch Changes
+
+-   [`aa780c0`](https://github.com/mobxjs/mobx-react/commit/aa780c07162be99e198e7bbdbd6465c1f451f1d6) [#908](https://github.com/mobxjs/mobx-react/pull/908) Thanks [@FredyC](https://github.com/FredyC)! - Initial setup of [changesets](https://github.com/atlassian/changesets). No code changes present.
+
 ## 6.3.0
 
 -   Updated mobx-react-lite to 2.2.0 which removes the need to manually configure batching. Fixes [#859](https://github.com/mobxjs/mobx-react/issues/859)
