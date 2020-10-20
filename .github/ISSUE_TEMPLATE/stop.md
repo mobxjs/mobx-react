@@ -1,5 +1,5 @@
 ---
-name: ⛔ Stop! Use https://github.com/mobxjs/mobx/issues/new/choose
+name: ⛔ Stop! Use [mobx issue tracker](https://github.com/mobxjs/mobx/issues) instead
 about: Do NOT create an issue here. Please use mobx issue tracker instead. This repository will be archived soon.
 ---
 
