@@ -5,7 +5,10 @@ contact_links:
     about: This repo will be archived soon. Please use this link to create an issue in mobx repo.
   - name: Documentation
     url: https://mobx.js.org
+    about: Official Mobx documentation 
   - name: GitHub discussions
     url: https://github.com/mobxjs/mobx/discussions    
+    about: We are open to your questions or discussion
   - name: StackOverflow
     url: https://stackoverflow.com/questions/tagged/mobx
+    about: We are open to your questions or discussion
