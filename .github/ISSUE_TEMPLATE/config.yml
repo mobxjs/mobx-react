@@ -1,6 +1,6 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Create an issue
+  - name: Create new issue
     url: https://github.com/mobxjs/mobx/issues/new/choose
     about: This repo will be archived soon. Please use this link to create an issue in mobx repo.
   - name: Documentation
