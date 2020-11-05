@@ -1,5 +1,11 @@
 # mobx-react
 
+----
+
+🚨🚨🚨 This repo has been moved to [mobx](https://github.com/mobxjs/mobx/tree/mobx6/packages/mobx-react)
+
+----
+
 [![CircleCI](https://circleci.com/gh/mobxjs/mobx-react.svg?style=svg)](https://circleci.com/gh/mobxjs/mobx-react)
 [![CDNJS](https://img.shields.io/cdnjs/v/mobx-react.svg)](https://cdnjs.com/libraries/mobx-react)
 [![Minzipped size](https://img.shields.io/bundlephobia/minzip/mobx-react-lite.svg)](https://bundlephobia.com/result?p=mobx-react-lite)
