@@ -2,7 +2,7 @@
 
 ----
 
-🚨🚨🚨 This repo has been moved to [mobx](https://github.com/mobxjs/mobx/tree/mobx6/packages/mobx-react)
+## 🚨🚨🚨 This repo has been moved to [mobx](https://github.com/mobxjs/mobx/tree/main/packages/mobx-react)
 
 ----
 
